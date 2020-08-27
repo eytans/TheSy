@@ -1,13 +1,16 @@
-use cached::proc_macro::cached;
+mod tree;
+
 use egg::*;
 use std::collections::{HashMap, HashSet, LinkedList};
 use std::iter::FromIterator;
-use std::fmt::{Display, Formatter, Result};
+use std::fmt::{Display, Formatter};
 use std::{fmt, iter};
 use std::hash::{Hash, Hasher};
 use std::cmp::Eq;
 use itertools::Itertools;
 use itertools::iproduct;
+use symbolic_expressions::Sexp;
+use crate::tree::Tree;
 
 
 // fn reconstruct(egraph: &EGraph<SymbolLang, ()>, id: Id) -> impl Iterator<Item = RecExpr<SymbolLang>> {
@@ -20,30 +23,7 @@ use itertools::iproduct;
 //     class.nodes.iter().flat_map(|s| )
 // }
 
-#[cached]
-fn entry_to_tree(root: String, subentries: Vec<Entry>) -> Tree {
-    return Tree::Branch(
-        root,
-        Vec::from_iter(
-            subentries.iter().map(|x| entry_to_tree(
-                x.symbol.op.to_string(),
-                x.subentries.clone()))
-        ),
-        Box::new(None),
-    );
-}
 
-#[derive(PartialEq, Eq, Clone, Hash)]
-struct Entry {
-    symbol: SymbolLang,
-    subentries: Vec<Entry>,
-}
-
-impl Entry {
-    pub fn tree(&self) -> Tree {
-        return entry_to_tree(self.symbol.op.to_string(), self.subentries.clone());
-    }
-}
 
 // fn combinations<T: Clone, I: Iterator<Item = T> + Clone>(mut sets: impl Iterator<Item = I>) -> impl Iterator<Item = impl Iterator<Item = T>> {
 //     let next = sets.next();
@@ -94,7 +74,7 @@ fn reconstruct_all(egraph: &EGraph<SymbolLang, ()>, max_depth: usize) -> HashMap
                     res.insert(id.clone(), HashSet::default());
                 }
                 if edge.is_leaf() {
-                    res.get_mut(&id).unwrap().insert(Tree::Leaf(edge.op.to_string(), Box::new(None)));
+                    res.get_mut(&id).unwrap().insert(Tree::leaf(edge.op.to_string()));
                 }
 
                 // Why cant I borrow a hashset and then added a different hashset to res?
@@ -109,9 +89,8 @@ fn reconstruct_all(egraph: &EGraph<SymbolLang, ()>, max_depth: usize) -> HashMap
                     for c in children {
                         updated_children.push(c.clone());
                     }
-                    let new_tree = Tree::Branch(edge.op.to_string(),
-                                                updated_children,
-                                                Box::new(None));
+                    let new_tree = Tree::branch(edge.op.to_string(),
+                                                updated_children);
                     res.get_mut(&id).unwrap().insert(new_tree);
                 }
             })
@@ -157,63 +136,6 @@ fn choose<K>(vec: &[K], size: usize) -> Vec<Vec<&K>> {
     res
 }
 
-#[derive(Clone, Hash, PartialEq, Eq)]
-enum Tree {
-    // Root subtrees type
-    Leaf(String, Box<Option<Tree>>),
-    Branch(String, Vec<Tree>, Box<Option<Tree>>),
-}
-
-impl Tree {
-    fn to_rec_expr(&self, op_res: Option<RecExpr<SymbolLang>>) -> (Id, RecExpr<SymbolLang>) {
-        let mut res = if op_res.is_none() { RecExpr::default() } else { op_res.unwrap() };
-        return match self {
-            Tree::Leaf(r, t) => {
-                (res.add(SymbolLang::leaf(r)), res)
-            }
-            Tree::Branch(r, ss, t) => {
-                let mut ids = Vec::default();
-                for s in ss {
-                    let (id, r) = s.to_rec_expr(Some(res));
-                    res = r;
-                    ids.push(id);
-                }
-                (res.add(SymbolLang::new(r, ids)), res)
-            }
-        };
-    }
-
-    fn add_to_graph(&self, graph: &mut EGraph<SymbolLang, ()>) {
-        graph.add_expr(&self.to_rec_expr(None).1);
-    }
-
-    fn is_leaf(&self) -> bool {
-        match self {
-            Tree::Leaf(_, _) => true,
-            _ => false,
-        }
-    }
-}
-
-impl Display for Tree {
-    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        match self {
-            Tree::Leaf(r, t) => {
-                write!(f, "{}()", r)
-            },
-            Tree::Branch(r, ss, t) => {
-                if ss.is_empty() {write!(f, "{}()", r)}
-                else {
-                    write!(f, "{}({}", r, ss[0]);
-                    for s in ss.iter().skip(1) {
-                        write!(f, ", {}", s);
-                    }
-                    write!(f, ")")
-                }
-            },
-        }
-    }
-}
 
 // TODO: hide structs inside mod to hide privates?
 
@@ -228,9 +150,11 @@ struct SyGuESOE {
 }
 
 impl SyGuESOE {
+    // fn iterate_ph_vals(&self)
+
     // TODO: ind from example types
     fn new(examples: Vec<Tree>, dict: Vec<Tree>) -> SyGuESOE {
-        let ind_ph = Tree::Leaf(String::from("ind_var"), Box::new(Some(Tree::Leaf(String::from("int"), Box::new(None)))));
+        let ind_ph = Tree::tleaf(String::from("ind_var"), Box::new(Some(Tree::leaf(String::from("int")))));
         let mut egraph = EGraph::default();
         let mut terms = HashMap::new();
         terms.insert(ind_ph.clone(), Vec::default());
@@ -253,59 +177,24 @@ impl SyGuESOE {
         }
     }
 
+    // fn create_sygue_anchor()
+
+    // fn sygue_rules(&self) -> Vec::<egg::Rewrite<SymbolLang, ()>> {
+    //     self.examples.iter().enumerate().flat_map(|(i, e)| {
+    //         let anchor =
+    //         self.dict.iter().map(|f| {
+    //
+    //         })
+    //     }).collect()
+    // }
+
     fn increase_depth(&self) {
-        for val_set in self.terms.values() {}
+
     }
 }
 
 fn main() {
-// we can do the same thing with an EGraph
-    let mut egraph: EGraph<SymbolLang, ()> = Default::default();
-    let a: Id = egraph.add(SymbolLang::leaf("a"));
-    let b = egraph.add(SymbolLang::leaf("b"));
-    let foo = egraph.add(SymbolLang::new("foo", vec![a, b]));
-
-// we can also add RecExprs to an egraph
-    let mut expr = RecExpr::default();
-    let a = expr.add(SymbolLang::leaf("a"));
-    let b = expr.add(SymbolLang::leaf("b"));
-    let foo = expr.add(SymbolLang::new("foo", vec![a, b]));
-    let foo2 = egraph.add_expr(&expr);
-    println!("{}", expr.pretty(10));
-    let foo4 = expr.add(SymbolLang::new("bar", vec![a, b]));
-    println!("{}", expr.pretty(10));
-    let mut cloned = expr.clone();
-    println!("{}", cloned.pretty(10));
-    let foo3 = cloned.add(SymbolLang::new("bar", vec![a, b]));
-    println!("{}", cloned.pretty(10));
-    let foo2 = egraph.add_expr(&cloned);
-    let recs = reconstruct_all(&egraph, 3);
-    for (id, set) in recs.iter() {
-        println!("{}", id);
-        for t in set {
-            println!("{}", t);
-        }
-    }
-// note that if you add the same thing to an e-graph twice, you'll get back equivalent Ids
-    let v1 = vec![1, 2, 3];
-    let v2 = vec![4, 5, 6];
-    let sets = vec![v1.iter().collect::<HashSet<&i32>>(), v2.iter().collect::<HashSet<&i32>>()];
-    let combs = combinations(&sets.iter().collect::<Vec<&HashSet<&i32>>>());
-    for v in combs {
-        for i in v {
-            print!("{}, ", i);
-        }
-        println!("");
-    }
-    let v3 = vec![1, 2, 3, 4, 5, 6, 7, 8, 9];
-    for v in choose(&v3, 5) {
-        for i in v {
-            print!("{}, ", i);
-        }
-        println!("");
-    }
-    // let res = reconstruct_all(&egraph, 3);
-    // for x in res.values() {
-    //     println!("{}", x.iter().collect());
-    // }
+    let t: Tree = "(a (typed b int) c)".parse().unwrap();
+    println!("{}", t);
+    // let mut sygue = SyGuESOE::new(vec!);
 }
