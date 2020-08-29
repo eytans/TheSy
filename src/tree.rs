@@ -40,9 +40,9 @@ impl Entry {
 
 #[derive(Clone, Hash, PartialEq, Eq)]
 pub struct Tree {
-    root: String,
-    subtrees: Vec<Tree>,
-    typ: Box<Option<Tree>>,
+    pub root: String,
+    pub subtrees: Vec<Tree>,
+    pub typ: Box<Option<Tree>>,
 }
 
 impl Tree {

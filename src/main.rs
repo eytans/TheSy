@@ -1,4 +1,5 @@
 mod tree;
+mod eggstentions;
 
 use egg::*;
 use std::collections::{HashMap, HashSet, LinkedList};
@@ -150,8 +151,6 @@ struct SyGuESOE {
 }
 
 impl SyGuESOE {
-    // fn iterate_ph_vals(&self)
-
     // TODO: ind from example types
     fn new(examples: Vec<Tree>, dict: Vec<Tree>) -> SyGuESOE {
         let ind_ph = Tree::tleaf(String::from("ind_var"), Box::new(Some(Tree::leaf(String::from("int")))));
@@ -177,16 +176,21 @@ impl SyGuESOE {
         }
     }
 
-    // fn create_sygue_anchor()
+    fn iterate_ph_vals(&self) -> impl Iterator<Item = &Tree> {
+        iter::once(&self.ind_ph).chain(&self.examples)
+    }
 
-    // fn sygue_rules(&self) -> Vec::<egg::Rewrite<SymbolLang, ()>> {
-    //     self.examples.iter().enumerate().flat_map(|(i, e)| {
-    //         let anchor =
-    //         self.dict.iter().map(|f| {
-    //
-    //         })
-    //     }).collect()
-    // }
+    fn create_sygue_anchor() {}
+
+    fn sygue_rules(&self) -> Vec::<egg::Rewrite<SymbolLang, ()>> {
+        self.iterate_ph_vals().enumerate().flat_map(|(i, e)| {
+            let anchor = SyGuESOE::create_sygue_anchor();
+            self.dict.iter().map(|f| {
+                assert_eq!(f.root, "typed");
+                rewrite!(f.to_string(); "?x" => "?x + 1")
+            })
+        }).collect()
+    }
 
     fn increase_depth(&self) {
 
