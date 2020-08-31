@@ -88,11 +88,11 @@ impl Display for Tree {
             write!(f, "{}()", &self.root)
         } else {
             if self.subtrees.is_empty() { write!(f, "{}()", &self.root) } else {
-                write!(f, "{}({}", &self.root, &self.subtrees[0]);
+                let mut res = write!(f, "{}({}", &self.root, &self.subtrees[0]);
                 for s in self.subtrees.iter().skip(1) {
-                    write!(f, ", {}", s);
+                    res = res.and_then(|()| write!(f, ", {}", s));
                 }
-                write!(f, ")")
+                res.and_then(|()| write!(f, ")"))
             }
         }
     }
