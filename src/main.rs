@@ -14,6 +14,7 @@ use std::cmp::Eq;
 use itertools::Itertools;
 use symbolic_expressions::Sexp;
 use crate::tree::Tree;
+use std::str::FromStr;
 
 
 // fn reconstruct(egraph: &EGraph<SymbolLang, ()>, id: Id) -> impl Iterator<Item = RecExpr<SymbolLang>> {
@@ -104,6 +105,8 @@ impl SyGuESOE {
 
 fn main() {
     let t: Tree = "(a (typed b int) c)".parse().unwrap();
+    // let exps_strs = vec!["0", "1", "2", "x", "y", "z", "(+ x y)", "(+ y x)", "(+ x z)", "(+ z x)", "(+ z y)", "(+ y z)", "(+ x x)", "(+ y y)", "(+ z z)", "(s 0)", "(s 1)", "(s 2)", "(s x)", "(s y)", "(s z)", "(s (s 0))", "(s (s 1))", "(s (s 2))", ];
+
     println!("{}", t);
     // let mut sygue = SyGuESOE::new(vec!);
 }

@@ -23,7 +23,7 @@ mod multisearcher {
                     *common_vars.get_mut(&v).unwrap() += 1;
                 }
             }
-            let remove_keys = common_vars.keys().filter(|v| common_vars[v] > 1);
+            let remove_keys = common_vars.keys().filter(|v| common_vars[v] <= 1);
             for k in Vec::from_iter(remove_keys.cloned()) {
                 common_vars.remove(&k);
             }
@@ -33,6 +33,7 @@ mod multisearcher {
             }
 
             patterns.sort_by_key(|p| count_commons(&p, &common_vars));
+            println!("{:#?}", &common_vars);
             MultiSearcher { patterns, common_vars }
         }
 
@@ -77,6 +78,8 @@ mod multisearcher {
                 by_vars.push(cur_map);
             }
 
+            println!("{:#?}", by_vars);
+
             // Aggregate product of equal common var substs
             fn aggregate(possibilities: &[HashMap<Vec<Option<Id>>, Vec<&Subst>>], limits: Vec<&Option<Id>>, all_vars: &Vec<Var>) -> Vec<Subst> {
                 let current = possibilities.first().unwrap();
@@ -110,7 +113,8 @@ mod multisearcher {
 
             let initial_limits = (0..self.common_vars.len()).map(|x| &None).collect();
             let res = aggregate(&by_vars[..], initial_limits, &self.vars());
-            Some(SearchMatches { substs: res, eclass })
+            if res.is_empty() {None}
+            else {Some(SearchMatches { substs: res, eclass })}
         }
 
         fn vars(&self) -> Vec<Var> {
@@ -144,8 +148,14 @@ mod tests {
     fn two_trees_one_common() {
         let searcher: MultiSearcher = MultiSearcher::from_str("(a ?b ?c) ||| (a ?c ?d)").unwrap();
         let mut egraph: EGraph<SymbolLang, ()> = egg::EGraph::default();
-        egraph.add_expr(&RecExpr::from_str("(a x y)").unwrap());
+        let x = egraph.add_expr(&RecExpr::from_str("x").unwrap());
+        let z = egraph.add_expr(&RecExpr::from_str("z").unwrap());
+        let a = egraph.add_expr(&RecExpr::from_str("(a x y)").unwrap());
         egraph.add_expr(&RecExpr::from_str("(a z x)").unwrap());
-        assert!(searcher.search(&egraph).len() > 0);
+        println!("{:#?}", searcher.search(&egraph));
+        assert_eq!(searcher.search(&egraph).len(), 0);
+        let a2 = egraph.add(SymbolLang::new("a", vec![z, x]));
+        egraph.union(a, a2);
+        assert_eq!(searcher.search(&egraph).len(), 1);
     }
 }

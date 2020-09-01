@@ -2,7 +2,9 @@ pub mod tools {
     use std::iter;
     use itertools::{iproduct, Itertools};
     use std::collections::HashSet;
-    use std::fmt::Display;
+    use std::fmt::{Display, Formatter, Debug, Result};
+    use std::env::set_current_dir;
+    use egg::{Var, Subst};
 
 // fn combinations<'a, T: 'a, I: Iterator<Item = &'a T> + Clone>(mut sets: impl Iterator<Item = I>) -> impl Iterator<Item = Vec<&'a T>> {
 //     let first = sets.next();
@@ -68,6 +70,35 @@ pub mod tools {
         }
         println!();
     }
+
+    // pub trait DispWrapper {
+    //     fn to_print_str(&self) -> String;
+    // }
+    //
+    // impl<T: ToString> DispWrapper for T {
+    //     fn to_print_str(&self) -> String {
+    //         self.to_string()
+    //     }
+    // }
+    //
+    // impl<T: DispWrapper, I: Iterator<Item = T> + Clone> DispWrapper for I {
+    //     fn to_print_str(&self) -> String {
+    //         let mut res = String::new();
+    //         let mut cloned = self.clone();
+    //         let mut next = cloned.next();
+    //         while next.is_some() {
+    //             res += &*next.as_ref().unwrap().to_print_str();
+    //             res += ", "
+    //         }
+    //         res
+    //     }
+    // }
+    //
+    // impl<T: DispWrapper> Display for T {
+    //     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+    //         self.to_print_str().fmt(f)
+    //     }
+    // }
 }
 
 #[cfg(test)]
