@@ -1,21 +1,15 @@
 // #![feature(iterator_fold_self)]
 
+use std::{iter};
+use std::collections::HashMap;
+
+use egg::*;
+
+use crate::tree::Tree;
+
 mod tree;
 mod eggstentions;
 mod tools;
-
-use egg::*;
-use std::collections::{HashMap, HashSet, LinkedList};
-use std::iter::FromIterator;
-use std::fmt::{Display, Formatter};
-use std::{fmt, iter};
-use std::hash::{Hash, Hasher};
-use std::cmp::Eq;
-use itertools::Itertools;
-use symbolic_expressions::Sexp;
-use crate::tree::Tree;
-use std::str::FromStr;
-
 
 // fn reconstruct(egraph: &EGraph<SymbolLang, ()>, id: Id) -> impl Iterator<Item = RecExpr<SymbolLang>> {
 //     inner_reconstruct(egraph, id, HashSet::default())
@@ -27,9 +21,9 @@ use std::str::FromStr;
 //     class.nodes.iter().flat_map(|s| )
 // }
 
-fn create_exprs(egrapg: EGraph<SymbolLang, ()>, depth: usize) {
-    let consts = vec!["Z"];
-    let funcs = vec!["+", "S"];
+// fn create_exprs(egrapg: EGraph<SymbolLang, ()>, depth: usize) {
+    // let consts = vec!["Z"];
+    // let funcs = vec!["+", "S"];
 
     // let exprs: Vec<RecExpr<SymbolLang>> = consts.iter().map(|s| RecExpr::default()
     //     .add(SymbolLang::leaf(s))).collect();
@@ -41,7 +35,7 @@ fn create_exprs(egrapg: EGraph<SymbolLang, ()>, depth: usize) {
     //                 exprs[i].
     //             }}).collect();
     // }
-}
+// }
 
 
 // TODO: hide structs inside mod to hide privates?

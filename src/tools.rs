@@ -1,10 +1,8 @@
 pub mod tools {
-    use std::iter;
-    use itertools::{iproduct, Itertools};
-    use std::collections::HashSet;
-    use std::fmt::{Display, Formatter, Debug, Result};
-    use std::env::set_current_dir;
-    use egg::{Var, Subst};
+    use std::collections::{HashMap, HashSet};
+    use std::collections::hash_map::RandomState;
+    use std::fmt::{Display};
+    use std::hash::Hash;
 
 // fn combinations<'a, T: 'a, I: Iterator<Item = &'a T> + Clone>(mut sets: impl Iterator<Item = I>) -> impl Iterator<Item = Vec<&'a T>> {
 //     let first = sets.next();
@@ -28,7 +26,7 @@ pub mod tools {
             return sets[0].iter().map(|t| vec![t.clone()]).collect();
         }
 
-        let mut rec_res = combinations(&sets[1..sets.len()]);
+        let rec_res = combinations(&sets[1..sets.len()]);
         // TODO: clone iterator
         let initial_set = &sets[0];
         let mut res = Vec::new();
@@ -62,6 +60,18 @@ pub mod tools {
             res.extend(rec_res);
         }
         res
+    }
+
+    pub trait Grouped<T> {
+        fn grouped<K: Hash + Eq, F: Fn(&T) -> K>(&mut self, key: F) -> HashMap<K, Vec<T>>;
+    }
+
+    impl<T, I: Iterator<Item = T>> Grouped<T> for I {
+        fn grouped<K: Hash + Eq, F: Fn(&T) -> K>(&mut self, key: F) -> HashMap<K, Vec<T>, RandomState> {
+            let mut res = HashMap::new();
+            self.for_each(|t| res.entry(key(&t)).or_insert(Vec::new()).push(t));
+            res
+        }
     }
 
     pub fn print_iter<T: Display, I: Iterator<Item = T>>(x: I) {
@@ -103,10 +113,11 @@ pub mod tools {
 
 #[cfg(test)]
 mod tests {
-    use crate::tools::tools::combinations;
-    use crate::tools::tools::choose;
     use std::collections::HashSet;
     use std::iter::FromIterator;
+
+    use crate::tools::tools::choose;
+    use crate::tools::tools::combinations;
 
     #[test]
     fn check_comb_amount() {

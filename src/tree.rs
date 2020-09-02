@@ -73,8 +73,8 @@ impl Tree {
         };
     }
 
-    pub fn add_to_graph(&self, graph: &mut EGraph<SymbolLang, ()>) {
-        graph.add_expr(&self.to_rec_expr(None).1);
+    pub fn add_to_graph(&self, graph: &mut EGraph<SymbolLang, ()>) -> Id {
+        graph.add_expr(&self.to_rec_expr(None).1)
     }
 
     pub fn is_leaf(&self) -> bool {
