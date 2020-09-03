@@ -3,6 +3,7 @@ use std::iter::FromIterator;
 use egg::{SymbolLang, RecExpr, Id, EGraph};
 use std::fmt::{Display, Formatter};
 use cached::proc_macro::cached;
+use itertools::Itertools;
 
 macro_rules! bail {
     ($s:literal $(,)?) => {
@@ -67,7 +68,7 @@ impl Tree {
             for s in &self.subtrees {
                 let (id, r) = s.to_rec_expr(Some(res));
                 res = r;
-                ids.push(id);
+                ids.insert(0, id);
             }
             (res.add(SymbolLang::new(&self.root, ids)), res)
         };
@@ -80,21 +81,19 @@ impl Tree {
     pub fn is_leaf(&self) -> bool {
         self.subtrees.is_empty()
     }
+
+    pub fn to_sexp_string(&self) -> String {
+        if self.is_leaf() {
+            self.root.clone()
+        } else {
+            format!("({} {})", self.root.clone(), self.subtrees.iter().map(|t| t.to_string()).intersperse(" ".parse().unwrap()).collect::<String>())
+        }
+    }
 }
 
 impl Display for Tree {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        if self.is_leaf() {
-            write!(f, "{}()", &self.root)
-        } else {
-            if self.subtrees.is_empty() { write!(f, "{}()", &self.root) } else {
-                let mut res = write!(f, "{}({}", &self.root, &self.subtrees[0]);
-                for s in self.subtrees.iter().skip(1) {
-                    res = res.and_then(|()| write!(f, ", {}", s));
-                }
-                res.and_then(|()| write!(f, ")"))
-            }
-        }
+        write!(f, "{}", &self.to_sexp_string())
     }
 }
 
@@ -112,12 +111,12 @@ impl std::str::FromStr for Tree {
                     Sexp::Empty => unreachable!("Cannot be in head position"),
                     // TODO: add apply
                     Sexp::List(l) => bail!("Found a list in the head position: {:?}", l),
-                    Sexp::String(op) if op == "typed" => {
-                        let mut tree = parse_sexp_tree(&list[1])?;
-                        let types = parse_sexp_tree(&list[2])?;
-                        tree.typ = Box::new(Some(types));
-                        Ok(tree)
-                    }
+                    // Sexp::String(op) if op == "typed" => {
+                    //     let mut tree = parse_sexp_tree(&list[1])?;
+                    //     let types = parse_sexp_tree(&list[2])?;
+                    //     tree.typ = Box::new(Some(types));
+                    //     Ok(tree)
+                    // }
                     Sexp::String(op) => {
                         let arg_ids = list[1..].iter().map(|s| parse_sexp_tree(s).expect("Parsing should succeed")).collect::<Vec<Tree>>();
                         let node = Tree::branch(op.clone(), arg_ids);

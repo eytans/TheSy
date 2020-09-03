@@ -1,4 +1,4 @@
-mod multisearcher {
+pub mod multisearcher {
     use std::collections::{HashMap, HashSet};
     use std::iter::FromIterator;
     use std::str::FromStr;
@@ -167,7 +167,7 @@ mod multisearcher {
     }
 
     impl MultiDiffSearcher {
-        fn new(mut patterns: Vec<Pattern<SymbolLang>>) -> MultiDiffSearcher {
+        pub fn new(mut patterns: Vec<Pattern<SymbolLang>>) -> MultiDiffSearcher {
             let common_vars = get_common_vars(&mut patterns);
             MultiDiffSearcher { patterns, common_vars }
         }
@@ -197,8 +197,6 @@ mod multisearcher {
                 res
             };
 
-            println!("{:#?}", search_results);
-
             // To reuse group_by_common_vars we will merge all results to a single searchmatches.
             // We don't really care which eclass we use so we will choose the first one.
             // It is a really stupid way to do it but we will run the grouping for each eclass from
@@ -212,7 +210,7 @@ mod multisearcher {
                     .fold1(|mut s1, mut s2| {
                         s1.substs.extend(s2.substs.into_iter());
                         s1
-                    }).unwrap())
+                    }).unwrap_or(SearchMatches{substs: Vec::new(), eclass: Id::default()}))
                     .collect::<Vec<SearchMatches>>();
             let mut all_combinations = group_by_common_vars(
                 all_matches.iter_mut().collect(),
