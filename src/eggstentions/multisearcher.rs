@@ -212,6 +212,10 @@ pub mod multisearcher {
                         s1
                     }).unwrap_or(SearchMatches{substs: Vec::new(), eclass: Id::default()}))
                     .collect::<Vec<SearchMatches>>();
+            if all_matches.iter().any(|s| s.substs.is_empty()) {
+                return Vec::new();
+            }
+
             let mut all_combinations = group_by_common_vars(
                 all_matches.iter_mut().collect(),
                 &self.common_vars);
@@ -223,7 +227,9 @@ pub mod multisearcher {
                 let res = aggregate_substs(&all_combinations[..], initial_limits, &self.vars());
                 all_combinations.pop();
                 if res.is_empty() {None}
-                else {Some(SearchMatches { substs: res, eclass })}
+                else {
+                    Some(SearchMatches { substs: res, eclass })
+                }
             }).collect()
         }
 

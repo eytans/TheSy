@@ -12,6 +12,7 @@ use itertools::Itertools;
 use crate::eggstentions::appliers::DiffApplier;
 use crate::eggstentions::reconstruct_all;
 use egg::test::run;
+use std::time::Duration;
 
 mod tree;
 mod eggstentions;
@@ -62,10 +63,10 @@ impl SyGuESOE {
     fn new(examples: Vec<Tree>, dict: Vec<Tree>) -> SyGuESOE {
         let ind_ph = Tree::tleaf(String::from("ind_var"), Box::new(Some(Tree::leaf(String::from("int")))));
         let mut egraph = EGraph::default();
-        for v in dict.iter().filter(|v| v.subtrees[0].is_leaf()) {
+        for v in dict.iter().filter(|v| v.subtrees[1].is_leaf()) {
             for (i, e) in Self::iterate_ph_vals(&ind_ph, &examples).enumerate() {
                 let anchor = Self::create_sygue_anchor(i);
-                egraph.add_expr(&Tree::branch(anchor.clone(), vec![v.clone()]).to_rec_expr(None).1);
+                egraph.add_expr(&Tree::branch(anchor.clone(), vec![v.subtrees[0].clone()]).to_rec_expr(None).1);
                 egraph.add_expr(&Tree::branch(anchor, vec![e.clone()]).to_rec_expr(None).1);
             }
         }
@@ -106,17 +107,21 @@ impl SyGuESOE {
                     None
                 } else {
                     let patterns = fun_type.subtrees.iter().take(fun_type.subtrees.len() - 1).enumerate()
-                        .flat_map(|(i, t)| vec![
-                            Pattern::from_str(&*format!("({} ?param_{})", anchor, i)).unwrap(),
-                            Pattern::from_str(&*format!("(typed ?param_{} {})", i, t.to_string())).unwrap(),
-                        ]).collect::<Vec<Pattern<SymbolLang>>>();
+                        .flat_map(|(i, t)| {
+                            let pat_string = format!("({} ?param_{})", anchor, i);
+                            vec![
+                                Pattern::from_str(&*pat_string).unwrap(),
+                                // Pattern::from_str(&*format!("(typed ?param_{} {})", i, t.to_string())).unwrap(),
+                            ]
+                        }).collect::<Vec<Pattern<SymbolLang>>>();
                     let searcher = MultiDiffSearcher::new(patterns);
-                    let param_list = (0..fun_type.subtrees.len())
+                    let param_list = (0..fun_type.subtrees.len()-1)
                         .map(|i| format!("?param_{}", i))
                         .intersperse(" ".to_string())
                         .collect::<String>();
                     // TODO: Multiapplier under diffapplier with types at result for lists and trees
-                    let applier = DiffApplier::new(Pattern::from_str(&*format!("({} {})", fun_name, param_list)).unwrap());
+                    let applier_string = format!("({} ({} {}))", anchor, fun_name, param_list);
+                    let applier = DiffApplier::new(Pattern::from_str(&*applier_string).unwrap());
                     Some(Rewrite::new(fun_name, format!("{}_{}", fun_name, anchor), searcher, applier).unwrap())
                 }
             })
@@ -124,7 +129,7 @@ impl SyGuESOE {
     }
 
     fn increase_depth(&mut self) {
-        self.egraph = Runner::default().with_egraph(std::mem::take(&mut self.egraph)).with_iter_limit(1).run(&self.sygue_rules).egraph;
+        self.egraph = Runner::default().with_time_limit(Duration::from_secs(60*60)).with_node_limit(60000).with_egraph(std::mem::take(&mut self.egraph)).with_iter_limit(1).run(&self.sygue_rules).egraph;
     }
 }
 
@@ -143,12 +148,20 @@ fn main() {
     println!("{}", all_trees.into_iter().map(|t| t.to_sexp_string()).intersperse(" ".parse().unwrap()).collect::<String>());
     println!("increase depth 1");
     sygue.increase_depth();
+    let all_trees = reconstruct_all(&sygue.egraph, 10).into_iter()
+        .flat_map(|x| x.1).collect::<Vec<Tree>>();
+    println!("len of trees {}", all_trees.len());
+    // println!("{}", all_trees.into_iter().map(|t| t.to_sexp_string()).intersperse(" ".parse().unwrap()).collect::<String>());
     println!("increase depth 2");
     sygue.increase_depth();
+    let all_trees = reconstruct_all(&sygue.egraph, 10).into_iter()
+        .flat_map(|x| x.1).collect::<Vec<Tree>>();
+    println!("len of trees {}", all_trees.len());
+    // println!("{}", all_trees.into_iter().map(|t| t.to_sexp_string()).intersperse(" ".parse().unwrap()).collect::<String>());
     println!("increase depth 3");
     sygue.increase_depth();
     let all_trees = reconstruct_all(&sygue.egraph, 10).into_iter()
         .flat_map(|x| x.1).collect::<Vec<Tree>>();
     println!("len of trees {}", all_trees.len());
-    println!("{}", all_trees.into_iter().map(|t| t.to_sexp_string()).intersperse(" ".parse().unwrap()).collect::<String>());
+    // println!("{}", all_trees.into_iter().map(|t| t.to_sexp_string()).intersperse(" ".parse().unwrap()).collect::<String>());
 }
