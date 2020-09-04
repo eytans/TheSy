@@ -12,7 +12,7 @@ use itertools::Itertools;
 use crate::eggstentions::appliers::DiffApplier;
 use crate::eggstentions::reconstruct_all;
 use egg::test::run;
-use std::time::Duration;
+use std::time::{Duration, SystemTime};
 
 mod tree;
 mod eggstentions;
@@ -29,19 +29,19 @@ mod tools;
 // }
 
 // fn create_exprs(egrapg: EGraph<SymbolLang, ()>, depth: usize) {
-    // let consts = vec!["Z"];
-    // let funcs = vec!["+", "S"];
+// let consts = vec!["Z"];
+// let funcs = vec!["+", "S"];
 
-    // let exprs: Vec<RecExpr<SymbolLang>> = consts.iter().map(|s| RecExpr::default()
-    //     .add(SymbolLang::leaf(s))).collect();
+// let exprs: Vec<RecExpr<SymbolLang>> = consts.iter().map(|s| RecExpr::default()
+//     .add(SymbolLang::leaf(s))).collect();
 
-    // for i in 1..=2 {
-    //     let newExps =
-    //         funcs.iter().flat_map(|e| for i in 0..exprs.len() {
-    //             for j in i..exprs.len() {
-    //                 exprs[i].
-    //             }}).collect();
-    // }
+// for i in 1..=2 {
+//     let newExps =
+//         funcs.iter().flat_map(|e| for i in 0..exprs.len() {
+//             for j in i..exprs.len() {
+//                 exprs[i].
+//             }}).collect();
+// }
 // }
 
 
@@ -55,7 +55,7 @@ struct SyGuESOE {
     egraph: EGraph<SymbolLang, ()>,
     // egraph: EGraph<SymbolLang, ()>,
     // terms: HashMap<Tree, Vec<(Tree, Id)>>,
-    sygue_rules: Vec<Rewrite<SymbolLang, ()>>
+    sygue_rules: Vec<Rewrite<SymbolLang, ()>>,
 }
 
 impl SyGuESOE {
@@ -75,7 +75,7 @@ impl SyGuESOE {
             dict,
             ind_ph,
             egraph,
-            sygue_rules: vec![]
+            sygue_rules: vec![],
         };
         let mut rws = res.create_sygue_rules();
         for rw in rws {
@@ -84,7 +84,7 @@ impl SyGuESOE {
         res
     }
 
-    fn iterate_ph_vals<'a>(ind_ph: &'a Tree, examples: &'a Vec<Tree>) -> impl Iterator<Item = &'a Tree> {
+    fn iterate_ph_vals<'a>(ind_ph: &'a Tree, examples: &'a Vec<Tree>) -> impl Iterator<Item=&'a Tree> {
         iter::once(ind_ph).chain(examples)
     }
 
@@ -92,7 +92,7 @@ impl SyGuESOE {
         format!("anchor_{}", i)
     }
 
-    fn iterate_val_cases(&self) -> impl Iterator<Item = &Tree> {
+    fn iterate_val_cases(&self) -> impl Iterator<Item=&Tree> {
         Self::iterate_ph_vals(&self.ind_ph, &self.examples)
     }
 
@@ -115,7 +115,7 @@ impl SyGuESOE {
                             ]
                         }).collect::<Vec<Pattern<SymbolLang>>>();
                     let searcher = MultiDiffSearcher::new(patterns);
-                    let param_list = (0..fun_type.subtrees.len()-1)
+                    let param_list = (0..fun_type.subtrees.len() - 1)
                         .map(|i| format!("?param_{}", i))
                         .intersperse(" ".to_string())
                         .collect::<String>();
@@ -129,7 +129,11 @@ impl SyGuESOE {
     }
 
     fn increase_depth(&mut self) {
-        self.egraph = Runner::default().with_time_limit(Duration::from_secs(60*60)).with_node_limit(60000).with_egraph(std::mem::take(&mut self.egraph)).with_iter_limit(1).run(&self.sygue_rules).egraph;
+        self.egraph = Runner::default().with_time_limit(Duration::from_secs(60 * 60)).with_node_limit(60000).with_egraph(std::mem::take(&mut self.egraph)).with_iter_limit(1).run(&self.sygue_rules).egraph;
+    }
+
+    fn equiv_reduc(&mut self, rules: &[Rewrite<SymbolLang, ()>]) {
+        self.egraph = Runner::default().with_time_limit(Duration::from_secs(60 * 60)).with_node_limit(60000).with_egraph(std::mem::take(&mut self.egraph)).with_iter_limit(8).run(rules).egraph;
     }
 }
 
@@ -139,29 +143,46 @@ fn main() {
 
     let mut sygue = SyGuESOE::new(
         vec!["Z", "(S Z)", "(S (S Z))"].into_iter().map(|s| Tree::from_str(s).unwrap()).collect(),
-        vec!["(typed Z int)", "(typed S (-> int int))", "(typed pl (-> int int int))"].into_iter().map(|s| Tree::from_str(s).unwrap()).collect()
+        vec!["(typed ph0 int)", "(typed ph1 int)", "(typed Z int)", "(typed S (-> int int))", "(typed pl (-> int int int))"].into_iter().map(|s| Tree::from_str(s).unwrap()).collect(),
     );
 
     let all_trees = reconstruct_all(&sygue.egraph, 10).into_iter()
         .flat_map(|x| x.1).collect::<Vec<Tree>>();
+    let start = SystemTime::now();
     println!("len of trees {}", all_trees.len());
-    println!("{}", all_trees.into_iter().map(|t| t.to_sexp_string()).intersperse(" ".parse().unwrap()).collect::<String>());
+    // println!("{}", all_trees.into_iter().map(|t| t.to_sexp_string()).intersperse(" ".parse().unwrap()).collect::<String>());
+    // println!("Current time: {}", SystemTime::now().duration_since(start).unwrap().as_millis());
+    let mut rewrites: Vec<Rewrite<SymbolLang, ()>> = vec![rewrite!("pl base"; "(pl Z ?x)" => "?x"), rewrite!("pl ind"; "(pl (S ?y) ?x)" => "(S (pl ?y ?x))")];
     println!("increase depth 1");
     sygue.increase_depth();
-    let all_trees = reconstruct_all(&sygue.egraph, 10).into_iter()
-        .flat_map(|x| x.1).collect::<Vec<Tree>>();
-    println!("len of trees {}", all_trees.len());
+    sygue.equiv_reduc(&rewrites[..]);
+    println!("Current time: {}", SystemTime::now().duration_since(start).unwrap().as_millis());
+    // let all_trees = reconstruct_all(&sygue.egraph, 10).into_iter()
+    //     .flat_map(|x| x.1).collect::<Vec<Tree>>();
+    // println!("len of trees {}", all_trees.len());
+    // println!("Current time: {}", SystemTime::now().duration_since(start).unwrap().as_millis());
     // println!("{}", all_trees.into_iter().map(|t| t.to_sexp_string()).intersperse(" ".parse().unwrap()).collect::<String>());
     println!("increase depth 2");
     sygue.increase_depth();
-    let all_trees = reconstruct_all(&sygue.egraph, 10).into_iter()
-        .flat_map(|x| x.1).collect::<Vec<Tree>>();
-    println!("len of trees {}", all_trees.len());
+    sygue.equiv_reduc(&rewrites[..]);
+    // println!("Current time: {}", SystemTime::now().duration_since(start).unwrap().as_millis());
+    // let all_trees = reconstruct_all(&sygue.egraph, 10).into_iter()
+    //     .flat_map(|x| x.1).collect::<Vec<Tree>>();
+    // println!("len of trees {}", all_trees.len());
+    println!("Current time: {}", SystemTime::now().duration_since(start).unwrap().as_millis());
     // println!("{}", all_trees.into_iter().map(|t| t.to_sexp_string()).intersperse(" ".parse().unwrap()).collect::<String>());
     println!("increase depth 3");
     sygue.increase_depth();
-    let all_trees = reconstruct_all(&sygue.egraph, 10).into_iter()
-        .flat_map(|x| x.1).collect::<Vec<Tree>>();
-    println!("len of trees {}", all_trees.len());
+    sygue.equiv_reduc(&rewrites[..]);
+    // println!("Current time: {}", SystemTime::now().duration_since(start).unwrap().as_millis());
+    // let all_trees = reconstruct_all(&sygue.egraph, 10).into_iter()
+    //     .flat_map(|x| x.1).collect::<Vec<Tree>>();
+    // println!("len of trees {}", all_trees.len());
+    println!("Current time: {}", SystemTime::now().duration_since(start).unwrap().as_millis());
     // println!("{}", all_trees.into_iter().map(|t| t.to_sexp_string()).intersperse(" ".parse().unwrap()).collect::<String>());
+    let runner = Runner::default().with_time_limit(Duration::from_secs(60 * 60)).with_node_limit(60000).with_egraph(sygue.egraph.clone()).with_iter_limit(8).run(&rewrites[..]);
+    println!("Current time: {}", SystemTime::now().duration_since(start).unwrap().as_millis());
+    // let all_trees = reconstruct_all(&runner.egraph, 10).into_iter()
+    //     .flat_map(|x| x.1).collect::<Vec<Tree>>();
+    // println!("previous: 11676, len of trees {}", all_trees.len());
 }
