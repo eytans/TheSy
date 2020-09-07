@@ -7,7 +7,6 @@ pub mod multisearcher {
     use itertools::Itertools;
 
     use crate::tools::tools::Grouped;
-    use std::iter;
 
     fn get_common_vars(patterns: &mut Vec<Pattern<SymbolLang>>) -> HashMap<Var, usize> {
         let common_vars = patterns.iter().flat_map(|p| p.vars())

@@ -1,7 +1,8 @@
 // #![feature(iterator_fold_self)]
+#[macro_use(c)]
+extern crate cute;
 
 use std::{iter};
-use std::collections::HashMap;
 
 use egg::*;
 
@@ -11,41 +12,12 @@ use crate::eggstentions::multisearcher::multisearcher::MultiDiffSearcher;
 use itertools::Itertools;
 use crate::eggstentions::appliers::DiffApplier;
 use crate::eggstentions::reconstruct_all;
-use egg::test::run;
 use std::time::{Duration, SystemTime};
 
 mod tree;
 mod eggstentions;
 mod tools;
 
-// fn reconstruct(egraph: &EGraph<SymbolLang, ()>, id: Id) -> impl Iterator<Item = RecExpr<SymbolLang>> {
-//     inner_reconstruct(egraph, id, HashSet::default())
-// }
-//
-// fn inner_reconstruct(egraph: &EGraph<SymbolLang, ()>, id: Id, used: HashSet<Id>) -> impl Iterator<Item = RecExpr<SymbolLang>> {
-//     let updated_id = egraph.find(id);
-//     let class = egraph.classes().find(|e| e.id == updated_id).expect("Id shouldn't be deleted");
-//     class.nodes.iter().flat_map(|s| )
-// }
-
-// fn create_exprs(egrapg: EGraph<SymbolLang, ()>, depth: usize) {
-// let consts = vec!["Z"];
-// let funcs = vec!["+", "S"];
-
-// let exprs: Vec<RecExpr<SymbolLang>> = consts.iter().map(|s| RecExpr::default()
-//     .add(SymbolLang::leaf(s))).collect();
-
-// for i in 1..=2 {
-//     let newExps =
-//         funcs.iter().flat_map(|e| for i in 0..exprs.len() {
-//             for j in i..exprs.len() {
-//                 exprs[i].
-//             }}).collect();
-// }
-// }
-
-
-// TODO: hide structs inside mod to hide privates?
 
 struct SyGuESOE {
     // TODO: automatic examples
@@ -182,6 +154,7 @@ fn main() {
     // println!("{}", all_trees.into_iter().map(|t| t.to_sexp_string()).intersperse(" ".parse().unwrap()).collect::<String>());
     let runner = Runner::default().with_time_limit(Duration::from_secs(60 * 60)).with_node_limit(60000).with_egraph(sygue.egraph.clone()).with_iter_limit(8).run(&rewrites[..]);
     println!("Current time: {}", SystemTime::now().duration_since(start).unwrap().as_millis());
+    // let e: Extractor<AstSize, SymbolLang, ()> = Extractor::new(&runner.egraph);
     // let all_trees = reconstruct_all(&runner.egraph, 10).into_iter()
     //     .flat_map(|x| x.1).collect::<Vec<Tree>>();
     // println!("previous: 11676, len of trees {}", all_trees.len());

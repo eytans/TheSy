@@ -1,4 +1,4 @@
-use egg::{Applier, SymbolLang, EGraph, Var, Subst, Id, SearchMatches};
+use egg::{Applier, SymbolLang, EGraph, Subst, Id, SearchMatches};
 
 pub struct DiffApplier<T: Applier<SymbolLang, ()>> {
     applier: T

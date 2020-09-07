@@ -3,6 +3,7 @@ pub mod tools {
     use std::collections::hash_map::RandomState;
     use std::fmt::{Display};
     use std::hash::Hash;
+    use std::iter::FromIterator;
 
 // fn combinations<'a, T: 'a, I: Iterator<Item = &'a T> + Clone>(mut sets: impl Iterator<Item = I>) -> impl Iterator<Item = Vec<&'a T>> {
 //     let first = sets.next();
@@ -17,8 +18,28 @@ pub mod tools {
 //     res.unwrap_or(iter::empty())
 // }
 
+    fn inner_product<'a, T>(it1: impl Iterator<Item = &'a T>, it2: Vec<Vec<&'a T>>) -> Vec<Vec<&'a T>> {
+        if it2.is_empty() {
+            return Vec::from_iter(it1.map(|t| vec![t]));
+        }
+
+        it1.flat_map(|t| {
+            let mut cloned = it2.clone();
+            cloned.iter_mut().for_each(|x| x.insert(0, t));
+            cloned
+        }).collect()
+    }
+
+    pub fn product<'a, T>(mut it: impl Iterator<Item = impl Iterator<Item = &'a T>>) -> Vec<Vec<&'a T>> {
+        let mut first = it.next();
+        if first.is_none() {
+            return vec![vec![]];
+        }
+        inner_product(first.unwrap(), product(it))
+    }
+
     // TODO: don't clone T to satisfy borrow checker
-    pub(crate) fn combinations<T: Clone>(sets: &[&HashSet<T>]) -> Vec<Vec<T>> {
+    pub(crate) fn  combinations<T: Clone>(sets: &[&HashSet<T>]) -> Vec<Vec<T>> {
         if sets.is_empty() {
             return Vec::new();
         }
@@ -27,7 +48,6 @@ pub mod tools {
         }
 
         let rec_res = combinations(&sets[1..sets.len()]);
-        // TODO: clone iterator
         let initial_set = &sets[0];
         let mut res = Vec::new();
         for s in initial_set.iter() {

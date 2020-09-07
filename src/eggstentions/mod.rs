@@ -1,3 +1,5 @@
+
+
 use egg::{EGraph, SymbolLang, Id, Language};
 use std::collections::{HashMap, HashSet};
 use crate::tree::Tree;
@@ -6,6 +8,7 @@ use crate::tools::tools::combinations;
 
 pub mod multisearcher;
 pub mod appliers;
+pub mod reconstruct;
 
 pub fn reconstruct_all(egraph: &EGraph<SymbolLang, ()>, max_depth: usize) -> HashMap<Id, HashSet<Tree>> {
     let mut res: HashMap<Id, HashSet<Tree>> = HashMap::default();
