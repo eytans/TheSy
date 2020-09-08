@@ -13,6 +13,8 @@ use itertools::Itertools;
 use crate::eggstentions::appliers::DiffApplier;
 use crate::eggstentions::reconstruct_all;
 use std::time::{Duration, SystemTime};
+use crate::eggstentions::reconstruct::{reconstruct_entries, ETree};
+use std::rc::Rc;
 
 mod tree;
 mod eggstentions;
@@ -120,10 +122,15 @@ fn main() {
 
     let all_trees = reconstruct_all(&sygue.egraph, 10).into_iter()
         .flat_map(|x| x.1).collect::<Vec<Tree>>();
+    let entries = reconstruct_entries(&sygue.egraph, 10);
+    let all_etrees = entries.iter_all()
+        .flat_map(|x| x.1.iter().map(|e| e.tree.clone())).collect::<Vec<Rc<ETree>>>();
     let start = SystemTime::now();
     println!("len of trees {}", all_trees.len());
-    // println!("{}", all_trees.into_iter().map(|t| t.to_sexp_string()).intersperse(" ".parse().unwrap()).collect::<String>());
-    // println!("Current time: {}", SystemTime::now().duration_since(start).unwrap().as_millis());
+    println!("{}", all_trees.into_iter().map(|t| t.to_sexp_string()).intersperse(" ".parse().unwrap()).collect::<String>());
+    println!("len of etrees {}", &all_etrees.len());
+    println!("{}", all_etrees.into_iter().map(|t| t.to_sexp_string()).intersperse(" ".parse().unwrap()).collect::<String>());
+    println!("Current time: {}", SystemTime::now().duration_since(start).unwrap().as_millis());
     let mut rewrites: Vec<Rewrite<SymbolLang, ()>> = vec![rewrite!("pl base"; "(pl Z ?x)" => "?x"), rewrite!("pl ind"; "(pl (S ?y) ?x)" => "(S (pl ?y ?x))")];
     println!("increase depth 1");
     sygue.increase_depth();

@@ -4,6 +4,7 @@ pub mod tools {
     use std::fmt::{Display};
     use std::hash::Hash;
     use std::iter::FromIterator;
+    use itertools::{Itertools, Product};
 
 // fn combinations<'a, T: 'a, I: Iterator<Item = &'a T> + Clone>(mut sets: impl Iterator<Item = I>) -> impl Iterator<Item = Vec<&'a T>> {
 //     let first = sets.next();
@@ -18,24 +19,27 @@ pub mod tools {
 //     res.unwrap_or(iter::empty())
 // }
 
-    fn inner_product<'a, T>(it1: impl Iterator<Item = &'a T>, it2: Vec<Vec<&'a T>>) -> Vec<Vec<&'a T>> {
-        if it2.is_empty() {
-            return Vec::from_iter(it1.map(|t| vec![t]));
-        }
-
-        it1.flat_map(|t| {
-            let mut cloned = it2.clone();
-            cloned.iter_mut().for_each(|x| x.insert(0, t));
-            cloned
-        }).collect()
-    }
-
-    pub fn product<'a, T>(mut it: impl Iterator<Item = impl Iterator<Item = &'a T>>) -> Vec<Vec<&'a T>> {
-        let mut first = it.next();
-        if first.is_none() {
+    pub fn product<'a, T: 'a + Clone>(vecs: &[&'a Vec<T>]) -> Vec<Vec<&'a T>> {
+        if vecs.is_empty() {
             return vec![vec![]];
         }
-        inner_product(first.unwrap(), product(it))
+
+        if vecs.len() == 1 {
+            return vecs[0].iter().map(|t| vec![t]).collect();
+        }
+
+        let rec_res = product(&vecs[1..vecs.len()]);
+        let initial_set = &vecs[0];
+        let mut res = Vec::new();
+        for s in initial_set.iter() {
+            for r in rec_res.iter() {
+                let mut new_r = r.clone();
+                new_r.push(s);
+                res.push(new_r)
+            }
+        }
+
+        return res;
     }
 
     // TODO: don't clone T to satisfy borrow checker
