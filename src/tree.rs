@@ -4,6 +4,7 @@ use egg::{SymbolLang, RecExpr, Id, EGraph};
 use std::fmt::{Display, Formatter};
 use cached::proc_macro::cached;
 use itertools::Itertools;
+use std::rc::Rc;
 
 macro_rules! bail {
     ($s:literal $(,)?) => {
@@ -14,49 +15,25 @@ macro_rules! bail {
     };
 }
 
-#[cached]
-fn entry_to_tree(root: String, subentries: Vec<Entry>) -> Tree {
-    return Tree::branch(
-        root,
-        Vec::from_iter(
-            subentries.iter().map(|x| entry_to_tree(
-                x.symbol.op.to_string(),
-                x.subentries.clone()))
-        ),
-    );
-}
-
-
-#[derive(PartialEq, Eq, Clone, Hash)]
-struct Entry {
-    symbol: SymbolLang,
-    subentries: Vec<Entry>,
-}
-
-impl Entry {
-    pub fn tree(&self) -> Tree {
-        return entry_to_tree(self.symbol.op.to_string(), self.subentries.clone());
-    }
-}
 
 #[derive(Clone, Hash, PartialEq, Eq)]
 pub struct Tree {
     pub root: String,
-    pub subtrees: Vec<Tree>,
-    pub typ: Box<Option<Tree>>,
+    pub subtrees: Vec<Rc<Tree>>,
+    pub typ: Rc<Option<Tree>>,
 }
 
 impl Tree {
     pub fn leaf(op: String) -> Tree {
-        Tree { root: op, subtrees: Vec::new(), typ: Box::new(None) }
+        Tree { root: op, subtrees: Vec::new(), typ: Rc::new(None) }
     }
 
-    pub fn tleaf(op: String, typ: Box<Option<Tree>>) -> Tree {
+    pub fn tleaf(op: String, typ: Rc<Option<Tree>>) -> Tree {
         Tree { root: op, subtrees: Vec::new(), typ }
     }
 
-    pub fn branch(op: String, subtrees: Vec<Tree>) -> Tree {
-        Tree { root: op, subtrees, typ: Box::new(None) }
+    pub fn branch(op: String, subtrees: Vec<Rc<Tree>>) -> Tree {
+        Tree { root: op, subtrees, typ: Rc::new(None) }
     }
 
     pub fn to_rec_expr(&self, op_res: Option<RecExpr<SymbolLang>>) -> (Id, RecExpr<SymbolLang>) {
@@ -118,7 +95,7 @@ impl std::str::FromStr for Tree {
                     //     Ok(tree)
                     // }
                     Sexp::String(op) => {
-                        let arg_ids = list[1..].iter().map(|s| parse_sexp_tree(s).expect("Parsing should succeed")).collect::<Vec<Tree>>();
+                        let arg_ids = list[1..].iter().map(|s| Rc::new(parse_sexp_tree(s).expect("Parsing should succeed"))).collect::<Vec<Rc<Tree>>>();
                         let node = Tree::branch(op.clone(), arg_ids);
                         Ok(node)
                     }

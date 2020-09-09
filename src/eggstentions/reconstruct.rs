@@ -76,7 +76,7 @@ pub fn reconstruct_entries(egraph: &EGraph<SymbolLang, ()>, max_depth: usize) ->
         }
     }
 
-    for i in 0..max_depth {
+    for i in 0..=max_depth {
         let mut new_ids: HashSet<Id> = HashSet::new();
         let mut new_latest: MultiMap<Id, Rc<Entry>> = MultiMap::default();
         for (id, edges) in available_edges.iter_all() {
