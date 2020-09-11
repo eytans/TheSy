@@ -4,6 +4,7 @@ pub mod tools {
     use std::fmt::{Display};
     use std::hash::Hash;
     use std::iter::FromIterator;
+    use itertools::{iproduct, MultiProduct};
     use itertools::{Itertools, Product};
 
 // fn combinations<'a, T: 'a, I: Iterator<Item = &'a T> + Clone>(mut sets: impl Iterator<Item = I>) -> impl Iterator<Item = Vec<&'a T>> {
@@ -42,27 +43,8 @@ pub mod tools {
         return res;
     }
 
-    // TODO: don't clone T to satisfy borrow checker
-    pub(crate) fn  combinations<T: Clone>(sets: &[&HashSet<T>]) -> Vec<Vec<T>> {
-        if sets.is_empty() {
-            return Vec::new();
-        }
-        if sets.len() == 1 {
-            return sets[0].iter().map(|t| vec![t.clone()]).collect();
-        }
-
-        let rec_res = combinations(&sets[1..sets.len()]);
-        let initial_set = &sets[0];
-        let mut res = Vec::new();
-        for s in initial_set.iter() {
-            for r in rec_res.iter() {
-                let mut new_r = r.clone();
-                new_r.push(s.clone());
-                res.push(new_r)
-            }
-        }
-
-        return res;
+    pub(crate) fn  combinations<T: Clone, I: Clone + Iterator<Item = T>>(iters: impl Iterator<Item = I>) -> MultiProduct<I> {
+        iters.multi_cartesian_product()
     }
 
     pub fn choose<K>(vec: &[K], size: usize) -> Vec<Vec<&K>> {
