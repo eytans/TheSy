@@ -124,13 +124,13 @@ mod tests {
 
     use crate::tools::tools::choose;
     use crate::tools::tools::combinations;
+    use itertools::Itertools;
 
     #[test]
     fn check_comb_amount() {
         let v1 = vec![1, 2, 3];
         let v2 = vec![4, 5, 6];
-        let sets = vec![v1.iter().collect::<HashSet<&i32>>(), v2.iter().collect::<HashSet<&i32>>()];
-        let combs = combinations(&sets.iter().collect::<Vec<&HashSet<&i32>>>());
+        let combs = combinations(vec![v1.iter(), v2.iter()].into_iter()).collect_vec();
         assert_eq!(combs.len(), 9);
         for v in &combs {
             assert_eq!(v.len(), 2);

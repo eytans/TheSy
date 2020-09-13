@@ -36,23 +36,27 @@ impl Tree {
         Tree { root: op, subtrees, typ: Rc::new(None) }
     }
 
-    pub fn to_rec_expr(&self, op_res: Option<RecExpr<SymbolLang>>) -> (Id, RecExpr<SymbolLang>) {
-        let mut res = if op_res.is_none() { RecExpr::default() } else { op_res.unwrap() };
-        return if self.is_leaf() {
-            (res.add(SymbolLang::leaf(&self.root)), res)
-        } else {
-            let mut ids = Vec::default();
-            for s in &self.subtrees {
-                let (id, r) = s.to_rec_expr(Some(res));
-                res = r;
-                ids.insert(0, id);
-            }
-            (res.add(SymbolLang::new(&self.root, ids)), res)
-        };
-    }
+    // pub fn to_rec_expr(&self, op_res: Option<RecExpr<SymbolLang>>) -> (Id, RecExpr<SymbolLang>) {
+    //     let mut res = if op_res.is_none() { RecExpr::default() } else { op_res.unwrap() };
+    //     return if self.is_leaf() {
+    //         (res.add(SymbolLang::leaf(&self.root)), res)
+    //     } else {
+    //         let mut ids = Vec::default();
+    //         for s in &self.subtrees {
+    //             let (id, r) = s.to_rec_expr(Some(res));
+    //             res = r;
+    //             ids.insert(0, id);
+    //         }
+    //         (res.add(SymbolLang::new(&self.root, ids)), res)
+    //     };
+    // }
 
     pub fn add_to_graph(&self, graph: &mut EGraph<SymbolLang, ()>) -> Id {
-        graph.add_expr(&self.to_rec_expr(None).1)
+        let mut children = Vec::new();
+        for t in &self.subtrees {
+            children.push(t.add_to_graph(graph));
+        };
+        graph.add(SymbolLang::new(self.root.clone(), children))
     }
 
     pub fn is_leaf(&self) -> bool {
