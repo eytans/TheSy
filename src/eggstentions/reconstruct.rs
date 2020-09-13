@@ -1,13 +1,10 @@
 use egg::{EGraph, SymbolLang, Id, Language};
 use std::collections::{HashMap, HashSet};
 use crate::tree::Tree;
-use std::iter::FromIterator;
 use crate::tools::tools::{combinations};
 use std::rc::Rc;
-use std::alloc::System;
 use std::time::SystemTime;
-use multimap::MultiMap;
-use itertools::{Itertools, MultiProduct};
+use itertools::{Itertools};
 use std::iter;
 
 

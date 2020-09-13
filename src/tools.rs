@@ -1,11 +1,10 @@
 pub mod tools {
-    use std::collections::{HashMap, HashSet};
+    use std::collections::{HashMap};
     use std::collections::hash_map::RandomState;
     use std::fmt::{Display};
     use std::hash::Hash;
-    use std::iter::FromIterator;
-    use itertools::{iproduct, MultiProduct};
-    use itertools::{Itertools, Product};
+    use itertools::{MultiProduct};
+    use itertools::{Itertools};
 
 // fn combinations<'a, T: 'a, I: Iterator<Item = &'a T> + Clone>(mut sets: impl Iterator<Item = I>) -> impl Iterator<Item = Vec<&'a T>> {
 //     let first = sets.next();

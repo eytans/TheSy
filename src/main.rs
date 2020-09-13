@@ -2,21 +2,15 @@
 #[macro_use(c)]
 extern crate cute;
 
-use std::{iter};
-
 use egg::*;
 
 use crate::tree::Tree;
 use std::str::FromStr;
-use crate::eggstentions::multisearcher::multisearcher::MultiDiffSearcher;
-use itertools::{Itertools, all};
-use crate::eggstentions::appliers::DiffApplier;
+use itertools::{Itertools};
 use crate::eggstentions::reconstruct::reconstruct_all;
-use std::time::{Duration, SystemTime};
+use std::time::{SystemTime};
 use std::rc::Rc;
-use std::hash::Hash;
 use std::collections::HashSet;
-use std::iter::FromIterator;
 use crate::thesy::SyGuESOE;
 
 mod tree;

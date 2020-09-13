@@ -1,8 +1,6 @@
 use symbolic_expressions::Sexp;
-use std::iter::FromIterator;
-use egg::{SymbolLang, RecExpr, Id, EGraph};
+use egg::{SymbolLang, Id, EGraph};
 use std::fmt::{Display, Formatter};
-use cached::proc_macro::cached;
 use itertools::Itertools;
 use std::rc::Rc;
 
