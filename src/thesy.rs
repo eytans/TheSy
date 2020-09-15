@@ -1,12 +1,12 @@
 use std::rc::Rc;
 use crate::tree::Tree;
-use egg::{SymbolLang, EGraph, Rewrite, Pattern, Runner, Searcher, Var, Id, Subst};
+use egg::{SymbolLang, EGraph, Rewrite, Pattern, Runner, Searcher, Var, Id, Subst, RecExpr, Extractor};
 use std::iter;
 use itertools::Itertools;
 use crate::eggstentions::multisearcher::multisearcher::MultiDiffSearcher;
 use std::str::FromStr;
 use std::time::{Duration, SystemTime};
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::iter::FromIterator;
 
 pub struct SyGuESOE {
@@ -57,6 +57,11 @@ impl SyGuESOE {
         res.egraph.rebuild();
         res
     }
+
+    // fn extract_classes(&self) -> HashSet<RecExpr<SymbolLang>> {
+        // let ext = Extractor::new(&self.egraph, );
+        // self.
+    // }
 
     fn create_sygue_anchor() -> String {
         format!("sygueanchor")
