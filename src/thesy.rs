@@ -1,6 +1,6 @@
 use std::rc::Rc;
 use crate::tree::Tree;
-use egg::{SymbolLang, EGraph, Rewrite, Pattern, Runner, Searcher, Var, Id, Subst, RecExpr, Extractor};
+use egg::*;
 use std::iter;
 use itertools::Itertools;
 use crate::eggstentions::multisearcher::multisearcher::MultiDiffSearcher;
@@ -8,6 +8,7 @@ use std::str::FromStr;
 use std::time::{Duration, SystemTime};
 use std::collections::{HashMap, HashSet};
 use std::iter::FromIterator;
+use crate::eggstentions::costs::MinRep;
 
 pub struct SyGuESOE {
     // TODO: automatic examples
@@ -58,10 +59,12 @@ impl SyGuESOE {
         res
     }
 
-    // fn extract_classes(&self) -> HashSet<RecExpr<SymbolLang>> {
-        // let ext = Extractor::new(&self.egraph, );
-        // self.
-    // }
+    fn extract_classes(&self) -> HashMap<Id, RecExpr<SymbolLang>> {
+        let mut ext = Extractor::new(&self.egraph, MinRep);
+        self.example_ids.keys().map(|key| {
+            (*key, ext.find_best(*key).1)
+        }).collect()
+    }
 
     fn create_sygue_anchor() -> String {
         format!("sygueanchor")
@@ -137,6 +140,7 @@ impl SyGuESOE {
 
     pub fn equiv_reduc(&mut self, rules: &[Rewrite<SymbolLang, ()>]) {
         self.egraph = Runner::default().with_time_limit(Duration::from_secs(60 * 60)).with_node_limit(60000).with_egraph(std::mem::take(&mut self.egraph)).with_iter_limit(8).run(rules).egraph;
+        self.egraph.rebuild();
     }
 }
 
@@ -149,13 +153,17 @@ mod test {
     use std::time::SystemTime;
     use itertools::Itertools;
     use std::collections::HashSet;
-    use egg::{SymbolLang, Pattern, Searcher};
+    use egg::{SymbolLang, Pattern, Searcher, Rewrite};
 
     fn create_nat_sygue() -> SyGuESOE {
         SyGuESOE::new(
             vec!["Z", "(S Z)", "(S (S Z))"].into_iter().map(|s| Rc::new(Tree::from_str(s).unwrap())).collect(),
-            vec!["(typed ph0 int)", "(typed ph1 int)", "(typed Z int)", "(typed S (-> int int))", "(typed pl (-> int int int))"].into_iter().map(|s| Rc::new(Tree::from_str(s).unwrap())).collect(),
+            vec!["(typed ts_ph0 int)", "(typed ts_ph1 int)", "(typed Z int)", "(typed S (-> int int))", "(typed pl (-> int int int))"].into_iter().map(|s| Rc::new(Tree::from_str(s).unwrap())).collect(),
         )
+    }
+
+    fn create_pl_rewrites() -> Vec<Rewrite<SymbolLang, ()>> {
+        vec![rewrite!("pl base"; "(pl Z ?x)" => "?x"), rewrite!("pl ind"; "(pl (S ?y) ?x)" => "(S (pl ?y ?x))")]
     }
 
     #[test]
@@ -214,9 +222,9 @@ mod test {
         assert!(ssz.is_some());
         let ind_ph = syg.egraph.lookup(SymbolLang::new(syg.ind_ph.root.clone(), vec![]));
         assert!(ind_ph.is_some());
-        let ph1 = syg.egraph.lookup(SymbolLang::new("ph0", vec![]));
+        let ph1 = syg.egraph.lookup(SymbolLang::new("ts_ph0", vec![]));
         assert!(ph1.is_some());
-        let ph2 = syg.egraph.lookup(SymbolLang::new("ph1", vec![]));
+        let ph2 = syg.egraph.lookup(SymbolLang::new("ts_ph1", vec![]));
         assert!(ph2.is_some());
         syg.increase_depth();
         let pl_ph1_ex2 = syg.egraph.lookup(SymbolLang::new("pl", vec![syg.egraph.find(ph1.unwrap()), syg.egraph.find(ssz.unwrap())]));
@@ -234,7 +242,7 @@ mod test {
     fn does_not_create_unneeded_terms() {
         let mut syg = SyGuESOE::new(
             vec!["Z"].into_iter().map(|s| Rc::new(Tree::from_str(s).unwrap())).collect(),
-            vec!["(typed ph0 int)", "(typed S (-> int int))"].into_iter().map(|s| Rc::new(Tree::from_str(s).unwrap())).collect(),
+            vec!["(typed ts_ph0 int)", "(typed S (-> int int))"].into_iter().map(|s| Rc::new(Tree::from_str(s).unwrap())).collect(),
         );
 
         let anchor_patt: Pattern<SymbolLang> = Pattern::from_str("(sygueanchor ?x)").unwrap();
@@ -247,7 +255,7 @@ mod test {
 
         let mut syg = SyGuESOE::new(
             vec!["Z"].into_iter().map(|s| Rc::new(Tree::from_str(s).unwrap())).collect(),
-            vec!["(typed ph0 int)", "(typed ph1 int)", "(typed x (-> int int int))"].into_iter().map(|s| Rc::new(Tree::from_str(s).unwrap())).collect(),
+            vec!["(typed ts_ph0 int)", "(typed ts_ph1 int)", "(typed x (-> int int int))"].into_iter().map(|s| Rc::new(Tree::from_str(s).unwrap())).collect(),
         );
 
         let anchor_patt: Pattern<SymbolLang> = Pattern::from_str("(sygueanchor ?x)").unwrap();
@@ -259,6 +267,26 @@ mod test {
         syg.increase_depth();
         let results2 = anchor_patt.search(&syg.egraph);
         assert_eq!(147usize, results2.iter().map(|x| x.substs.len()).sum());
+    }
+
+    #[test]
+    fn check_representatives_sane() {
+        let mut syg = create_nat_sygue();
+        let mut rewrites = create_pl_rewrites();
+
+        syg.increase_depth();
+        syg.equiv_reduc(&rewrites);
+        syg.increase_depth();
+        syg.equiv_reduc(&rewrites);
+        let classes = syg.extract_classes();
+        for (id, exp) in classes {
+            for n in exp.as_ref() {
+                if n.op.to_string() == "pl" {
+                    let index = n.children[0].to_string();
+                    assert_ne!(exp.as_ref()[ index.parse::<usize>().unwrap()].op.to_string(), "Z");
+                }
+            }
+        }
     }
 
     // TODO: test on lists

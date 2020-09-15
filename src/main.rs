@@ -1,4 +1,7 @@
 // #![feature(iterator_fold_self)]
+#[macro_use(rewrite)]
+extern crate egg;
+
 #[macro_use(c)]
 extern crate cute;
 
@@ -22,7 +25,7 @@ mod thesy;
 fn main() {
     let mut sygue = SyGuESOE::new(
         vec!["Z", "(S Z)", "(S (S Z))"].into_iter().map(|s| Rc::new(Tree::from_str(s).unwrap())).collect(),
-        vec!["(typed ph0 int)", "(typed ph1 int)", "(typed Z int)", "(typed S (-> int int))", "(typed pl (-> int int int))"].into_iter().map(|s| Rc::new(Tree::from_str(s).unwrap())).collect(),
+        vec!["(typed ts_ph0 int)", "(typed ts_ph1 int)", "(typed Z int)", "(typed S (-> int int))", "(typed pl (-> int int int))"].into_iter().map(|s| Rc::new(Tree::from_str(s).unwrap())).collect(),
     );
 
     let start = SystemTime::now();
@@ -39,7 +42,6 @@ fn main() {
     // println!("{}", &all_trees.len());
     println!("Current time: {}", SystemTime::now().duration_since(start).unwrap().as_millis());
     sygue.equiv_reduc(&rewrites[..]);
-    sygue.egraph.rebuild();
     // let all_trees = reconstruct_all(&sygue.egraph, 4).values().flatten().cloned().collect_vec();
     // println!("{}", &all_trees.iter().map(|t| t.to_sexp_string()).intersperse(" ".parse().unwrap()).collect::<String>());
     // let all_trees = reconstruct_all(&sygue.egraph, 2).iter().flat_map(|x| x.1).cloned().collect::<HashSet<Rc<Tree>>>();
@@ -52,7 +54,6 @@ fn main() {
     println!("Current time: {}", SystemTime::now().duration_since(start).unwrap().as_millis());
     // let all_trees = reconstruct_all(&sygue.egraph, 3).iter().flat_map(|x| x.1).cloned().collect::<HashSet<Rc<Tree>>>();
     // println!("{}", all_trees.into_iter().map(|t| t.to_sexp_string()).intersperse(" ".parse().unwrap()).collect::<String>());
-    sygue.egraph.rebuild();
     // let all_trees = reconstruct_all(&sygue.egraph, 3).iter().flat_map(|x| x.1).cloned().collect_vec();
     // println!("{}", all_trees.into_iter().map(|t| t.to_sexp_string()).intersperse(" ".parse().unwrap()).collect::<String>());
     println!("increase depth 3");
