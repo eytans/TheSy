@@ -9,6 +9,7 @@ use std::time::{Duration, SystemTime};
 use std::collections::{HashMap, HashSet};
 use std::iter::FromIterator;
 use crate::eggstentions::costs::MinRep;
+use crate::tools::tools::choose;
 
 pub struct SyGuESOE {
     // TODO: automatic examples
@@ -62,7 +63,8 @@ impl SyGuESOE {
     fn extract_classes(&self) -> HashMap<Id, RecExpr<SymbolLang>> {
         let mut ext = Extractor::new(&self.egraph, MinRep);
         self.example_ids.keys().map(|key| {
-            (*key, ext.find_best(*key).1)
+            let updated_key = &self.egraph.find(*key);
+            (*updated_key, ext.find_best(*updated_key).1)
         }).collect()
     }
 
@@ -141,6 +143,26 @@ impl SyGuESOE {
     pub fn equiv_reduc(&mut self, rules: &[Rewrite<SymbolLang, ()>]) {
         self.egraph = Runner::default().with_time_limit(Duration::from_secs(60 * 60)).with_node_limit(60000).with_egraph(std::mem::take(&mut self.egraph)).with_iter_limit(8).run(rules).egraph;
         self.egraph.rebuild();
+    }
+
+    pub fn get_conjectures(&self) -> HashSet<(RecExpr<SymbolLang>, RecExpr<SymbolLang>)> {
+        let mut finer_equality_classes: HashMap<Vec<Id>, HashSet<Id>> = HashMap::new();
+        for (id, vals) in &self.example_ids {
+            if !finer_equality_classes.contains_key(vals) {
+                finer_equality_classes.insert(vals.clone(), HashSet::new());
+            }
+            finer_equality_classes.get_mut(vals).expect("Should have just added if missing").insert(*id);
+        }
+        let reps = self.extract_classes();
+        let mut res = HashSet::new();
+        for set in finer_equality_classes.values() {
+            if set.len() < 2 { continue; }
+            for couple in choose(&set.iter().collect_vec()[..], 2) {
+                // TODO: move translation with find above choosing
+                res.insert((reps[&self.egraph.find(**couple[0])].clone(), reps[&self.egraph.find(**couple[1])].clone()));
+            }
+        }
+        res
     }
 }
 
@@ -283,11 +305,39 @@ mod test {
             for n in exp.as_ref() {
                 if n.op.to_string() == "pl" {
                     let index = n.children[0].to_string();
-                    assert_ne!(exp.as_ref()[ index.parse::<usize>().unwrap()].op.to_string(), "Z");
+                    assert_ne!(exp.as_ref()[index.parse::<usize>().unwrap()].op.to_string(), "Z");
                 }
             }
         }
     }
 
+    #[test]
+    fn check_conjectures_sane() {
+        let mut syg = create_nat_sygue();
+        let mut rewrites = create_pl_rewrites();
+
+        syg.increase_depth();
+        syg.equiv_reduc(&rewrites);
+        syg.increase_depth();
+        syg.equiv_reduc(&rewrites);
+        // println!("{}", syg.get_conjectures().iter().map(|x| x.0.to_string() + " ?= " + &*x.1.to_string()).intersperse("\n".parse().unwrap()).collect::<String>());
+        let conjectures = syg.get_conjectures();
+        for c in syg.get_conjectures().iter().map(|x| x.0.to_string() + " ?= " + &*x.1.to_string()) {
+            assert_ne!(c, "ind_var ?= ts_ph0");
+            assert_ne!(c, "ts_ph0 ?= ind_var");
+            assert_ne!(c, "ind_var ?= ts_ph1");
+            assert_ne!(c, "ts_ph1 ?= ts_ph0");
+            assert_ne!(c, "ts_ph0 ?= ts_ph1");
+            assert_ne!(c, "ts_ph0 ?= ts_ph0");
+            assert_ne!(c, "(pl ts_ph0 ind_var) ?= (pl ts_ph1 ind_var)");
+            assert_ne!(c, "(pl ind_var ts_ph0) ?= (pl ts_ph1 ind_var)");
+            assert_ne!(c, "(pl ts_ph0 ind_var) ?= (pl ind_var ts_ph1)");
+            assert_ne!(c, "(pl ind_var ts_ph0) ?= (pl ind_var ts_ph1)");
+            assert_ne!(c, "(pl ts_ph1 ind_var) ?= (pl ts_ph0 ind_var)");
+            assert_ne!(c, "(pl ind_var ts_ph1) ?= (pl ts_ph0 ind_var)");
+            assert_ne!(c, "(pl ts_ph1 ind_var) ?= (pl ind_var ts_ph0)");
+            assert_ne!(c, "(pl ind_var ts_ph1) ?= (pl ind_var ts_ph0)");
+        }
+    }
     // TODO: test on lists
 }
