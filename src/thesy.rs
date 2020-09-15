@@ -11,6 +11,12 @@ use std::iter::FromIterator;
 use crate::eggstentions::costs::MinRep;
 use crate::tools::tools::choose;
 
+pub struct DataType {
+    name: String,
+    type_params: Vec<String>,
+    constructors: Vec<Tree>,
+}
+
 pub struct SyGuESOE {
     // TODO: automatic examples
     examples: Vec<Rc<Tree>>,
@@ -19,12 +25,55 @@ pub struct SyGuESOE {
     pub egraph: EGraph<SymbolLang, ()>,
     searchers: HashMap<String, (MultiDiffSearcher, Vec<Var>)>,
     example_ids: HashMap<Id, Vec<Id>>,
-    // egraph: EGraph<SymbolLang, ()>,
-    // terms: HashMap<Tree, Vec<(Tree, Id)>>,
-    // sygue_rules: Vec<Rewrite<SymbolLang, ()>>,
 }
 
 impl SyGuESOE {
+    // const WFO_OP: String = ("ltwf").parse().unwrap();
+    //
+    // const WFO_TRANS: Rewrite<SymbolLang, ()> = {
+    //     let searcher = MultiDiffSearcher::new(vec![
+    //         Pattern::from_str(&*format!("({} ?x ?y)", WFO_OP)).unwrap(),
+    //         Pattern::from_str(&*format!("({} ?z ?x)", WFO_OP)).unwrap()]);
+    //     let applier = Pattern::from_str(&*format!("({} ?z ?y)", WFO_OP)).unwrap();
+    //     Rewrite::new("wfo transitivity", "well founded order transitivity", searcher, applier).unwrap()
+    // };
+
+    // fn wfo_rewrites(datatype: DataType) -> Vec<Rewrite<SymbolLang, ()>> {
+    //     debug_assert!(datatype.constructors.iter().all(|c| c.root == "->"));
+    //     let contructor_rules = datatype.constructors.iter().flat_map(|c| {
+    //         let holes_ignores = c.subtrees.iter()
+    //             .take(c.subtrees.len() - 1).enumerate()
+    //             .map(|(i, t)| {
+    //                 // TODO: this should change for generic types
+    //                 if t.root == datatype.name {
+    //                     Some(format!("param_{}", i).to_string())
+    //                 } else {
+    //                     None
+    //                 }
+    //             });
+    //         let root_tree = AnnotatedTree.identifierOnly(Identifier("?root"));
+    //         let lhs = AnnotatedTree.withoutAnnotations(Language.andCondBuilderId, Seq(
+    //             rootTree,
+    //             AnnotatedTree.withoutAnnotations(c.copy(annotation = None), holesAndIgnores),
+    //         ));
+    //
+    //         let trueTree = AnnotatedTree.identifierOnly(Language.trueId);
+    //         let holesLtwf = AnnotatedTree.withoutAnnotations(Language.andCondBuilderId, trueTree +: holesAndIgnores.collect({
+    //             case
+    //             holeTree
+    //             if holeTree.root.literal.startsWith("?") =>
+    //             AnnotatedTree.withoutAnnotations(ltwfId, Seq(holeTree, rootTree))
+    //         }))
+    //
+    //         new
+    //         LetAction(AnnotatedTree.withoutAnnotations(Language.limitedDirectedLetId, Seq(
+    //             lhs,
+    //             holesLtwf,
+    //         ))).rules
+    //     })
+    //     ltwfTransivity + + contructorRules
+    // }
+
     // TODO: ind from example types
     pub fn new(examples: Vec<Rc<Tree>>, dict: Vec<Rc<Tree>>) -> SyGuESOE {
         let ind_ph = Rc::new(Tree::tleaf(String::from("ind_var"), Rc::new(Some(Tree::leaf(String::from("int"))))));
@@ -62,6 +111,7 @@ impl SyGuESOE {
 
     fn extract_classes(&self) -> HashMap<Id, RecExpr<SymbolLang>> {
         let mut ext = Extractor::new(&self.egraph, MinRep);
+        // TODO: update example ids as whole
         self.example_ids.keys().map(|key| {
             let updated_key = &self.egraph.find(*key);
             (*updated_key, ext.find_best(*updated_key).1)
@@ -95,6 +145,11 @@ impl SyGuESOE {
         res
     }
 
+    fn fix_example_ids(&mut self) {
+        self.example_ids = self.example_ids.iter()
+            .map(|(k, v)| (self.egraph.find(*k), v.iter().map(|x| self.egraph.find(*x)).collect())).collect();
+    }
+
     pub fn increase_depth(&mut self) {
         // How to efficiently find who merged? Extract one from each ph class then check for its
         // id the sets of ids the examples are in.
@@ -103,8 +158,7 @@ impl SyGuESOE {
         // Add anchor only to ind_ph term
 
         // First we need to update our keys as they might not be relevant anymore
-        self.example_ids = self.example_ids.iter()
-            .map(|(k, v)| (self.egraph.find(*k), v.iter().map(|x| self.egraph.find(*x)).collect())).collect();
+        self.fix_example_ids();
         // Now apply for all matches
         let anchor = Self::create_sygue_anchor();
         fn create_edge(op: &String, params: &Vec<Var>, sub: &Subst) -> SymbolLang {
@@ -145,25 +199,36 @@ impl SyGuESOE {
         self.egraph.rebuild();
     }
 
-    pub fn get_conjectures(&self) -> HashSet<(RecExpr<SymbolLang>, RecExpr<SymbolLang>)> {
+    pub fn get_conjectures(&mut self) -> HashSet<(RecExpr<SymbolLang>, RecExpr<SymbolLang>)> {
+        self.fix_example_ids();
         let mut finer_equality_classes: HashMap<Vec<Id>, HashSet<Id>> = HashMap::new();
         for (id, vals) in &self.example_ids {
             if !finer_equality_classes.contains_key(vals) {
-                finer_equality_classes.insert(vals.clone(), HashSet::new());
+                finer_equality_classes.insert(vals.iter().map(|i| self.egraph.find(*i)).collect_vec(), HashSet::new());
             }
-            finer_equality_classes.get_mut(vals).expect("Should have just added if missing").insert(*id);
+            finer_equality_classes.get_mut(vals).expect("Should have just added if missing").insert(self.egraph.find(*id));
         }
         let reps = self.extract_classes();
         let mut res = HashSet::new();
         for set in finer_equality_classes.values() {
             if set.len() < 2 { continue; }
             for couple in choose(&set.iter().collect_vec()[..], 2) {
-                // TODO: move translation with find above choosing
-                res.insert((reps[&self.egraph.find(**couple[0])].clone(), reps[&self.egraph.find(**couple[1])].clone()));
+                res.insert((reps[couple[0]].clone(), reps[couple[1]].clone()));
             }
         }
         res
     }
+
+    // Assume base case is correct and prove equality using induction.
+    // Induction hypothesis is given as a rewrite rule, using precompiled rewrite rules
+    // representing well founded order on the induction variable.
+    // Need to replace the induction variable with an expression representing a constructor and
+    // well founded order on the params of the constructor.
+    // pub fn prove(&self, datatype: Datatype, ex1: RecExpr<SymbolLang>, ex2: RecExpr<SymbolLang>) -> Option<Rewrite<SymbolLang, ()>> {
+    //     debug_assert!(ex1.as_ref().iter().find(|s| s.op.to_string() == self.ind_ph.root).is_some());
+    //     debug_assert!(ex2.as_ref().iter().find(|s| s.op.to_string() == self.ind_ph.root).is_some());
+    //     ex1.as_ref().iter().map(|n| n.)
+    // }
 }
 
 #[cfg(test)]
@@ -320,9 +385,9 @@ mod test {
         syg.equiv_reduc(&rewrites);
         syg.increase_depth();
         syg.equiv_reduc(&rewrites);
-        // println!("{}", syg.get_conjectures().iter().map(|x| x.0.to_string() + " ?= " + &*x.1.to_string()).intersperse("\n".parse().unwrap()).collect::<String>());
         let conjectures = syg.get_conjectures();
-        for c in syg.get_conjectures().iter().map(|x| x.0.to_string() + " ?= " + &*x.1.to_string()) {
+        println!("{}", conjectures.iter().map(|x| x.0.to_string() + " ?= " + &*x.1.to_string()).intersperse("\n".parse().unwrap()).collect::<String>());
+        for c in conjectures.iter().map(|x| x.0.to_string() + " ?= " + &*x.1.to_string()) {
             assert_ne!(c, "ind_var ?= ts_ph0");
             assert_ne!(c, "ts_ph0 ?= ind_var");
             assert_ne!(c, "ind_var ?= ts_ph1");

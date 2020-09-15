@@ -150,5 +150,6 @@ mod tests {
             let as_set: HashSet<&Vec<&i32>> = HashSet::from_iter(chosen.iter());
             assert_eq!(chosen.len(), as_set.len());
         }
+        assert_eq!(choose(&v3, 2).len(), 36);
     }
 }
