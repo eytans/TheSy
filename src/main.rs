@@ -14,7 +14,7 @@ use crate::eggstentions::reconstruct::reconstruct_all;
 use std::time::{SystemTime};
 use std::rc::Rc;
 use std::collections::HashSet;
-use crate::thesy::SyGuESOE;
+use crate::thesy::{SyGuESOE, DataType};
 
 mod tree;
 mod eggstentions;
@@ -24,8 +24,12 @@ mod thesy;
 
 fn main() {
     let mut sygue = SyGuESOE::new(
+        vec![DataType::new("nat".to_string(), vec![
+            Tree::from_str("(Z nat)").unwrap(),
+            Tree::from_str("(S nat nat)").unwrap()
+        ])],
         vec!["Z", "(S Z)", "(S (S Z))"].into_iter().map(|s| Rc::new(Tree::from_str(s).unwrap())).collect(),
-        vec!["(typed ts_ph0 int)", "(typed ts_ph1 int)", "(typed Z int)", "(typed S (-> int int))", "(typed pl (-> int int int))"].into_iter().map(|s| Rc::new(Tree::from_str(s).unwrap())).collect(),
+        vec!["(typed ts_ph0 nat)", "(typed ts_ph1 nat)", "(typed Z nat)", "(typed S (-> nat nat))", "(typed pl (-> nat nat nat))"].into_iter().map(|s| Rc::new(Tree::from_str(s).unwrap())).collect(),
     );
 
     let start = SystemTime::now();

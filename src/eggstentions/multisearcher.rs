@@ -84,13 +84,14 @@ pub mod multisearcher {
         by_vars
     }
 
+    #[derive(Clone)]
     pub struct MultiEqSearcher {
         patterns: Vec<Pattern<SymbolLang>>,
         common_vars: HashMap<Var, usize>,
     }
 
     impl MultiEqSearcher {
-        fn new(mut patterns: Vec<Pattern<SymbolLang>>) -> MultiEqSearcher {
+        pub(crate) fn new(mut patterns: Vec<Pattern<SymbolLang>>) -> MultiEqSearcher {
             let common_vars = get_common_vars(&mut patterns);
             MultiEqSearcher { patterns, common_vars }
         }
@@ -160,6 +161,7 @@ pub mod multisearcher {
         }
     }
 
+    #[derive(Clone)]
     pub struct MultiDiffSearcher {
         patterns: Vec<Pattern<SymbolLang>>,
         common_vars: HashMap<Var, usize>,

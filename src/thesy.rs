@@ -3,80 +3,106 @@ use crate::tree::Tree;
 use egg::*;
 use std::iter;
 use itertools::Itertools;
-use crate::eggstentions::multisearcher::multisearcher::MultiDiffSearcher;
+use crate::eggstentions::multisearcher::multisearcher::{MultiDiffSearcher, MultiEqSearcher};
 use std::str::FromStr;
 use std::time::{Duration, SystemTime};
 use std::collections::{HashMap, HashSet};
 use std::iter::FromIterator;
 use crate::eggstentions::costs::MinRep;
 use crate::tools::tools::choose;
+use crate::eggstentions::appliers::DiffApplier;
 
+#[derive(Clone, Hash, PartialEq, Eq)]
 pub struct DataType {
     name: String,
-    type_params: Vec<String>,
+    type_params: Vec<Tree>,
+    /// Constructor name applied on types
     constructors: Vec<Tree>,
+}
+
+impl DataType {
+    pub(crate) fn new(name: String, constructors: Vec<Tree>) -> DataType {
+        DataType { name, type_params: vec![], constructors }
+    }
+
+    fn generic(name: String, type_params: Vec<Tree>, constructors: Vec<Tree>) -> DataType {
+        DataType { name, type_params, constructors }
+    }
+
+    fn as_tree(&self) -> Tree {
+        Tree::branch(self.name.clone(), self.type_params.iter().map(|t| Rc::new(t.clone())).collect_vec())
+    }
 }
 
 pub struct SyGuESOE {
     // TODO: automatic examples
     examples: Vec<Rc<Tree>>,
+    // TODO: datatype out of dict, multiple examples at once
+    /// known datatypes to wfo rewrites for induction
+    datatypes: HashMap<DataType, Vec<Rewrite<SymbolLang, ()>>>,
+    /// known function declerations and their types
     dict: Vec<Rc<Tree>>,
+    /// name used to mark where the induction will be
     ind_ph: Rc<Tree>,
+    /// egraph which is expanded as part of the exploration
     pub egraph: EGraph<SymbolLang, ()>,
+    /// searchers used to create the next depth of terms
     searchers: HashMap<String, (MultiDiffSearcher, Vec<Var>)>,
+    /// map maintaining the connection between eclasses created by sygue
+    /// and their associated eclasses with `ind_ph` replaced by symbolic examples.
     example_ids: HashMap<Id, Vec<Id>>,
 }
 
 impl SyGuESOE {
-    // const WFO_OP: String = ("ltwf").parse().unwrap();
-    //
-    // const WFO_TRANS: Rewrite<SymbolLang, ()> = {
-    //     let searcher = MultiDiffSearcher::new(vec![
-    //         Pattern::from_str(&*format!("({} ?x ?y)", WFO_OP)).unwrap(),
-    //         Pattern::from_str(&*format!("({} ?z ?x)", WFO_OP)).unwrap()]);
-    //     let applier = Pattern::from_str(&*format!("({} ?z ?y)", WFO_OP)).unwrap();
-    //     Rewrite::new("wfo transitivity", "well founded order transitivity", searcher, applier).unwrap()
-    // };
+    fn wfo_op() -> &'static str { "ltwf" }
 
-    // fn wfo_rewrites(datatype: DataType) -> Vec<Rewrite<SymbolLang, ()>> {
-    //     debug_assert!(datatype.constructors.iter().all(|c| c.root == "->"));
-    //     let contructor_rules = datatype.constructors.iter().flat_map(|c| {
-    //         let holes_ignores = c.subtrees.iter()
-    //             .take(c.subtrees.len() - 1).enumerate()
-    //             .map(|(i, t)| {
-    //                 // TODO: this should change for generic types
-    //                 if t.root == datatype.name {
-    //                     Some(format!("param_{}", i).to_string())
-    //                 } else {
-    //                     None
-    //                 }
-    //             });
-    //         let root_tree = AnnotatedTree.identifierOnly(Identifier("?root"));
-    //         let lhs = AnnotatedTree.withoutAnnotations(Language.andCondBuilderId, Seq(
-    //             rootTree,
-    //             AnnotatedTree.withoutAnnotations(c.copy(annotation = None), holesAndIgnores),
-    //         ));
-    //
-    //         let trueTree = AnnotatedTree.identifierOnly(Language.trueId);
-    //         let holesLtwf = AnnotatedTree.withoutAnnotations(Language.andCondBuilderId, trueTree +: holesAndIgnores.collect({
-    //             case
-    //             holeTree
-    //             if holeTree.root.literal.startsWith("?") =>
-    //             AnnotatedTree.withoutAnnotations(ltwfId, Seq(holeTree, rootTree))
-    //         }))
-    //
-    //         new
-    //         LetAction(AnnotatedTree.withoutAnnotations(Language.limitedDirectedLetId, Seq(
-    //             lhs,
-    //             holesLtwf,
-    //         ))).rules
-    //     })
-    //     ltwfTransivity + + contructorRules
-    // }
+    fn wfo_trans() -> Rewrite<SymbolLang, ()>  {
+        let searcher = MultiDiffSearcher::new(vec![
+            Pattern::from_str(&vec!["(", Self::wfo_op(), "?x ?y)"].join(" ")).unwrap(),
+            Pattern::from_str(&vec!["(", Self::wfo_op(), "?z ?x)"].join(" ")).unwrap()]);
+        let applier = Pattern::from_str(&vec!["(", Self::wfo_op(), "?z ?y)"].join(" ")).unwrap();
+        Rewrite::new("wfo transitivity", "well founded order transitivity", searcher, applier).unwrap()
+    }
+
+    /// create well founded order rewrites for constructors of Datatype `datatype`.
+    fn wfo_datatype(datatype: &DataType) -> Vec<Rewrite<SymbolLang, ()>> {
+        // TODO: all buit values are bigger then base values
+        let contructor_rules = datatype.constructors.iter()
+            .filter(|c| c.subtrees.len() > 1)
+            .flat_map(|c| {
+                let params = c.subtrees.iter()
+                    .take(c.subtrees.len() - 1).enumerate()
+                    .map(|(i, t)|
+                        (format!("param_{}", i).to_string(), **t == datatype.as_tree())
+                    ).collect_vec();
+                let contr_pattern = Pattern::from_str(&*format!("({} {})", c.root, params.iter().map(|s| s.0.clone()).intersperse(" ".to_string()).collect::<String>())).unwrap();
+                let searcher = MultiEqSearcher::new(vec![
+                    contr_pattern,
+                    Pattern::from_str("?root").unwrap(),
+                ]);
+
+                let appliers = params.iter()
+                    .filter(|x| x.1)
+                    .map(|x| (x.0.clone(), DiffApplier::new(
+                        Pattern::from_str(&*format!("({} {} ?root)", Self::wfo_op(), x.0)).unwrap()
+                    )));
+
+                // rules
+                appliers.map(|a|
+                    Rewrite::new(format!("{}_{}", c.root, a.0), format!("{}_{}", c.root, a.0), searcher.clone(), a.1).unwrap())
+                    .collect_vec()
+            });
+        let mut res = contructor_rules.collect_vec();
+        res.push(Self::wfo_trans());
+        res
+    }
 
     // TODO: ind from example types
-    pub fn new(examples: Vec<Rc<Tree>>, dict: Vec<Rc<Tree>>) -> SyGuESOE {
-        let ind_ph = Rc::new(Tree::tleaf(String::from("ind_var"), Rc::new(Some(Tree::leaf(String::from("int"))))));
+    pub fn new(datatypes: Vec<DataType>, examples: Vec<Rc<Tree>>, dict: Vec<Rc<Tree>>) -> SyGuESOE {
+        let datatype_to_wfo = datatypes.into_iter()
+            .map(|d| (d.clone(), Self::wfo_datatype(&d))).collect();
+
+        let ind_ph = Rc::new(Tree::tleaf(String::from("ind_var"), Rc::new(Some(Tree::leaf(String::from("nat"))))));
         let mut egraph = EGraph::default();
         let anchor = Self::create_sygue_anchor();
         let mut example_ids = HashMap::new();
@@ -93,6 +119,7 @@ impl SyGuESOE {
 
         let mut res = SyGuESOE {
             examples,
+            datatypes: datatype_to_wfo,
             dict,
             ind_ph,
             egraph,
@@ -100,10 +127,7 @@ impl SyGuESOE {
             searchers: HashMap::new(),
             example_ids,
         };
-        // let mut rws = res.create_sygue_rules();
-        // for rw in rws {
-        //     res.sygue_rules.push(rw);
-        // }
+
         res.searchers = res.create_sygue_serchers();
         res.egraph.rebuild();
         res
@@ -150,13 +174,12 @@ impl SyGuESOE {
             .map(|(k, v)| (self.egraph.find(*k), v.iter().map(|x| self.egraph.find(*x)).collect())).collect();
     }
 
+    /// How to efficiently find who merged? Extract one from each ph class then check for its
+    /// id the sets of ids the examples are in.
+    /// Meaning need to hold all ids for ph and reference it to relevant example ids
+    /// You have base case. Create all new ids, for each example lookup params, create edge find all ids from edge
+    /// Add anchor only to ind_ph term
     pub fn increase_depth(&mut self) {
-        // How to efficiently find who merged? Extract one from each ph class then check for its
-        // id the sets of ids the examples are in.
-        // Meaning need to hold all ids for ph and reference it to relevant example ids
-        // You have base case. Create all new ids, for each example lookup params, create edge find all ids from edge
-        // Add anchor only to ind_ph term
-
         // First we need to update our keys as they might not be relevant anymore
         self.fix_example_ids();
         // Now apply for all matches
@@ -165,7 +188,6 @@ impl SyGuESOE {
             SymbolLang::new(op.clone(), params.iter().map(|v| sub.get(v.clone()).unwrap()).copied().collect())
         }
 
-        // TODO: can probably remove graph
         fn translate_edge(edge: &SymbolLang, e_index: usize, translations: &HashMap<Id, Vec<Id>>) -> SymbolLang {
             let new_child = edge.children.iter().map(|id| {
                 translations[id][e_index]
@@ -219,21 +241,22 @@ impl SyGuESOE {
         res
     }
 
-    // Assume base case is correct and prove equality using induction.
-    // Induction hypothesis is given as a rewrite rule, using precompiled rewrite rules
-    // representing well founded order on the induction variable.
-    // Need to replace the induction variable with an expression representing a constructor and
-    // well founded order on the params of the constructor.
-    // pub fn prove(&self, datatype: Datatype, ex1: RecExpr<SymbolLang>, ex2: RecExpr<SymbolLang>) -> Option<Rewrite<SymbolLang, ()>> {
-    //     debug_assert!(ex1.as_ref().iter().find(|s| s.op.to_string() == self.ind_ph.root).is_some());
-    //     debug_assert!(ex2.as_ref().iter().find(|s| s.op.to_string() == self.ind_ph.root).is_some());
-    //     ex1.as_ref().iter().map(|n| n.)
-    // }
+    /// Assume base case is correct and prove equality using induction.
+    /// Induction hypothesis is given as a rewrite rule, using precompiled rewrite rules
+    /// representing well founded order on the induction variable.
+    /// Need to replace the induction variable with an expression representing a constructor and
+    /// well founded order on the params of the constructor.
+    pub fn prove(&self, datatype: DataType, ex1: RecExpr<SymbolLang>, ex2: RecExpr<SymbolLang>) -> Option<Rewrite<SymbolLang, ()>> {
+        // debug_assert!(ex1.as_ref().iter().find(|s| s.op.to_string() == self.ind_ph.root).is_some());
+        // debug_assert!(ex2.as_ref().iter().find(|s| s.op.to_string() == self.ind_ph.root).is_some());
+        // ex1.as_ref().iter().map(|n| n.)
+        None
+    }
 }
 
 #[cfg(test)]
 mod test {
-    use crate::thesy::SyGuESOE;
+    use crate::thesy::{SyGuESOE, DataType};
     use crate::tree::Tree;
     use std::rc::Rc;
     use std::str::FromStr;
@@ -242,10 +265,18 @@ mod test {
     use std::collections::HashSet;
     use egg::{SymbolLang, Pattern, Searcher, Rewrite};
 
+    fn create_nat_type() -> DataType {
+        DataType::new("nat".to_string(), vec![
+            Tree::from_str("(Z nat)").unwrap(),
+            Tree::from_str("(S nat nat)").unwrap()
+        ])
+    }
+
     fn create_nat_sygue() -> SyGuESOE {
         SyGuESOE::new(
+            vec![create_nat_type()],
             vec!["Z", "(S Z)", "(S (S Z))"].into_iter().map(|s| Rc::new(Tree::from_str(s).unwrap())).collect(),
-            vec!["(typed ts_ph0 int)", "(typed ts_ph1 int)", "(typed Z int)", "(typed S (-> int int))", "(typed pl (-> int int int))"].into_iter().map(|s| Rc::new(Tree::from_str(s).unwrap())).collect(),
+            vec!["(typed ts_ph0 nat)", "(typed ts_ph1 nat)", "(typed Z nat)", "(typed S (-> nat nat))", "(typed pl (-> nat nat nat))"].into_iter().map(|s| Rc::new(Tree::from_str(s).unwrap())).collect(),
         )
     }
 
@@ -328,8 +359,12 @@ mod test {
     #[test]
     fn does_not_create_unneeded_terms() {
         let mut syg = SyGuESOE::new(
+            vec![DataType::new("nat".to_string(), vec![
+                Tree::from_str("(Z nat)").unwrap(),
+                Tree::from_str("(S nat nat)").unwrap()
+            ])],
             vec!["Z"].into_iter().map(|s| Rc::new(Tree::from_str(s).unwrap())).collect(),
-            vec!["(typed ts_ph0 int)", "(typed S (-> int int))"].into_iter().map(|s| Rc::new(Tree::from_str(s).unwrap())).collect(),
+            vec!["(typed ts_ph0 nat)", "(typed S (-> nat nat))"].into_iter().map(|s| Rc::new(Tree::from_str(s).unwrap())).collect(),
         );
 
         let anchor_patt: Pattern<SymbolLang> = Pattern::from_str("(sygueanchor ?x)").unwrap();
@@ -341,8 +376,13 @@ mod test {
         assert_eq!(6usize, anchor_patt.search(&syg.egraph).iter().map(|x| x.substs.len()).sum());
 
         let mut syg = SyGuESOE::new(
+            // For this test dont use full definition
+            vec![DataType::new("nat".to_string(), vec![
+                Tree::from_str("(Z nat)").unwrap(),
+                // Tree::from_str("(S nat nat)").unwrap()
+            ])],
             vec!["Z"].into_iter().map(|s| Rc::new(Tree::from_str(s).unwrap())).collect(),
-            vec!["(typed ts_ph0 int)", "(typed ts_ph1 int)", "(typed x (-> int int int))"].into_iter().map(|s| Rc::new(Tree::from_str(s).unwrap())).collect(),
+            vec!["(typed ts_ph0 nat)", "(typed ts_ph1 nat)", "(typed x (-> nat nat nat))"].into_iter().map(|s| Rc::new(Tree::from_str(s).unwrap())).collect(),
         );
 
         let anchor_patt: Pattern<SymbolLang> = Pattern::from_str("(sygueanchor ?x)").unwrap();
