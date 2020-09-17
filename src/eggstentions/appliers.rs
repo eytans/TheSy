@@ -1,4 +1,4 @@
-use egg::{Applier, SymbolLang, EGraph, Subst, Id, SearchMatches};
+use egg::{Applier, SymbolLang, EGraph, Subst, Id, SearchMatches, Pattern};
 
 pub struct DiffApplier<T: Applier<SymbolLang, ()>> {
     applier: T
@@ -7,6 +7,12 @@ pub struct DiffApplier<T: Applier<SymbolLang, ()>> {
 impl<T: Applier<SymbolLang, ()>> DiffApplier<T> {
     pub fn new(applier: T) -> DiffApplier<T> {
         DiffApplier { applier }
+    }
+}
+
+impl DiffApplier<Pattern<SymbolLang>> {
+    pub fn pretty(&self, width: usize) -> String {
+        self.applier.pretty(width)
     }
 }
 

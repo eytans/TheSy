@@ -14,3 +14,4 @@ symbolic_expressions = "5.0.3"
 smallvec = "1.4.2"
 cute = "0.3.0"
 multimap = "0.8.2"
+log = { version = "0.4", features = ["max_level_trace", "release_max_level_warn"] }

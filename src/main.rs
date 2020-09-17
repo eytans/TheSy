@@ -14,7 +14,7 @@ use crate::eggstentions::reconstruct::reconstruct_all;
 use std::time::{SystemTime};
 use std::rc::Rc;
 use std::collections::HashSet;
-use crate::thesy::{SyGuESOE, DataType};
+use crate::thesy::{TheSy, DataType};
 
 mod tree;
 mod eggstentions;
@@ -23,7 +23,7 @@ mod thesy;
 
 
 fn main() {
-    let mut sygue = SyGuESOE::new(
+    let mut sygue = TheSy::new(
         vec![DataType::new("nat".to_string(), vec![
             Tree::from_str("(Z nat)").unwrap(),
             Tree::from_str("(S nat nat)").unwrap()

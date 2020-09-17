@@ -95,6 +95,10 @@ pub mod multisearcher {
             let common_vars = get_common_vars(&mut patterns);
             MultiEqSearcher { patterns, common_vars }
         }
+
+        pub fn pretty(&self, width: usize) -> String {
+            self.patterns.iter().map(|p| p.pretty(width)).intersperse(" ||| ".to_string()).collect()
+        }
     }
 
     impl Searcher<SymbolLang, ()> for MultiEqSearcher {
@@ -172,6 +176,10 @@ pub mod multisearcher {
             let common_vars = get_common_vars(&mut patterns);
             MultiDiffSearcher { patterns, common_vars }
         }
+
+        pub fn pretty(&self, width: usize) -> String {
+            self.patterns.iter().map(|p| p.pretty(width)).intersperse(" |||| ".to_string()).collect()
+        }
     }
 
     impl Searcher<SymbolLang, ()> for MultiDiffSearcher {
@@ -183,6 +191,8 @@ pub mod multisearcher {
             if self.patterns.len() == 1 {
                 return self.patterns[0].search(egraph);
             }
+
+            let graph_string = format!("{:#?}", egraph);
 
             let mut search_results = {
                 let mut res = Vec::new();
@@ -291,5 +301,20 @@ mod tests {
         egraph.rebuild();
         println!("{:#?}", searcher.search(&egraph));
         assert_eq!(searcher.search(&egraph).len(), 1);
+    }
+
+    #[test]
+    fn find_ind_hyp() {
+        let mut egraph: EGraph<SymbolLang, ()> = EGraph::default();
+        let full_pl = egraph.add_expr(&"(pl (S p0) Z)".parse().unwrap());
+        let after_pl = egraph.add_expr(&"(S (pl p0 Z))".parse().unwrap());
+        let sp0 = egraph.add_expr(&"(S p0)".parse().unwrap());
+        let ind_var = egraph.add_expr(&"ind_var".parse().unwrap());
+        egraph.union(ind_var, sp0);
+        let ltwf = egraph.add_expr(&"(ltwf p0 (S p0))".parse().unwrap());
+        egraph.union(full_pl, after_pl);
+        egraph.rebuild();
+        let searcher = MultiDiffSearcher::from_str("(ltwf ?x ind_var) |||| (pl ?x Z)").unwrap();
+        assert!(!searcher.search(&egraph).is_empty());
     }
 }

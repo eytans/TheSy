@@ -11,6 +11,8 @@ use std::iter::FromIterator;
 use crate::eggstentions::costs::MinRep;
 use crate::tools::tools::choose;
 use crate::eggstentions::appliers::DiffApplier;
+use log::{info, warn, trace, debug};
+use egg::test::run;
 
 #[derive(Clone, Hash, PartialEq, Eq)]
 pub struct DataType {
@@ -34,7 +36,7 @@ impl DataType {
     }
 }
 
-pub struct SyGuESOE {
+pub struct TheSy {
     // TODO: automatic examples
     examples: Vec<Rc<Tree>>,
     // TODO: datatype out of dict, multiple examples at once
@@ -53,7 +55,11 @@ pub struct SyGuESOE {
     example_ids: HashMap<Id, Vec<Id>>,
 }
 
-impl SyGuESOE {
+// TODO: use conditional search\applier where applicable
+/// Thesy
+impl TheSy {
+    const PH_START: &'static str = "ts_ph";
+
     fn wfo_op() -> &'static str { "ltwf" }
 
     fn wfo_trans() -> Rewrite<SymbolLang, ()>  {
@@ -73,7 +79,7 @@ impl SyGuESOE {
                 let params = c.subtrees.iter()
                     .take(c.subtrees.len() - 1).enumerate()
                     .map(|(i, t)|
-                        (format!("param_{}", i).to_string(), **t == datatype.as_tree())
+                        (format!("?param_{}", i).to_string(), **t == datatype.as_tree())
                     ).collect_vec();
                 let contr_pattern = Pattern::from_str(&*format!("({} {})", c.root, params.iter().map(|s| s.0.clone()).intersperse(" ".to_string()).collect::<String>())).unwrap();
                 let searcher = MultiEqSearcher::new(vec![
@@ -88,9 +94,9 @@ impl SyGuESOE {
                     )));
 
                 // rules
-                appliers.map(|a|
-                    Rewrite::new(format!("{}_{}", c.root, a.0), format!("{}_{}", c.root, a.0), searcher.clone(), a.1).unwrap())
-                    .collect_vec()
+                appliers.map(|a| {
+                    Rewrite::new(format!("{}_{}", c.root, a.0), format!("{}_{}", c.root, a.0), searcher.clone(), a.1).unwrap()
+                }).collect_vec()
             });
         let mut res = contructor_rules.collect_vec();
         res.push(Self::wfo_trans());
@@ -98,7 +104,7 @@ impl SyGuESOE {
     }
 
     // TODO: ind from example types
-    pub fn new(datatypes: Vec<DataType>, examples: Vec<Rc<Tree>>, dict: Vec<Rc<Tree>>) -> SyGuESOE {
+    pub fn new(datatypes: Vec<DataType>, examples: Vec<Rc<Tree>>, dict: Vec<Rc<Tree>>) -> TheSy {
         let datatype_to_wfo = datatypes.into_iter()
             .map(|d| (d.clone(), Self::wfo_datatype(&d))).collect();
 
@@ -117,7 +123,7 @@ impl SyGuESOE {
             example_ids.insert(id, Vec::from_iter(iter::repeat(id).take(examples.len())));
         }
 
-        let mut res = SyGuESOE {
+        let mut res = TheSy {
             examples,
             datatypes: datatype_to_wfo,
             dict,
@@ -154,7 +160,7 @@ impl SyGuESOE {
             let fun_type = &f.subtrees[1];
             if fun_type.root == "->" {
                 let params: Vec<Var> = (0..fun_type.subtrees.len() - 1).map(|i| Var::from_str(&*format!("?param_{}", i)).unwrap()).collect_vec();
-                let anchor = SyGuESOE::create_sygue_anchor();
+                let anchor = TheSy::create_sygue_anchor();
                 let patterns = fun_type.subtrees.iter().take(fun_type.subtrees.len() - 1).enumerate()
                     .flat_map(|(i, t)| {
                         let pat_string = format!("({} ?param_{})", anchor, i);
@@ -241,29 +247,111 @@ impl SyGuESOE {
         res
     }
 
+    fn ident_mapper(i: &String, induction_ph: &String, sub_ind: &String) -> String {
+        if i == induction_ph {
+            sub_ind.clone()
+        }
+        else if i.starts_with(TheSy::PH_START) {
+            format!("?{}", i)
+        } else {
+            i.clone()
+        }
+    }
+
+    fn clean_vars(i: String) -> String {
+        if i.starts_with("?") {
+            i[1..].to_string()
+        } else { i }
+    }
+
+    fn create_hypothesis(induction_ph: &String, ex1: &RecExpr<SymbolLang>, ex2: &RecExpr<SymbolLang>) -> Vec<Rewrite<SymbolLang, ()>> {
+        assert!(!induction_ph.starts_with("?"));
+        // used somevar but wasnt recognised as var
+        let ind_replacer = "?somevar".to_string();
+        let clean_term1 = Self::pattern_from_exp(ex1.clone(), induction_ph, &ind_replacer);
+        let clean_term2 = Self::pattern_from_exp(ex2.clone(), induction_ph, &ind_replacer);
+        let pret = clean_term1.pretty(500);
+        let pret2 = clean_term2.pretty(500);
+        let precondition = Pattern::from_str(&*format!("({} {} {})", Self::wfo_op(), ind_replacer, induction_ph)).unwrap();
+        let mut res = vec![];
+        // Precondition on each direction of the hypothesis
+        if clean_term1.pretty(80).starts_with("(") {
+            res.push(Rewrite::new("IH1", "IH1", MultiDiffSearcher::new(vec![clean_term1.clone(), precondition.clone()]), clean_term2.clone()).unwrap());
+        }
+        if clean_term2.pretty(80).starts_with("(") {
+            res.push(Rewrite::new("IH2", "IH2", MultiDiffSearcher::new(vec![clean_term2, precondition]), clean_term1).unwrap());
+        }
+        res
+    }
+
+    fn pattern_from_exp(exp: RecExpr<SymbolLang>, induction_ph: &String, sub_ind: &String) -> Pattern<SymbolLang> {
+        let mapped = exp.as_ref().iter().cloned().map(|mut n| {
+            n.op = Self::ident_mapper(&n.op.to_string(), induction_ph, sub_ind).parse().unwrap();
+            n
+        }).collect_vec();
+        Pattern::from_str(&*RecExpr::from(mapped).pretty(500)).unwrap()
+    }
+
     /// Assume base case is correct and prove equality using induction.
     /// Induction hypothesis is given as a rewrite rule, using precompiled rewrite rules
     /// representing well founded order on the induction variable.
     /// Need to replace the induction variable with an expression representing a constructor and
     /// well founded order on the params of the constructor.
-    pub fn prove(&self, datatype: DataType, ex1: RecExpr<SymbolLang>, ex2: RecExpr<SymbolLang>) -> Option<Rewrite<SymbolLang, ()>> {
-        // debug_assert!(ex1.as_ref().iter().find(|s| s.op.to_string() == self.ind_ph.root).is_some());
-        // debug_assert!(ex2.as_ref().iter().find(|s| s.op.to_string() == self.ind_ph.root).is_some());
-        // ex1.as_ref().iter().map(|n| n.)
-        None
+    pub fn prove(&self, rules: &[Rewrite<SymbolLang, ()>], datatype: DataType, ex1: RecExpr<SymbolLang>, ex2: RecExpr<SymbolLang>) -> Option<Vec<Rewrite<SymbolLang, ()>>> {
+        debug_assert!(ex1.as_ref().iter().find(|s| s.op.to_string() == self.ind_ph.root).is_some());
+        debug_assert!(ex2.as_ref().iter().find(|s| s.op.to_string() == self.ind_ph.root).is_some());
+        // rewrites to encode proof
+        let mut rule_set = Self::create_hypothesis(&self.ind_ph.root, &ex1, &ex2);
+        let wfo_rws = self.datatypes.get(&datatype).unwrap();
+        rule_set.extend(rules.iter().cloned());
+        rule_set.extend(wfo_rws.iter().cloned());
+        // create graph containing both expressions
+        let mut orig_egraph: EGraph<SymbolLang, ()> = EGraph::default();
+        let ex1_id = orig_egraph.add_expr(&ex1);
+        let ex2_id = orig_egraph.add_expr(&ex2);
+        let ind_id = orig_egraph.lookup(SymbolLang::new(&self.ind_ph.root, vec![])).unwrap();
+        let mut res = true;
+        for c in datatype.constructors.iter().filter(|c| c.subtrees.len() > 1) {
+            let mut egraph = orig_egraph.clone();
+            let contr_exp = RecExpr::from_str(format!("({} {})", c.root, c.subtrees.iter().take(c.subtrees.len() - 1).enumerate()
+                .map(|(i, t)| "param_".to_owned() + &*i.to_string())
+                .intersperse(" ".parse().unwrap()).collect::<String>()).as_str()).unwrap();
+            let contr_id = egraph.add_expr(&contr_exp);
+            egraph.union(contr_id, ind_id);
+            let mut runner: Runner<SymbolLang, ()> = Runner::new(()).with_egraph(egraph).with_iter_limit(8).run(&rule_set[..]);
+            runner.egraph.rebuild();
+            runner.egraph.dot().to_dot("graph.dot");
+            let searcher = rule_set.first().unwrap();
+            let findings = searcher.search(&runner.egraph);
+            println!("{:#?}", findings);
+            res = res && !runner.egraph.equivs(&ex1, &ex2).is_empty()
+        }
+        if res {
+            let fixed_ex1 = Self::pattern_from_exp(ex1, &self.ind_ph.root, &("?".to_owned() + &self.ind_ph.root));
+            let fixed_ex2 = Self::pattern_from_exp(ex2, &self.ind_ph.root, &("?".to_owned() + &self.ind_ph.root));
+            let text1 = fixed_ex1.pretty(80) + " = " + &*fixed_ex2.pretty(80);
+            let text2 = fixed_ex2.pretty(80) + " = " + &*fixed_ex1.pretty(80);
+            println!("proved: {}", text1);
+            Some(vec![
+                Rewrite::new(text1.clone(), text1, fixed_ex1.clone(), fixed_ex2.clone()).unwrap(),
+                Rewrite::new(text2.clone(), text2, fixed_ex2, fixed_ex1).unwrap()
+            ])
+        } else {
+            None
+        }
     }
 }
 
 #[cfg(test)]
 mod test {
-    use crate::thesy::{SyGuESOE, DataType};
+    use crate::thesy::{TheSy, DataType};
     use crate::tree::Tree;
     use std::rc::Rc;
     use std::str::FromStr;
     use std::time::SystemTime;
     use itertools::Itertools;
     use std::collections::HashSet;
-    use egg::{SymbolLang, Pattern, Searcher, Rewrite};
+    use egg::{SymbolLang, Pattern, Searcher, Rewrite, RecExpr, EGraph, Runner};
 
     fn create_nat_type() -> DataType {
         DataType::new("nat".to_string(), vec![
@@ -272,8 +360,8 @@ mod test {
         ])
     }
 
-    fn create_nat_sygue() -> SyGuESOE {
-        SyGuESOE::new(
+    fn create_nat_sygue() -> TheSy {
+        TheSy::new(
             vec![create_nat_type()],
             vec!["Z", "(S Z)", "(S (S Z))"].into_iter().map(|s| Rc::new(Tree::from_str(s).unwrap())).collect(),
             vec!["(typed ts_ph0 nat)", "(typed ts_ph1 nat)", "(typed Z nat)", "(typed S (-> nat nat))", "(typed pl (-> nat nat nat))"].into_iter().map(|s| Rc::new(Tree::from_str(s).unwrap())).collect(),
@@ -358,7 +446,7 @@ mod test {
 
     #[test]
     fn does_not_create_unneeded_terms() {
-        let mut syg = SyGuESOE::new(
+        let mut syg = TheSy::new(
             vec![DataType::new("nat".to_string(), vec![
                 Tree::from_str("(Z nat)").unwrap(),
                 Tree::from_str("(S nat nat)").unwrap()
@@ -375,7 +463,7 @@ mod test {
         syg.increase_depth();
         assert_eq!(6usize, anchor_patt.search(&syg.egraph).iter().map(|x| x.substs.len()).sum());
 
-        let mut syg = SyGuESOE::new(
+        let mut syg = TheSy::new(
             // For this test dont use full definition
             vec![DataType::new("nat".to_string(), vec![
                 Tree::from_str("(Z nat)").unwrap(),
@@ -444,5 +532,35 @@ mod test {
             assert_ne!(c, "(pl ind_var ts_ph1) ?= (pl ind_var ts_ph0)");
         }
     }
+
+    #[test]
+    fn wfo_trans_ok() {
+        let mut egraph = EGraph::default();
+        egraph.add_expr("(ltwf x y)".parse().as_ref().unwrap());
+        egraph.add_expr("(ltwf y z)".parse().as_ref().unwrap());
+        egraph = Runner::default().with_egraph(egraph).run(&vec![TheSy::wfo_trans()][..]).egraph;
+        let pat: Pattern<SymbolLang> = "(ltwf x z)".parse().unwrap();
+        assert!(pat.search(&egraph).iter().all(|s| !s.substs.is_empty()));
+        assert!(!pat.search(&egraph).is_empty());
+    }
+
+    #[test]
+    fn wfo_nat_ok() {
+        let mut egraph = EGraph::default();
+        egraph.add_expr("(S y)".parse().as_ref().unwrap());
+        egraph = Runner::default().with_egraph(egraph).run(&TheSy::wfo_datatype(&create_nat_type())[..]).egraph;
+        let pat: Pattern<SymbolLang> = "(ltwf y (S y))".parse().unwrap();
+        assert!(pat.search(&egraph).iter().all(|s| !s.substs.is_empty()));
+        assert!(!pat.search(&egraph).is_empty());
+    }
+
+    #[test]
+    fn prove_pl_zero() {
+        let mut syg = create_nat_sygue();
+        let nat = create_nat_type();
+        let mut rewrites = create_pl_rewrites();
+        assert!(syg.prove(&rewrites[..], nat, format!("(pl {} Z)", syg.ind_ph.root).parse().unwrap(), syg.ind_ph.root.parse().unwrap()).is_some())
+    }
+
     // TODO: test on lists
 }
