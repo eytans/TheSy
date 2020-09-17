@@ -8,7 +8,7 @@ use std::str::FromStr;
 use std::time::{Duration, SystemTime};
 use std::collections::{HashMap, HashSet};
 use std::iter::FromIterator;
-use crate::eggstentions::costs::MinRep;
+use crate::eggstentions::costs::{MinRep, RepOrder};
 use crate::tools::tools::choose;
 use crate::eggstentions::appliers::DiffApplier;
 use log::{info, warn, trace, debug};
@@ -139,12 +139,12 @@ impl TheSy {
         res
     }
 
-    fn extract_classes(&self) -> HashMap<Id, RecExpr<SymbolLang>> {
+    fn extract_classes(&self) -> HashMap<Id, (RepOrder, RecExpr<SymbolLang>)> {
         let mut ext = Extractor::new(&self.egraph, MinRep);
         // TODO: update example ids as whole
         self.example_ids.keys().map(|key| {
             let updated_key = &self.egraph.find(*key);
-            (*updated_key, ext.find_best(*updated_key).1)
+            (*updated_key, ext.find_best(*updated_key))
         }).collect()
     }
 
@@ -227,7 +227,12 @@ impl TheSy {
         self.egraph.rebuild();
     }
 
-    pub fn get_conjectures(&mut self) -> HashSet<(RecExpr<SymbolLang>, RecExpr<SymbolLang>)> {
+    /// For all created terms, get possible equality conjectures.
+    /// Uses equivalence classes created by equiv_reduc, and finds classes that
+    /// are equal for examples but not for ind_var.
+    /// Each such class (e.g. fine class) is represented using a single minimal term.
+    /// return the conjectures ordered by representative size.
+    pub fn get_conjectures(&mut self) -> Vec<(RepOrder, RecExpr<SymbolLang>, RecExpr<SymbolLang>)> {
         self.fix_example_ids();
         let mut finer_equality_classes: HashMap<Vec<Id>, HashSet<Id>> = HashMap::new();
         for (id, vals) in &self.example_ids {
@@ -237,13 +242,16 @@ impl TheSy {
             finer_equality_classes.get_mut(vals).expect("Should have just added if missing").insert(self.egraph.find(*id));
         }
         let reps = self.extract_classes();
-        let mut res = HashSet::new();
+        let mut res = Vec::new();
         for set in finer_equality_classes.values() {
             if set.len() < 2 { continue; }
             for couple in choose(&set.iter().collect_vec()[..], 2) {
-                res.insert((reps[couple[0]].clone(), reps[couple[1]].clone()));
+                let min = if reps[couple[0]].0 <= reps[couple[1]].0 { reps[couple[0]].0.clone() }
+                            else {reps[couple[1]].0.clone()};
+                res.push((min, reps[couple[0]].1.clone(), reps[couple[1]].1.clone()));
             }
         }
+        res.sort_by_key(|x| x.0.clone());
         res
     }
 
@@ -268,8 +276,8 @@ impl TheSy {
         assert!(!induction_ph.starts_with("?"));
         // used somevar but wasnt recognised as var
         let ind_replacer = "?somevar".to_string();
-        let clean_term1 = Self::pattern_from_exp(ex1.clone(), induction_ph, &ind_replacer);
-        let clean_term2 = Self::pattern_from_exp(ex2.clone(), induction_ph, &ind_replacer);
+        let clean_term1 = Self::pattern_from_exp(ex1, induction_ph, &ind_replacer);
+        let clean_term2 = Self::pattern_from_exp(ex2, induction_ph, &ind_replacer);
         let pret = clean_term1.pretty(500);
         let pret2 = clean_term2.pretty(500);
         let precondition = Pattern::from_str(&*format!("({} {} {})", Self::wfo_op(), ind_replacer, induction_ph)).unwrap();
@@ -284,7 +292,7 @@ impl TheSy {
         res
     }
 
-    fn pattern_from_exp(exp: RecExpr<SymbolLang>, induction_ph: &String, sub_ind: &String) -> Pattern<SymbolLang> {
+    fn pattern_from_exp(exp: &RecExpr<SymbolLang>, induction_ph: &String, sub_ind: &String) -> Pattern<SymbolLang> {
         let mapped = exp.as_ref().iter().cloned().map(|mut n| {
             n.op = Self::ident_mapper(&n.op.to_string(), induction_ph, sub_ind).parse().unwrap();
             n
@@ -297,7 +305,7 @@ impl TheSy {
     /// representing well founded order on the induction variable.
     /// Need to replace the induction variable with an expression representing a constructor and
     /// well founded order on the params of the constructor.
-    pub fn prove(&self, rules: &[Rewrite<SymbolLang, ()>], datatype: DataType, ex1: RecExpr<SymbolLang>, ex2: RecExpr<SymbolLang>) -> Option<Vec<Rewrite<SymbolLang, ()>>> {
+    pub fn prove(&self, rules: &[Rewrite<SymbolLang, ()>], datatype: &DataType, ex1: &RecExpr<SymbolLang>, ex2: &RecExpr<SymbolLang>) -> Option<Vec<Rewrite<SymbolLang, ()>>> {
         debug_assert!(ex1.as_ref().iter().find(|s| s.op.to_string() == self.ind_ph.root).is_some());
         debug_assert!(ex2.as_ref().iter().find(|s| s.op.to_string() == self.ind_ph.root).is_some());
         // rewrites to encode proof
@@ -319,11 +327,6 @@ impl TheSy {
             let contr_id = egraph.add_expr(&contr_exp);
             egraph.union(contr_id, ind_id);
             let mut runner: Runner<SymbolLang, ()> = Runner::new(()).with_egraph(egraph).with_iter_limit(8).run(&rule_set[..]);
-            runner.egraph.rebuild();
-            runner.egraph.dot().to_dot("graph.dot");
-            let searcher = rule_set.first().unwrap();
-            let findings = searcher.search(&runner.egraph);
-            println!("{:#?}", findings);
             res = res && !runner.egraph.equivs(&ex1, &ex2).is_empty()
         }
         if res {
@@ -331,13 +334,53 @@ impl TheSy {
             let fixed_ex2 = Self::pattern_from_exp(ex2, &self.ind_ph.root, &("?".to_owned() + &self.ind_ph.root));
             let text1 = fixed_ex1.pretty(80) + " = " + &*fixed_ex2.pretty(80);
             let text2 = fixed_ex2.pretty(80) + " = " + &*fixed_ex1.pretty(80);
+            let mut new_rules = vec![];
             println!("proved: {}", text1);
-            Some(vec![
-                Rewrite::new(text1.clone(), text1, fixed_ex1.clone(), fixed_ex2.clone()).unwrap(),
-                Rewrite::new(text2.clone(), text2, fixed_ex2, fixed_ex1).unwrap()
-            ])
+            // TODO: dont do it so half assed
+            if text1.starts_with("(") {
+                new_rules.push(Rewrite::new(text1.clone(), text1, fixed_ex1.clone(), fixed_ex2.clone()).unwrap());
+            }
+            if text2.starts_with("(") {
+                new_rules.push(Rewrite::new(text2.clone(), text2, fixed_ex2, fixed_ex1).unwrap());
+            }
+            Some(new_rules)
         } else {
             None
+        }
+    }
+
+    fn check_equality(rules: &[Rewrite<SymbolLang, ()>], ex1: &RecExpr<SymbolLang>, ex2: &RecExpr<SymbolLang>) -> bool {
+        let mut egraph = EGraph::default();
+        egraph.add_expr(ex1);
+        egraph.add_expr(ex2);
+        egraph.rebuild();
+        let runner = Runner::default().with_iter_limit(8).with_egraph(egraph).run(rules);
+        !runner.egraph.equivs(ex1, ex2).is_empty()
+    }
+
+    pub fn run(&mut self, rules: &mut Vec<Rewrite<SymbolLang, ()>>, depth: usize) {
+        let mut proved = false;
+        for i in 0..depth {
+            if proved {
+                self.equiv_reduc(&rules[..]);
+            }
+            proved = false;
+            self.increase_depth();
+            self.equiv_reduc(&rules[..]);
+            for (key, ex1, ex2) in self.get_conjectures() {
+                if !Self::check_equality(&rules[..], &ex1, &ex2) {
+                    for d in self.datatypes.keys() {
+                        let new_rules = self.prove(&rules[..], d, &ex1, &ex2);
+                        if new_rules.is_some() {
+                            proved = true;
+                            for r in new_rules.unwrap() {
+                                println!("{}", r.long_name());
+                                rules.push(r);
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }
@@ -494,7 +537,7 @@ mod test {
         syg.increase_depth();
         syg.equiv_reduc(&rewrites);
         let classes = syg.extract_classes();
-        for (id, exp) in classes {
+        for (id, (ord, exp)) in classes {
             for n in exp.as_ref() {
                 if n.op.to_string() == "pl" {
                     let index = n.children[0].to_string();
@@ -513,7 +556,7 @@ mod test {
         syg.equiv_reduc(&rewrites);
         syg.increase_depth();
         syg.equiv_reduc(&rewrites);
-        let conjectures = syg.get_conjectures();
+        let conjectures = syg.get_conjectures().into_iter().map(|x| (x.1, x.2)).collect_vec();
         println!("{}", conjectures.iter().map(|x| x.0.to_string() + " ?= " + &*x.1.to_string()).intersperse("\n".parse().unwrap()).collect::<String>());
         for c in conjectures.iter().map(|x| x.0.to_string() + " ?= " + &*x.1.to_string()) {
             assert_ne!(c, "ind_var ?= ts_ph0");

@@ -26,6 +26,12 @@ impl PartialOrd for RepOrder {
     }
 }
 
+impl Ord for RepOrder {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.partial_cmp(other).unwrap_or(Ordering::Equal)
+    }
+}
+
 pub struct MinRep;
 
 impl CostFunction<SymbolLang> for MinRep {
