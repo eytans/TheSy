@@ -223,7 +223,11 @@ impl TheSy {
     }
 
     pub fn equiv_reduc(&mut self, rules: &[Rewrite<SymbolLang, ()>]) {
-        self.egraph = Runner::default().with_time_limit(Duration::from_secs(60 * 60)).with_node_limit(60000).with_egraph(std::mem::take(&mut self.egraph)).with_iter_limit(8).run(rules).egraph;
+        self.equiv_reduc_depth(rules, 8);
+    }
+
+    fn equiv_reduc_depth(&mut self, rules: &[Rewrite<SymbolLang, ()>], depth: usize) {
+        self.egraph = Runner::default().with_time_limit(Duration::from_secs(60 * 60)).with_node_limit(60000).with_egraph(std::mem::take(&mut self.egraph)).with_iter_limit(depth).run(rules).egraph;
         self.egraph.rebuild();
     }
 
@@ -359,11 +363,16 @@ impl TheSy {
     }
 
     pub fn run(&mut self, rules: &mut Vec<Rewrite<SymbolLang, ()>>, depth: usize) {
+        // TODO: track failed
+        // TODO: rewrite egraph after proof and use it to filter proofs
+        // TODO: add types only to sygue
+        // TODO: rerun final depth while still proving shit until timeout?
+        // TODO: case split
+        // TODO: run full tests
+        // TODO: check why pl comm didn't work in depth 3 without additional reduc?
         let mut proved = false;
         for i in 0..depth {
-            if proved {
-                self.equiv_reduc(&rules[..]);
-            }
+            if proved { self.equiv_reduc_depth(&rules[..], 2); }
             proved = false;
             self.increase_depth();
             self.equiv_reduc(&rules[..]);
