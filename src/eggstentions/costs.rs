@@ -11,6 +11,12 @@ pub struct RepOrder {
     size: usize,
 }
 
+impl RepOrder {
+    pub fn get_depth(&self) -> usize {
+        self.depth
+    }
+}
+
 impl PartialOrd for RepOrder {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         match self.size.partial_cmp(&other.size) {

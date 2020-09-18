@@ -62,7 +62,7 @@ impl TheSy {
 
     fn wfo_op() -> &'static str { "ltwf" }
 
-    fn wfo_trans() -> Rewrite<SymbolLang, ()>  {
+    fn wfo_trans() -> Rewrite<SymbolLang, ()> {
         let searcher = MultiDiffSearcher::new(vec![
             Pattern::from_str(&vec!["(", Self::wfo_op(), "?x ?y)"].join(" ")).unwrap(),
             Pattern::from_str(&vec!["(", Self::wfo_op(), "?z ?x)"].join(" ")).unwrap()]);
@@ -237,6 +237,7 @@ impl TheSy {
     /// Each such class (e.g. fine class) is represented using a single minimal term.
     /// return the conjectures ordered by representative size.
     pub fn get_conjectures(&mut self) -> Vec<(RepOrder, RecExpr<SymbolLang>, RecExpr<SymbolLang>)> {
+        // TODO: make this an iterator to save alot of time during recreating conjectures
         self.fix_example_ids();
         let mut finer_equality_classes: HashMap<Vec<Id>, HashSet<Id>> = HashMap::new();
         for (id, vals) in &self.example_ids {
@@ -250,20 +251,18 @@ impl TheSy {
         for set in finer_equality_classes.values() {
             if set.len() < 2 { continue; }
             for couple in choose(&set.iter().collect_vec()[..], 2) {
-                let min = if reps[couple[0]].0 <= reps[couple[1]].0 { reps[couple[0]].0.clone() }
-                            else {reps[couple[1]].0.clone()};
+                let min = if reps[couple[0]].0 <= reps[couple[1]].0 { reps[couple[0]].0.clone() } else { reps[couple[1]].0.clone() };
                 res.push((min, reps[couple[0]].1.clone(), reps[couple[1]].1.clone()));
             }
         }
-        res.sort_by_key(|x| x.0.clone());
-        res
+        res.sort_unstable_by_key(|x| x.0.clone());
+        res.into_iter().rev().collect_vec()
     }
 
     fn ident_mapper(i: &String, induction_ph: &String, sub_ind: &String) -> String {
         if i == induction_ph {
             sub_ind.clone()
-        }
-        else if i.starts_with(TheSy::PH_START) {
+        } else if i.starts_with(TheSy::PH_START) {
             format!("?{}", i)
         } else {
             i.clone()
@@ -362,30 +361,28 @@ impl TheSy {
         !runner.egraph.equivs(ex1, ex2).is_empty()
     }
 
-    pub fn run(&mut self, rules: &mut Vec<Rewrite<SymbolLang, ()>>, depth: usize) {
-        // TODO: track failed
-        // TODO: rewrite egraph after proof and use it to filter proofs
+    pub fn run(&mut self, rules: &mut Vec<Rewrite<SymbolLang, ()>>, max_depth: usize) {
         // TODO: add types only to sygue
         // TODO: rerun final depth while still proving shit until timeout?
         // TODO: case split
         // TODO: run full tests
         // TODO: check why pl comm didn't work in depth 3 without additional reduc?
-        let mut proved = false;
-        for i in 0..depth {
-            if proved { self.equiv_reduc_depth(&rules[..], 2); }
-            proved = false;
+        let datatypes = self.datatypes.keys().cloned().collect_vec();
+        for depth in 0..max_depth {
             self.increase_depth();
             self.equiv_reduc(&rules[..]);
-            for (key, ex1, ex2) in self.get_conjectures() {
-                if !Self::check_equality(&rules[..], &ex1, &ex2) {
-                    for d in self.datatypes.keys() {
-                        let new_rules = self.prove(&rules[..], d, &ex1, &ex2);
-                        if new_rules.is_some() {
-                            proved = true;
-                            for r in new_rules.unwrap() {
-                                println!("{}", r.long_name());
-                                rules.push(r);
-                            }
+            let mut conjectures = self.get_conjectures();
+            while !conjectures.is_empty() {
+                let (key, ex1, ex2) = conjectures.pop().unwrap();
+                if Self::check_equality(&rules[..], &ex1, &ex2) { continue }
+                for d in datatypes.iter() {
+                    let new_rules = self.prove(&rules[..], d, &ex1, &ex2);
+                    if new_rules.is_some() {
+                        for r in new_rules.unwrap() {
+                            println!("{}", r.long_name());
+                            rules.push(r);
+                            self.equiv_reduc_depth(rules, 3);
+                            conjectures = self.get_conjectures();
                         }
                     }
                 }
