@@ -24,10 +24,10 @@ mod thesy;
 
 fn main() {
     let mut sygue = TheSy::new(
-        vec![DataType::new("nat".to_string(), vec![
+        DataType::new("nat".to_string(), vec![
             "(Z nat)".parse().unwrap(),
             "(S nat nat)".parse().unwrap()
-        ])],
+        ]),
         vec!["Z".parse().unwrap(), "(S Z)".parse().unwrap(), "(S (S Z))".parse().unwrap()],
         vec![("Z", "nat"), ("S", "(-> nat nat)"), ("pl", "(-> nat nat nat)")].into_iter()
             .map(|(name, typ)| (name.to_string(), RecExpr::from_str(typ).unwrap())).collect(),
@@ -39,10 +39,10 @@ fn main() {
     println!("done in {}", SystemTime::now().duration_since(start).unwrap().as_millis());
 
     let mut sygue = TheSy::new(
-        vec![DataType::new("list".to_string(), vec![
+        DataType::new("list".to_string(), vec![
             "(Nil list)".parse().unwrap(),
             "(Cons nat list list)".parse().unwrap()
-        ])],
+        ]),
         vec!["Nil".parse().unwrap(), "(Cons x Nil)".parse().unwrap(), "(Cons y (Cons x Nil))".parse().unwrap()],
         vec![("Nil", "list"), ("Cons", "(-> nat list list)"), ("snoc", "(-> list nat list)"), ("rev", "(-> list list)"), ("app", "(-> list list list)")].into_iter()
             .map(|(name, typ)| (name.to_string(), RecExpr::from_str(typ).unwrap())).collect(),

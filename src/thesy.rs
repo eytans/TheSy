@@ -59,33 +59,40 @@ pub struct TheSy {
 
 /// *** Thesy ***
 impl TheSy {
-    pub fn new(datatypes: Vec<DataType>, examples: Vec<RecExpr<SymbolLang>>, dict: Vec<(String, RecExpr<SymbolLang>)>) -> TheSy {
-        Self::new_with_ph(datatypes, examples, dict, 3)
+    pub fn new(datatype: DataType, examples: Vec<RecExpr<SymbolLang>>, dict: Vec<(String, RecExpr<SymbolLang>)>) -> TheSy {
+        Self::new_with_ph(vec![datatype.clone()], HashMap::from_iter(iter::once((datatype, examples))), dict, 3)
     }
 
-    pub fn new_with_ph(datatypes: Vec<DataType>, examples: Vec<RecExpr<SymbolLang>>, dict: Vec<(String, RecExpr<SymbolLang>)>, ph_count: usize) -> TheSy {
+    pub fn new_with_ph(datatypes: Vec<DataType>, examples: HashMap<DataType, Vec<RecExpr<SymbolLang>>>, dict: Vec<(String, RecExpr<SymbolLang>)>, ph_count: usize) -> TheSy {
         // TODO: automatic examples
         // TODO: datatype out of dict, multiple examples at once
         let datatype_to_wfo: HashMap<DataType, Vec<Rewrite<SymbolLang, ()>>, RandomState> = datatypes.iter()
             .map(|d| (d.clone(), Self::wfo_datatype(d))).collect();
         let mut egraph = EGraph::default();
         let mut example_ids = HashMap::new();
-        // TODO support more examples then first dt
+        let total_example_len: usize = examples.iter().map(|x| x.1.len()).sum();
         for (name, typ) in dict.iter()
             .filter(|(name, typ)| typ.as_ref().len() == 1)
             .chain(TheSy::collect_phs(&dict, ph_count).iter()) {
             let id = egraph.add_expr(&name.parse().unwrap());
             let type_id = egraph.add_expr(typ);
             egraph.add(SymbolLang::new("typed", vec![id, type_id]));
-            // TODO: multiple example support
-            example_ids.insert(id, Vec::from_iter(iter::repeat(id).take(examples.len())));
+            example_ids.insert(id, Vec::from_iter(iter::repeat(id).take(total_example_len)));
         }
-        let ind_id = egraph.add_expr(&Self::get_ind_var(datatypes.first().unwrap()).parse().unwrap());
-        let ind_type_id = egraph.add_expr(&datatypes.first().unwrap().as_exp());
-        egraph.add(SymbolLang::new("typed", vec![ind_id, ind_type_id]));
-        let initial_example_ids = examples.iter()
-            .map(|e| egraph.add_expr(e)).collect_vec();
-        example_ids.insert(ind_id, initial_example_ids);
+        let mut skipped = 0;
+        for d in datatypes.iter() {
+            let ind_id = egraph.add_expr(&Self::get_ind_var(d).parse().unwrap());
+            let ind_type_id = egraph.add_expr(&d.as_exp());
+            egraph.add(SymbolLang::new("typed", vec![ind_id, ind_type_id]));
+            let initial_example_ids = examples[d].iter()
+                .map(|e| egraph.add_expr(e)).collect_vec();
+            let mut id_repeat = iter::repeat(ind_id);
+            let chained = id_repeat.clone().take(skipped)
+                .chain(initial_example_ids.into_iter())
+                .chain(id_repeat.take(total_example_len - skipped - examples[d].len())).collect_vec();
+            example_ids.insert(ind_id, chained);
+            skipped += examples[d].len();
+        }
 
         let mut res = TheSy {
             datatypes: datatype_to_wfo,
@@ -235,8 +242,10 @@ impl TheSy {
     /// Need to replace the induction variable with an expression representing a constructor and
     /// well founded order on the params of the constructor.
     pub fn prove(&self, rules: &[Rewrite<SymbolLang, ()>], datatype: &DataType, ex1: &RecExpr<SymbolLang>, ex2: &RecExpr<SymbolLang>) -> Option<Vec<Rewrite<SymbolLang, ()>>> {
-        debug_assert!(ex1.as_ref().iter().find(|s| s.op.to_string() == Self::get_ind_var(datatype)).is_some());
-        debug_assert!(ex2.as_ref().iter().find(|s| s.op.to_string() == Self::get_ind_var(datatype)).is_some());
+        if ex1.as_ref().iter().find(|s| s.op.to_string() == Self::get_ind_var(datatype)).is_none() ||
+            ex2.as_ref().iter().find(|s| s.op.to_string() == Self::get_ind_var(datatype)).is_none() {
+            return None;
+        }
         // rewrites to encode proof
         let mut rule_set = Self::create_hypothesis(&Self::get_ind_var(datatype), &ex1, &ex2);
         let wfo_rws = self.datatypes.get(&datatype).unwrap();
@@ -467,7 +476,7 @@ mod test {
 
     fn create_nat_sygue() -> TheSy {
         TheSy::new(
-            vec![create_nat_type()],
+            create_nat_type(),
             vec!["Z", "(S Z)", "(S (S Z))"].into_iter().map(|s| s.parse().unwrap()).collect(),
             vec![("Z".to_string(), "nat".parse().unwrap()), ("S".to_string(), "(-> nat nat)".parse().unwrap()), ("pl".to_string(), "(-> nat nat nat)".parse().unwrap())],
         )
@@ -475,7 +484,7 @@ mod test {
 
     fn create_list_sygue() -> TheSy {
         TheSy::new(
-            vec![create_list_type()],
+            create_list_type(),
             vec!["Nil".parse().unwrap(), "(Cons x Nil)".parse().unwrap(), "(Cons y (Cons x Nil))".parse().unwrap()],
             vec![("Nil", "list"), ("Cons", "(-> nat list list)"), ("snoc", "(-> list nat list)"), ("rev", "(-> list list)"), ("app", "(-> list list list)")].into_iter()
                 .map(|(name, typ)| (name.to_string(), RecExpr::from_str(typ).unwrap())).collect(),
