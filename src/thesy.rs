@@ -1,5 +1,4 @@
 use std::rc::Rc;
-use crate::tree::Tree;
 use egg::*;
 use std::iter;
 use itertools::Itertools;
@@ -13,121 +12,81 @@ use crate::tools::tools::choose;
 use crate::eggstentions::appliers::DiffApplier;
 use log::{info, warn, trace, debug};
 use egg::test::run;
+use crate::eggstentions::expression_ops::{RecExpSlice, IntoTree, Tree};
+use std::collections::hash_map::RandomState;
 
 #[derive(Clone, Hash, PartialEq, Eq)]
 pub struct DataType {
     name: String,
-    type_params: Vec<Tree>,
+    type_params: Vec<RecExpr<SymbolLang>>,
     /// Constructor name applied on types
-    constructors: Vec<Tree>,
+    constructors: Vec<RecExpr<SymbolLang>>,
 }
 
 impl DataType {
-    pub(crate) fn new(name: String, constructors: Vec<Tree>) -> DataType {
+    pub(crate) fn new(name: String, constructors: Vec<RecExpr<SymbolLang>>) -> DataType {
         DataType { name, type_params: vec![], constructors }
     }
 
-    fn generic(name: String, type_params: Vec<Tree>, constructors: Vec<Tree>) -> DataType {
+    fn generic(name: String, type_params: Vec<RecExpr<SymbolLang>>, constructors: Vec<RecExpr<SymbolLang>>) -> DataType {
         DataType { name, type_params, constructors }
     }
 
-    fn as_tree(&self) -> Tree {
-        Tree::branch(self.name.clone(), self.type_params.iter().map(|t| Rc::new(t.clone())).collect_vec())
+    fn as_exp(&self) -> RecExpr<SymbolLang> {
+        let mut res = vec![];
+        let children = self.type_params.iter().map(|e| {
+            res.extend(e.as_ref().iter().cloned());
+            Id::from(res.len() - 1)
+        }).collect_vec();
+        res.push(SymbolLang::new(self.name.clone(), children));
+        RecExpr::from(res)
     }
 }
 
 pub struct TheSy {
-    // TODO: automatic examples
-    examples: Vec<Rc<Tree>>,
-    // TODO: datatype out of dict, multiple examples at once
     /// known datatypes to wfo rewrites for induction
     datatypes: HashMap<DataType, Vec<Rewrite<SymbolLang, ()>>>,
     /// known function declerations and their types
-    dict: Vec<Rc<Tree>>,
-    /// name used to mark where the induction will be
-    ind_ph: Rc<Tree>,
+    dict: Vec<(String, RecExpr<SymbolLang>)>,
     /// egraph which is expanded as part of the exploration
     pub egraph: EGraph<SymbolLang, ()>,
     /// searchers used to create the next depth of terms
-    searchers: HashMap<String, (MultiDiffSearcher, Vec<Var>)>,
+    searchers: HashMap<String, (MultiDiffSearcher, Vec<(Var, RecExpr<SymbolLang>)>)>,
     /// map maintaining the connection between eclasses created by sygue
     /// and their associated eclasses with `ind_ph` replaced by symbolic examples.
     example_ids: HashMap<Id, Vec<Id>>,
 }
 
-// TODO: use conditional search\applier where applicable
-/// Thesy
+/// *** Thesy ***
 impl TheSy {
-    const PH_START: &'static str = "ts_ph";
-
-    fn wfo_op() -> &'static str { "ltwf" }
-
-    fn wfo_trans() -> Rewrite<SymbolLang, ()> {
-        let searcher = MultiDiffSearcher::new(vec![
-            Pattern::from_str(&vec!["(", Self::wfo_op(), "?x ?y)"].join(" ")).unwrap(),
-            Pattern::from_str(&vec!["(", Self::wfo_op(), "?z ?x)"].join(" ")).unwrap()]);
-        let applier = Pattern::from_str(&vec!["(", Self::wfo_op(), "?z ?y)"].join(" ")).unwrap();
-        Rewrite::new("wfo transitivity", "well founded order transitivity", searcher, applier).unwrap()
-    }
-
-    /// create well founded order rewrites for constructors of Datatype `datatype`.
-    fn wfo_datatype(datatype: &DataType) -> Vec<Rewrite<SymbolLang, ()>> {
-        // TODO: all buit values are bigger then base values
-        let contructor_rules = datatype.constructors.iter()
-            .filter(|c| c.subtrees.len() > 1)
-            .flat_map(|c| {
-                let params = c.subtrees.iter()
-                    .take(c.subtrees.len() - 1).enumerate()
-                    .map(|(i, t)|
-                        (format!("?param_{}", i).to_string(), **t == datatype.as_tree())
-                    ).collect_vec();
-                let contr_pattern = Pattern::from_str(&*format!("({} {})", c.root, params.iter().map(|s| s.0.clone()).intersperse(" ".to_string()).collect::<String>())).unwrap();
-                let searcher = MultiEqSearcher::new(vec![
-                    contr_pattern,
-                    Pattern::from_str("?root").unwrap(),
-                ]);
-
-                let appliers = params.iter()
-                    .filter(|x| x.1)
-                    .map(|x| (x.0.clone(), DiffApplier::new(
-                        Pattern::from_str(&*format!("({} {} ?root)", Self::wfo_op(), x.0)).unwrap()
-                    )));
-
-                // rules
-                appliers.map(|a| {
-                    Rewrite::new(format!("{}_{}", c.root, a.0), format!("{}_{}", c.root, a.0), searcher.clone(), a.1).unwrap()
-                }).collect_vec()
-            });
-        let mut res = contructor_rules.collect_vec();
-        res.push(Self::wfo_trans());
-        res
-    }
-
-    // TODO: ind from example types
-    pub fn new(datatypes: Vec<DataType>, examples: Vec<Rc<Tree>>, dict: Vec<Rc<Tree>>) -> TheSy {
-        let datatype_to_wfo = datatypes.into_iter()
-            .map(|d| (d.clone(), Self::wfo_datatype(&d))).collect();
-
-        let ind_ph = Rc::new(Tree::tleaf(String::from("ind_var"), Rc::new(Some(Tree::leaf(String::from("nat"))))));
+    pub fn new(datatypes: Vec<DataType>, examples: Vec<RecExpr<SymbolLang>>, dict: Vec<(String, RecExpr<SymbolLang>)>) -> TheSy {
+        // TODO: automatic examples
+        // TODO: datatype out of dict, multiple examples at once
+        let datatype_to_wfo: HashMap<DataType, Vec<Rewrite<SymbolLang, ()>>, RandomState> = datatypes.iter()
+            .map(|d| (d.clone(), Self::wfo_datatype(d))).collect();
+        let phs = TheSy::collect_phs(&dict, &datatype_to_wfo);
         let mut egraph = EGraph::default();
         let anchor = Self::create_sygue_anchor();
         let mut example_ids = HashMap::new();
-        let ind_id = ind_ph.add_to_graph(&mut egraph);
+        // TODO support more examples then first dt
+        let ind_id = egraph.add_expr(&Self::get_ind_var(datatypes.first().unwrap()).parse().unwrap());
         egraph.add(SymbolLang::new(anchor.clone(), vec![ind_id]));
         let initial_example_ids = examples.iter()
-            .map(|e| e.add_to_graph(&mut egraph)).collect_vec();
+            .map(|e| egraph.add_expr(e)).collect_vec();
         example_ids.insert(ind_id, initial_example_ids);
-        for v in dict.iter().filter(|v| v.subtrees[1].is_leaf()) {
-            let id = v.subtrees[0].add_to_graph(&mut egraph);
+        for name in dict.iter()
+            .filter(|(name, typ)| typ.as_ref().len() == 1)
+            .map(|x| x.0.clone())
+            .chain(phs.into_iter()) {
+            let id = egraph.add_expr(&name.parse().unwrap());
             egraph.add(SymbolLang::new(anchor.clone(), vec![id]));
+            // TODO: multiple example support
             example_ids.insert(id, Vec::from_iter(iter::repeat(id).take(examples.len())));
         }
 
         let mut res = TheSy {
-            examples,
             datatypes: datatype_to_wfo,
             dict,
-            ind_ph,
             egraph,
             // sygue_rules: vec![],
             searchers: HashMap::new(),
@@ -152,21 +111,23 @@ impl TheSy {
         format!("sygueanchor")
     }
 
-    fn create_sygue_serchers(&self) -> HashMap<String, (MultiDiffSearcher, Vec<Var>)> {
+    fn create_sygue_serchers(&self) -> HashMap<String, (MultiDiffSearcher, Vec<(Var, RecExpr<SymbolLang>)>)> {
+        // TODO: eggstentions should contain wrappers to recexpressions, i.e. subtrees wihtout cloning and such.
         let mut res = HashMap::new();
-        self.dict.iter().for_each(|f| {
-            assert_eq!(f.root, "typed");
-            let fun_name = &f.subtrees[0].root;
-            let fun_type = &f.subtrees[1];
-            if fun_type.root == "->" {
-                let params: Vec<Var> = (0..fun_type.subtrees.len() - 1).map(|i| Var::from_str(&*format!("?param_{}", i)).unwrap()).collect_vec();
+        self.dict.iter().for_each(|(fun_name, fun_type)| {
+            let type_tree = fun_type.into_tree();
+            if type_tree.root().op.to_string() == "->" {
+                let params: Vec<(Var, RecExpr<SymbolLang>)> = type_tree.children().iter().enumerate()
+                    .dropping_back(1).map(|(i, t)| {
+                    (Var::from_str(&*format!("?param_{}", i)).unwrap(), t.into())
+                }).collect_vec();
                 let anchor = TheSy::create_sygue_anchor();
-                let patterns = fun_type.subtrees.iter().take(fun_type.subtrees.len() - 1).enumerate()
-                    .flat_map(|(i, t)| {
-                        let pat_string = format!("({} ?param_{})", anchor, i);
+                let patterns = params.iter()
+                    .flat_map(|(v, typ)| {
+                        let pat_string = format!("({} {})", anchor, v.to_string());
                         vec![
                             Pattern::from_str(&*pat_string).unwrap(),
-                            // Pattern::from_str(&*format!("(typed ?param_{} {})", i, t.to_string())).unwrap(),
+                            Pattern::from_str(&*format!("(typed {} {})", v.to_string(), typ.pretty(500))).unwrap(),
                         ]
                     }).collect::<Vec<Pattern<SymbolLang>>>();
                 res.insert(fun_name.clone(), (MultiDiffSearcher::new(patterns), params));
@@ -190,8 +151,8 @@ impl TheSy {
         self.fix_example_ids();
         // Now apply for all matches
         let anchor = Self::create_sygue_anchor();
-        fn create_edge(op: &String, params: &Vec<Var>, sub: &Subst) -> SymbolLang {
-            SymbolLang::new(op.clone(), params.iter().map(|v| sub.get(v.clone()).unwrap()).copied().collect())
+        fn create_edge(op: &String, params: &Vec<(Var, RecExpr<SymbolLang>)>, sub: &Subst) -> SymbolLang {
+            SymbolLang::new(op.clone(), params.iter().map(|(v, typ)| sub.get(v.clone()).unwrap()).copied().collect())
         }
 
         fn translate_edge(edge: &SymbolLang, e_index: usize, translations: &HashMap<Id, Vec<Id>>) -> SymbolLang {
@@ -200,17 +161,27 @@ impl TheSy {
             }).collect_vec();
             SymbolLang::new(edge.op.clone(), new_child)
         }
-        let length = self.examples.len();
+        let length = self.example_ids.iter().next().unwrap().1.len();
 
         let op_matches = self.searchers.iter()
             .map(|(op, (searcher, params))| {
                 (op, params, searcher.search(&self.egraph).iter_mut().flat_map(|mut sm| std::mem::take(&mut sm.substs)).collect_vec())
             }).collect_vec();
         for (op, params, subs) in op_matches {
+            let typ = {
+                let full_type = &self.dict.iter()
+                    .find(|(n, typ)| n == op).unwrap().1.into_tree();
+                let res: RecExpr<SymbolLang> = full_type.children().last().unwrap().into();
+                println!("{}", res.pretty(500));
+                res
+            };
             for sub in subs {
                 // Foreach match add a term for ind_ph and foreach example and update example_ids map
                 let new_edge = create_edge(op, params, &sub);
                 let key = self.egraph.add(new_edge.clone());
+                // TODO: do this once per type, not on each sygue application
+                let type_key = self.egraph.add_expr(&typ);
+                self.egraph.add(SymbolLang::new("typed", vec![key, type_key]));
                 self.egraph.add(SymbolLang::new(anchor.clone(), vec![key]));
                 let mut new_ids = vec![];
                 for i in 0..length {
@@ -309,10 +280,10 @@ impl TheSy {
     /// Need to replace the induction variable with an expression representing a constructor and
     /// well founded order on the params of the constructor.
     pub fn prove(&self, rules: &[Rewrite<SymbolLang, ()>], datatype: &DataType, ex1: &RecExpr<SymbolLang>, ex2: &RecExpr<SymbolLang>) -> Option<Vec<Rewrite<SymbolLang, ()>>> {
-        debug_assert!(ex1.as_ref().iter().find(|s| s.op.to_string() == self.ind_ph.root).is_some());
-        debug_assert!(ex2.as_ref().iter().find(|s| s.op.to_string() == self.ind_ph.root).is_some());
+        debug_assert!(ex1.as_ref().iter().find(|s| s.op.to_string() == Self::get_ind_var(datatype)).is_some());
+        debug_assert!(ex2.as_ref().iter().find(|s| s.op.to_string() == Self::get_ind_var(datatype)).is_some());
         // rewrites to encode proof
-        let mut rule_set = Self::create_hypothesis(&self.ind_ph.root, &ex1, &ex2);
+        let mut rule_set = Self::create_hypothesis(&Self::get_ind_var(datatype), &ex1, &ex2);
         let wfo_rws = self.datatypes.get(&datatype).unwrap();
         rule_set.extend(rules.iter().cloned());
         rule_set.extend(wfo_rws.iter().cloned());
@@ -320,11 +291,11 @@ impl TheSy {
         let mut orig_egraph: EGraph<SymbolLang, ()> = EGraph::default();
         let ex1_id = orig_egraph.add_expr(&ex1);
         let ex2_id = orig_egraph.add_expr(&ex2);
-        let ind_id = orig_egraph.lookup(SymbolLang::new(&self.ind_ph.root, vec![])).unwrap();
+        let ind_id = orig_egraph.lookup(SymbolLang::new(&Self::get_ind_var(datatype), vec![])).unwrap();
         let mut res = true;
-        for c in datatype.constructors.iter().filter(|c| c.subtrees.len() > 1) {
+        for c in datatype.constructors.iter().map(|c| c.into_tree()).filter(|c| c.children().len() > 1) {
             let mut egraph = orig_egraph.clone();
-            let contr_exp = RecExpr::from_str(format!("({} {})", c.root, c.subtrees.iter().take(c.subtrees.len() - 1).enumerate()
+            let contr_exp = RecExpr::from_str(format!("({} {})", c.root().display_op(), c.children().iter().take(c.children().len() - 1).enumerate()
                 .map(|(i, t)| "param_".to_owned() + &*i.to_string())
                 .intersperse(" ".parse().unwrap()).collect::<String>()).as_str()).unwrap();
             let contr_id = egraph.add_expr(&contr_exp);
@@ -333,8 +304,8 @@ impl TheSy {
             res = res && !runner.egraph.equivs(&ex1, &ex2).is_empty()
         }
         if res {
-            let fixed_ex1 = Self::pattern_from_exp(ex1, &self.ind_ph.root, &("?".to_owned() + &self.ind_ph.root));
-            let fixed_ex2 = Self::pattern_from_exp(ex2, &self.ind_ph.root, &("?".to_owned() + &self.ind_ph.root));
+            let fixed_ex1 = Self::pattern_from_exp(ex1, &Self::get_ind_var(datatype), &("?".to_owned() + &Self::get_ind_var(datatype)));
+            let fixed_ex2 = Self::pattern_from_exp(ex2, &Self::get_ind_var(datatype), &("?".to_owned() + &Self::get_ind_var(datatype)));
             let text1 = fixed_ex1.pretty(80) + " = " + &*fixed_ex2.pretty(80);
             let text2 = fixed_ex2.pretty(80) + " = " + &*fixed_ex1.pretty(80);
             let mut new_rules = vec![];
@@ -363,10 +334,9 @@ impl TheSy {
 
     pub fn run(&mut self, rules: &mut Vec<Rewrite<SymbolLang, ()>>, max_depth: usize) {
         // TODO: add types only to sygue
-        // TODO: rerun final depth while still proving shit until timeout?
         // TODO: case split
         // TODO: run full tests
-        // TODO: check why pl comm didn't work in depth 3 without additional reduc?
+        // TODO: add timeout
         let datatypes = self.datatypes.keys().cloned().collect_vec();
         for depth in 0..max_depth {
             self.increase_depth();
@@ -374,7 +344,7 @@ impl TheSy {
             let mut conjectures = self.get_conjectures();
             while !conjectures.is_empty() {
                 let (key, ex1, ex2) = conjectures.pop().unwrap();
-                if Self::check_equality(&rules[..], &ex1, &ex2) { continue }
+                if Self::check_equality(&rules[..], &ex1, &ex2) { continue; }
                 for d in datatypes.iter() {
                     let new_rules = self.prove(&rules[..], d, &ex1, &ex2);
                     if new_rules.is_some() {
@@ -391,6 +361,85 @@ impl TheSy {
     }
 }
 
+/// *** Thesy statics ***
+impl TheSy {
+    const PH_START: &'static str = "ts_ph";
+
+    fn collect_phs(dict: &Vec<(String, RecExpr<SymbolLang>)>, datatype_to_wfo: &HashMap<DataType, Vec<Rewrite<SymbolLang, ()>>>) -> Vec<String> {
+        let mut res = HashSet::new();
+        for (d, wf) in datatype_to_wfo {
+            res.insert(d.as_exp());
+        }
+        for (name, typ) in dict {
+            if typ.into_tree().root().op.to_string() == "->" {
+                for e in typ.into_tree().children().iter().dropping_back(1) {
+                    res.insert(e.into());
+                }
+            }
+        }
+        let mut phs = vec![];
+        for d in res {
+            for i in 0..3 {
+                phs.push(Self::get_ph(&d, i));
+            }
+        }
+        phs
+    }
+
+    fn wfo_op() -> &'static str { "ltwf" }
+
+    fn wfo_trans() -> Rewrite<SymbolLang, ()> {
+        let searcher = MultiDiffSearcher::new(vec![
+            Pattern::from_str(&vec!["(", Self::wfo_op(), "?x ?y)"].join(" ")).unwrap(),
+            Pattern::from_str(&vec!["(", Self::wfo_op(), "?z ?x)"].join(" ")).unwrap()]);
+        let applier = Pattern::from_str(&vec!["(", Self::wfo_op(), "?z ?y)"].join(" ")).unwrap();
+        Rewrite::new("wfo transitivity", "well founded order transitivity", searcher, applier).unwrap()
+    }
+
+    /// create well founded order rewrites for constructors of Datatype `datatype`.
+    fn wfo_datatype(datatype: &DataType) -> Vec<Rewrite<SymbolLang, ()>> {
+        // TODO: all buit values are bigger then base values
+        let contructor_rules = datatype.constructors.iter().map(|c| c.into_tree())
+            .filter(|c| c.children().len() > 1)
+            .flat_map(|c| {
+                let params = c.children().iter()
+                    .take(c.children().len() - 1).enumerate()
+                    .map(|(i, t)|
+                        (format!("?param_{}", i).to_string(), *t == datatype.as_exp().into_tree())
+                    ).collect_vec();
+                let contr_pattern = Pattern::from_str(&*format!("({} {})", c.root().display_op(), params.iter().map(|s| s.0.clone()).intersperse(" ".to_string()).collect::<String>())).unwrap();
+                let searcher = MultiEqSearcher::new(vec![
+                    contr_pattern,
+                    Pattern::from_str("?root").unwrap(),
+                ]);
+
+                let appliers = params.iter()
+                    .filter(|x| x.1)
+                    .map(|x| (x.0.clone(), DiffApplier::new(
+                        Pattern::from_str(&*format!("({} {} ?root)", Self::wfo_op(), x.0)).unwrap()
+                    )));
+
+                // rules
+                appliers.map(|a| {
+                    Rewrite::new(format!("{}_{}", c.root().display_op(), a.0), format!("{}_{}", c.root().display_op(), a.0), searcher.clone(), a.1).unwrap()
+                }).collect_vec()
+            });
+        let mut res = contructor_rules.collect_vec();
+        res.push(Self::wfo_trans());
+        res
+    }
+
+    fn get_ph(d: &RecExpr<SymbolLang>, i: usize) -> String {
+        let res = format!("{}_{}", Self::PH_START, d.into_tree().to_spaceless_string());
+        println!("{}", res);
+        res
+    }
+
+    fn get_ind_var(d: &DataType) -> String {
+        Self::get_ph(&d.as_exp(), 0)
+    }
+}
+
 #[cfg(test)]
 mod test {
     use crate::thesy::{TheSy, DataType};
@@ -404,8 +453,8 @@ mod test {
 
     fn create_nat_type() -> DataType {
         DataType::new("nat".to_string(), vec![
-            Tree::from_str("(Z nat)").unwrap(),
-            Tree::from_str("(S nat nat)").unwrap()
+            "(Z nat)".parse().unwrap(),
+            "(S nat nat)".parse().unwrap()
         ])
     }
 
@@ -497,8 +546,8 @@ mod test {
     fn does_not_create_unneeded_terms() {
         let mut syg = TheSy::new(
             vec![DataType::new("nat".to_string(), vec![
-                Tree::from_str("(Z nat)").unwrap(),
-                Tree::from_str("(S nat nat)").unwrap()
+                "(Z nat)".parse().unwrap(),
+                "(S nat nat)".parse().unwrap()
             ])],
             vec!["Z"].into_iter().map(|s| Rc::new(Tree::from_str(s).unwrap())).collect(),
             vec!["(typed ts_ph0 nat)", "(typed S (-> nat nat))"].into_iter().map(|s| Rc::new(Tree::from_str(s).unwrap())).collect(),
@@ -515,7 +564,7 @@ mod test {
         let mut syg = TheSy::new(
             // For this test dont use full definition
             vec![DataType::new("nat".to_string(), vec![
-                Tree::from_str("(Z nat)").unwrap(),
+                "(Z nat)".parse().unwrap(),
                 // Tree::from_str("(S nat nat)").unwrap()
             ])],
             vec!["Z"].into_iter().map(|s| Rc::new(Tree::from_str(s).unwrap())).collect(),
@@ -608,7 +657,7 @@ mod test {
         let mut syg = create_nat_sygue();
         let nat = create_nat_type();
         let mut rewrites = create_pl_rewrites();
-        assert!(syg.prove(&rewrites[..], nat, format!("(pl {} Z)", syg.ind_ph.root).parse().unwrap(), syg.ind_ph.root.parse().unwrap()).is_some())
+        assert!(syg.prove(&rewrites[..], &nat, format!("(pl {} Z)", syg.ind_ph.root).parse().unwrap(), syg.ind_ph.root.parse().unwrap()).is_some())
     }
 
     // TODO: test on lists
