@@ -33,8 +33,31 @@ fn main() {
             .map(|(name, typ)| (name.to_string(), RecExpr::from_str(typ).unwrap())).collect(),
     );
 
-    sygue.egraph.dot().to_dot("graph.dot");
     let mut rewrites: Vec<Rewrite<SymbolLang, ()>> = vec![rewrite!("pl base"; "(pl Z ?x)" => "?x"), rewrite!("pl ind"; "(pl (S ?y) ?x)" => "(S (pl ?y ?x))")];
+    let start = SystemTime::now();
+    sygue.run(&mut rewrites,2);
+    println!("done in {}", SystemTime::now().duration_since(start).unwrap().as_millis());
+
+    let mut sygue = TheSy::new(
+        vec![DataType::new("list".to_string(), vec![
+            "(Nil list)".parse().unwrap(),
+            "(Cons nat list list)".parse().unwrap()
+        ])],
+        vec!["Nil".parse().unwrap(), "(Cons x Nil)".parse().unwrap(), "(Cons y (Cons x Nil))".parse().unwrap()],
+        vec![("Nil", "list"), ("Cons", "(-> nat list list)"), ("snoc", "(-> list nat list)"), ("rev", "(-> list list)"), ("app", "(-> list list list)")].into_iter()
+            .map(|(name, typ)| (name.to_string(), RecExpr::from_str(typ).unwrap())).collect(),
+    );
+
+    sygue.egraph.dot().to_dot("graph.dot");
+
+    let mut rewrites: Vec<Rewrite<SymbolLang, ()>> = vec![
+        rewrite!("app base"; "(app Nil ?xs)" => "?xs"),
+        rewrite!("app ind"; "(app (Cons ?y ?ys) ?xs)" => "(Cons ?y (app ?ys ?xs))"),
+        rewrite!("snoc base"; "(snoc Nil ?x)" => "(Cons ?x Nil)"),
+        rewrite!("snoc ind"; "(snoc (Cons ?y ?ys) ?x)" => "(Cons ?y (snoc ?ys ?x))"),
+        rewrite!("rev base"; "(rev Nil)" => "Nil"),
+        rewrite!("rev ind"; "(rev (Cons ?y ?ys))" => "(snoc (rev ?ys) ?y)"),
+    ];
     let start = SystemTime::now();
     sygue.run(&mut rewrites,2);
     println!("done in {}", SystemTime::now().duration_since(start).unwrap().as_millis());

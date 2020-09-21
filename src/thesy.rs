@@ -360,7 +360,6 @@ impl TheSy {
                     .map(|(i, t)|
                         (format!("?param_{}", i).to_string(), RecExpr::from(t) == datatype.as_exp())
                     ).collect_vec();
-                println!("{:#?}", params);
                 let contr_pattern = Pattern::from_str(&*format!("({} {})", c.root().display_op(), params.iter().map(|s| s.0.clone()).intersperse(" ".to_string()).collect::<String>())).unwrap();
                 let searcher = MultiEqSearcher::new(vec![
                     contr_pattern,
@@ -459,6 +458,13 @@ mod test {
         ])
     }
 
+    fn create_list_type() -> DataType {
+        DataType::new("list".to_string(), vec![
+            "(Nil list)".parse().unwrap(),
+            "(Cons nat list list)".parse().unwrap()
+        ])
+    }
+
     fn create_nat_sygue() -> TheSy {
         TheSy::new(
             vec![create_nat_type()],
@@ -467,8 +473,28 @@ mod test {
         )
     }
 
+    fn create_list_sygue() -> TheSy {
+        TheSy::new(
+            vec![create_list_type()],
+            vec!["Nil".parse().unwrap(), "(Cons x Nil)".parse().unwrap(), "(Cons y (Cons x Nil))".parse().unwrap()],
+            vec![("Nil", "list"), ("Cons", "(-> nat list list)"), ("snoc", "(-> list nat list)"), ("rev", "(-> list list)"), ("app", "(-> list list list)")].into_iter()
+                .map(|(name, typ)| (name.to_string(), RecExpr::from_str(typ).unwrap())).collect(),
+        )
+    }
+
     fn create_pl_rewrites() -> Vec<Rewrite<SymbolLang, ()>> {
         vec![rewrite!("pl base"; "(pl Z ?x)" => "?x"), rewrite!("pl ind"; "(pl (S ?y) ?x)" => "(S (pl ?y ?x))")]
+    }
+
+    fn create_list_rewrites() -> Vec<Rewrite<SymbolLang, ()>> {
+        vec![
+            rewrite!("app base"; "(app Nil ?xs)" => "?xs"),
+            rewrite!("app ind"; "(app (Cons ?y ?ys) ?xs)" => "(Cons ?y (app ?ys ?xs))"),
+            rewrite!("snoc base"; "(snoc Nil ?x)" => "(Cons ?x Nil)"),
+            rewrite!("snoc ind"; "(snoc (Cons ?y ?ys) ?x)" => "(Cons ?y (snoc ?ys ?x))"),
+            rewrite!("rev base"; "(rev Nil)" => "Nil"),
+            rewrite!("rev ind"; "(rev (Cons ?y ?ys))" => "(snoc (rev ?ys) ?y)"),
+        ]
     }
 
     #[test]
