@@ -6,7 +6,7 @@ use std::process::exit;
 use std::hash::{Hash, Hasher};
 use std::collections::{HashSet, HashMap};
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct RecExpSlice<'a, L: Language> {
     index: usize,
     exp: &'a RecExpr<L>

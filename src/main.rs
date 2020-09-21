@@ -29,12 +29,13 @@ fn main() {
             "(S nat nat)".parse().unwrap()
         ])],
         vec!["Z".parse().unwrap(), "(S Z)".parse().unwrap(), "(S (S Z))".parse().unwrap()],
-        vec![("ts_ph0", "nat"), ("ts_ph1", "nat"), ("Z", "nat"), ("S", "(-> nat nat)"), ("pl", "(-> nat nat nat)")].into_iter()
+        vec![("Z", "nat"), ("S", "(-> nat nat)"), ("pl", "(-> nat nat nat)")].into_iter()
             .map(|(name, typ)| (name.to_string(), RecExpr::from_str(typ).unwrap())).collect(),
     );
 
+    sygue.egraph.dot().to_dot("graph.dot");
     let mut rewrites: Vec<Rewrite<SymbolLang, ()>> = vec![rewrite!("pl base"; "(pl Z ?x)" => "?x"), rewrite!("pl ind"; "(pl (S ?y) ?x)" => "(S (pl ?y ?x))")];
     let start = SystemTime::now();
-    sygue.run(&mut rewrites,3);
+    sygue.run(&mut rewrites,2);
     println!("done in {}", SystemTime::now().duration_since(start).unwrap().as_millis());
 }
