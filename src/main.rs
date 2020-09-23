@@ -55,18 +55,19 @@ fn main() {
     let mut sygue = TheSy::new_with_ph(
         vec![list.clone(), nat.clone()],
         // vec![list.clone()],
-        HashMap::from_iter(vec![(list, list_examples), (nat, nat_examples)]),
+        HashMap::from_iter(vec![(list.clone(), list_examples.clone()), (nat.clone(), nat_examples.clone())]),
         // HashMap::from_iter(vec![(list, list_examples)]),
         vec![("Z", "nat"), ("S", "(-> nat nat)"), ("pl", "(-> nat nat nat)"),
              ("Nil", "list"), ("Cons", "(-> nat list list)"), ("snoc", "(-> list nat list)"),
              ("rev", "(-> list list)"), ("app", "(-> list list list)"),
-             ("len", "(-> list nat)")
+             // ("len", "(-> list nat)"), ("sum", "(-> list nat)"),
+             // ("map", "(-> (-> nat nat) list)"), ("fold", "(-> nat (-> nat nat nat) list nat)"),
         ].into_iter()
             .map(|(name, typ)| (name.to_string(), RecExpr::from_str(typ).unwrap())).collect(),
         3
     );
 
-    // sygue.egraph.dot().to_dot("graph.dot");
+    sygue.egraph.dot().to_dot("graph.dot");
 
     let mut list_rws: Vec<Rewrite<SymbolLang, ()>> = vec![
         rewrite!("app base"; "(app Nil ?xs)" => "?xs"),
@@ -75,10 +76,55 @@ fn main() {
         rewrite!("snoc ind"; "(snoc (Cons ?y ?ys) ?x)" => "(Cons ?y (snoc ?ys ?x))"),
         rewrite!("rev base"; "(rev Nil)" => "Nil"),
         rewrite!("rev ind"; "(rev (Cons ?y ?ys))" => "(snoc (rev ?ys) ?y)"),
-        rewrite!("len base"; "(len Nil)" => "Z"),
-        rewrite!("len ind"; "(len (Cons ?y ?ys))" => "(S (len ?ys))"),
+        // rewrite!("len base"; "(len Nil)" => "Z"),
+        // rewrite!("len ind"; "(len (Cons ?y ?ys))" => "(S (len ?ys))"),
+        // rewrite!("sum base"; "(sum Nil)" => "Z"),
+        // rewrite!("sum ind"; "(sum (Cons ?y ?ys))" => "(pl ?y (sum ?ys))"),
+        // rewrite!("map base"; "(map ?f Nil)" => "Nil"),
+        // rewrite!("map ind"; "(map ?f (Cons ?y ?ys))" => "(Cons (apply ?f ?y) (map ?f ?ys))"),
+        // rewrite!("fold base"; "(fold ?i ?f Nil)" => "?i"),
+        // rewrite!("fold ind"; "(fold ?i ?f (Cons ?y ?ys))" => "(fold (apply ?f ?y ?i) ?f ?ys)"),
     ];
     list_rws.extend(nat_rws.into_iter());
+    let start = SystemTime::now();
+    let new_rules = sygue.run(&mut list_rws, 2);
+    println!("done in {}", SystemTime::now().duration_since(start).unwrap().as_millis());
+
+
+
+    let mut sygue = TheSy::new_with_ph(
+        vec![list.clone(), nat.clone()],
+        // vec![list.clone()],
+        HashMap::from_iter(vec![(list.clone(), list_examples.clone()), (nat.clone(), nat_examples.clone())]),
+        // HashMap::from_iter(vec![(list, list_examples)]),
+        vec![("Z", "nat"), ("S", "(-> nat nat)"), ("pl", "(-> nat nat nat)"),
+             ("Nil", "list"), ("Cons", "(-> nat list list)"), ("snoc", "(-> list nat list)"),
+             ("rev", "(-> list list)"), ("app", "(-> list list list)"),
+             ("len", "(-> list nat)"), ("sum", "(-> list nat)"),
+             ("map", "(-> (-> nat nat) list)"), ("fold", "(-> nat (-> nat nat nat) list nat)"),
+        ].into_iter()
+            .map(|(name, typ)| (name.to_string(), RecExpr::from_str(typ).unwrap())).collect(),
+        2
+    );
+
+    sygue.egraph.dot().to_dot("graph.dot");
+
+    list_rws.extend_from_slice(&vec![
+        // rewrite!("app base"; "(app Nil ?xs)" => "?xs"),
+        // rewrite!("app ind"; "(app (Cons ?y ?ys) ?xs)" => "(Cons ?y (app ?ys ?xs))"),
+        // rewrite!("snoc base"; "(snoc Nil ?x)" => "(Cons ?x Nil)"),
+        // rewrite!("snoc ind"; "(snoc (Cons ?y ?ys) ?x)" => "(Cons ?y (snoc ?ys ?x))"),
+        // rewrite!("rev base"; "(rev Nil)" => "Nil"),
+        // rewrite!("rev ind"; "(rev (Cons ?y ?ys))" => "(snoc (rev ?ys) ?y)"),
+        rewrite!("len base"; "(len Nil)" => "Z"),
+        rewrite!("len ind"; "(len (Cons ?y ?ys))" => "(S (len ?ys))"),
+        rewrite!("sum base"; "(sum Nil)" => "Z"),
+        rewrite!("sum ind"; "(sum (Cons ?y ?ys))" => "(pl ?y (sum ?ys))"),
+        rewrite!("map base"; "(map ?f Nil)" => "Nil"),
+        rewrite!("map ind"; "(map ?f (Cons ?y ?ys))" => "(Cons (apply ?f ?y) (map ?f ?ys))"),
+        rewrite!("fold base"; "(fold ?i ?f Nil)" => "?i"),
+        rewrite!("fold ind"; "(fold ?i ?f (Cons ?y ?ys))" => "(fold (apply ?f ?y ?i) ?f ?ys)"),
+    ]);
     let start = SystemTime::now();
     sygue.run(&mut list_rws, 2);
     println!("done in {}", SystemTime::now().duration_since(start).unwrap().as_millis());
