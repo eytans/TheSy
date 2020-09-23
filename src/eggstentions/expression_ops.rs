@@ -22,19 +22,18 @@ impl<'a, L: Language> RecExpSlice<'a, L> {
     }
 
     pub fn to_spaceless_string(&self) -> String {
-        let children = self.children();
-        if children.is_empty() {
-            format!("{}", self.root().display_op()).replace(" ", "__")
-        } else {
-            format!("|_{}__{}_|", self.root().display_op(), children.iter().map(|c| c.to_spaceless_string()).intersperse("__".to_string()).collect::<String>())
-        }
+        self.to_sexp_string()
+            .replace(" ", "_")
+            .replace("(", "PO")
+            .replace(")", "PC")
+            .replace("->", "fn")
     }
 
     pub fn to_sexp_string(&self) -> String {
         if self.is_leaf() {
-            format!("{}", self.root().display_op())
+            format!("{}", self.root().display_op().to_string())
         } else {
-            format!("({} {})", self.root().display_op(), self.children().iter().map(|t| t.to_sexp_string()).intersperse(" ".parse().unwrap()).collect::<String>())
+            format!("({} {})", self.root().display_op().to_string(), self.children().iter().map(|t| t.to_sexp_string()).intersperse(" ".to_string()).collect::<String>())
         }
     }
 }
@@ -108,7 +107,7 @@ pub trait Tree<'a, T: 'a + Language> {
 
 impl<'a ,L: Language> Tree<'a, L> for RecExpSlice<'a, L> {
     fn root(&self) -> &'a L {
-        self.exp.as_ref().last().unwrap()
+        &self.exp.as_ref()[self.index]
     }
 
     fn children(&self) -> Vec<RecExpSlice<'a, L>> {

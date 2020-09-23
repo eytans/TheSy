@@ -55,6 +55,9 @@ pub struct TheSy {
     /// map maintaining the connection between eclasses created by sygue
     /// and their associated eclasses with `ind_ph` replaced by symbolic examples.
     example_ids: HashMap<DataType, HashMap<Id, Vec<Id>>>,
+    /// Flattern apply rewrites are used for high order function such as fold.
+    /// TODO: add support for partial application
+    apply_rws: Vec<Rewrite<SymbolLang, ()>>,
 }
 
 /// *** Thesy ***
@@ -65,7 +68,6 @@ impl TheSy {
 
     pub fn new_with_ph(datatypes: Vec<DataType>, examples: HashMap<DataType, Vec<RecExpr<SymbolLang>>>, dict: Vec<(String, RecExpr<SymbolLang>)>, ph_count: usize) -> TheSy {
         // TODO: automatic examples
-        // TODO: datatype out of dict, multiple examples at once
         let datatype_to_wfo: HashMap<DataType, Vec<Rewrite<SymbolLang, ()>>, RandomState> = datatypes.iter()
             .map(|d| (d.clone(), Self::wfo_datatype(d))).collect();
         let mut egraph = EGraph::default();
@@ -74,7 +76,6 @@ impl TheSy {
             example_ids.insert(d.clone(), HashMap::new());
         }
         for (name, typ) in dict.iter()
-            .filter(|(name, typ)| typ.as_ref().len() == 1)
             .chain(TheSy::collect_phs(&dict, ph_count).iter()) {
             let id = egraph.add_expr(&name.parse().unwrap());
             let type_id = egraph.add_expr(typ);
@@ -83,6 +84,21 @@ impl TheSy {
                 example_ids.get_mut(d).unwrap().insert(id, Vec::from_iter(iter::repeat(id).take(examples[d].len())));
             }
         }
+
+        let apply_rws = dict.iter()
+            .chain(TheSy::collect_phs(&dict, ph_count).iter())
+            .filter(|(name, typ)| typ.into_tree().root().op.to_string() == "->".to_string())
+            .map(|(name, typ)| {
+                let params = typ.into_tree().children()
+                    .iter().dropping_back(1).enumerate()
+                    .map(|(i, x)| format!("?param_{}", i))
+                    .collect_vec();
+                let searcher: Pattern<SymbolLang> = format!("(apply {} {})", name, params.iter().intersperse(&" ".to_string()).cloned().collect::<String>()).parse().unwrap();
+                let applier: Pattern<SymbolLang> = format!("({} {})", name, params.iter().intersperse(&" ".to_string()).cloned().collect::<String>()).parse().unwrap();
+                println!("{} => {}", searcher.pretty(500), applier.pretty(500));
+                rewrite!(format!("apply {}", name); searcher => applier)
+            }).collect_vec();
+
         for d in datatypes.iter() {
             let ind_id = egraph.add_expr(&Self::get_ind_var(d).parse().unwrap());
             let initial_example_ids = examples[d].iter()
@@ -98,6 +114,7 @@ impl TheSy {
             // sygue_rules: vec![],
             searchers: HashMap::new(),
             example_ids,
+            apply_rws,
         };
 
         res.searchers = res.create_sygue_serchers();
@@ -211,7 +228,7 @@ impl TheSy {
     }
 
     fn equiv_reduc_depth(&mut self, rules: &[Rewrite<SymbolLang, ()>], depth: usize) {
-        self.egraph = Runner::default().with_time_limit(Duration::from_secs(60 * 60)).with_node_limit(60000).with_egraph(std::mem::take(&mut self.egraph)).with_iter_limit(depth).run(rules).egraph;
+        self.egraph = Runner::default().with_time_limit(Duration::from_secs(60 * 60)).with_node_limit(10000000).with_egraph(std::mem::take(&mut self.egraph)).with_iter_limit(depth).run(rules).egraph;
         self.egraph.rebuild();
     }
 
@@ -253,7 +270,7 @@ impl TheSy {
     /// representing well founded order on the induction variable.
     /// Need to replace the induction variable with an expression representing a constructor and
     /// well founded order on the params of the constructor.
-    pub fn prove(&self, rules: &[Rewrite<SymbolLang, ()>], datatype: &DataType, ex1: &RecExpr<SymbolLang>, ex2: &RecExpr<SymbolLang>) -> Option<Vec<Rewrite<SymbolLang, ()>>> {
+    pub fn prove(&self, rules: &[Rewrite<SymbolLang, ()>], datatype: &DataType, ex1: &RecExpr<SymbolLang>, ex2: &RecExpr<SymbolLang>) -> Option<Vec<(Pattern<SymbolLang>, Pattern<SymbolLang>, Rewrite<SymbolLang, ()>)>> {
         if ex1.as_ref().iter().find(|s| s.op.to_string() == Self::get_ind_var(datatype)).is_none() &&
             ex2.as_ref().iter().find(|s| s.op.to_string() == Self::get_ind_var(datatype)).is_none() {
             return None;
@@ -290,7 +307,7 @@ impl TheSy {
             if text1.starts_with("(") {
                 let rw = Rewrite::new(text1.clone(), text1.clone(), fixed_ex1.clone(), fixed_ex2.clone());
                 if rw.is_ok() {
-                    new_rules.push(rw.unwrap());
+                    new_rules.push((fixed_ex1.clone(), fixed_ex2.clone(), rw.unwrap()));
                 } else {
                     println!("Err creating rewrite, probably existential");
                     println!("{}", fixed_ex1.pretty(80) + " => " + &*fixed_ex2.pretty(80));
@@ -299,7 +316,7 @@ impl TheSy {
             if text2.starts_with("(") {
                 let rw = Rewrite::new(text2.clone(), text2.clone(), fixed_ex2.clone(), fixed_ex1.clone());
                 if rw.is_ok() {
-                    new_rules.push(rw.unwrap());
+                    new_rules.push((fixed_ex2.clone(), fixed_ex1.clone(), rw.unwrap()));
                 } else {
                     println!("Err creating rewrite, probably existential");
                     println!("{}", fixed_ex2.pretty(80) + " => " + &*fixed_ex1.pretty(80));
@@ -320,24 +337,32 @@ impl TheSy {
         !runner.egraph.equivs(ex1, ex2).is_empty()
     }
 
-    pub fn run(&mut self, rules: &mut Vec<Rewrite<SymbolLang, ()>>, max_depth: usize) {
+    pub fn run(&mut self, rules: &mut Vec<Rewrite<SymbolLang, ()>>, max_depth: usize) -> Vec<(Pattern<SymbolLang>, Pattern<SymbolLang>, Rewrite<SymbolLang, ()>)> {
         // TODO: case split
         // TODO: run full tests
         // TODO: add timeout
         // TODO: high level
+        // TODO: check why not finding app rev
+        // TODO: fix bug with apply in fold
+        let apply_rws_start = rules.len();
+        let mut found_rules = vec![];
+        for r in &self.apply_rws {
+            rules.push(r.clone());
+        }
         for depth in 0..max_depth {
             self.increase_depth();
             self.equiv_reduc(&rules[..]);
             let mut conjectures = self.get_conjectures();
             'outer: while !conjectures.is_empty() {
                 let (key, ex1, ex2, d) = conjectures.pop().unwrap();
+                if Self::check_equality(&rules[..], &ex1, &ex2) { continue 'outer; }
                 let new_rules = self.prove(&rules[..], &d, &ex1, &ex2);
                 if new_rules.is_some() {
+                    found_rules.extend_from_slice(&new_rules.as_ref().unwrap());
                     // TODO: move print out of prove
-                    if Self::check_equality(&rules[..], &ex1, &ex2) { continue 'outer; }
                     for r in new_rules.unwrap() {
-                        println!("proved: {}", r.long_name());
-                        rules.push(r);
+                        println!("proved: {}", r.2.long_name());
+                        rules.push(r.2);
                         self.equiv_reduc_depth(rules, 3);
                         conjectures = self.get_conjectures();
                     }
@@ -345,6 +370,10 @@ impl TheSy {
                 }
             }
         }
+        for i in 0..self.apply_rws.len() {
+            rules.remove(apply_rws_start);
+        }
+        found_rules
     }
 }
 
@@ -415,17 +444,14 @@ impl TheSy {
     }
 
     fn get_ph(d: &RecExpr<SymbolLang>, i: usize) -> String {
-        let res = format!("{}_{}_{}", Self::PH_START, d.into_tree().to_spaceless_string(), i);
+        let s = d.into_tree().to_spaceless_string();
+        let res = format!("{}_{}_{}", Self::PH_START, s, i);
         res
     }
 
     fn get_ind_var(d: &DataType) -> String {
         Self::get_ph(&d.as_exp(), 0)
     }
-
-    // fn create_sygue_anchor() -> String {
-    //     format!("sygueanchor")
-    // }
 
     fn ident_mapper(i: &String, induction_ph: &String, sub_ind: &String) -> String {
         if i == induction_ph {
