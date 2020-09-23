@@ -16,14 +16,32 @@ use std::rc::Rc;
 use std::collections::{HashSet, HashMap};
 use crate::thesy::{TheSy, DataType};
 use std::iter::FromIterator;
+use std::env;
+use std::path::PathBuf;
+use structopt::StructOpt;
 
 mod tree;
 mod eggstentions;
 mod tools;
 mod thesy;
+mod smtlib_parser;
 
+/// Arguments to use to run thesy
+#[derive(StructOpt)]
+struct Opt {
+    /// The path to the file to read
+    #[structopt(parse(from_os_str))]
+    path: Option<std::path::PathBuf>,
+    /// Placeholder count
+    #[structopt(name = "placeholder count", default_value = "3")]
+    ph_count: usize,
+    /// Previous results to read
+    prev_res: Vec<String>
+}
 
 fn main() {
+    let args = Opt::from_args();
+
     let nat = DataType::new("nat".to_string(), vec![
         "(Z nat)".parse().unwrap(),
         "(S nat nat)".parse().unwrap()

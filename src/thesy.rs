@@ -23,12 +23,39 @@ pub struct DataType {
     constructors: Vec<RecExpr<SymbolLang>>,
 }
 
+#[derive(Clone, Hash, PartialEq, Eq, Debug)]
+pub struct Function {
+    name: String,
+    params: Vec<RecExpr<SymbolLang>>,
+    /// Constructor name applied on types
+    ret_type: RecExpr<SymbolLang>,
+}
+
+impl Function {
+    pub fn new(name: String, params: Vec<RecExpr<SymbolLang>>, ret_type: RecExpr<SymbolLang>) -> Function {
+        Function{name, params, ret_type}
+    }
+
+    pub fn as_exp(&self) -> RecExpr<SymbolLang> {
+        let mut children = vec![];
+        let mut indices = vec![];
+        for p in &self.params {
+            children.extend_from_slice(p.as_ref());
+            indices.push(Id::from(children.len()));
+        }
+        children.extend_from_slice(self.ret_type.as_ref());
+        indices.push(Id::from(children.len()));
+        children.push(SymbolLang::new(self.name.clone(), indices));
+        RecExpr::from(children)
+    }
+}
+
 impl DataType {
     pub(crate) fn new(name: String, constructors: Vec<RecExpr<SymbolLang>>) -> DataType {
         DataType { name, type_params: vec![], constructors }
     }
 
-    fn generic(name: String, type_params: Vec<RecExpr<SymbolLang>>, constructors: Vec<RecExpr<SymbolLang>>) -> DataType {
+    pub fn generic(name: String, type_params: Vec<RecExpr<SymbolLang>>, constructors: Vec<RecExpr<SymbolLang>>) -> DataType {
         DataType { name, type_params, constructors }
     }
 
