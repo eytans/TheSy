@@ -25,7 +25,7 @@ pub struct DataType {
 
 #[derive(Clone, Hash, PartialEq, Eq, Debug)]
 pub struct Function {
-    name: String,
+    pub name: String,
     params: Vec<RecExpr<SymbolLang>>,
     /// Constructor name applied on types
     ret_type: RecExpr<SymbolLang>,
@@ -37,6 +37,15 @@ impl Function {
     }
 
     pub fn as_exp(&self) -> RecExpr<SymbolLang> {
+        let as_type = self.get_type();
+        let mut children = as_type.as_ref().iter().cloned().dropping_back(1).collect_vec();
+        let mut new_last = as_type.as_ref().last().unwrap().clone();
+        new_last.op = Symbol::from(self.name.clone());
+        children.push(new_last);
+        RecExpr::from(children)
+    }
+
+    pub fn get_type(&self) -> RecExpr<SymbolLang> {
         let mut children = vec![];
         let mut indices = vec![];
         for p in &self.params {
@@ -45,7 +54,7 @@ impl Function {
         }
         children.extend_from_slice(self.ret_type.as_ref());
         indices.push(Id::from(children.len()));
-        children.push(SymbolLang::new(self.name.clone(), indices));
+        children.push(SymbolLang::new("->", indices));
         RecExpr::from(children)
     }
 }

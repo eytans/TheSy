@@ -19,28 +19,98 @@ use std::iter::FromIterator;
 use std::env;
 use std::path::PathBuf;
 use structopt::StructOpt;
+use std::fs::File;
+use std::io::{Read, Write};
+use crate::thesy_parser::parser::Definitions;
+use std::process::exit;
+use std::borrow::Borrow;
 
 mod tree;
 mod eggstentions;
 mod tools;
 mod thesy;
-mod smtlib_parser;
+mod thesy_parser;
 
 /// Arguments to use to run thesy
 #[derive(StructOpt)]
-struct Opt {
+struct CliOpt {
     /// The path to the file to read
     #[structopt(parse(from_os_str))]
-    path: Option<std::path::PathBuf>,
+    path: std::path::PathBuf,
     /// Placeholder count
     #[structopt(name = "placeholder count", default_value = "3")]
     ph_count: usize,
     /// Previous results to read
-    prev_res: Vec<String>
+    dependencies: Vec<String>,
+}
+
+impl From<&CliOpt> for TheSyConfig {
+    fn from(opts: &CliOpt) -> Self {
+        TheSyConfig::new(thesy_parser::parser::parse_file(opts.path.to_str().unwrap().to_string()), 3, vec![], opts.path.with_extension("res"))
+    }
+}
+
+struct TheSyConfig {
+    definitions: Definitions,
+    ph_count: usize,
+    dependencies: Vec<TheSyConfig>,
+    dep_results: Vec<Vec<Rewrite<SymbolLang, ()>>>,
+    output: PathBuf
+}
+
+impl TheSyConfig {
+    pub fn new(definitions: Definitions, ph_count: usize, dependencies: Vec<TheSyConfig>, output: PathBuf) -> TheSyConfig {
+        TheSyConfig { definitions,
+            ph_count,
+            dependencies,
+            dep_results: vec![],
+            output}
+    }
+
+    fn collect_dependencies(&mut self) {
+        if self.dep_results.is_empty() {
+            self.dep_results = self.dependencies.iter_mut().map(|conf| {
+                conf.run(Some(2)).1
+            }).collect_vec();
+        }
+    }
+
+    pub fn from_path(path: String) -> TheSyConfig {
+        let definitions = thesy_parser::parser::parse_file(path.clone());
+        TheSyConfig::new(definitions, 3, vec![], PathBuf::from(path).with_extension("res"))
+    }
+
+    /// Run thesy using current configuration returning (thesy instance, previous + new rewrites)
+    pub fn run(&mut self, max_depth: Option<usize>) -> (TheSy, Vec<Rewrite<SymbolLang, ()>>) {
+        self.collect_dependencies();
+        let mut thesy = TheSy::from(self.borrow());
+        let mut rules = self.definitions.rws.clone();
+        rules.extend(self.dep_results.iter().flatten().cloned());
+        let results = thesy.run(&mut rules, max_depth.unwrap_or(2));
+        let new_rules_text = results.iter()
+            .map(|(searcher, applier, rw)|
+                format!("{} => {}", searcher.pretty(1000), applier.pretty(1000)))
+            .join("\n");
+        File::create(&self.output).unwrap().write_all(new_rules_text.as_bytes()).unwrap();
+        (thesy, rules)
+    }
+}
+
+impl From<&TheSyConfig> for TheSy {
+    fn from(conf: &TheSyConfig) -> Self {
+        let dict = conf.definitions.functions.iter().map(|f| (f.name.clone(), f.get_type())).collect_vec();
+        TheSy::new_with_ph(conf.definitions.datatypes.clone(),
+                           HashMap::new(),
+                           dict,
+                           conf.ph_count)
+    }
 }
 
 fn main() {
-    let args = Opt::from_args();
+    let args = CliOpt::from_args();
+    let res = TheSyConfig::from(&args).run(Some(2));
+
+    exit(0);
 
     let nat = DataType::new("nat".to_string(), vec![
         "(Z nat)".parse().unwrap(),
@@ -82,7 +152,7 @@ fn main() {
              // ("map", "(-> (-> nat nat) list)"), ("fold", "(-> nat (-> nat nat nat) list nat)"),
         ].into_iter()
             .map(|(name, typ)| (name.to_string(), RecExpr::from_str(typ).unwrap())).collect(),
-        3
+        3,
     );
 
     sygue.egraph.dot().to_dot("graph.dot");
@@ -109,7 +179,6 @@ fn main() {
     println!("done in {}", SystemTime::now().duration_since(start).unwrap().as_millis());
 
 
-
     let mut sygue = TheSy::new_with_ph(
         vec![list.clone(), nat.clone()],
         // vec![list.clone()],
@@ -122,7 +191,7 @@ fn main() {
              ("map", "(-> (-> nat nat) list)"), ("fold", "(-> nat (-> nat nat nat) list nat)"),
         ].into_iter()
             .map(|(name, typ)| (name.to_string(), RecExpr::from_str(typ).unwrap())).collect(),
-        2
+        2,
     );
 
     sygue.egraph.dot().to_dot("graph.dot");

@@ -4,7 +4,7 @@ pub mod parser {
     use egg::{SymbolLang, Rewrite, RecExpr, Pattern, PatternAst};
     use std::str::FromStr;
     use crate::eggstentions::expression_ops::{IntoTree, RecExpSlice, Tree};
-    use itertools::Itertools;
+    use itertools::{Itertools, cons_tuples};
     use std::fs::File;
     use std::io::Read;
 
@@ -24,18 +24,21 @@ pub mod parser {
         let mut file = File::open(f).unwrap();
         let mut contents = String::new();
         file.read_to_string(&mut contents).unwrap();
-        parse(&contents.split("\n").collect_vec()[..])
+        parse(&contents.split("\n").map(|s| s.to_string()).collect_vec()[..])
     }
 
-    pub fn parse(lines: &[&str]) -> Definitions {
+    pub fn parse(lines: &[String]) -> Definitions {
         let mut res = Definitions::default();
         for l in lines {
+            if l.trim().is_empty() {
+                continue;
+            }
             let mut sexp = symbolic_expressions::parser::parse_str(l).unwrap();
             let mut l = sexp.take_list().unwrap();
             let name = l[0].take_string().unwrap();
             match name.as_ref() {
                 "datatype" => {
-                    let type_name = l[1].take_string()?;
+                    let type_name = l[1].take_string().unwrap();
                     let type_params = l[2].take_list().unwrap();
                     // Constructor name applied on param types
                     let constructors = l[3].take_list().unwrap();
