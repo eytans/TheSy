@@ -3,23 +3,23 @@
 (declare-fun plus (Nat Nat) Nat)
 
 (=> plus_base (plus zero ?n) ?n)
-(=> plus_ind (plus (succ ?n) ?m) (succ (plus ?n ?m)))
-(=> plus_ind (succ (plus ?n ?m)) (plus (succ ?n) ?m))
+(=> plus_ind_1 (plus (succ ?n) ?m) (succ (plus ?n ?m)))
+(=> plus_ind_2 (succ (plus ?n ?m)) (plus (succ ?n) ?m))
 
 (declare-fun mult (Nat Nat) Nat)
 
 (=> mult_base (mult zero ?n) zero)
-(=> mult_ind (mult (succ ?n) ?m) (plus (mult ?n ?m) ?m))
-(=> mult_ind (plus (mult ?n ?m) ?m) (mult (succ ?n) ?m))
+(=> mult_ind_1 (mult (succ ?n) ?m) (plus (mult ?n ?m) ?m))
+(=> mult_ind_2 (plus (mult ?n ?m) ?m) (mult (succ ?n) ?m))
 
 (declare-fun tri (Nat) Nat)
 
 (=> tri_base (tri zero) zero)
-(=> tri_ind (tri (succ ?n)) (plus (tri ?n) (succ ?n)))
-(=> tri_ind (plus (tri ?n) (succ ?n)) (tri (succ ?n)))
+(=> tri_ind_1 (tri (succ ?n)) (plus (tri ?n) (succ ?n)))
+(=> tri_ind_2 (plus (tri ?n) (succ ?n)) (tri (succ ?n)))
 
 (declare-fun cubes (Nat) Nat)
 
 (=> cubes_base (cubes zero) zero)
-(=> cubes_ind (cubes (succ ?n)) (plus (cubes ?n) (mult (succ ?n) (mult (succ ?n) (succ ?n)))))
-(=> cubes_ind (plus (cubes ?n) (mult (succ ?n) (mult (succ ?n) (succ ?n)))) (cubes (succ ?n)))
+(=> cubes_ind_1 (cubes (succ ?n)) (plus (cubes ?n) (mult (succ ?n) (mult (succ ?n) (succ ?n)))))
+(=> cubes_ind_2 (plus (cubes ?n) (mult (succ ?n) (mult (succ ?n) (succ ?n)))) (cubes (succ ?n)))

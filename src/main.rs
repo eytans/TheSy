@@ -24,6 +24,7 @@ use std::io::{Read, Write};
 use crate::thesy_parser::parser::Definitions;
 use std::process::exit;
 use std::borrow::Borrow;
+use crate::tools::tools::choose;
 
 mod tree;
 mod eggstentions;
@@ -61,7 +62,8 @@ struct TheSyConfig {
     ph_count: usize,
     dependencies: Vec<TheSyConfig>,
     dep_results: Vec<Vec<Rewrite<SymbolLang, ()>>>,
-    output: PathBuf
+    output: PathBuf,
+    prerun_couples: bool
 }
 
 impl TheSyConfig {
@@ -70,7 +72,8 @@ impl TheSyConfig {
             ph_count,
             dependencies,
             dep_results: vec![],
-            output}
+            output,
+            prerun_couples: true}
     }
 
     fn collect_dependencies(&mut self) {
@@ -89,9 +92,19 @@ impl TheSyConfig {
     /// Run thesy using current configuration returning (thesy instance, previous + new rewrites)
     pub fn run(&mut self, max_depth: Option<usize>) -> (TheSy, Vec<Rewrite<SymbolLang, ()>>) {
         self.collect_dependencies();
-        let mut thesy = TheSy::from(self.borrow());
         let mut rules = self.definitions.rws.clone();
         rules.extend(self.dep_results.iter().flatten().cloned());
+        if self.prerun_couples && self.definitions.functions.len() > 2 {
+            for couple in choose(&self.definitions.functions[..], 2) {
+                println!("prerun {}", couple.iter().map(|x| &x.name).join(" "));
+                let mut new_conf = self.clone();
+                let funcs = couple.into_iter().cloned().collect_vec();
+                new_conf.definitions.functions = funcs;
+                let mut thesy = TheSy::from(&new_conf);
+                thesy.run(&mut rules, max_depth.unwrap_or(2));
+            }
+        }
+        let mut thesy = TheSy::from(self.borrow());
         let results = thesy.run(&mut rules, max_depth.unwrap_or(2));
         let new_rules_text = results.iter()
             .map(|(searcher, applier, rw)|
@@ -104,9 +117,15 @@ impl TheSyConfig {
 
 impl From<&TheSyConfig> for TheSy {
     fn from(conf: &TheSyConfig) -> Self {
-        let dict = conf.definitions.functions.iter().map(|f| (f.name.clone(), f.get_type())).collect_vec();
+        let mut dict = conf.definitions.functions.iter().map(|f| (f.name.clone(), f.get_type())).collect_vec();
+        for c in conf.definitions.datatypes.iter().flat_map(|d| &d.constructors) {
+            dict.push((c.name.clone(), c.get_type()));
+        }
+        let examples = conf.definitions.datatypes.iter()
+            .map(|d| (d.clone(), example_creator::examples(d, 2)))
+            .collect();
         TheSy::new_with_ph(conf.definitions.datatypes.clone(),
-                           HashMap::new(),
+                           examples,
                            dict,
                            conf.ph_count)
     }
