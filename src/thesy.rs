@@ -53,10 +53,28 @@ impl Function {
             children.extend_from_slice(p.as_ref());
             indices.push(Id::from(children.len() - 1));
         }
-        children.extend_from_slice(self.ret_type.as_ref());
-        indices.push(Id::from(children.len() - 1));
-        children.push(SymbolLang::new("->", indices));
-        RecExpr::from(children)
+        if children.is_empty() {
+            self.ret_type.clone()
+        } else {
+            children.extend_from_slice(self.ret_type.as_ref());
+            indices.push(Id::from(children.len() - 1));
+            children.push(SymbolLang::new("->", indices));
+            RecExpr::from(children)
+        }
+    }
+
+    pub fn apply_params(&self, params: Vec<RecExpr<SymbolLang>>) -> RecExpr<SymbolLang> {
+        let mut res = RecExpr::default();
+        let mut indices = vec![];
+        for p in params {
+            let current_len = res.as_ref().len();
+            for s in p.as_ref() {
+                res.add(s.clone().map_children(|c| Id::from(usize::from(c) + current_len)));
+            }
+            indices.push(Id::from(res.as_ref().len() - 1));
+        }
+        res.add(SymbolLang::new(self.name.clone(), indices));
+        res
     }
 }
 
@@ -79,7 +97,7 @@ impl DataType {
         DataType { name, type_params, constructors }
     }
 
-    fn as_exp(&self) -> RecExpr<SymbolLang> {
+    pub fn as_exp(&self) -> RecExpr<SymbolLang> {
         let mut res = vec![];
         let children = self.type_params.iter().map(|e| {
             res.extend(e.as_ref().iter().cloned());
@@ -125,7 +143,6 @@ impl TheSy {
         for (name, typ) in dict.iter()
             .chain(TheSy::collect_phs(&dict, ph_count).iter()) {
             let id = egraph.add_expr(&name.parse().unwrap());
-            println!("{:#?}", typ);
             let type_id = egraph.add_expr(typ);
             egraph.add(SymbolLang::new("typed", vec![id, type_id]));
             for d in datatypes.iter() {
@@ -391,6 +408,7 @@ impl TheSy {
         // TODO: high level
         // TODO: check why not finding app rev
         // TODO: fix bug with apply in fold
+        println!("Running TheSy on datatypes: {} dict: {}", self.datatypes.keys().map(|x| &x.name).join(" "), self.dict.iter().map(|x| &x.0).join(" "));
         let apply_rws_start = rules.len();
         let mut found_rules = vec![];
         for r in &self.apply_rws {
