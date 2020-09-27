@@ -14,7 +14,7 @@ use crate::eggstentions::reconstruct::reconstruct_all;
 use std::time::{SystemTime};
 use std::rc::Rc;
 use std::collections::{HashSet, HashMap};
-use crate::thesy::{TheSy, DataType};
+use crate::thesy::{TheSy, DataType, Function};
 use std::iter::FromIterator;
 use std::env;
 use std::path::PathBuf;
@@ -30,6 +30,7 @@ mod eggstentions;
 mod tools;
 mod thesy;
 mod thesy_parser;
+mod example_creator;
 
 /// Arguments to use to run thesy
 #[derive(StructOpt)]
@@ -46,10 +47,15 @@ struct CliOpt {
 
 impl From<&CliOpt> for TheSyConfig {
     fn from(opts: &CliOpt) -> Self {
-        TheSyConfig::new(thesy_parser::parser::parse_file(opts.path.to_str().unwrap().to_string()), 3, vec![], opts.path.with_extension("res"))
+        TheSyConfig::new(
+            thesy_parser::parser::parse_file(opts.path.to_str().unwrap().to_string()),
+            3,
+            vec![],
+            opts.path.with_extension("res"))
     }
 }
 
+#[derive(Debug, Clone)]
 struct TheSyConfig {
     definitions: Definitions,
     ph_count: usize,
@@ -113,8 +119,8 @@ fn main() {
     exit(0);
 
     let nat = DataType::new("nat".to_string(), vec![
-        "(Z nat)".parse().unwrap(),
-        "(S nat nat)".parse().unwrap()
+        Function::new("Z".to_string(), vec![], "nat".parse().unwrap()),
+        Function::new("Z".to_string(), vec!["nat".parse().unwrap()], "nat".parse().unwrap())
     ]);
 
     let nat_examples = vec!["Z".parse().unwrap(), "(S Z)".parse().unwrap(), "(S (S Z))".parse().unwrap()];
@@ -134,8 +140,8 @@ fn main() {
     println!("done in {}", SystemTime::now().duration_since(start).unwrap().as_millis());
 
     let list = DataType::new("list".to_string(), vec![
-        "(Nil list)".parse().unwrap(),
-        "(Cons nat list list)".parse().unwrap()
+        Function::new("Nil".to_string(), vec![], "list".parse().unwrap()),
+        Function::new("Cons".to_string(), vec!["nat".parse().unwrap(), "list".parse().unwrap()], "list".parse().unwrap()),
     ]);
 
     let list_examples = vec!["Nil".parse().unwrap(), "(Cons x Nil)".parse().unwrap(), "(Cons y (Cons x Nil))".parse().unwrap()];

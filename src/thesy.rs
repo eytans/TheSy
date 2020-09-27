@@ -17,18 +17,19 @@ use std::collections::hash_map::RandomState;
 
 #[derive(Clone, Hash, PartialEq, Eq, Debug)]
 pub struct DataType {
-    name: String,
-    type_params: Vec<RecExpr<SymbolLang>>,
+    pub name: String,
+    pub type_params: Vec<RecExpr<SymbolLang>>,
+    // TODO: change to Function instead of rec expr
     /// Constructor name applied on types
-    constructors: Vec<RecExpr<SymbolLang>>,
+    pub constructors: Vec<Function>,
 }
 
 #[derive(Clone, Hash, PartialEq, Eq, Debug)]
 pub struct Function {
     pub name: String,
-    params: Vec<RecExpr<SymbolLang>>,
+    pub params: Vec<RecExpr<SymbolLang>>,
     /// Constructor name applied on types
-    ret_type: RecExpr<SymbolLang>,
+    pub ret_type: RecExpr<SymbolLang>,
 }
 
 impl Function {
@@ -50,21 +51,31 @@ impl Function {
         let mut indices = vec![];
         for p in &self.params {
             children.extend_from_slice(p.as_ref());
-            indices.push(Id::from(children.len()));
+            indices.push(Id::from(children.len() - 1));
         }
         children.extend_from_slice(self.ret_type.as_ref());
-        indices.push(Id::from(children.len()));
+        indices.push(Id::from(children.len() - 1));
         children.push(SymbolLang::new("->", indices));
         RecExpr::from(children)
     }
 }
 
+impl From<RecExpr<SymbolLang>> for Function {
+    fn from(exp: RecExpr<SymbolLang>) -> Self {
+        let tree = exp.into_tree();
+        Function::new(tree.root().op.to_string(),
+                      tree.children().iter().dropping_back(1)
+                          .map(|t| RecExpr::from(t)).collect_vec(),
+                      RecExpr::from(tree.children().last().unwrap()))
+    }
+}
+
 impl DataType {
-    pub(crate) fn new(name: String, constructors: Vec<RecExpr<SymbolLang>>) -> DataType {
+    pub(crate) fn new(name: String, constructors: Vec<Function>) -> DataType {
         DataType { name, type_params: vec![], constructors }
     }
 
-    pub fn generic(name: String, type_params: Vec<RecExpr<SymbolLang>>, constructors: Vec<RecExpr<SymbolLang>>) -> DataType {
+    pub fn generic(name: String, type_params: Vec<RecExpr<SymbolLang>>, constructors: Vec<Function>) -> DataType {
         DataType { name, type_params, constructors }
     }
 
@@ -114,6 +125,7 @@ impl TheSy {
         for (name, typ) in dict.iter()
             .chain(TheSy::collect_phs(&dict, ph_count).iter()) {
             let id = egraph.add_expr(&name.parse().unwrap());
+            println!("{:#?}", typ);
             let type_id = egraph.add_expr(typ);
             egraph.add(SymbolLang::new("typed", vec![id, type_id]));
             for d in datatypes.iter() {
@@ -131,7 +143,6 @@ impl TheSy {
                     .collect_vec();
                 let searcher: Pattern<SymbolLang> = format!("(apply {} {})", name, params.iter().intersperse(&" ".to_string()).cloned().collect::<String>()).parse().unwrap();
                 let applier: Pattern<SymbolLang> = format!("({} {})", name, params.iter().intersperse(&" ".to_string()).cloned().collect::<String>()).parse().unwrap();
-                println!("{} => {}", searcher.pretty(500), applier.pretty(500));
                 rewrite!(format!("apply {}", name); searcher => applier)
             }).collect_vec();
 
@@ -322,9 +333,9 @@ impl TheSy {
         let ex2_id = orig_egraph.add_expr(&ex2);
         let ind_id = orig_egraph.lookup(SymbolLang::new(&Self::get_ind_var(datatype), vec![])).unwrap();
         let mut res = true;
-        for c in datatype.constructors.iter().map(|c| c.into_tree()).filter(|c| c.children().len() > 1) {
+        for c in datatype.constructors.iter().filter(|c| !c.params.is_empty()) {
             let mut egraph = orig_egraph.clone();
-            let contr_exp = RecExpr::from_str(format!("({} {})", c.root().display_op(), c.children().iter().take(c.children().len() - 1).enumerate()
+            let contr_exp = RecExpr::from_str(format!("({} {})", c.name, c.params.iter().enumerate()
                 .map(|(i, t)| "param_".to_owned() + &*i.to_string())
                 .intersperse(" ".parse().unwrap()).collect::<String>()).as_str()).unwrap();
             let contr_id = egraph.add_expr(&contr_exp);
@@ -449,15 +460,14 @@ impl TheSy {
     /// create well founded order rewrites for constructors of Datatype `datatype`.
     fn wfo_datatype(datatype: &DataType) -> Vec<Rewrite<SymbolLang, ()>> {
         // TODO: all buit values are bigger then base values
-        let contructor_rules = datatype.constructors.iter().map(|c| c.into_tree())
-            .filter(|c| c.children().len() > 1)
+        let contructor_rules = datatype.constructors.iter()
+            .filter(|c| !c.params.is_empty())
             .flat_map(|c| {
-                let params = c.children().iter()
-                    .take(c.children().len() - 1).enumerate()
+                let params = c.params.iter().enumerate()
                     .map(|(i, t)|
-                        (format!("?param_{}", i).to_string(), RecExpr::from(t) == datatype.as_exp())
+                        (format!("?param_{}", i).to_string(), *t == datatype.as_exp())
                     ).collect_vec();
-                let contr_pattern = Pattern::from_str(&*format!("({} {})", c.root().display_op(), params.iter().map(|s| s.0.clone()).intersperse(" ".to_string()).collect::<String>())).unwrap();
+                let contr_pattern = Pattern::from_str(&*format!("({} {})", c.name, params.iter().map(|s| s.0.clone()).intersperse(" ".to_string()).collect::<String>())).unwrap();
                 let searcher = MultiEqSearcher::new(vec![
                     contr_pattern,
                     Pattern::from_str("?root").unwrap(),
@@ -471,7 +481,7 @@ impl TheSy {
 
                 // rules
                 appliers.map(|a| {
-                    Rewrite::new(format!("{}_{}", c.root().display_op(), a.0), format!("{}_{}", c.root().display_op(), a.0), searcher.clone(), a.1).unwrap()
+                    Rewrite::new(format!("{}_{}", c.name, a.0), format!("{}_{}", c.name, a.0), searcher.clone(), a.1).unwrap()
                 }).collect_vec()
             });
         let mut res = contructor_rules.collect_vec();

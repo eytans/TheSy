@@ -8,7 +8,7 @@ pub mod parser {
     use std::fs::File;
     use std::io::Read;
 
-    #[derive(Default)]
+    #[derive(Default, Clone, Debug)]
     pub struct Definitions {
         /// All datatype definitions
         pub datatypes: Vec<DataType>,
@@ -45,6 +45,9 @@ pub mod parser {
                     res.datatypes.push(DataType::generic(type_name,
                                                          sexp_list_to_recexpr(type_params),
                                                          sexp_list_to_recexpr(constructors)
+                                                             .into_iter()
+                                                             .map(|e| Function::from(e))
+                                                             .collect_vec()
 
                     ));
                 },
