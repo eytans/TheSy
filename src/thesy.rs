@@ -420,17 +420,17 @@ impl TheSy {
             let mut conjectures = self.get_conjectures();
             'outer: while !conjectures.is_empty() {
                 let (key, ex1, ex2, d) = conjectures.pop().unwrap();
-                if Self::check_equality(&rules[..], &ex1, &ex2) { continue 'outer; }
                 let new_rules = self.prove(&rules[..], &d, &ex1, &ex2);
                 if new_rules.is_some() {
+                    if Self::check_equality(&rules[..], &ex1, &ex2) { continue 'outer; }
                     found_rules.extend_from_slice(&new_rules.as_ref().unwrap());
                     // TODO: move print out of prove
                     for r in new_rules.unwrap() {
                         println!("proved: {}", r.2.long_name());
                         rules.push(r.2);
-                        self.equiv_reduc_depth(rules, 3);
-                        conjectures = self.get_conjectures();
                     }
+                    self.equiv_reduc_depth(rules, 3);
+                    conjectures = self.get_conjectures();
                     println!();
                 }
             }
