@@ -6,7 +6,7 @@ use symbolic_expressions::encode_string;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct RepOrder {
-    vars: HashSet<String>,
+    vars: Vec<String>,
     depth: usize,
     size: usize,
 }
@@ -15,16 +15,32 @@ impl RepOrder {
     pub fn get_depth(&self) -> usize {
         self.depth
     }
+
+    fn count_ph1(it: &Vec<String>) -> usize {
+        it.iter().filter(|x| x.ends_with("1")).count()
+    }
+
+    fn compare_vars(&self, other: &Self) -> Option<Ordering> {
+        match self.vars.iter().unique().count().partial_cmp(&other.vars.iter().unique().count()) {
+            None => { Self::count_ph1(&self.vars).partial_cmp(&Self::count_ph1(&other.vars)) }
+            Some(ord) => { match ord {
+                Ordering::Less => { Some(Ordering::Less) }
+                Ordering::Equal => { Self::count_ph1(&self.vars).partial_cmp(&Self::count_ph1(&other.vars)) }
+                Ordering::Greater => { Some(Ordering::Greater) }
+            }}
+        }
+
+    }
 }
 
 impl PartialOrd for RepOrder {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         match self.size.partial_cmp(&other.size) {
-            None => { self.vars.len().partial_cmp(&other.vars.len()) }
+            None => { other.compare_vars(self) }
             Some(x) => {
                 match x {
                     Ordering::Less => {Some(Ordering::Less)}
-                    Ordering::Equal => {other.vars.len().partial_cmp(&self.vars.len()) }
+                    Ordering::Equal => { other.compare_vars(self) }
                     Ordering::Greater => {Some(Ordering::Greater)}
                 }
             }
@@ -56,9 +72,9 @@ impl CostFunction<SymbolLang> for MinRep {
         C: FnMut(Id) -> Self::Cost {
         let current_depth = enode.children.iter().map(|i| costs(*i).depth).max().unwrap_or(0);
         let current_size = enode.children.iter().map(|i| costs(*i).size).sum1().unwrap_or(0);
-        let mut vars = enode.children.iter().flat_map(|i| costs(*i).vars).collect::<HashSet<String>>();
+        let mut vars = enode.children.iter().flat_map(|i| costs(*i).vars).collect_vec();
         if enode.op.as_str().starts_with("ts_ph") {
-            vars.insert(enode.op.to_string());
+            vars.push(enode.op.to_string());
         }
         RepOrder{depth: current_depth + 1, size: current_size + 1, vars}
     }
@@ -72,12 +88,12 @@ mod tests {
 
     #[test]
     fn compare_two_different_sizes() {
-        assert!(RepOrder{vars: HashSet::new(), depth: 0, size: 1} < RepOrder{vars: HashSet::new(), depth: 0, size: 2});
-        assert!(RepOrder{vars: HashSet::from_iter(vec![":".to_string(), "a".to_string(), "b".to_string()]), depth: 0, size: 1} < RepOrder{vars: HashSet::new(), depth: 0, size: 2});
+        assert!(RepOrder{vars: Vec::new(), depth: 0, size: 1} < RepOrder{vars: Vec::new(), depth: 0, size: 2});
+        assert!(RepOrder{vars: Vec::from_iter(vec![":".to_string(), "a".to_string(), "b".to_string()]), depth: 0, size: 1} < RepOrder{vars: HashSet::new(), depth: 0, size: 2});
     }
 
     #[test]
     fn compare_two_different_vars() {
-        assert!(RepOrder{vars: HashSet::from_iter(vec![":".to_string(), "a".to_string(), "b".to_string()]), depth: 0, size: 2} < RepOrder{vars:  HashSet::from_iter(vec![":".to_string(), "a".to_string()]), depth: 0, size: 2});
+        assert!(RepOrder{vars: Vec::from_iter(vec![":".to_string(), "a".to_string(), "b".to_string()]), depth: 0, size: 2} < RepOrder{vars:  HashSet::from_iter(vec![":".to_string(), "a".to_string()]), depth: 0, size: 2});
     }
 }
