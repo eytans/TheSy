@@ -292,7 +292,18 @@ impl TheSy {
     }
 
     fn equiv_reduc_depth(&mut self, rules: &[Rewrite<SymbolLang, ()>], depth: usize) {
-        self.egraph = Runner::default().with_time_limit(Duration::from_secs(60 * 60)).with_node_limit(10000000).with_egraph(std::mem::take(&mut self.egraph)).with_iter_limit(depth).run(rules).egraph;
+        let mut runner = Runner::default().with_time_limit(Duration::from_secs(60 * 5)).with_node_limit(200000).with_egraph(std::mem::take(&mut self.egraph)).with_iter_limit(depth);
+        runner = runner.run(rules);
+        // for (i, it) in runner.iterations.iter().enumerate() {
+        //     println!("Info on iteration {}:", i);
+        //     println!("Rebuilding time {}", it.rebuild_time);
+        //     println!("Search time {}", it.search_time);
+        //     for x in &it.applied {
+        //         println!("Rule {} time {}", x.0, x.1);
+        //     }
+        //     println!();
+        // }
+        self.egraph = runner.egraph;
         self.egraph.rebuild();
     }
 
@@ -397,7 +408,7 @@ impl TheSy {
         egraph.add_expr(ex1);
         egraph.add_expr(ex2);
         egraph.rebuild();
-        let runner = Runner::default().with_iter_limit(8).with_egraph(egraph).run(rules);
+        let runner = Runner::default().with_iter_limit(8).with_time_limit(Duration::from_secs(60)).with_node_limit(10000).with_egraph(egraph).run(rules);
         !runner.egraph.equivs(ex1, ex2).is_empty()
     }
 
@@ -405,9 +416,6 @@ impl TheSy {
         // TODO: case split
         // TODO: run full tests
         // TODO: add timeout
-        // TODO: high level
-        // TODO: check why not finding app rev
-        // TODO: fix bug with apply in fold
         println!("Running TheSy on datatypes: {} dict: {}", self.datatypes.keys().map(|x| &x.name).join(" "), self.dict.iter().map(|x| &x.0).join(" "));
         let apply_rws_start = rules.len();
         let mut found_rules = vec![];
@@ -420,9 +428,12 @@ impl TheSy {
             let mut conjectures = self.get_conjectures();
             'outer: while !conjectures.is_empty() {
                 let (key, ex1, ex2, d) = conjectures.pop().unwrap();
+                if Self::check_equality(&rules[..], &ex1, &ex2) {
+                    println!("bad conjecture {} = {}", &ex1.pretty(500), &ex2.pretty(500));
+                    continue 'outer;
+                }
                 let new_rules = self.prove(&rules[..], &d, &ex1, &ex2);
                 if new_rules.is_some() {
-                    if Self::check_equality(&rules[..], &ex1, &ex2) { continue 'outer; }
                     found_rules.extend_from_slice(&new_rules.as_ref().unwrap());
                     // TODO: move print out of prove
                     for r in new_rules.unwrap() {
