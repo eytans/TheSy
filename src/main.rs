@@ -63,17 +63,19 @@ struct TheSyConfig {
     dependencies: Vec<TheSyConfig>,
     dep_results: Vec<Vec<Rewrite<SymbolLang, ()>>>,
     output: PathBuf,
-    prerun_couples: bool
+    prerun: bool
 }
 
 impl TheSyConfig {
     pub fn new(definitions: Definitions, ph_count: usize, dependencies: Vec<TheSyConfig>, output: PathBuf) -> TheSyConfig {
+        let func_len = definitions.functions.len();
         TheSyConfig { definitions,
             ph_count,
             dependencies,
             dep_results: vec![],
             output,
-            prerun_couples: true}
+            prerun: false}
+            // prerun: func_len > 2}
     }
 
     fn collect_dependencies(&mut self) {
@@ -94,7 +96,16 @@ impl TheSyConfig {
         self.collect_dependencies();
         let mut rules = self.definitions.rws.clone();
         rules.extend(self.dep_results.iter().flatten().cloned());
-        if self.prerun_couples && self.definitions.functions.len() > 2 {
+        // Prerun helps prevent state overflow
+        if self.prerun && self.definitions.functions.len() > 2 {
+            for f in &self.definitions.functions {
+                println!("prerun {}", f.name);
+                let mut new_conf = self.clone();
+                let funcs = vec![f.clone()];
+                new_conf.definitions.functions = funcs;
+                let mut thesy = TheSy::from(&new_conf);
+                thesy.run(&mut rules, max_depth.unwrap_or(2));
+            }
             for couple in choose(&self.definitions.functions[..], 2) {
                 println!("prerun {}", couple.iter().map(|x| &x.name).join(" "));
                 let mut new_conf = self.clone();

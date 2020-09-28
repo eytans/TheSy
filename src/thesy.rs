@@ -123,6 +123,10 @@ pub struct TheSy {
     /// Flattern apply rewrites are used for high order function such as fold.
     /// TODO: add support for partial application
     apply_rws: Vec<Rewrite<SymbolLang, ()>>,
+    /// Limits to use in equiv reduc
+    node_limit: usize,
+    /// Limits to use in equiv reduc
+    iter_limit: usize
 }
 
 /// *** Thesy ***
@@ -179,6 +183,8 @@ impl TheSy {
             searchers: HashMap::new(),
             example_ids,
             apply_rws,
+            node_limit: 300000,
+            iter_limit: 8
         };
 
         res.searchers = res.create_sygue_serchers();
@@ -287,12 +293,12 @@ impl TheSy {
         self.egraph.rebuild();
     }
 
-    pub fn equiv_reduc(&mut self, rules: &[Rewrite<SymbolLang, ()>]) {
-        self.equiv_reduc_depth(rules, 8);
+    pub fn equiv_reduc(&mut self, rules: &[Rewrite<SymbolLang, ()>]) -> StopReason {
+        self.equiv_reduc_depth(rules, self.iter_limit)
     }
 
-    fn equiv_reduc_depth(&mut self, rules: &[Rewrite<SymbolLang, ()>], depth: usize) {
-        let mut runner = Runner::default().with_time_limit(Duration::from_secs(60 * 5)).with_node_limit(200000).with_egraph(std::mem::take(&mut self.egraph)).with_iter_limit(depth);
+    fn equiv_reduc_depth(&mut self, rules: &[Rewrite<SymbolLang, ()>], depth: usize)  -> StopReason {
+        let mut runner = Runner::default().with_time_limit(Duration::from_secs(60 * 10)).with_node_limit(self.node_limit).with_egraph(std::mem::take(&mut self.egraph)).with_iter_limit(depth);
         runner = runner.run(rules);
         // for (i, it) in runner.iterations.iter().enumerate() {
         //     println!("Info on iteration {}:", i);
@@ -305,6 +311,7 @@ impl TheSy {
         // }
         self.egraph = runner.egraph;
         self.egraph.rebuild();
+        runner.stop_reason.unwrap()
     }
 
     /// For all created terms, get possible equality conjectures.
@@ -417,30 +424,47 @@ impl TheSy {
         // TODO: run full tests
         // TODO: add timeout
         println!("Running TheSy on datatypes: {} dict: {}", self.datatypes.keys().map(|x| &x.name).join(" "), self.dict.iter().map(|x| &x.0).join(" "));
+
         let apply_rws_start = rules.len();
         let mut found_rules = vec![];
         for r in &self.apply_rws {
             rules.push(r.clone());
         }
+        let new_rules_index = rules.len();
+
         for depth in 0..max_depth {
             self.increase_depth();
-            self.equiv_reduc(&rules[..]);
+            self.node_limit = match self.equiv_reduc(&rules[..]) {
+                StopReason::NodeLimit(x) => {
+                    println!("Reached node limit. Increasing maximum graph size.");
+                    x + 50000
+                },
+                _ => { self.node_limit },
+            };
             let mut conjectures = self.get_conjectures();
             'outer: while !conjectures.is_empty() {
                 let (key, ex1, ex2, d) = conjectures.pop().unwrap();
-                if Self::check_equality(&rules[..], &ex1, &ex2) {
-                    println!("bad conjecture {} = {}", &ex1.pretty(500), &ex2.pretty(500));
-                    continue 'outer;
-                }
                 let new_rules = self.prove(&rules[..], &d, &ex1, &ex2);
                 if new_rules.is_some() {
+                    if Self::check_equality(&rules[..], &ex1, &ex2) {
+                        println!("bad conjecture {} = {}", &ex1.pretty(500), &ex2.pretty(500));
+                        continue 'outer;
+                    }
                     found_rules.extend_from_slice(&new_rules.as_ref().unwrap());
                     // TODO: move print out of prove
                     for r in new_rules.unwrap() {
                         println!("proved: {}", r.2.long_name());
-                        rules.push(r.2);
+                        // inserting like this so new rule will apply before running into node limit.
+                        rules.insert(new_rules_index, r.2);
                     }
-                    self.equiv_reduc_depth(rules, 3);
+                    let reduc_depth = 3;
+                    self.node_limit = match self.equiv_reduc_depth(&rules[..], reduc_depth) {
+                        StopReason::NodeLimit(x) => {
+                            println!("Reached node limit. Increasing maximum graph size.");
+                            x + 50000
+                        },
+                        _ => { self.node_limit },
+                    };
                     conjectures = self.get_conjectures();
                     println!();
                 }
