@@ -50,7 +50,7 @@ impl From<&CliOpt> for TheSyConfig {
     fn from(opts: &CliOpt) -> Self {
         TheSyConfig::new(
             thesy_parser::parser::parse_file(opts.path.to_str().unwrap().to_string()),
-            3,
+            opts.ph_count,
             vec![],
             opts.path.with_extension("res"))
     }
@@ -119,7 +119,7 @@ impl TheSyConfig {
         let results = thesy.run(&mut rules, max_depth.unwrap_or(2));
         let new_rules_text = results.iter()
             .map(|(searcher, applier, rw)|
-                format!("{} => {}", searcher.pretty(1000), applier.pretty(1000)))
+                format!("(=> {} {})", searcher.pretty(1000), applier.pretty(1000)))
             .join("\n");
         File::create(&self.output).unwrap().write_all(new_rules_text.as_bytes()).unwrap();
         (thesy, rules)

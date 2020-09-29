@@ -1,0 +1,27 @@
+(datatype Nat () ((succ Nat Nat) (zero Nat)))
+(datatype Lst () ((cons Nat Lst Lst) (nil Lst)))
+
+(declare-fun plus (Nat Nat) Nat)
+(=> plus_base (plus zero ?n) ?n)
+(=> plus_ind_1 (plus (succ ?n) ?m) (succ (plus ?n ?m)))
+(=> plus_ind_2 (succ (plus ?n ?m)) (plus (succ ?n) ?m))
+
+(declare-fun append (Lst Lst) Lst)
+(=> app_base (append nil ?x) ?x)
+(=> app_ind1 (append (cons ?x ?y) ?z) (cons ?x (append ?y ?z)))
+(=> app_ind2 (cons ?x (append ?y ?z)) (append (cons ?x ?y) ?z))
+
+(declare-fun sum (Lst) Nat)
+(=> sum_base (sum nil) zero)
+(=> sum_ind1 (sum (cons ?x ?y)) (plus ?x (sum ?y)))
+(=> sum_ind2 (plus ?x (sum ?y)) (sum (cons ?x ?y)))
+
+(declare-fun map ((-> Nat Nat) Lst) Lst)
+(=> map_base (map ?f nil) nil)
+(=> map_ind1 (map ?f (cons ?x ?xs)) (cons (apply ?f ?x) (map ?f ?xs)))
+(=> map_ind2 (cons (apply ?f ?x) (map ?f ?xs)) (map ?f (cons ?x ?xs)))
+
+(declare-fun fold (Nat (-> Nat Nat Nat) Lst) Nat)
+(=> fold_base (fold ?i ?f nil) ?i)
+(=> fold_ind1 (fold ?i ?f (cons ?x ?xs)) (fold (apply ?f ?x ?i) ?f ?xs))
+(=> fold_ind2 (fold (apply ?f ?x ?i) ?f ?xs) (fold ?i ?f (cons ?x ?xs)))

@@ -34,7 +34,7 @@ pub struct Function {
 
 impl Function {
     pub fn new(name: String, params: Vec<RecExpr<SymbolLang>>, ret_type: RecExpr<SymbolLang>) -> Function {
-        Function{name, params, ret_type}
+        Function { name, params, ret_type }
     }
 
     pub fn as_exp(&self) -> RecExpr<SymbolLang> {
@@ -126,7 +126,7 @@ pub struct TheSy {
     /// Limits to use in equiv reduc
     node_limit: usize,
     /// Limits to use in equiv reduc
-    iter_limit: usize
+    iter_limit: usize,
 }
 
 /// *** Thesy ***
@@ -183,8 +183,8 @@ impl TheSy {
             searchers: HashMap::new(),
             example_ids,
             apply_rws,
-            node_limit: 300000,
-            iter_limit: 8
+            node_limit: 400000,
+            iter_limit: 8,
         };
 
         res.searchers = res.create_sygue_serchers();
@@ -207,7 +207,6 @@ impl TheSy {
     }
 
     fn create_sygue_serchers(&self) -> HashMap<String, (MultiDiffSearcher, Vec<(Var, RecExpr<SymbolLang>)>)> {
-        // TODO: eggstentions should contain wrappers to recexpressions, i.e. subtrees wihtout cloning and such.
         let mut res = HashMap::new();
         self.dict.iter().for_each(|(fun_name, fun_type)| {
             let type_tree = fun_type.into_tree();
@@ -297,7 +296,7 @@ impl TheSy {
         self.equiv_reduc_depth(rules, self.iter_limit)
     }
 
-    fn equiv_reduc_depth(&mut self, rules: &[Rewrite<SymbolLang, ()>], depth: usize)  -> StopReason {
+    fn equiv_reduc_depth(&mut self, rules: &[Rewrite<SymbolLang, ()>], depth: usize) -> StopReason {
         let mut runner = Runner::default().with_time_limit(Duration::from_secs(60 * 10)).with_node_limit(self.node_limit).with_egraph(std::mem::take(&mut self.egraph)).with_iter_limit(depth);
         runner = runner.run(rules);
         // for (i, it) in runner.iterations.iter().enumerate() {
@@ -422,7 +421,7 @@ impl TheSy {
     pub fn run(&mut self, rules: &mut Vec<Rewrite<SymbolLang, ()>>, max_depth: usize) -> Vec<(Pattern<SymbolLang>, Pattern<SymbolLang>, Rewrite<SymbolLang, ()>)> {
         // TODO: case split
         // TODO: run full tests
-        // TODO: add timeout
+        // TODO: 2 phs and generalize
         println!("Running TheSy on datatypes: {} dict: {}", self.datatypes.keys().map(|x| &x.name).join(" "), self.dict.iter().map(|x| &x.0).join(" "));
 
         let apply_rws_start = rules.len();
@@ -437,10 +436,11 @@ impl TheSy {
             self.node_limit = match self.equiv_reduc(&rules[..]) {
                 StopReason::NodeLimit(x) => {
                     println!("Reached node limit. Increasing maximum graph size.");
-                    x + 50000
-                },
-                _ => { self.node_limit },
+                    x + 100000
+                }
+                _ => { self.node_limit }
             };
+
             let mut conjectures = self.get_conjectures();
             'outer: while !conjectures.is_empty() {
                 let (key, ex1, ex2, d) = conjectures.pop().unwrap();
@@ -461,9 +461,9 @@ impl TheSy {
                     self.node_limit = match self.equiv_reduc_depth(&rules[..], reduc_depth) {
                         StopReason::NodeLimit(x) => {
                             println!("Reached node limit. Increasing maximum graph size.");
-                            x + 50000
-                        },
-                        _ => { self.node_limit },
+                            x + 100000
+                        }
+                        _ => { self.node_limit }
                     };
                     conjectures = self.get_conjectures();
                     println!();
@@ -479,10 +479,71 @@ impl TheSy {
 
 /// *** Thesy statics ***
 impl TheSy {
+    /// Appears at the start of every placeholder var
     const PH_START: &'static str = "ts_ph";
+    /// To be used as the op of edges representing potential split
+    const SPLITTER: &'static str = "potential_split";
+    /// Pattern to find all available splitter edges. Limited arbitrarily to 5 possible splits.
+    fn split_patterns() -> Vec<Pattern<SymbolLang>> {
+        vec![
+            Pattern::from_str(&*format!("({} ?c0 ?c1)", Self::SPLITTER)).unwrap(),
+            Pattern::from_str(&*format!("({} ?c0 ?c1 ?c2)", Self::SPLITTER)).unwrap(),
+            Pattern::from_str(&*format!("({} ?c0 ?c1 ?c2 ?c3)", Self::SPLITTER)).unwrap(),
+            Pattern::from_str(&*format!("({} ?c0 ?c1 ?c2 ?c3 ?c4)", Self::SPLITTER)).unwrap(),
+        ]
+    }
+
+    /// Case splitting works by cloning the graph and merging the different possibilities.
+    /// Enabling recursivly splitting all
+    fn case_split(rules: &[Rewrite<SymbolLang, ()>], egraph: &mut EGraph<SymbolLang, ()>, root: Id, splits: Vec<Id>, run_depth: usize, split_depth: usize) {
+        let classes = egraph.classes().collect_vec();
+        // TODO: parallel
+        let after_splits = splits.iter().map(|child| {
+            let mut new_graph = egraph.clone();
+            new_graph.union(root, *child);
+            // TODO: graph limit enhancing runner, with rules sorting
+            let mut runner = Runner::default().with_time_limit(Duration::from_secs(60 * 5)).with_node_limit(new_graph.total_number_of_nodes() + 200000).with_egraph(new_graph).with_iter_limit(run_depth);
+            runner = runner.run(rules);
+            runner.egraph.rebuild();
+            Self::case_split_all(rules, &mut runner.egraph, split_depth - 1, run_depth);
+            classes.iter().map(|c| (c.id, runner.egraph.find(c.id))).collect::<HashMap<Id, Id>>()
+        }).collect_vec();
+        let mut group_by_splits: HashMap<Vec<Id>, HashSet<Id>> = HashMap::new();
+        for c in classes {
+            let key = after_splits.iter().map(|m| m[&c.id]).collect_vec();
+            if !group_by_splits.contains_key(&key) {
+                group_by_splits.insert(key.clone(), HashSet::new());
+            }
+            group_by_splits.get_mut(&key).unwrap().insert(c.id);
+        }
+        for group in group_by_splits.values().filter(|g| g.len() > 1) {
+            let first = group.iter().next().unwrap();
+            for id in group.iter().dropping(1) {
+                egraph.union(*first, *id);
+            }
+        }
+        egraph.rebuild();
+    }
+
+    fn case_split_all(rules: &[Rewrite<SymbolLang, ()>], egraph: &mut EGraph<SymbolLang, ()>, split_depth: usize, run_depth: usize) {
+        // TODO: marked used splitters to prevent reusing
+        if run_depth == 0 {
+            return;
+        }
+        let splitters: Vec<(SearchMatches, usize)> = Self::split_patterns().iter().enumerate()
+            .flat_map(|(i, p)| {
+                p.search(egraph).into_iter().zip(iter::once(i + 2).cycle())
+            }).collect_vec();
+        splitters.iter().for_each(|(sm, child_count)|
+            sm.substs.iter().for_each(|s| {
+                let params = (0..*child_count).map(|i| *s.get(format!("c{}", i).parse().unwrap()).unwrap()).collect_vec();
+                Self::case_split(rules, egraph, sm.eclass, params, split_depth, run_depth);
+            }));
+    }
 
     /// Create all needed phs from
     fn collect_phs(dict: &Vec<(String, RecExpr<SymbolLang>)>, ph_count: usize) -> Vec<(String, RecExpr<SymbolLang>)> {
+        // TODO: only two phs of non recursive types
         let mut res = HashSet::new();
         for (name, typ) in dict {
             if typ.into_tree().root().op.to_string() == "->" {
