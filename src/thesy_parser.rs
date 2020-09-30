@@ -7,6 +7,7 @@ pub mod parser {
     use itertools::{Itertools, cons_tuples};
     use std::fs::File;
     use std::io::Read;
+    use crate::eggstentions::appliers::DiffApplier;
 
     #[derive(Default, Clone, Debug)]
     pub struct Definitions {
@@ -93,6 +94,12 @@ pub mod parser {
                     res.rws.push(rewrite!(name + "-rev"; applier1 => searcher1));
                     // buggy macro
                     // res.rws.extend_from_slice(&rewrite!(name; searcher <=> applier));
+                },
+                "=|>" => {
+                    let name = l[1].take_string().unwrap();
+                    let searcher = Pattern::from_str(&*l[2].to_string()).unwrap();
+                    let applier = DiffApplier::new(Pattern::from_str(&*l[3].to_string()).unwrap());
+                    res.rws.push(rewrite!(name; searcher => applier));
                 },
                 "prove" => {
                     res.conjectures.push((sexp_to_recexpr(&l[1]), sexp_to_recexpr(&l[2])));

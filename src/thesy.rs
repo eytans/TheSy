@@ -167,6 +167,11 @@ impl TheSy {
                 rewrite!(format!("apply {}", name); searcher => applier)
             }).collect_vec();
 
+        let ite_rws = vec![
+            rewrite!("ite_true"; "(ite true ?x ?y)" => "?x"),
+            rewrite!("ite_false"; "(ite false ?x ?y)" => "?y")
+        ];
+
         for d in datatypes.iter() {
             let ind_id = egraph.add_expr(&Self::get_ind_var(d).parse().unwrap());
             let initial_example_ids = examples[d].iter()

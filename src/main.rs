@@ -32,7 +32,7 @@ mod tools;
 mod thesy;
 mod thesy_parser;
 mod example_creator;
-mod smtlib_translator;
+// mod smtlib_translator;
 
 /// Arguments to use to run thesy
 #[derive(StructOpt)]
