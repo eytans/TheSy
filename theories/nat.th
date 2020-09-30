@@ -12,14 +12,8 @@
 (=> mult_ind_1 (mult (succ ?n) ?m) (plus (mult ?n ?m) ?m))
 (=> mult_ind_2 (plus (mult ?n ?m) ?m) (mult (succ ?n) ?m))
 
-(declare-fun tri (Nat) Nat)
+(declare-fun minus (Nat Nat) Nat)
 
-(=> tri_base (tri zero) zero)
-(=> tri_ind_1 (tri (succ ?n)) (plus (tri ?n) (succ ?n)))
-(=> tri_ind_2 (plus (tri ?n) (succ ?n)) (tri (succ ?n)))
-
-(declare-fun cubes (Nat) Nat)
-
-(=> cubes_base (cubes zero) zero)
-(=> cubes_ind_1 (cubes (succ ?n)) (plus (cubes ?n) (mult (succ ?n) (mult (succ ?n) (succ ?n)))))
-(=> cubes_ind_2 (plus (cubes ?n) (mult (succ ?n) (mult (succ ?n) (succ ?n)))) (cubes (succ ?n)))
+(=> minus_base (minus zero ?n) zero)
+(=> minus_ind_1 (minus (succ ?n) (succ ?m)) (minus ?n ?m))
+(=> minus_ind_2 (minus ?n zero) ?n)

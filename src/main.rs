@@ -32,6 +32,7 @@ mod tools;
 mod thesy;
 mod thesy_parser;
 mod example_creator;
+mod smtlib_translator;
 
 /// Arguments to use to run thesy
 #[derive(StructOpt)]
@@ -52,7 +53,7 @@ impl From<&CliOpt> for TheSyConfig {
             thesy_parser::parser::parse_file(opts.path.to_str().unwrap().to_string()),
             opts.ph_count,
             vec![],
-            opts.path.with_extension("res"))
+            opts.path.with_extension("res.th"))
     }
 }
 
@@ -119,7 +120,7 @@ impl TheSyConfig {
         let results = thesy.run(&mut rules, max_depth.unwrap_or(2));
         let new_rules_text = results.iter()
             .map(|(searcher, applier, rw)|
-                format!("(=> {} {})", searcher.pretty(1000), applier.pretty(1000)))
+                format!("(=> ({} => {}) {} {})", searcher.pretty(1000), applier.pretty(1000), searcher.pretty(1000), applier.pretty(1000)))
             .join("\n");
         File::create(&self.output).unwrap().write_all(new_rules_text.as_bytes()).unwrap();
         (thesy, rules)
@@ -144,111 +145,9 @@ impl From<&TheSyConfig> for TheSy {
 
 fn main() {
     let args = CliOpt::from_args();
+    let start = SystemTime::now();
+    // TODO: Add logging of all runs
     let res = TheSyConfig::from(&args).run(Some(2));
-
+    println!("done in {}", SystemTime::now().duration_since(start).unwrap().as_millis());
     exit(0);
-
-    let nat = DataType::new("nat".to_string(), vec![
-        Function::new("Z".to_string(), vec![], "nat".parse().unwrap()),
-        Function::new("Z".to_string(), vec!["nat".parse().unwrap()], "nat".parse().unwrap())
-    ]);
-
-    let nat_examples = vec!["Z".parse().unwrap(), "(S Z)".parse().unwrap(), "(S (S Z))".parse().unwrap()];
-
-    let nat_definitions = vec![("Z", "nat"), ("S", "(-> nat nat)"), ("pl", "(-> nat nat nat)")].into_iter()
-        .map(|(name, typ)| (name.to_string(), RecExpr::from_str(typ).unwrap())).collect();
-
-    let mut sygue = TheSy::new(
-        nat.clone(),
-        nat_examples.clone(),
-        nat_definitions,
-    );
-
-    let mut nat_rws: Vec<Rewrite<SymbolLang, ()>> = vec![rewrite!("pl base"; "(pl Z ?x)" => "?x"), rewrite!("pl ind"; "(pl (S ?y) ?x)" => "(S (pl ?y ?x))")];
-    let start = SystemTime::now();
-    sygue.run(&mut nat_rws, 2);
-    println!("done in {}", SystemTime::now().duration_since(start).unwrap().as_millis());
-
-    let list = DataType::new("list".to_string(), vec![
-        Function::new("Nil".to_string(), vec![], "list".parse().unwrap()),
-        Function::new("Cons".to_string(), vec!["nat".parse().unwrap(), "list".parse().unwrap()], "list".parse().unwrap()),
-    ]);
-
-    let list_examples = vec!["Nil".parse().unwrap(), "(Cons x Nil)".parse().unwrap(), "(Cons y (Cons x Nil))".parse().unwrap()];
-
-    let mut sygue = TheSy::new_with_ph(
-        vec![list.clone(), nat.clone()],
-        // vec![list.clone()],
-        HashMap::from_iter(vec![(list.clone(), list_examples.clone()), (nat.clone(), nat_examples.clone())]),
-        // HashMap::from_iter(vec![(list, list_examples)]),
-        vec![("Z", "nat"), ("S", "(-> nat nat)"), ("pl", "(-> nat nat nat)"),
-             ("Nil", "list"), ("Cons", "(-> nat list list)"), ("snoc", "(-> list nat list)"),
-             ("rev", "(-> list list)"), ("app", "(-> list list list)"),
-             // ("len", "(-> list nat)"), ("sum", "(-> list nat)"),
-             // ("map", "(-> (-> nat nat) list)"), ("fold", "(-> nat (-> nat nat nat) list nat)"),
-        ].into_iter()
-            .map(|(name, typ)| (name.to_string(), RecExpr::from_str(typ).unwrap())).collect(),
-        3,
-    );
-
-    sygue.egraph.dot().to_dot("graph.dot");
-
-    let mut list_rws: Vec<Rewrite<SymbolLang, ()>> = vec![
-        rewrite!("app base"; "(app Nil ?xs)" => "?xs"),
-        rewrite!("app ind"; "(app (Cons ?y ?ys) ?xs)" => "(Cons ?y (app ?ys ?xs))"),
-        rewrite!("snoc base"; "(snoc Nil ?x)" => "(Cons ?x Nil)"),
-        rewrite!("snoc ind"; "(snoc (Cons ?y ?ys) ?x)" => "(Cons ?y (snoc ?ys ?x))"),
-        rewrite!("rev base"; "(rev Nil)" => "Nil"),
-        rewrite!("rev ind"; "(rev (Cons ?y ?ys))" => "(snoc (rev ?ys) ?y)"),
-        // rewrite!("len base"; "(len Nil)" => "Z"),
-        // rewrite!("len ind"; "(len (Cons ?y ?ys))" => "(S (len ?ys))"),
-        // rewrite!("sum base"; "(sum Nil)" => "Z"),
-        // rewrite!("sum ind"; "(sum (Cons ?y ?ys))" => "(pl ?y (sum ?ys))"),
-        // rewrite!("map base"; "(map ?f Nil)" => "Nil"),
-        // rewrite!("map ind"; "(map ?f (Cons ?y ?ys))" => "(Cons (apply ?f ?y) (map ?f ?ys))"),
-        // rewrite!("fold base"; "(fold ?i ?f Nil)" => "?i"),
-        // rewrite!("fold ind"; "(fold ?i ?f (Cons ?y ?ys))" => "(fold (apply ?f ?y ?i) ?f ?ys)"),
-    ];
-    list_rws.extend(nat_rws.into_iter());
-    let start = SystemTime::now();
-    let new_rules = sygue.run(&mut list_rws, 2);
-    println!("done in {}", SystemTime::now().duration_since(start).unwrap().as_millis());
-
-
-    let mut sygue = TheSy::new_with_ph(
-        vec![list.clone(), nat.clone()],
-        // vec![list.clone()],
-        HashMap::from_iter(vec![(list.clone(), list_examples.clone()), (nat.clone(), nat_examples.clone())]),
-        // HashMap::from_iter(vec![(list, list_examples)]),
-        vec![("Z", "nat"), ("S", "(-> nat nat)"), ("pl", "(-> nat nat nat)"),
-             ("Nil", "list"), ("Cons", "(-> nat list list)"), ("snoc", "(-> list nat list)"),
-             ("rev", "(-> list list)"), ("app", "(-> list list list)"),
-             ("len", "(-> list nat)"), ("sum", "(-> list nat)"),
-             ("map", "(-> (-> nat nat) list)"), ("fold", "(-> nat (-> nat nat nat) list nat)"),
-        ].into_iter()
-            .map(|(name, typ)| (name.to_string(), RecExpr::from_str(typ).unwrap())).collect(),
-        2,
-    );
-
-    sygue.egraph.dot().to_dot("graph.dot");
-
-    list_rws.extend_from_slice(&vec![
-        // rewrite!("app base"; "(app Nil ?xs)" => "?xs"),
-        // rewrite!("app ind"; "(app (Cons ?y ?ys) ?xs)" => "(Cons ?y (app ?ys ?xs))"),
-        // rewrite!("snoc base"; "(snoc Nil ?x)" => "(Cons ?x Nil)"),
-        // rewrite!("snoc ind"; "(snoc (Cons ?y ?ys) ?x)" => "(Cons ?y (snoc ?ys ?x))"),
-        // rewrite!("rev base"; "(rev Nil)" => "Nil"),
-        // rewrite!("rev ind"; "(rev (Cons ?y ?ys))" => "(snoc (rev ?ys) ?y)"),
-        rewrite!("len base"; "(len Nil)" => "Z"),
-        rewrite!("len ind"; "(len (Cons ?y ?ys))" => "(S (len ?ys))"),
-        rewrite!("sum base"; "(sum Nil)" => "Z"),
-        rewrite!("sum ind"; "(sum (Cons ?y ?ys))" => "(pl ?y (sum ?ys))"),
-        rewrite!("map base"; "(map ?f Nil)" => "Nil"),
-        rewrite!("map ind"; "(map ?f (Cons ?y ?ys))" => "(Cons (apply ?f ?y) (map ?f ?ys))"),
-        rewrite!("fold base"; "(fold ?i ?f Nil)" => "?i"),
-        rewrite!("fold ind"; "(fold ?i ?f (Cons ?y ?ys))" => "(fold (apply ?f ?y ?i) ?f ?ys)"),
-    ]);
-    let start = SystemTime::now();
-    sygue.run(&mut list_rws, 2);
-    println!("done in {}", SystemTime::now().duration_since(start).unwrap().as_millis());
 }

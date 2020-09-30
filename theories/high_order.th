@@ -1,15 +1,12 @@
+(include list)
+(include list.res)
+
 (datatype Nat () ((succ Nat Nat) (zero Nat)))
-(datatype Lst () ((cons Nat Lst Lst) (nil Lst)))
 
 (declare-fun plus (Nat Nat) Nat)
 (=> plus_base (plus zero ?n) ?n)
 (=> plus_ind_1 (plus (succ ?n) ?m) (succ (plus ?n ?m)))
 (=> plus_ind_2 (succ (plus ?n ?m)) (plus (succ ?n) ?m))
-
-(declare-fun append (Lst Lst) Lst)
-(=> app_base (append nil ?x) ?x)
-(=> app_ind1 (append (cons ?x ?y) ?z) (cons ?x (append ?y ?z)))
-(=> app_ind2 (cons ?x (append ?y ?z)) (append (cons ?x ?y) ?z))
 
 (declare-fun sum (Lst) Nat)
 (=> sum_base (sum nil) zero)
