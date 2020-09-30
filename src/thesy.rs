@@ -123,6 +123,8 @@ pub struct TheSy {
     /// Flattern apply rewrites are used for high order function such as fold.
     /// TODO: add support for partial application
     apply_rws: Vec<Rewrite<SymbolLang, ()>>,
+    /// Rewrites to support ite
+    ite_rws: Vec<Rewrite<SymbolLang, ()>>,
     /// Limits to use in equiv reduc
     node_limit: usize,
     /// Limits to use in equiv reduc
@@ -167,7 +169,7 @@ impl TheSy {
                 rewrite!(format!("apply {}", name); searcher => applier)
             }).collect_vec();
 
-        let ite_rws = vec![
+        let ite_rws: Vec<Rewrite<SymbolLang, ()>> = vec![
             rewrite!("ite_true"; "(ite true ?x ?y)" => "?x"),
             rewrite!("ite_false"; "(ite false ?x ?y)" => "?y")
         ];
@@ -188,6 +190,7 @@ impl TheSy {
             searchers: HashMap::new(),
             example_ids,
             apply_rws,
+            ite_rws,
             node_limit: 400000,
             iter_limit: 8,
         };
@@ -380,6 +383,7 @@ impl TheSy {
             let contr_id = egraph.add_expr(&contr_exp);
             egraph.union(contr_id, ind_id);
             let mut runner: Runner<SymbolLang, ()> = Runner::new(()).with_egraph(egraph).with_iter_limit(8).run(&rule_set[..]);
+            Self::case_split_all(rules, &mut runner.egraph, 2, 4);
             res = res && !runner.egraph.equivs(&ex1, &ex2).is_empty()
         }
         if res {
@@ -429,9 +433,9 @@ impl TheSy {
         // TODO: 2 phs and generalize
         println!("Running TheSy on datatypes: {} dict: {}", self.datatypes.keys().map(|x| &x.name).join(" "), self.dict.iter().map(|x| &x.0).join(" "));
 
-        let apply_rws_start = rules.len();
+        let system_rws_start = rules.len();
         let mut found_rules = vec![];
-        for r in &self.apply_rws {
+        for r in self.apply_rws.iter().chain(self.ite_rws.iter()) {
             rules.push(r.clone());
         }
         let new_rules_index = rules.len();
@@ -445,6 +449,7 @@ impl TheSy {
                 }
                 _ => { self.node_limit }
             };
+            Self::case_split_all(rules, &mut self.egraph, 2, 4);
 
             let mut conjectures = self.get_conjectures();
             'outer: while !conjectures.is_empty() {
@@ -476,7 +481,7 @@ impl TheSy {
             }
         }
         for i in 0..self.apply_rws.len() {
-            rules.remove(apply_rws_start);
+            rules.remove(system_rws_start);
         }
         found_rules
     }
@@ -491,10 +496,10 @@ impl TheSy {
     /// Pattern to find all available splitter edges. Limited arbitrarily to 5 possible splits.
     fn split_patterns() -> Vec<Pattern<SymbolLang>> {
         vec![
-            Pattern::from_str(&*format!("({} ?c0 ?c1)", Self::SPLITTER)).unwrap(),
-            Pattern::from_str(&*format!("({} ?c0 ?c1 ?c2)", Self::SPLITTER)).unwrap(),
-            Pattern::from_str(&*format!("({} ?c0 ?c1 ?c2 ?c3)", Self::SPLITTER)).unwrap(),
-            Pattern::from_str(&*format!("({} ?c0 ?c1 ?c2 ?c3 ?c4)", Self::SPLITTER)).unwrap(),
+            Pattern::from_str(&*format!("({} ?root ?c0 ?c1)", Self::SPLITTER)).unwrap(),
+            Pattern::from_str(&*format!("({} ?root ?c0 ?c1 ?c2)", Self::SPLITTER)).unwrap(),
+            Pattern::from_str(&*format!("({} ?root ?c0 ?c1 ?c2 ?c3)", Self::SPLITTER)).unwrap(),
+            Pattern::from_str(&*format!("({} ?root ?c0 ?c1 ?c2 ?c3 ?c4)", Self::SPLITTER)).unwrap(),
         ]
     }
 
@@ -535,14 +540,16 @@ impl TheSy {
         if run_depth == 0 {
             return;
         }
-        let splitters: Vec<(SearchMatches, usize)> = Self::split_patterns().iter().enumerate()
-            .flat_map(|(i, p)| {
-                p.search(egraph).into_iter().zip(iter::once(i + 2).cycle())
+        let root_var: Var = "?root".parse().unwrap();
+        let children_vars: Vec<Var> = (0..5).map(|i| format!("?c{}", i).parse().unwrap()).collect_vec();
+        let splitters: Vec<(usize, Vec<Subst>)> = Self::split_patterns().iter().enumerate()
+            .map(|(i, p)| {
+                (i + 2, p.search(egraph).into_iter().flat_map(|x| x.substs).collect_vec())
             }).collect_vec();
-        splitters.iter().for_each(|(sm, child_count)|
-            sm.substs.iter().for_each(|s| {
-                let params = (0..*child_count).map(|i| *s.get(format!("c{}", i).parse().unwrap()).unwrap()).collect_vec();
-                Self::case_split(rules, egraph, sm.eclass, params, split_depth, run_depth);
+        splitters.iter().for_each(|(child_count, substs)|
+            substs.iter().for_each(|s| {
+                let params = (0..*child_count).map(|i| *s.get(children_vars[i]).unwrap()).collect_vec();
+                Self::case_split(rules, egraph, *s.get(root_var).unwrap(), params, split_depth, run_depth);
             }));
     }
 
