@@ -32,8 +32,12 @@ pub mod parser {
             self.conjectures.extend_from_slice(&std::mem::take(&mut other.conjectures).into_iter()
                 .filter(|c| !self.conjectures.contains(c)).collect_vec());
             self.rws.extend_from_slice(&std::mem::take(&mut other.rws).into_iter()
-                .filter(|rw| self.rws.iter()
-                    .all(|rw1| rw1.long_name() != rw.long_name())).collect_vec());
+                .filter(|rw| {
+                    self.rws.iter()
+                        .all(|rw1| {
+                            rw1.name() != rw.name()
+                        })
+                }).collect_vec());
         }
     }
 
@@ -99,6 +103,7 @@ pub mod parser {
                     let name = l[1].take_string().unwrap();
                     let searcher = Pattern::from_str(&*l[2].to_string()).unwrap();
                     let applier = DiffApplier::new(Pattern::from_str(&*l[3].to_string()).unwrap());
+                    println!("{}", applier.pretty(500));
                     res.rws.push(rewrite!(name; searcher => applier));
                 },
                 "prove" => {

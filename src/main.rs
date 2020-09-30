@@ -120,7 +120,7 @@ impl TheSyConfig {
         let results = thesy.run(&mut rules, max_depth.unwrap_or(2));
         let new_rules_text = results.iter()
             .map(|(searcher, applier, rw)|
-                format!("(=> ({} => {}) {} {})", searcher.pretty(1000), applier.pretty(1000), searcher.pretty(1000), applier.pretty(1000)))
+                format!("(=> \"{} => {}\" {} {})", searcher.pretty(1000), applier.pretty(1000), searcher.pretty(1000), applier.pretty(1000)))
             .join("\n");
         File::create(&self.output).unwrap().write_all(new_rules_text.as_bytes()).unwrap();
         (thesy, rules)
