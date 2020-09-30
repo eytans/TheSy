@@ -51,7 +51,7 @@ pub mod parser {
     pub fn parse(lines: &[String]) -> Definitions {
         let mut res = Definitions::default();
         for l in lines {
-            if l.trim().is_empty() {
+            if l.trim().is_empty() || l.starts_with(";") {
                 continue;
             }
             let mut sexp = symbolic_expressions::parser::parse_str(l).unwrap();

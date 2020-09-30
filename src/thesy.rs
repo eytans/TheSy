@@ -505,7 +505,7 @@ impl TheSy {
 
     /// Case splitting works by cloning the graph and merging the different possibilities.
     /// Enabling recursivly splitting all
-    fn case_split(rules: &[Rewrite<SymbolLang, ()>], egraph: &mut EGraph<SymbolLang, ()>, root: Id, splits: Vec<Id>, run_depth: usize, split_depth: usize) {
+    fn case_split(rules: &[Rewrite<SymbolLang, ()>], egraph: &mut EGraph<SymbolLang, ()>, root: Id, splits: Vec<Id>, split_depth: usize, run_depth: usize) {
         let classes = egraph.classes().collect_vec();
         // TODO: parallel
         let after_splits = splits.iter().map(|child| {
@@ -537,9 +537,10 @@ impl TheSy {
 
     fn case_split_all(rules: &[Rewrite<SymbolLang, ()>], egraph: &mut EGraph<SymbolLang, ()>, split_depth: usize, run_depth: usize) {
         // TODO: marked used splitters to prevent reusing
-        if run_depth == 0 {
+        if split_depth == 0 {
             return;
         }
+        println!("split depth {}", split_depth);
         let root_var: Var = "?root".parse().unwrap();
         let children_vars: Vec<Var> = (0..5).map(|i| format!("?c{}", i).parse().unwrap()).collect_vec();
         let splitters: Vec<(usize, Vec<Subst>)> = Self::split_patterns().iter().enumerate()
@@ -547,10 +548,14 @@ impl TheSy {
                 (i + 2, p.search(egraph).into_iter().flat_map(|x| x.substs).collect_vec())
             }).collect_vec();
         splitters.iter().for_each(|(child_count, substs)|
-            substs.iter().for_each(|s| {
-                let params = (0..*child_count).map(|i| *s.get(children_vars[i]).unwrap()).collect_vec();
-                Self::case_split(rules, egraph, *s.get(root_var).unwrap(), params, split_depth, run_depth);
-            }));
+            {
+                println!("substs for {} len {}", child_count, substs.len());
+                substs.iter().for_each(|s| {
+                    println!("split by {:#?}", *s.get(root_var).unwrap());
+                    let params = (0..*child_count).map(|i| *s.get(children_vars[i]).unwrap()).collect_vec();
+                    Self::case_split(rules, egraph, *s.get(root_var).unwrap(), params, split_depth, run_depth);
+                })
+            });
     }
 
     /// Create all needed phs from
