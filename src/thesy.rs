@@ -337,8 +337,8 @@ impl TheSy {
             for set in m.values() {
                 if set.len() < 2 { continue; }
                 for couple in choose(&set.iter().collect_vec()[..], 2) {
-                    let min = if reps[couple[0]].0 <= reps[couple[1]].0 { reps[couple[0]].0.clone() } else { reps[couple[1]].0.clone() };
-                    res.push((min, reps[couple[0]].1.clone(), reps[couple[1]].1.clone(), d.clone()));
+                    let max = if reps[couple[0]].0 >= reps[couple[1]].0 { reps[couple[0]].0.clone() } else { reps[couple[1]].0.clone() };
+                    res.push((max, reps[couple[0]].1.clone(), reps[couple[1]].1.clone(), d.clone()));
                 }
             }
         }
