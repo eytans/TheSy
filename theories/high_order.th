@@ -1,7 +1,8 @@
-(include list)
 (include list.res)
+(include nat.res)
 
 (datatype Nat () ((succ Nat Nat) (zero Nat)))
+(datatype Lst () ((cons Nat Lst Lst) (nil Lst)))
 
 (declare-fun plus (Nat Nat) Nat)
 (=> plus_base (plus zero ?n) ?n)

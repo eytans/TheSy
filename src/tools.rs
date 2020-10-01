@@ -79,13 +79,6 @@ pub mod tools {
         }
     }
 
-    pub fn print_iter<T: Display, I: Iterator<Item = T>>(x: I) {
-        for y in x {
-            print!("{}, ", y);
-        }
-        println!();
-    }
-
     // pub trait DispWrapper {
     //     fn to_print_str(&self) -> String;
     // }

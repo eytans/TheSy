@@ -1,0 +1,2 @@
+(=> "(filter ?ts_ph_POfn_Nat_boolPC_1 ?ts_ph_Lst_0) => (filter ?ts_ph_POfn_Nat_boolPC_1 (filter ?ts_ph_POfn_Nat_boolPC_1 ?ts_ph_Lst_0))" (filter ?ts_ph_POfn_Nat_boolPC_1 ?ts_ph_Lst_0) (filter ?ts_ph_POfn_Nat_boolPC_1 (filter ?ts_ph_POfn_Nat_boolPC_1 ?ts_ph_Lst_0)))
+(=> "(filter ?ts_ph_POfn_Nat_boolPC_1 (filter ?ts_ph_POfn_Nat_boolPC_1 ?ts_ph_Lst_0)) => (filter ?ts_ph_POfn_Nat_boolPC_1 ?ts_ph_Lst_0)" (filter ?ts_ph_POfn_Nat_boolPC_1 (filter ?ts_ph_POfn_Nat_boolPC_1 ?ts_ph_Lst_0)) (filter ?ts_ph_POfn_Nat_boolPC_1 ?ts_ph_Lst_0))

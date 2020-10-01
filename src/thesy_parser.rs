@@ -103,7 +103,6 @@ pub mod parser {
                     let name = l[1].take_string().unwrap();
                     let searcher = Pattern::from_str(&*l[2].to_string()).unwrap();
                     let applier = DiffApplier::new(Pattern::from_str(&*l[3].to_string()).unwrap());
-                    println!("{}", applier.pretty(500));
                     res.rws.push(rewrite!(name; searcher => applier));
                 },
                 "prove" => {

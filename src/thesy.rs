@@ -14,6 +14,7 @@ use log::{info, warn, trace, debug};
 use egg::test::run;
 use crate::eggstentions::expression_ops::{RecExpSlice, IntoTree, Tree};
 use std::collections::hash_map::RandomState;
+use std::process::{id, exit};
 
 #[derive(Clone, Hash, PartialEq, Eq, Debug)]
 pub struct DataType {
@@ -428,7 +429,6 @@ impl TheSy {
     }
 
     pub fn run(&mut self, rules: &mut Vec<Rewrite<SymbolLang, ()>>, max_depth: usize) -> Vec<(Pattern<SymbolLang>, Pattern<SymbolLang>, Rewrite<SymbolLang, ()>)> {
-        // TODO: case split
         // TODO: run full tests
         // TODO: 2 phs and generalize
         println!("Running TheSy on datatypes: {} dict: {}", self.datatypes.keys().map(|x| &x.name).join(" "), self.dict.iter().map(|x| &x.0).join(" "));
@@ -449,7 +449,7 @@ impl TheSy {
                 }
                 _ => { self.node_limit }
             };
-            Self::case_split_all(rules, &mut self.egraph, 2, 4);
+            Self::case_split_all(rules, &mut self.egraph, 4, 4);
 
             let mut conjectures = self.get_conjectures();
             'outer: while !conjectures.is_empty() {
@@ -505,7 +505,7 @@ impl TheSy {
 
     /// Case splitting works by cloning the graph and merging the different possibilities.
     /// Enabling recursivly splitting all
-    fn case_split(rules: &[Rewrite<SymbolLang, ()>], egraph: &mut EGraph<SymbolLang, ()>, root: Id, splits: Vec<Id>, split_depth: usize, run_depth: usize) {
+    fn case_split(rules: &[Rewrite<SymbolLang, ()>], egraph: &mut EGraph<SymbolLang, ()>, root: Id, splits: Vec<Id>, split_depth: usize, run_depth: usize, dont_use: &HashSet<(Id, Vec<Id>)>) {
         let classes = egraph.classes().collect_vec();
         // TODO: parallel
         let after_splits = splits.iter().map(|child| {
@@ -515,7 +515,7 @@ impl TheSy {
             let mut runner = Runner::default().with_time_limit(Duration::from_secs(60 * 5)).with_node_limit(new_graph.total_number_of_nodes() + 200000).with_egraph(new_graph).with_iter_limit(run_depth);
             runner = runner.run(rules);
             runner.egraph.rebuild();
-            Self::case_split_all(rules, &mut runner.egraph, split_depth - 1, run_depth);
+            Self::_case_split_all(rules, &mut runner.egraph, split_depth - 1, run_depth, dont_use);
             classes.iter().map(|c| (c.id, runner.egraph.find(c.id))).collect::<HashMap<Id, Id>>()
         }).collect_vec();
         let mut group_by_splits: HashMap<Vec<Id>, HashSet<Id>> = HashMap::new();
@@ -535,27 +535,43 @@ impl TheSy {
         egraph.rebuild();
     }
 
-    fn case_split_all(rules: &[Rewrite<SymbolLang, ()>], egraph: &mut EGraph<SymbolLang, ()>, split_depth: usize, run_depth: usize) {
+    fn case_split_all(rules: &[Rewrite<SymbolLang, ()>],
+                      egraph: &mut EGraph<SymbolLang, ()>,
+                      split_depth: usize, run_depth: usize) {
+        Self::_case_split_all(rules, egraph, split_depth, run_depth, &HashSet::new())
+    }
+
+    fn _case_split_all(rules: &[Rewrite<SymbolLang, ()>],
+                       egraph: &mut EGraph<SymbolLang, ()>,
+                       split_depth: usize, run_depth: usize,
+                       dont_use: &HashSet<(Id, Vec<Id>)>) {
         // TODO: marked used splitters to prevent reusing
         if split_depth == 0 {
             return;
         }
-        println!("split depth {}", split_depth);
+        let new_dont_use = dont_use.iter()
+            .map(|(root, children)|
+                (
+                    egraph.find(*root),
+                    children.iter().map(|c| egraph.find(*c)).collect_vec()
+                )
+            ).collect::<HashSet<(Id, Vec<Id>)>>();
         let root_var: Var = "?root".parse().unwrap();
         let children_vars: Vec<Var> = (0..5).map(|i| format!("?c{}", i).parse().unwrap()).collect_vec();
-        let splitters: Vec<(usize, Vec<Subst>)> = Self::split_patterns().iter().enumerate()
-            .map(|(i, p)| {
-                (i + 2, p.search(egraph).into_iter().flat_map(|x| x.substs).collect_vec())
-            }).collect_vec();
-        splitters.iter().for_each(|(child_count, substs)|
-            {
-                println!("substs for {} len {}", child_count, substs.len());
-                substs.iter().for_each(|s| {
-                    println!("split by {:#?}", *s.get(root_var).unwrap());
-                    let params = (0..*child_count).map(|i| *s.get(children_vars[i]).unwrap()).collect_vec();
-                    Self::case_split(rules, egraph, *s.get(root_var).unwrap(), params, split_depth, run_depth);
-                })
-            });
+        let splitters: Vec<(Id, Vec<Id>)> = Self::split_patterns().iter().enumerate()
+            .flat_map(|(i, p)| {
+                let results = p.search(egraph).into_iter().flat_map(|x| x.substs);
+                results.map(|s| (
+                    *s.get(root_var).unwrap(), // Root
+                    (0..i + 2).map(|i| *s.get(children_vars[i]).unwrap()).collect_vec() // Params
+                )).filter(|x| !new_dont_use.contains(x)).collect_vec()
+            })
+            .collect_vec();
+        splitters.iter().enumerate().for_each(|(i, (root, params))| {
+            let mut updated_dont_use = new_dont_use.clone();
+            updated_dont_use.extend(splitters.iter().take(i).cloned());
+            Self::case_split(rules, egraph, *root, params.clone(), split_depth, run_depth, &updated_dont_use);
+        });
     }
 
     /// Create all needed phs from
@@ -680,11 +696,25 @@ impl TheSy {
     }
 
     fn pattern_from_exp(exp: &RecExpr<SymbolLang>, induction_ph: &String, sub_ind: &String) -> Pattern<SymbolLang> {
-        let mapped = exp.as_ref().iter().cloned().map(|mut n| {
-            n.op = Self::ident_mapper(&n.op.to_string(), induction_ph, sub_ind).parse().unwrap();
-            n
-        }).collect_vec();
-        Pattern::from_str(&*RecExpr::from(mapped).pretty(500)).unwrap()
+        let mut res_exp: RecExpr<ENodeOrVar<SymbolLang>> = RecExpr::default();
+        fn add_to_exp(res: &mut RecExpr<ENodeOrVar<SymbolLang>>, inp: &RecExpSlice<SymbolLang>, induction_ph: &String, sub_ind: &String) -> Id {
+            let mut ids = inp.children().iter().map(|c| add_to_exp(res, c, induction_ph, sub_ind)).collect_vec();
+            let mut root = inp.root().clone();
+            root.op = TheSy::ident_mapper(&root.op.to_string(), induction_ph, sub_ind).parse().unwrap();
+            let is_var = root.op.to_string().starts_with("?");
+            if (!ids.is_empty()) && is_var {
+                // Special case of vairable function
+                let func_id = res.add(ENodeOrVar::ENode(SymbolLang::new(root.op.to_string(), vec![])));
+                ids.insert(0, func_id);
+                res.add(ENodeOrVar::ENode(SymbolLang::new("apply", ids)))
+            } else if is_var {
+                res.add(ENodeOrVar::Var(Var::from_str(&*root.op.to_string()).unwrap()))
+            } else {
+                res.add(ENodeOrVar::ENode(root.clone()))
+            }
+        }
+        add_to_exp(&mut res_exp, &exp.into_tree(), induction_ph, sub_ind);
+        Pattern::from(PatternAst::from(res_exp))
     }
 }
 

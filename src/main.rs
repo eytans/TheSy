@@ -41,7 +41,7 @@ struct CliOpt {
     #[structopt(parse(from_os_str))]
     path: std::path::PathBuf,
     /// Placeholder count
-    #[structopt(name = "placeholder count", default_value = "3")]
+    #[structopt(name = "placeholder count", default_value = "2")]
     ph_count: usize,
     /// Previous results to read
     dependencies: Vec<String>,
