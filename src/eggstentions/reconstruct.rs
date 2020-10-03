@@ -1,12 +1,13 @@
-use egg::{EGraph, SymbolLang, Id, Language};
 use std::collections::{HashMap, HashSet};
-use crate::tree::Tree;
-use crate::tools::tools::{combinations};
+use std::iter;
 use std::rc::Rc;
 use std::time::SystemTime;
-use itertools::{Itertools};
-use std::iter;
 
+use egg::{EGraph, Id, Language, SymbolLang};
+use itertools::Itertools;
+
+use crate::tools::tools::combinations;
+use crate::tree::Tree;
 
 pub fn reconstruct_all(graph: &EGraph<SymbolLang, ()>, max_depth: usize) -> HashMap<Id, HashSet<Rc<Tree>>> {
     for c in graph.classes() {

@@ -2,36 +2,28 @@
 #[macro_use(rewrite)]
 extern crate egg;
 
-#[macro_use(c)]
-extern crate cute;
+use std::borrow::Borrow;
+use std::fs::File;
+use std::io::{Write};
+use std::path::PathBuf;
+use std::process::exit;
+use std::time::SystemTime;
 
 use egg::*;
-
-use crate::tree::Tree;
-use std::str::FromStr;
-use itertools::{Itertools};
-use crate::eggstentions::reconstruct::reconstruct_all;
-use std::time::{SystemTime};
-use std::rc::Rc;
-use std::collections::{HashSet, HashMap};
-use crate::thesy::{TheSy, DataType, Function};
-use std::iter::FromIterator;
-use std::env;
-use std::path::PathBuf;
+use itertools::Itertools;
 use structopt::StructOpt;
-use std::fs::File;
-use std::io::{Read, Write};
+
+use crate::thesy::TheSy;
 use crate::thesy_parser::parser::Definitions;
-use std::process::exit;
-use std::borrow::Borrow;
 use crate::tools::tools::choose;
 
-mod tree;
 mod eggstentions;
 mod tools;
 mod thesy;
 mod thesy_parser;
 mod example_creator;
+mod lang;
+mod tree;
 // mod smtlib_translator;
 
 /// Arguments to use to run thesy

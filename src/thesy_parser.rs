@@ -1,13 +1,15 @@
 pub mod parser {
-    use symbolic_expressions::Sexp;
-    use crate::thesy::{DataType, Function};
-    use egg::{SymbolLang, Rewrite, RecExpr, Pattern, PatternAst};
-    use std::str::FromStr;
-    use crate::eggstentions::expression_ops::{IntoTree, RecExpSlice, Tree};
-    use itertools::{Itertools, cons_tuples};
     use std::fs::File;
     use std::io::Read;
+    use std::str::FromStr;
+
+    use egg::{Pattern, PatternAst, RecExpr, Rewrite, SymbolLang};
+    use itertools::{cons_tuples, Itertools};
+    use symbolic_expressions::Sexp;
+
     use crate::eggstentions::appliers::DiffApplier;
+    use crate::eggstentions::expression_ops::{IntoTree, RecExpSlice, Tree};
+    use crate::lang::{DataType, Function};
 
     #[derive(Default, Clone, Debug)]
     pub struct Definitions {

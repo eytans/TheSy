@@ -1,10 +1,11 @@
-use itertools::Itertools;
-use egg::{Language, RecExpr, EGraph, Id};
-use smallvec::alloc::fmt::Display;
+use std::collections::{HashMap, HashSet};
 use std::fmt::Formatter;
-use std::process::exit;
 use std::hash::{Hash, Hasher};
-use std::collections::{HashSet, HashMap};
+use std::process::exit;
+
+use egg::{EGraph, Id, Language, RecExpr};
+use itertools::Itertools;
+use smallvec::alloc::fmt::Display;
 
 #[derive(Clone, Debug)]
 pub struct RecExpSlice<'a, L: Language> {

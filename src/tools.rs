@@ -1,10 +1,10 @@
 pub mod tools {
-    use std::collections::{HashMap};
+    use std::collections::HashMap;
     use std::collections::hash_map::RandomState;
-    use std::fmt::{Display};
     use std::hash::Hash;
-    use itertools::{MultiProduct};
-    use itertools::{Itertools};
+
+    use itertools::MultiProduct;
+    use itertools::Itertools;
 
 // fn combinations<'a, T: 'a, I: Iterator<Item = &'a T> + Clone>(mut sets: impl Iterator<Item = I>) -> impl Iterator<Item = Vec<&'a T>> {
 //     let first = sets.next();
@@ -114,9 +114,10 @@ mod tests {
     use std::collections::HashSet;
     use std::iter::FromIterator;
 
+    use itertools::Itertools;
+
     use crate::tools::tools::choose;
     use crate::tools::tools::combinations;
-    use itertools::Itertools;
 
     #[test]
     fn check_comb_amount() {

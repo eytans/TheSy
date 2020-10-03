@@ -1,8 +1,7 @@
-use egg::{CostFunction, SymbolLang, Id};
-use std::collections::HashSet;
 use std::cmp::Ordering;
+
+use egg::{CostFunction, Id, SymbolLang};
 use itertools::Itertools;
-use symbolic_expressions::encode_string;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct RepOrder {
@@ -82,18 +81,18 @@ impl CostFunction<SymbolLang> for MinRep {
 
 #[cfg(test)]
 mod tests {
-    use crate::eggstentions::costs::RepOrder;
-    use std::collections::HashSet;
     use std::iter::FromIterator;
+
+    use crate::eggstentions::costs::RepOrder;
 
     #[test]
     fn compare_two_different_sizes() {
         assert!(RepOrder{vars: Vec::new(), depth: 0, size: 1} < RepOrder{vars: Vec::new(), depth: 0, size: 2});
-        assert!(RepOrder{vars: Vec::from_iter(vec![":".to_string(), "a".to_string(), "b".to_string()]), depth: 0, size: 1} < RepOrder{vars: HashSet::new(), depth: 0, size: 2});
+        assert!(RepOrder{vars: Vec::from_iter(vec![":".to_string(), "a".to_string(), "b".to_string()]), depth: 0, size: 1} < RepOrder{vars: Vec::new(), depth: 0, size: 2});
     }
 
     #[test]
     fn compare_two_different_vars() {
-        assert!(RepOrder{vars: Vec::from_iter(vec![":".to_string(), "a".to_string(), "b".to_string()]), depth: 0, size: 2} < RepOrder{vars:  HashSet::from_iter(vec![":".to_string(), "a".to_string()]), depth: 0, size: 2});
+        assert!(RepOrder{vars: Vec::from_iter(vec![":".to_string(), "a".to_string(), "b".to_string()]), depth: 0, size: 2} < RepOrder{vars:  Vec::from_iter(vec![":".to_string(), "a".to_string()]), depth: 0, size: 2});
     }
 }

@@ -1,113 +1,21 @@
-use std::rc::Rc;
-use egg::*;
+use std::collections::{HashMap, HashSet};
+use std::collections::hash_map::RandomState;
 use std::iter;
-use itertools::Itertools;
-use crate::eggstentions::multisearcher::multisearcher::{MultiDiffSearcher, MultiEqSearcher};
+use std::iter::FromIterator;
 use std::str::FromStr;
 use std::time::{Duration, SystemTime};
-use std::collections::{HashMap, HashSet};
-use std::iter::FromIterator;
-use crate::eggstentions::costs::{MinRep, RepOrder};
-use crate::tools::tools::choose;
+
+use egg::*;
+use egg::StopReason::Saturated;
+use itertools::Itertools;
+use log::{debug, info, trace, warn};
+
 use crate::eggstentions::appliers::DiffApplier;
-use log::{info, warn, trace, debug};
-use egg::test::run;
-use crate::eggstentions::expression_ops::{RecExpSlice, IntoTree, Tree};
-use std::collections::hash_map::RandomState;
-use std::process::{id, exit};
-
-#[derive(Clone, Hash, PartialEq, Eq, Debug)]
-pub struct DataType {
-    pub name: String,
-    pub type_params: Vec<RecExpr<SymbolLang>>,
-    // TODO: change to Function instead of rec expr
-    /// Constructor name applied on types
-    pub constructors: Vec<Function>,
-}
-
-#[derive(Clone, Hash, PartialEq, Eq, Debug)]
-pub struct Function {
-    pub name: String,
-    pub params: Vec<RecExpr<SymbolLang>>,
-    /// Constructor name applied on types
-    pub ret_type: RecExpr<SymbolLang>,
-}
-
-impl Function {
-    pub fn new(name: String, params: Vec<RecExpr<SymbolLang>>, ret_type: RecExpr<SymbolLang>) -> Function {
-        Function { name, params, ret_type }
-    }
-
-    pub fn as_exp(&self) -> RecExpr<SymbolLang> {
-        let as_type = self.get_type();
-        let mut children = as_type.as_ref().iter().cloned().dropping_back(1).collect_vec();
-        let mut new_last = as_type.as_ref().last().unwrap().clone();
-        new_last.op = Symbol::from(self.name.clone());
-        children.push(new_last);
-        RecExpr::from(children)
-    }
-
-    pub fn get_type(&self) -> RecExpr<SymbolLang> {
-        let mut children = vec![];
-        let mut indices = vec![];
-        for p in &self.params {
-            children.extend_from_slice(p.as_ref());
-            indices.push(Id::from(children.len() - 1));
-        }
-        if children.is_empty() {
-            self.ret_type.clone()
-        } else {
-            children.extend_from_slice(self.ret_type.as_ref());
-            indices.push(Id::from(children.len() - 1));
-            children.push(SymbolLang::new("->", indices));
-            RecExpr::from(children)
-        }
-    }
-
-    pub fn apply_params(&self, params: Vec<RecExpr<SymbolLang>>) -> RecExpr<SymbolLang> {
-        let mut res = RecExpr::default();
-        let mut indices = vec![];
-        for p in params {
-            let current_len = res.as_ref().len();
-            for s in p.as_ref() {
-                res.add(s.clone().map_children(|c| Id::from(usize::from(c) + current_len)));
-            }
-            indices.push(Id::from(res.as_ref().len() - 1));
-        }
-        res.add(SymbolLang::new(self.name.clone(), indices));
-        res
-    }
-}
-
-impl From<RecExpr<SymbolLang>> for Function {
-    fn from(exp: RecExpr<SymbolLang>) -> Self {
-        let tree = exp.into_tree();
-        Function::new(tree.root().op.to_string(),
-                      tree.children().iter().dropping_back(1)
-                          .map(|t| RecExpr::from(t)).collect_vec(),
-                      RecExpr::from(tree.children().last().unwrap()))
-    }
-}
-
-impl DataType {
-    pub(crate) fn new(name: String, constructors: Vec<Function>) -> DataType {
-        DataType { name, type_params: vec![], constructors }
-    }
-
-    pub fn generic(name: String, type_params: Vec<RecExpr<SymbolLang>>, constructors: Vec<Function>) -> DataType {
-        DataType { name, type_params, constructors }
-    }
-
-    pub fn as_exp(&self) -> RecExpr<SymbolLang> {
-        let mut res = vec![];
-        let children = self.type_params.iter().map(|e| {
-            res.extend(e.as_ref().iter().cloned());
-            Id::from(res.len() - 1)
-        }).collect_vec();
-        res.push(SymbolLang::new(self.name.clone(), children));
-        RecExpr::from(res)
-    }
-}
+use crate::eggstentions::costs::{MinRep, RepOrder};
+use crate::eggstentions::expression_ops::{IntoTree, RecExpSlice, Tree};
+use crate::eggstentions::multisearcher::multisearcher::{MultiDiffSearcher, MultiEqSearcher};
+use crate::lang::*;
+use crate::tools::tools::choose;
 
 pub struct TheSy {
     /// known datatypes to wfo rewrites for induction
@@ -139,7 +47,6 @@ impl TheSy {
     }
 
     pub fn new_with_ph(datatypes: Vec<DataType>, examples: HashMap<DataType, Vec<RecExpr<SymbolLang>>>, dict: Vec<(String, RecExpr<SymbolLang>)>, ph_count: usize) -> TheSy {
-        // TODO: automatic examples
         let datatype_to_wfo: HashMap<DataType, Vec<Rewrite<SymbolLang, ()>>, RandomState> = datatypes.iter()
             .map(|d| (d.clone(), Self::wfo_datatype(d))).collect();
         let mut egraph = EGraph::default();
@@ -384,7 +291,7 @@ impl TheSy {
             let contr_id = egraph.add_expr(&contr_exp);
             egraph.union(contr_id, ind_id);
             let mut runner: Runner<SymbolLang, ()> = Runner::new(()).with_egraph(egraph).with_iter_limit(8).run(&rule_set[..]);
-            Self::case_split_all(rules, &mut runner.egraph, 2, 4);
+            Self::case_split_all(rules, &mut runner.egraph, 4, 4);
             res = res && !runner.egraph.equivs(&ex1, &ex2).is_empty()
         }
         if res {
@@ -449,7 +356,7 @@ impl TheSy {
                 }
                 _ => { self.node_limit }
             };
-            Self::case_split_all(rules, &mut self.egraph, 4, 4);
+            Self::case_split_all(rules, &mut self.egraph, 4, 6);
 
             let mut conjectures = self.get_conjectures();
             'outer: while !conjectures.is_empty() {
@@ -475,6 +382,7 @@ impl TheSy {
                         }
                         _ => { self.node_limit }
                     };
+                    // Self::case_split_all(rules, &mut self.egraph, 4, 3);
                     conjectures = self.get_conjectures();
                     println!();
                 }
@@ -515,6 +423,10 @@ impl TheSy {
             let mut runner = Runner::default().with_time_limit(Duration::from_secs(60 * 5)).with_node_limit(new_graph.total_number_of_nodes() + 200000).with_egraph(new_graph).with_iter_limit(run_depth);
             runner = runner.run(rules);
             runner.egraph.rebuild();
+            match runner.stop_reason.as_ref().unwrap() {
+                Saturated => {}
+                _ => { println!("{:#?}", runner.stop_reason.as_ref().unwrap()); }
+            }
             Self::_case_split_all(rules, &mut runner.egraph, split_depth - 1, run_depth, dont_use);
             classes.iter().map(|c| (c.id, runner.egraph.find(c.id))).collect::<HashMap<Id, Id>>()
         }).collect_vec();
@@ -545,7 +457,6 @@ impl TheSy {
                        egraph: &mut EGraph<SymbolLang, ()>,
                        split_depth: usize, run_depth: usize,
                        dont_use: &HashSet<(Id, Vec<Id>)>) {
-        // TODO: marked used splitters to prevent reusing
         if split_depth == 0 {
             return;
         }
@@ -569,7 +480,7 @@ impl TheSy {
             .collect_vec();
         splitters.iter().enumerate().for_each(|(i, (root, params))| {
             let mut updated_dont_use = new_dont_use.clone();
-            updated_dont_use.extend(splitters.iter().take(i).cloned());
+            updated_dont_use.extend(splitters.iter().take(i + 1).cloned());
             Self::case_split(rules, egraph, *root, params.clone(), split_depth, run_depth, &updated_dont_use);
         });
     }
@@ -720,26 +631,31 @@ impl TheSy {
 
 #[cfg(test)]
 mod test {
-    use crate::thesy::{TheSy, DataType};
-    use crate::tree::Tree;
+    use std::collections::{HashMap, HashSet};
+    use std::iter;
+    use std::iter::FromIterator;
     use std::rc::Rc;
     use std::str::FromStr;
     use std::time::SystemTime;
+
+    use egg::{EGraph, Pattern, RecExpr, Rewrite, Runner, Searcher, SymbolLang};
     use itertools::Itertools;
-    use std::collections::HashSet;
-    use egg::{SymbolLang, Pattern, Searcher, Rewrite, RecExpr, EGraph, Runner};
+
+    use crate::example_creator::examples;
+    use crate::thesy::{DataType, Function, TheSy};
+    use crate::tree::Tree;
 
     fn create_nat_type() -> DataType {
         DataType::new("nat".to_string(), vec![
-            "(Z nat)".parse().unwrap(),
-            "(S nat nat)".parse().unwrap()
+            Function::new("Z".to_string(), vec![], "nat".parse().unwrap()),
+            Function::new("S".to_string(), vec!["nat".parse().unwrap()], "nat".parse().unwrap()),
         ])
     }
 
     fn create_list_type() -> DataType {
         DataType::new("list".to_string(), vec![
-            "(Nil list)".parse().unwrap(),
-            "(Cons nat list list)".parse().unwrap()
+            Function::new("Nil".to_string(), vec![], "list".parse().unwrap()),
+            Function::new("Cons".to_string(), vec!["nat".parse().unwrap(), "list".parse().unwrap()], "list".parse().unwrap()),
         ])
     }
 
@@ -850,40 +766,42 @@ mod test {
 
     #[test]
     fn does_not_create_unneeded_terms() {
+        let nat_type = create_nat_type();
         let mut syg = TheSy::new_with_ph(
-            vec![create_nat_type()],
-            vec!["Z"].into_iter().map(|s| s.parse().unwrap()).collect(),
+            vec![nat_type.clone()],
+            HashMap::from_iter(iter::once((nat_type, vec!["Z"].into_iter().map(|s| s.parse().unwrap()).collect()))),
             vec![("S".to_string(), "(-> nat nat)".parse().unwrap())],
             2,
         );
 
         let anchor_patt: Pattern<SymbolLang> = Pattern::from_str("(typed ?x ?y)").unwrap();
         let results0 = anchor_patt.search(&syg.egraph);
-        assert_eq!(2usize, results0.iter().map(|x| x.substs.len()).sum());
+        assert_eq!(3usize, results0.iter().map(|x| x.substs.len()).sum());
         syg.increase_depth();
-        assert_eq!(4usize, anchor_patt.search(&syg.egraph).iter().map(|x| x.substs.len()).sum());
+        assert_eq!(5usize, anchor_patt.search(&syg.egraph).iter().map(|x| x.substs.len()).sum());
         syg.increase_depth();
-        assert_eq!(6usize, anchor_patt.search(&syg.egraph).iter().map(|x| x.substs.len()).sum());
+        assert_eq!(7usize, anchor_patt.search(&syg.egraph).iter().map(|x| x.substs.len()).sum());
 
+        let new_nat = DataType::new("nat".to_string(), vec![
+            Function::new("Z".to_string(), vec![], "nat".parse().unwrap()),
+            // Function::new("S".to_string(), vec!["nat".parse().unwrap()], "nat".parse().unwrap()),
+        ]);
         let mut syg = TheSy::new_with_ph(
             // For this test dont use full definition
-            vec![DataType::new("nat".to_string(), vec![
-                "(Z nat)".parse().unwrap(),
-                // Tree::from_str("(S nat nat)").unwrap()
-            ])],
-            vec!["Z"].into_iter().map(|s| s.parse().unwrap()).collect(),
+            vec![new_nat.clone()],
+            HashMap::from_iter(iter::once((new_nat, vec!["Z"].into_iter().map(|s| s.parse().unwrap()).collect()))),
             vec![("x".to_string(), "(-> nat nat nat)".parse().unwrap())],
             3,
         );
 
         let results0 = anchor_patt.search(&syg.egraph);
-        assert_eq!(3usize, results0.iter().map(|x| x.substs.len()).sum());
+        assert_eq!(4usize, results0.iter().map(|x| x.substs.len()).sum());
         syg.increase_depth();
         let results1 = anchor_patt.search(&syg.egraph);
-        assert_eq!(12usize, results1.iter().map(|x| x.substs.len()).sum());
+        assert_eq!(13usize, results1.iter().map(|x| x.substs.len()).sum());
         syg.increase_depth();
         let results2 = anchor_patt.search(&syg.egraph);
-        assert_eq!(147usize, results2.iter().map(|x| x.substs.len()).sum());
+        assert_eq!(148usize, results2.iter().map(|x| x.substs.len()).sum());
     }
 
     #[test]
@@ -898,7 +816,7 @@ mod test {
         let classes = syg.extract_classes();
         for (id, (ord, exp)) in classes {
             for n in exp.as_ref() {
-                if n.op.to_string() == "pl" {
+                if n.op.to_string() == "pl" && !n.children.is_empty() {
                     let index = n.children[0].to_string();
                     assert_ne!(exp.as_ref()[index.parse::<usize>().unwrap()].op.to_string(), "Z");
                 }
@@ -963,6 +881,24 @@ mod test {
         let mut rewrites = create_pl_rewrites();
         let ind_rec = TheSy::get_ind_var(&nat);
         assert!(syg.prove(&rewrites[..], &nat, &format!("(pl {} Z)", ind_rec).parse().unwrap(), &ind_rec.parse().unwrap()).is_some())
+    }
+    //
+    // #[test]
+    // fn split_case_filter_p_filter_q() {
+    //     let list_type = create_list_type();
+    //     let list_example = examples(&list_type, 1).pop().unwrap();
+    //     let mut egraph: EGraph<SymbolLang, ()> = EGraph::default();
+    //     egraph.add_expr(&format!("(filter p (filter q {}))", list_example.pretty(400)).parse().unwrap());
+    //     egraph.add_expr(&format!("(filter q (filter p {}))", list_example.pretty(400)).parse().unwrap());
+    //     let filter_rules = vec![
+    //         // rewrite!("filter_base"; "")
+    //     ];
+    //     // TheSy::case_split_all()
+    // }
+
+    #[test]
+    fn split_case_filter_p_and_q() {
+
     }
 
     // TODO: test on lists

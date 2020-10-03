@@ -271,7 +271,7 @@ mod tests {
 
     use egg::{EGraph, RecExpr, Searcher, SymbolLang};
 
-    use crate::eggstentions::multisearcher::multisearcher::{MultiEqSearcher, MultiDiffSearcher};
+    use crate::eggstentions::multisearcher::multisearcher::{MultiDiffSearcher, MultiEqSearcher};
 
     #[test]
     fn eq_two_trees_one_common() {

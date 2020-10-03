@@ -1,8 +1,9 @@
-use symbolic_expressions::Sexp;
-use egg::{SymbolLang, Id, EGraph};
 use std::fmt::{Display, Formatter};
-use itertools::Itertools;
 use std::rc::Rc;
+
+use egg::{EGraph, Id, SymbolLang};
+use itertools::Itertools;
+use symbolic_expressions::Sexp;
 
 macro_rules! bail {
     ($s:literal $(,)?) => {
