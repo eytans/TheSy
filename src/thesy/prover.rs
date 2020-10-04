@@ -60,6 +60,11 @@ impl Prover {
         res
     }
 
+    // TODO: write this function and allow only 2 phs.
+    // pub fn generalize_prove(&self, rules: &[Rewrite<SymbolLang, ()>], ex1: &RecExpr<SymbolLang>, ex2: &RecExpr<SymbolLang>) -> Option<Vec<(Pattern<SymbolLang>, Pattern<SymbolLang>, Rewrite<SymbolLang, ()>)>> {
+    //     fn collect_ph1_indexes()
+    // }
+
     /// Assume base case is correct and prove equality using induction.
    /// Induction hypothesis is given as a rewrite rule, using precompiled rewrite rules
    /// representing well founded order on the induction variable.

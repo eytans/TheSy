@@ -1,8 +1,7 @@
-(include list.res)
+(include list)
 (include nat.res)
 
 (datatype Nat () ((succ Nat Nat) (zero Nat)))
-(datatype Lst () ((cons Nat Lst Lst) (nil Lst)))
 
 (declare-fun plus (Nat Nat) Nat)
 (=> plus_base (plus zero ?n) ?n)
@@ -29,3 +28,5 @@
 (=> filter_ind (filter ?p (cons ?x ?xs)) (ite (apply ?p ?x) (cons ?x (filter ?p ?xs)) (filter ?p ?xs)))
 
 (=|> filter_split (filter ?p (cons ?x ?xs)) (potential_split (apply ?p ?x) true false))
+
+(declare-fun len
