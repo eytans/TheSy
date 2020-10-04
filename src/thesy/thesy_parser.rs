@@ -3,12 +3,11 @@ pub mod parser {
     use std::io::Read;
     use std::str::FromStr;
 
-    use egg::{Pattern, PatternAst, RecExpr, Rewrite, SymbolLang};
-    use itertools::{cons_tuples, Itertools};
+    use egg::{Pattern, RecExpr, Rewrite, SymbolLang};
+    use itertools::{Itertools};
     use symbolic_expressions::Sexp;
 
     use crate::eggstentions::appliers::DiffApplier;
-    use crate::eggstentions::expression_ops::{IntoTree, RecExpSlice, Tree};
     use crate::lang::{DataType, Function};
 
     #[derive(Default, Clone, Debug)]

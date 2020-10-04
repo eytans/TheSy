@@ -13,15 +13,14 @@ use egg::*;
 use itertools::Itertools;
 use structopt::StructOpt;
 
-use crate::thesy::TheSy;
-use crate::thesy_parser::parser::Definitions;
+use crate::thesy::thesy::TheSy;
+use crate::thesy::thesy_parser::parser::Definitions;
 use crate::tools::tools::choose;
+use crate::thesy::{thesy_parser, example_creator};
 
 mod eggstentions;
 mod tools;
 mod thesy;
-mod thesy_parser;
-mod example_creator;
 mod lang;
 mod tree;
 // mod smtlib_translator;
@@ -121,9 +120,9 @@ impl TheSyConfig {
 
 impl From<&TheSyConfig> for TheSy {
     fn from(conf: &TheSyConfig) -> Self {
-        let mut dict = conf.definitions.functions.iter().map(|f| (f.name.clone(), f.get_type())).collect_vec();
+        let mut dict = conf.definitions.functions.clone();
         for c in conf.definitions.datatypes.iter().flat_map(|d| &d.constructors) {
-            dict.push((c.name.clone(), c.get_type()));
+            dict.push(c.clone());
         }
         let examples = conf.definitions.datatypes.iter()
             .map(|d| (d.clone(), example_creator::examples(d, 2)))

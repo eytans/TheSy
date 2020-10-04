@@ -1,10 +1,9 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::{HashMap};
 
 use egg::{RecExpr, SymbolLang};
 use itertools::Itertools;
 
-use crate::eggstentions::expression_ops::{IntoTree, Tree};
-use crate::thesy_parser::parser::Definitions;
+use crate::eggstentions::expression_ops::{IntoTree};
 use crate::lang::DataType;
 
 /// For now I will create full examples?
