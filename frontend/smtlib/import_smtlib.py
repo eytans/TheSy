@@ -1,4 +1,5 @@
 import typing
+import itertools
 from smtlib26 import SmtLib20ParserPlus
 from pysmt.smtlib.parser import SmtLibScript
 from pysmt.fnode import FNode
@@ -14,6 +15,7 @@ class SmtLibDocument:
     def __init__(self, s: typing.TextIO):
         p = SmtLib20ParserPlus()
         self.script = p.get_script(s)
+        self._fresh_cnt = itertools.count()
 
     def iter_datatypes(self):
         for cmd in self.script:
@@ -70,10 +72,13 @@ class SmtLibDocument:
             lhs, rhs = formula.args()
             for lhs, rhs in [(lhs, rhs), (rhs, lhs)]:
                 if lhs not in uvars:    # avoid e.g. x => x + 0
-                    yield SExpression(['=>', ex(lhs), ex(rhs)])
+                    yield SExpression(['=>', self._fresh('rule%d'), ex(lhs), ex(rhs)])
 
     def export_expr(self, e):
         return SmtLibSExpression(e)
+
+    def _fresh(self, template):
+        return template % self._fresh_cnt.__next__()
 
 
 class SExpression:
@@ -93,16 +98,23 @@ class SmtLibSExpression(SExpression):
 
 def main():
     BENCHMARK_DIRS = ['benchmarks/cvc4-conj/benchmarks-dt/isaplanner']
+    TARGET_DIR = '/tmp/thesy'
 
     import os
+
+    try: os.makedirs(TARGET_DIR)
+    except FileExistsError: pass
+
     for d in BENCHMARK_DIRS:
         for fn in os.listdir(d):
             print('--  %s --' % fn)
             infile = open(os.path.join(d, fn))
 
             doc = SmtLibDocument(infile)
-            for el in doc:
-                print(el)
+            with open(os.path.join(TARGET_DIR, fn + '.th'), 'w') as outf:
+                for el in doc:
+                    print(el)
+                    print(el, file=outf)
 
 
 if __name__ == '__main__':
