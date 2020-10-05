@@ -18,6 +18,7 @@ use crate::lang::*;
 use crate::tools::tools::choose;
 use crate::thesy::prover::Prover;
 
+/// Theory Synthesizer - Explores a given theory finding and proving new lemmas.
 pub struct TheSy {
     /// known datatypes to wfo rewrites for induction
     datatypes: HashMap<DataType, Prover>,
@@ -39,18 +40,21 @@ pub struct TheSy {
     node_limit: usize,
     /// Limits to use in equiv reduc
     iter_limit: usize,
+    /// Lemmas given by user to prove. Continue exploration until all lemmas are provable then stop.
+    /// If empty then TheSy will fully explore the space.
+    lemmas: Option<Vec<(RecExpr<SymbolLang>, RecExpr<SymbolLang>)>>
 }
 
 /// *** Thesy ***
 impl TheSy {
     pub fn new(datatype: DataType, examples: Vec<RecExpr<SymbolLang>>, dict: Vec<Function>) -> TheSy {
-        Self::new_with_ph(vec![datatype.clone()], HashMap::from_iter(iter::once((datatype, examples))), dict, 3)
+        Self::new_with_ph(vec![datatype.clone()], HashMap::from_iter(iter::once((datatype, examples))), dict,2, None)
     }
 
-    pub fn new_with_ph(datatypes: Vec<DataType>, examples: HashMap<DataType, Vec<RecExpr<SymbolLang>>>, dict: Vec<Function>, ph_count: usize) -> TheSy {
+    pub fn new_with_ph(datatypes: Vec<DataType>, examples: HashMap<DataType, Vec<RecExpr<SymbolLang>>>, dict: Vec<Function>, ph_count: usize, lemmas: Option<Vec<(RecExpr<SymbolLang>, RecExpr<SymbolLang>)>>) -> TheSy {
         let datatype_to_prover: HashMap<DataType, Prover> = datatypes.iter()
             .map(|d| (d.clone(), Prover::new(d.clone()))).collect();
-        let (mut egraph, mut example_ids) = TheSy::create_graph_example_ids(&datatypes, &examples, &dict, ph_count);
+        let (mut egraph, mut example_ids) = TheSy::create_graph_example_ids(&datatypes, &examples, &dict,ph_count);
 
         let apply_rws = TheSy::create_apply_rws(&dict, ph_count);
 
@@ -65,8 +69,9 @@ impl TheSy {
             example_ids,
             apply_rws,
             ite_rws,
-            node_limit: 400000,
+            node_limit: 200000,
             iter_limit: 8,
+            lemmas
         };
 
         res.searchers = res.create_sygue_serchers();
@@ -264,11 +269,10 @@ impl TheSy {
 
     pub fn run(&mut self, rules: &mut Vec<Rewrite<SymbolLang, ()>>, max_depth: usize) -> Vec<(Pattern<SymbolLang>, Pattern<SymbolLang>, Rewrite<SymbolLang, ()>)> {
         // TODO: run full tests
-        // TODO: 2 phs and generalize
         println!("Running TheSy on datatypes: {} dict: {}", self.datatypes.keys().map(|x| &x.name).join(" "), self.dict.iter().map(|x| &x.name).join(" "));
 
         let system_rws_start = rules.len();
-        let mut found_rules = vec![];
+        let mut found_rules  = vec![];
         for r in self.apply_rws.iter().chain(self.ite_rws.iter()) {
             rules.push(r.clone());
         }
@@ -279,7 +283,7 @@ impl TheSy {
             self.node_limit = match self.equiv_reduc(&rules[..]) {
                 StopReason::NodeLimit(x) => {
                     println!("Reached node limit. Increasing maximum graph size.");
-                    x + 100000
+                    x + 50000
                 }
                 _ => { self.node_limit }
             };
@@ -288,8 +292,13 @@ impl TheSy {
             let mut conjectures = self.get_conjectures();
             'outer: while !conjectures.is_empty() {
                 let (_, ex1, ex2, d) = conjectures.pop().unwrap();
-                let new_rules = self.datatypes[&d].prove(&rules[..], &ex1, &ex2);
+                let mut new_rules = self.datatypes[&d].prove_ind(&rules, &ex1, &ex2);
                 if new_rules.is_some() {
+                    let temp = new_rules;
+                    new_rules = self.datatypes[&d].generalize_prove(&rules, &ex1, &ex2);
+                    if new_rules.is_none() {
+                        new_rules = temp;
+                    }
                     if Self::check_equality(&rules[..], &ex1, &ex2) {
                         println!("bad conjecture {} = {}", &ex1.pretty(500), &ex2.pretty(500));
                         continue 'outer;
@@ -304,7 +313,7 @@ impl TheSy {
                     self.node_limit = match self.equiv_reduc_depth(&rules[..], reduc_depth) {
                         StopReason::NodeLimit(x) => {
                             println!("Reached node limit. Increasing maximum graph size.");
-                            x + 100000
+                            x + 50000
                         }
                         _ => { self.node_limit }
                     };
@@ -446,7 +455,7 @@ impl TheSy {
         phs
     }
 
-    fn get_ph(d: &RecExpr<SymbolLang>, i: usize) -> Function {
+    pub(crate) fn get_ph(d: &RecExpr<SymbolLang>, i: usize) -> Function {
         let s = d.into_tree().to_spaceless_string();
         let name = format!("{}_{}_{}", Self::PH_START, s, i);
         if d.into_tree().root().op.as_str() == "->" {
@@ -605,11 +614,10 @@ mod test {
     #[test]
     fn does_not_create_unneeded_terms() {
         let nat_type = create_nat_type();
-        let mut syg = TheSy::new_with_ph(
-            vec![nat_type.clone()],
-            HashMap::from_iter(iter::once((nat_type, vec!["Z"].into_iter().map(|s| s.parse().unwrap()).collect()))),
-            vec![Function::new("S".to_string(), vec!["nat".parse().unwrap()], "nat".parse().unwrap())],
-            2,
+        let mut syg = TheSy::new(
+            nat_type.clone(),
+            vec!["Z"].into_iter().map(|s| s.parse().unwrap()).collect(),
+            vec![Function::new("S".to_string(), vec!["nat".parse().unwrap()], "nat".parse().unwrap())]
         );
 
         let anchor_patt: Pattern<SymbolLang> = Pattern::from_str("(typed ?x ?y)").unwrap();
@@ -630,6 +638,7 @@ mod test {
             HashMap::from_iter(iter::once((new_nat, vec!["Z"].into_iter().map(|s| s.parse().unwrap()).collect()))),
             vec![Function::new("x".to_string(), vec!["nat".parse().unwrap(), "nat".parse().unwrap()], "nat".parse().unwrap())],
             3,
+            None
         );
 
         let results0 = anchor_patt.search(&syg.egraph);

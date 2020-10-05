@@ -55,19 +55,21 @@ struct TheSyConfig {
     dependencies: Vec<TheSyConfig>,
     dep_results: Vec<Vec<Rewrite<SymbolLang, ()>>>,
     output: PathBuf,
-    prerun: bool
+    prerun: bool,
 }
 
 impl TheSyConfig {
     pub fn new(definitions: Definitions, ph_count: usize, dependencies: Vec<TheSyConfig>, output: PathBuf) -> TheSyConfig {
         let func_len = definitions.functions.len();
-        TheSyConfig { definitions,
+        TheSyConfig {
+            definitions,
             ph_count,
             dependencies,
             dep_results: vec![],
             output,
-            prerun: false}
-            // prerun: func_len > 2}
+            prerun: false,
+        }
+        // prerun: func_len > 2}
     }
 
     fn collect_dependencies(&mut self) {
@@ -80,7 +82,7 @@ impl TheSyConfig {
 
     pub fn from_path(path: String) -> TheSyConfig {
         let definitions = thesy_parser::parser::parse_file(path.clone());
-        TheSyConfig::new(definitions, 3, vec![], PathBuf::from(path).with_extension("res"))
+        TheSyConfig::new(definitions, 2, vec![], PathBuf::from(path).with_extension("res"))
     }
 
     /// Run thesy using current configuration returning (thesy instance, previous + new rewrites)
@@ -130,7 +132,8 @@ impl From<&TheSyConfig> for TheSy {
         TheSy::new_with_ph(conf.definitions.datatypes.clone(),
                            examples,
                            dict,
-                           conf.ph_count)
+                           conf.ph_count,
+                           Some(conf.definitions.conjectures.clone()))
     }
 }
 
