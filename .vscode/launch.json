@@ -1,0 +1,13 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: import_smtlib.py",
+            "type": "python",
+            "request": "launch",
+            "program": "frontend/smtlib/import_smtlib.py",
+            "console": "integratedTerminal",
+            "justMyCode": false
+        }
+    ]
+}
