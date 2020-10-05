@@ -3,6 +3,9 @@ import itertools
 from smtlib26 import SmtLib20ParserPlus
 from pysmt.smtlib.parser import SmtLibScript
 from pysmt.fnode import FNode
+from pysmt.environment import get_env
+from pysmt.shortcuts import Symbol, get_free_variables
+
 
 
 class SmtLibDocument:
@@ -18,15 +21,18 @@ class SmtLibDocument:
         self._fresh_cnt = itertools.count()
 
     def iter_datatypes(self):
+        used = set(self.iter_used_types())
         for cmd in self.script:
             if cmd.name == 'declare-datatypes':
                 params, defs = cmd.args
                 if params: print("*** warning: datatype declaration with parameters")
-                for a in defs: yield self.export_datatype(a)
+                for a in defs:
+                    if a[0] in used: yield self.export_datatype(a)
 
     def iter_decls(self):
+        used = set(self.iter_used_symbols())
         for cmd in self.script:
-            if cmd.name == 'declare-fun':
+            if cmd.name == 'declare-fun' and cmd.args[0] in used:
                 yield self.export_func(cmd.args[0])
 
     def iter_rules(self):
@@ -34,6 +40,20 @@ class SmtLibDocument:
             if cmd.name == 'assert':
                 for rule in self.export_rules(cmd.args[0]):
                     yield rule
+
+    def iter_used_symbols(self):
+        for cmd in self.script:
+            if cmd.name == 'assert':
+                for v in get_free_variables(cmd.args[0]):
+                    yield v
+
+    def iter_used_types(self):
+        for cmd in self.script:
+            if cmd.name == 'assert':
+                formula = cmd.args[0]
+                while formula.is_forall():
+                    for v in formula.quantifier_vars(): yield v.symbol_type()
+                    formula = formula.args()[0]
 
     def __iter__(self):
         for dt in self.iter_datatypes():
@@ -69,9 +89,17 @@ class SmtLibDocument:
             formula = formula.args()[0]
 
         if formula.is_equals():
+            if uvars:
+                re = {v: Symbol(self._fresh("?%s_%%d" % v), v.symbol_type()) for v in uvars}
+                formula = formula.substitute(re)
+                uvars = re.values()
+            uvars = set(uvars)
+            fv = lambda phi: get_free_variables(phi) & uvars
+
             lhs, rhs = formula.args()
             for lhs, rhs in [(lhs, rhs), (rhs, lhs)]:
-                if lhs not in uvars:    # avoid e.g. x => x + 0
+                if ((lhs not in uvars) and     # avoid e.g. x => x + 0
+                        fv(lhs) >= fv(rhs)):
                     yield SExpression(['=>', self._fresh('rule%d'), ex(lhs), ex(rhs)])
 
     def export_expr(self, e):
@@ -115,6 +143,10 @@ def main():
                 for el in doc:
                     print(el)
                     print(el, file=outf)
+
+            print(set(doc.iter_used_symbols()))
+            print(set(doc.iter_used_types()))
+
 
 
 if __name__ == '__main__':
