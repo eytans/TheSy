@@ -267,6 +267,22 @@ impl TheSy {
         !runner.egraph.equivs(ex1, ex2).is_empty()
     }
 
+    fn check_lemmas(&mut self, rules: &mut Vec<Rewrite<SymbolLang, ()>>) -> Option<Vec<(Pattern<SymbolLang>, Pattern<SymbolLang>, Rewrite<SymbolLang, ()>)>> {
+        if self.lemmas.is_none() {
+            return None;
+        }
+        let mut lemmas = self.lemmas.as_mut().unwrap();
+        for l in lemmas {
+            for p in self.datatypes.values() {
+                let res = p.prove_all(rules, &l.0, &l.1);
+                if res.is_some() {
+                    return res;
+                }
+            }
+        }
+        None
+    }
+
     pub fn run(&mut self, rules: &mut Vec<Rewrite<SymbolLang, ()>>, max_depth: usize) -> Vec<(Pattern<SymbolLang>, Pattern<SymbolLang>, Rewrite<SymbolLang, ()>)> {
         // TODO: run full tests
         println!("Running TheSy on datatypes: {} dict: {}", self.datatypes.keys().map(|x| &x.name).join(" "), self.dict.iter().map(|x| &x.name).join(" "));
@@ -277,6 +293,20 @@ impl TheSy {
             rules.push(r.clone());
         }
         let new_rules_index = rules.len();
+
+        let mut lemma = self.check_lemmas(rules);
+        while lemma.is_some() {
+            found_rules.extend_from_slice(&lemma.as_ref().unwrap());
+            for r in lemma.unwrap() {
+                println!("proved: {}", r.2.long_name());
+                // inserting like this so new rule will apply before running into node limit.
+                rules.insert(new_rules_index, r.2);
+            }
+            lemma = self.check_lemmas(rules);
+        }
+        if self.lemmas.is_some() && self.lemmas.as_ref().unwrap().is_empty() {
+            return found_rules;
+        }
 
         for depth in 0..max_depth {
             self.increase_depth();
@@ -309,6 +339,21 @@ impl TheSy {
                         // inserting like this so new rule will apply before running into node limit.
                         rules.insert(new_rules_index, r.2);
                     }
+
+                    lemma = self.check_lemmas(rules);
+                    while lemma.is_some() {
+                        found_rules.extend_from_slice(&lemma.as_ref().unwrap());
+                        for r in lemma.unwrap() {
+                            println!("proved: {}", r.2.long_name());
+                            // inserting like this so new rule will apply before running into node limit.
+                            rules.insert(new_rules_index, r.2);
+                        }
+                        lemma = self.check_lemmas(rules);
+                    }
+                    if self.lemmas.is_some() && self.lemmas.as_ref().unwrap().is_empty() {
+                        return found_rules;
+                    }
+
                     let reduc_depth = 3;
                     self.node_limit = match self.equiv_reduc_depth(&rules[..], reduc_depth) {
                         StopReason::NodeLimit(x) => {
