@@ -4,6 +4,7 @@ from smtlib26 import SmtLib20ParserPlus
 from pysmt.smtlib.parser import SmtLibScript
 from pysmt.fnode import FNode
 from pysmt.environment import get_env
+from pysmt.exceptions import PysmtTypeError
 from pysmt.shortcuts import Symbol, get_free_variables
 
 
@@ -41,6 +42,12 @@ class SmtLibDocument:
                 for rule in self.export_rules(cmd.args[0]):
                     yield rule
 
+    def iter_goals(self):
+        for cmd in self.script:
+            if cmd.name == 'assert':
+                for goal in self.export_goals(cmd.args[0]):
+                    yield goal
+
     def iter_used_symbols(self):
         for cmd in self.script:
             if cmd.name == 'assert':
@@ -62,6 +69,8 @@ class SmtLibDocument:
             yield dl
         for rule in self.iter_rules():
             yield rule
+        for goal in self.iter_goals():
+            yield goal
 
     def export_datatype(self, dt):
         (name, ctors) = dt
@@ -82,15 +91,12 @@ class SmtLibDocument:
 
     def export_rules(self, formula):
         ex = self.export_expr
-        uvars = []
 
-        while formula.is_forall():
-            uvars += formula.quantifier_vars()
-            formula = formula.args()[0]
+        uvars, formula = self.extract_universal(formula)
 
         if formula.is_equals():
             if uvars:
-                re = {v: Symbol(self._fresh("?%s_%%d" % v), v.symbol_type()) for v in uvars}
+                re = {v: self._qvar_from_symbol(v) for v in uvars}
                 formula = formula.substitute(re)
                 uvars = re.values()
             uvars = set(uvars)
@@ -102,8 +108,34 @@ class SmtLibDocument:
                         fv(lhs) >= fv(rhs)):
                     yield SExpression(['=>', self._fresh('rule%d'), ex(lhs), ex(rhs)])
 
+    def export_goals(self, formula):
+        ex = self.export_expr
+
+        if formula.is_not():
+            formula = formula.arg(0)
+            uvars, inner = self.extract_universal(formula)
+            if inner.is_equals():
+                yield SExpression(['prove', ex(formula)])
+
     def export_expr(self, e):
         return SmtLibSExpression(e)
+
+    def extract_universal(self, formula):
+        uvars = []
+
+        while formula.is_forall():
+            uvars += formula.quantifier_vars()
+            formula = formula.args()[0]
+
+        return uvars, formula
+
+    def _qvar(self, name, type_):
+        try: return Symbol(name, type_)
+        except PysmtTypeError:  # technically, not supposed to occur
+            return Symbol(self._fresh("%s_%%d" % name), type_)
+
+    def _qvar_from_symbol(self, symbol):
+        return self._qvar("?%s" % symbol, symbol.symbol_type())
 
     def _fresh(self, template):
         return template % self._fresh_cnt.__next__()
@@ -144,8 +176,8 @@ def main():
                     print(el)
                     print(el, file=outf)
 
-            print(set(doc.iter_used_symbols()))
-            print(set(doc.iter_used_types()))
+            print(';', set(doc.iter_used_symbols()))
+            print(';', set(doc.iter_used_types()))
 
 
 
