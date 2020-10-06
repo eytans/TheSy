@@ -17,6 +17,7 @@ use crate::eggstentions::multisearcher::multisearcher::{MultiDiffSearcher, Multi
 use crate::lang::*;
 use crate::tools::tools::choose;
 use crate::thesy::prover::Prover;
+use multimap::MultiMap;
 
 /// Theory Synthesizer - Explores a given theory finding and proving new lemmas.
 pub struct TheSy {
@@ -42,7 +43,7 @@ pub struct TheSy {
     iter_limit: usize,
     /// Lemmas given by user to prove. Continue exploration until all lemmas are provable then stop.
     /// If empty then TheSy will fully explore the space.
-    lemmas: Option<Vec<(RecExpr<SymbolLang>, RecExpr<SymbolLang>)>>
+    lemmas: Option<Vec<Vec<(RecExpr<SymbolLang>, RecExpr<SymbolLang>)>>>
 }
 
 /// *** Thesy ***
@@ -51,7 +52,16 @@ impl TheSy {
         Self::new_with_ph(vec![datatype.clone()], HashMap::from_iter(iter::once((datatype, examples))), dict,2, None)
     }
 
-    pub fn new_with_ph(datatypes: Vec<DataType>, examples: HashMap<DataType, Vec<RecExpr<SymbolLang>>>, dict: Vec<Function>, ph_count: usize, lemmas: Option<Vec<(RecExpr<SymbolLang>, RecExpr<SymbolLang>)>>) -> TheSy {
+    fn replace_ops(exp: &RecExpr<SymbolLang>, replacments: &HashMap<Symbol, Symbol>) -> RecExpr<SymbolLang> {
+        RecExpr::from(exp.as_ref().iter().map(|s| replacments.get(&s.op)
+            .map(|x| SymbolLang::new(x.as_str(), s.children.clone())).unwrap_or(s.clone())).collect_vec())
+    }
+
+    fn replace_op(exp: &RecExpr<SymbolLang>, orig: Symbol, replacment: Symbol) -> RecExpr<SymbolLang> {
+        Self::replace_ops(exp, &HashMap::from_iter(iter::once((orig, replacment))))
+    }
+
+    pub fn new_with_ph(datatypes: Vec<DataType>, examples: HashMap<DataType, Vec<RecExpr<SymbolLang>>>, dict: Vec<Function>, ph_count: usize, lemmas: Option<Vec<(HashMap<RecExpr<SymbolLang>, RecExpr<SymbolLang>>, RecExpr<SymbolLang>, RecExpr<SymbolLang>)>>) -> TheSy {
         let datatype_to_prover: HashMap<DataType, Prover> = datatypes.iter()
             .map(|d| (d.clone(), Prover::new(d.clone()))).collect();
         let (mut egraph, mut example_ids) = TheSy::create_graph_example_ids(&datatypes, &examples, &dict,ph_count);
@@ -59,6 +69,31 @@ impl TheSy {
         let apply_rws = TheSy::create_apply_rws(&dict, ph_count);
 
         let ite_rws: Vec<Rewrite<SymbolLang, ()>> = TheSy::create_ite_rws();
+
+        let conjectures = lemmas.map(|v| v.into_iter()
+            .map(|(vars, ex1, ex2)| {
+                let mut types_to_vars: HashMap<RecExpr<SymbolLang>, HashMap<Symbol, Function>> = HashMap::new();
+                for v in vars {
+                    if !types_to_vars.contains_key(&v.1) {
+                        types_to_vars.insert(v.1.clone(), HashMap::new());
+                    }
+                    let current_ph = types_to_vars[&v.1].len() + 1;
+                    types_to_vars.get_mut(&v.1).unwrap().insert(v.0.as_ref().last().unwrap().op, TheSy::get_ph(&v.1, current_ph));
+                }
+                let replacments: HashMap<Symbol, Symbol> = types_to_vars.values().flat_map(|v| {
+                    v.iter().map(|(k, f)| (*k, Symbol::from(&f.name)))
+                }).collect();
+                let ex1_replaced = Self::replace_ops(&ex1, &replacments);
+                let ex2_replaced = Self::replace_ops(&ex2, &replacments);
+                types_to_vars.keys().filter(|key|datatypes.iter()
+                    .any(|d| d.as_exp().into_tree() == key.into_tree()))
+                    .flat_map(|typ| {
+                        types_to_vars[typ].values().zip(iter::once(typ).cycle()).map(|(ph, typ)| {
+                            (Self::replace_op(&ex1_replaced, Symbol::from(&ph.name), Symbol::from(&Self::get_ph(typ, 0).name)),
+                            Self::replace_op(&ex2_replaced, Symbol::from(&ph.name), Symbol::from(&Self::get_ph(typ, 0).name)))
+                        })
+                    }).collect_vec()
+        }).collect_vec());
 
         let mut res = TheSy {
             datatypes: datatype_to_prover,
@@ -71,7 +106,7 @@ impl TheSy {
             ite_rws,
             node_limit: 200000,
             iter_limit: 8,
-            lemmas
+            lemmas: conjectures
         };
 
         res.searchers = res.create_sygue_serchers();
@@ -272,15 +307,23 @@ impl TheSy {
             return None;
         }
         let mut lemmas = self.lemmas.as_mut().unwrap();
-        for l in lemmas {
-            for p in self.datatypes.values() {
-                let res = p.prove_all(rules, &l.0, &l.1);
-                if res.is_some() {
-                    return res;
+        let mut res = None;
+        let mut index = 0;
+        'outer: for (i, conjs) in lemmas.iter().enumerate() {
+            for (ex1, ex2) in conjs {
+                for p in self.datatypes.values() {
+                    res = p.prove_all(rules, ex1, ex2);
+                    index = i;
+                    if res.is_some() {
+                        break 'outer;
+                    }
                 }
             }
         }
-        None
+        if res.is_some() {
+            lemmas.remove(index);
+        }
+        res
     }
 
     pub fn run(&mut self, rules: &mut Vec<Rewrite<SymbolLang, ()>>, max_depth: usize) -> Vec<(Pattern<SymbolLang>, Pattern<SymbolLang>, Rewrite<SymbolLang, ()>)> {
@@ -305,6 +348,7 @@ impl TheSy {
             lemma = self.check_lemmas(rules);
         }
         if self.lemmas.is_some() && self.lemmas.as_ref().unwrap().is_empty() {
+            println!("Found all lemmas");
             return found_rules;
         }
 
@@ -317,7 +361,7 @@ impl TheSy {
                 }
                 _ => { self.node_limit }
             };
-            Self::case_split_all(rules, &mut self.egraph, 4, 6);
+            Self::case_split_all(rules, &mut self.egraph, 2, 4);
 
             let mut conjectures = self.get_conjectures();
             'outer: while !conjectures.is_empty() {
@@ -340,17 +384,20 @@ impl TheSy {
                         rules.insert(new_rules_index, r.2);
                     }
 
-                    lemma = self.check_lemmas(rules);
-                    while lemma.is_some() {
+                    loop {
+                        lemma = self.check_lemmas(rules);
+                        if lemma.is_none() {
+                            break;
+                        }
                         found_rules.extend_from_slice(&lemma.as_ref().unwrap());
                         for r in lemma.unwrap() {
                             println!("proved: {}", r.2.long_name());
                             // inserting like this so new rule will apply before running into node limit.
                             rules.insert(new_rules_index, r.2);
                         }
-                        lemma = self.check_lemmas(rules);
                     }
                     if self.lemmas.is_some() && self.lemmas.as_ref().unwrap().is_empty() {
+                        println!("Found all lemmas");
                         return found_rules;
                     }
 

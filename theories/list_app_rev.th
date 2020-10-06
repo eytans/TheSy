@@ -1,0 +1,16 @@
+(datatype Lst () ((cons Nat Lst Lst) (nil Lst)))
+
+(declare-fun append (Lst Lst) Lst)
+(=> app_base (append nil ?x) ?x)
+(=> app_ind1 (append (cons ?x ?y) ?z) (cons ?x (append ?y ?z)))
+(=> app_ind2 (cons ?x (append ?y ?z)) (append (cons ?x ?y) ?z))
+
+(declare-fun snoc (Lst Nat) Lst)
+(=> snoc_base (snoc nil ?x) (cons ?x nil))
+(<=> snoc_ind (snoc (cons ?x ?xs) ?y) (cons ?x (snoc ?xs ?y)))
+
+(declare-fun rev (Lst) Lst)
+(=> rev_base (rev nil) nil)
+(<=> rev_ind (rev (cons ?x ?y)) (snoc (rev ?y) ?x))
+
+(prove (forall ((x Lst) (y Lst)) (= (rev (append x y)) (append (rev y) (rev x)))))
