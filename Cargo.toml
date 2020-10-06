@@ -15,6 +15,7 @@ smallvec = "1.4.2"
 cute = "0.3.0"
 multimap = "0.8.2"
 log = { version = "0.4", features = ["max_level_trace", "release_max_level_warn"] }
+simplelog = "0.8.0"
 structopt = "0.3.17"
 z3-sys = "0.6.2"
 permutohedron = "0.2.4"
