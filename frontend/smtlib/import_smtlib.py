@@ -3,9 +3,9 @@ import itertools
 from smtlib26 import SmtLib20ParserPlus
 from pysmt.smtlib.parser import SmtLibScript
 from pysmt.fnode import FNode
-from pysmt.environment import get_env
 from pysmt.exceptions import PysmtTypeError
-from pysmt.shortcuts import Symbol, get_free_variables
+from pysmt.shortcuts import Symbol, FunctionType, ForAll, Equals, \
+    Iff, Function, Bool, get_free_variables
 
 
 
@@ -38,6 +38,9 @@ class SmtLibDocument:
 
     def iter_rules(self):
         for cmd in self.script:
+            if cmd.name == 'define-fun':
+                for defin in self.export_rule_def(cmd.args):
+                    yield defin
             if cmd.name == 'assert':
                 for rule in self.export_rules(cmd.args[0]):
                     yield rule
@@ -89,12 +92,23 @@ class SmtLibDocument:
         assert not (type_.is_function_type() or type_.is_array_type()) # TODO compound types
         return type_
 
+    def export_rule_def(self, defun):
+        name, args, rettype, body = defun
+        ftype = FunctionType(rettype, [a.symbol_type() for a in args])
+        fsymb = Symbol(name, ftype)
+        yield self.export_func(fsymb)
+
+        eqop = Iff if rettype.is_bool_type() else Equals
+
+        for rule in self.export_rules(ForAll(args, eqop(Function(fsymb, args), body))):
+            yield rule
+
     def export_rules(self, formula):
         ex = self.export_expr
 
         uvars, formula = self.extract_universal(formula)
 
-        if formula.is_equals():
+        if formula.is_equals() or formula.is_iff():
             if uvars:
                 re = {v: self._qvar_from_symbol(v) for v in uvars}
                 formula = formula.substitute(re)
@@ -114,8 +128,11 @@ class SmtLibDocument:
         if formula.is_not():
             formula = formula.arg(0)
             uvars, inner = self.extract_universal(formula)
-            if inner.is_equals():
-                yield SExpression(['prove', ex(formula)])
+            if inner.is_equals() or inner.is_iff():
+                goal = formula
+            else:
+                goal = ForAll(uvars, Iff(inner, Bool(True)))
+            yield SExpression(['prove', ex(goal)])
 
     def export_expr(self, e):
         return SmtLibSExpression(e)
