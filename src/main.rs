@@ -2,6 +2,9 @@
 #[macro_use(rewrite)]
 extern crate egg;
 
+#[macro_use] extern crate log;
+extern crate simplelog;
+
 use std::borrow::Borrow;
 use std::fs::File;
 use std::io::{Write};
@@ -17,6 +20,7 @@ use crate::thesy::thesy::TheSy;
 use crate::thesy::thesy_parser::parser::Definitions;
 use crate::tools::tools::choose;
 use crate::thesy::{thesy_parser, example_creator};
+use log::LevelFilter;
 
 mod eggstentions;
 mod tools;
@@ -143,9 +147,20 @@ impl From<&TheSyConfig> for TheSy {
 }
 
 fn main() {
+    use simplelog::*;
+    use std::fs::File;
+
     let args = CliOpt::from_args();
+
+    let log_path = args.path.with_extension("log");
+    CombinedLogger::init(
+        vec![
+            TermLogger::new(LevelFilter::Warn, Config::default(), TerminalMode::Mixed),
+            WriteLogger::new(LevelFilter::Info, Config::default(), File::create(log_path).unwrap()),
+        ]
+    ).unwrap();
+
     let start = SystemTime::now();
-    // TODO: Add logging of all runs
     let res = TheSyConfig::from(&args).run(Some(2));
     println!("done in {}", SystemTime::now().duration_since(start).unwrap().as_millis());
     exit(0);
