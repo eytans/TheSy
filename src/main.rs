@@ -129,11 +129,16 @@ impl From<&TheSyConfig> for TheSy {
         let examples = conf.definitions.datatypes.iter()
             .map(|d| (d.clone(), example_creator::examples(d, 2)))
             .collect();
+        let conjectures = if conf.definitions.conjectures.is_empty() {
+            None
+        } else {
+            Some(conf.definitions.conjectures.clone())
+        };
         TheSy::new_with_ph(conf.definitions.datatypes.clone(),
                            examples,
                            dict,
                            conf.ph_count,
-                           Some(conf.definitions.conjectures.clone()))
+                           conjectures)
     }
 }
 

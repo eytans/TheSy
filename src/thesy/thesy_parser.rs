@@ -9,6 +9,7 @@ pub mod parser {
 
     use crate::eggstentions::appliers::DiffApplier;
     use crate::lang::{DataType, Function};
+    use std::collections::HashMap;
 
     #[derive(Default, Clone, Debug)]
     pub struct Definitions {
@@ -19,7 +20,7 @@ pub mod parser {
         /// Rewrites defined by (assert forall)
         pub rws: Vec<Rewrite<SymbolLang, ()>>,
         /// Terms to prove, given as not forall
-        pub conjectures: Vec<(RecExpr<SymbolLang>, RecExpr<SymbolLang>)>
+        pub conjectures: Vec<(HashMap<RecExpr<SymbolLang>, RecExpr<SymbolLang>>, RecExpr<SymbolLang>, RecExpr<SymbolLang>)>
     }
 
     impl Definitions {
@@ -107,7 +108,16 @@ pub mod parser {
                     res.rws.push(rewrite!(name; searcher => applier));
                 },
                 "prove" => {
-                    res.conjectures.push((sexp_to_recexpr(&l[1]), sexp_to_recexpr(&l[2])));
+                    let mut forall_list = l[1].take_list().unwrap();
+                    assert_eq!(forall_list[0].take_string().unwrap(), "forall");
+                    let mut var_map = forall_list[1].take_list().unwrap().iter_mut()
+                        .map(|s| {
+                            let s_list = s.take_list().unwrap();
+                            (sexp_to_recexpr(&s_list[0]), sexp_to_recexpr(&s_list[1]))
+                        }).collect();
+                    let mut equality = forall_list[2].take_list().unwrap();
+                    assert_eq!(equality[0].string().unwrap(), "=");
+                    res.conjectures.push((var_map, sexp_to_recexpr(&equality[1]), sexp_to_recexpr(&equality[2])));
                 }
                 _ => {
                     println!("Error parsing smtlib2 line, found {} op which is not supported", l[0].to_string())

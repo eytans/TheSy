@@ -27,6 +27,8 @@
 (=> filter_base (filter ?p nil) nil)
 (=> filter_ind (filter ?p (cons ?x ?xs)) (ite (apply ?p ?x) (cons ?x (filter ?p ?xs)) (filter ?p ?xs)))
 
-(=|> filter_split (filter ?p (cons ?x ?xs)) (potential_split (apply ?p ?x) true false))
+;(=|> filter_split (filter ?p (cons ?x ?xs)) (potential_split (apply ?p ?x) true false))
 
-(declare-fun len
+(declare-fun len (Lst) Nat)
+(=> len_base (len nil) zero)
+(=> len_ind (len (cons ?x ?xs)) (succ (len ?xs)))
