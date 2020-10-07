@@ -18,6 +18,7 @@ use crate::lang::*;
 use crate::tools::tools::choose;
 use crate::thesy::prover::Prover;
 use multimap::MultiMap;
+use crate::eggstentions::reconstruct::reconstruct;
 
 /// Theory Synthesizer - Explores a given theory finding and proving new lemmas.
 pub struct TheSy {
@@ -104,8 +105,8 @@ impl TheSy {
             example_ids,
             apply_rws,
             ite_rws,
-            node_limit: 200000,
-            iter_limit: 8,
+            node_limit: 400000,
+            iter_limit: 12,
             lemmas: conjectures
         };
 
@@ -246,15 +247,6 @@ impl TheSy {
     fn equiv_reduc_depth(&mut self, rules: &[Rewrite<SymbolLang, ()>], depth: usize) -> StopReason {
         let mut runner = Runner::default().with_time_limit(Duration::from_secs(60 * 10)).with_node_limit(self.node_limit).with_egraph(std::mem::take(&mut self.egraph)).with_iter_limit(depth);
         runner = runner.run(rules);
-        // for (i, it) in runner.iterations.iter().enumerate() {
-        //     println!("Info on iteration {}:", i);
-        //     println!("Rebuilding time {}", it.rebuild_time);
-        //     println!("Search time {}", it.search_time);
-        //     for x in &it.applied {
-        //         println!("Rule {} time {}", x.0, x.1);
-        //     }
-        //     println!();
-        // }
         self.egraph = runner.egraph;
         self.egraph.rebuild();
         runner.stop_reason.unwrap()
@@ -328,8 +320,8 @@ impl TheSy {
 
     pub fn run(&mut self, rules: &mut Vec<Rewrite<SymbolLang, ()>>, max_depth: usize) -> Vec<(Pattern<SymbolLang>, Pattern<SymbolLang>, Rewrite<SymbolLang, ()>)> {
         // TODO: run full tests
+        // TODO: dont allow rules like (take ?x ?y) => (take ?x (append ?y ?y))
         println!("Running TheSy on datatypes: {} dict: {}", self.datatypes.keys().map(|x| &x.name).join(" "), self.dict.iter().map(|x| &x.name).join(" "));
-
         let system_rws_start = rules.len();
         let mut found_rules  = vec![];
         for r in self.apply_rws.iter().chain(self.ite_rws.iter()) {
@@ -341,14 +333,14 @@ impl TheSy {
         while lemma.is_some() {
             found_rules.extend_from_slice(&lemma.as_ref().unwrap());
             for r in lemma.unwrap() {
-                println!("proved: {}", r.2.long_name());
+                warn!("proved: {}", r.2.long_name());
                 // inserting like this so new rule will apply before running into node limit.
                 rules.insert(new_rules_index, r.2);
             }
             lemma = self.check_lemmas(rules);
         }
         if self.lemmas.is_some() && self.lemmas.as_ref().unwrap().is_empty() {
-            println!("Found all lemmas");
+            warn!("Found all lemmas");
             return found_rules;
         }
 
@@ -356,11 +348,13 @@ impl TheSy {
             self.increase_depth();
             self.node_limit = match self.equiv_reduc(&rules[..]) {
                 StopReason::NodeLimit(x) => {
-                    println!("Reached node limit. Increasing maximum graph size.");
+                    info!("Reached node limit. Increasing maximum graph size.");
                     x + 50000
                 }
                 _ => { self.node_limit }
             };
+            // let matches = Self::split_patterns()[0].search(&self.egraph);
+            // assert!(matches.iter().all(|m| self.egraph.classes().find(|c| c.id == m.eclass).unwrap().nodes.len() == 1));
             Self::case_split_all(rules, &mut self.egraph, 2, 4);
 
             let mut conjectures = self.get_conjectures();
@@ -374,12 +368,12 @@ impl TheSy {
                         new_rules = temp;
                     }
                     if Self::check_equality(&rules[..], &ex1, &ex2) {
-                        println!("bad conjecture {} = {}", &ex1.pretty(500), &ex2.pretty(500));
+                        info!("bad conjecture {} = {}", &ex1.pretty(500), &ex2.pretty(500));
                         continue 'outer;
                     }
                     found_rules.extend_from_slice(&new_rules.as_ref().unwrap());
                     for r in new_rules.unwrap() {
-                        println!("proved: {}", r.2.long_name());
+                        warn!("proved: {}", r.2.long_name());
                         // inserting like this so new rule will apply before running into node limit.
                         rules.insert(new_rules_index, r.2);
                     }
@@ -469,8 +463,15 @@ impl TheSy {
             let mut new_graph = egraph.clone();
             new_graph.union(root, *child);
             // TODO: graph limit enhancing runner, with rules sorting
-            let mut runner = Runner::default().with_time_limit(Duration::from_secs(60 * 5)).with_node_limit(new_graph.total_number_of_nodes() + 200000).with_egraph(new_graph).with_iter_limit(run_depth);
+            let mut runner = Runner::default().with_time_limit(Duration::from_secs(60 * 10)).with_node_limit(new_graph.total_number_of_nodes() + 400000).with_egraph(new_graph).with_iter_limit(run_depth);
             runner = runner.run(rules);
+            match runner.stop_reason.as_ref().unwrap() {
+                Saturated => {}
+                StopReason::IterationLimit(_) => {}
+                StopReason::NodeLimit(_) => { warn!("Stopped case split due to node limit") }
+                StopReason::TimeLimit(_) => { warn!("Stopped case split due to time limit") }
+                StopReason::Other(_) => {}
+            };
             runner.egraph.rebuild();
             Self::_case_split_all(rules, &mut runner.egraph, split_depth - 1, run_depth, dont_use);
             classes.iter().map(|c| (c.id, runner.egraph.find(c.id))).collect::<HashMap<Id, Id>>()
@@ -520,7 +521,8 @@ impl TheSy {
                 results.map(|s| (
                     *s.get(root_var).unwrap(), // Root
                     (0..i + 2).map(|i| *s.get(children_vars[i]).unwrap()).collect_vec() // Params
-                )).filter(|x| !new_dont_use.contains(x)).collect_vec()
+                )).filter(|x| !new_dont_use.contains(x))
+                    .collect_vec()
             })
             .collect_vec();
         splitters.iter().enumerate().for_each(|(i, (root, params))| {
@@ -581,6 +583,9 @@ mod test {
     use crate::lang::{DataType, Function};
     use crate::eggstentions::appliers::DiffApplier;
     use crate::eggstentions::expression_ops::{Tree};
+    use crate::TheSyConfig;
+    use egg::test::run;
+    use crate::thesy::prover::Prover;
 
     fn create_nat_type() -> DataType {
         DataType::new("nat".to_string(), vec![
@@ -793,33 +798,12 @@ mod test {
     }
 
     #[test]
-    fn wfo_trans_ok() {
-        let mut egraph = EGraph::default();
-        egraph.add_expr("(ltwf x y)".parse().as_ref().unwrap());
-        egraph.add_expr("(ltwf y z)".parse().as_ref().unwrap());
-        egraph = Runner::default().with_egraph(egraph).run(&vec![TheSy::wfo_trans()][..]).egraph;
-        let pat: Pattern<SymbolLang> = "(ltwf x z)".parse().unwrap();
-        assert!(pat.search(&egraph).iter().all(|s| !s.substs.is_empty()));
-        assert!(!pat.search(&egraph).is_empty());
-    }
-
-    #[test]
-    fn wfo_nat_ok() {
-        let mut egraph = EGraph::default();
-        egraph.add_expr("(S y)".parse().as_ref().unwrap());
-        egraph = Runner::default().with_egraph(egraph).run(&TheSy::wfo_datatype(&create_nat_type())[..]).egraph;
-        let pat: Pattern<SymbolLang> = "(ltwf y (S y))".parse().unwrap();
-        assert!(pat.search(&egraph).iter().all(|s| !s.substs.is_empty()));
-        assert!(!pat.search(&egraph).is_empty());
-    }
-
-    #[test]
     fn prove_pl_zero() {
         let mut syg = create_nat_sygue();
         let nat = create_nat_type();
         let mut rewrites = create_pl_rewrites();
         let ind_rec = TheSy::get_ind_var(&nat);
-        assert!(syg.prove(&rewrites[..], &nat, &format!("(pl {} Z)", ind_rec.name).parse().unwrap(), &ind_rec.name.parse().unwrap()).is_some())
+        assert!(syg.datatypes[&nat].prove_ind(&rewrites[..], &format!("(pl {} Z)", ind_rec.name).parse().unwrap(), &ind_rec.name.parse().unwrap()).is_some())
     }
 
     #[test]
@@ -887,12 +871,55 @@ mod test {
         }
         let conjs = thesy.get_conjectures();
         let (o, c1, c2, d) = conjs.last().unwrap();
-        assert!(thesy.prove(&filter_rules, d, c1, c2).is_some());
+        assert!(thesy.datatypes[d].prove_ind(&filter_rules, c1, c2).is_some());
     }
 
     #[test]
     fn split_case_filter_p_and_q() {
 
+    }
+
+    #[test]
+    fn take_drop_equiv_red() {
+        let conf = TheSyConfig::from_path("theories/goal1.smt2.th".parse().unwrap());
+        let mut thesy = TheSy::from(&conf);
+        let rules = conf.definitions.rws;
+        let mut egraph = EGraph::default();
+        let nil = egraph.add_expr(&"nil".parse().unwrap());
+        let consx = egraph.add_expr(&"(cons x nil)".parse().unwrap());
+        let consxy = egraph.add_expr(&"(cons y (cons x nil))".parse().unwrap());
+        let ex0 = egraph.add_expr(&"(append (take i nil) (drop i nil))".parse().unwrap());
+        let ex1 = egraph.add_expr(&"(append (take i (cons x nil)) (drop i (cons x nil)))".parse().unwrap());
+        let ex2 = egraph.add_expr(&"(append (take i (cons y (cons x nil))) (drop i (cons y (cons x nil))))".parse().unwrap());
+        let mut runner = Runner::default().with_egraph(egraph).with_iter_limit(8).run(&rules);
+        egraph = std::mem::take(&mut runner.egraph);
+        egraph.rebuild();
+        // assert_ne!(egraph.find(nil), egraph.find(ex0));
+        assert_ne!(egraph.find(consx), egraph.find(ex1));
+        assert_ne!(egraph.find(consxy), egraph.find(ex2));
+        TheSy::case_split_all(&rules, &mut egraph, 2, 4);
+        egraph.rebuild();
+        assert_eq!(egraph.find(nil), egraph.find(ex0));
+        assert_eq!(egraph.find(consx), egraph.find(ex1));
+        assert_eq!(egraph.find(consxy), egraph.find(ex2));
+    }
+
+    #[test]
+    fn take_drop_prove_all() {
+        let conf = TheSyConfig::from_path("theories/goal1.smt2.th".parse().unwrap());
+        let mut thesy = TheSy::from(&conf);
+        let rules = &conf.definitions.rws;
+        assert!(thesy.datatypes[conf.definitions.datatypes.last().unwrap()].prove_all(rules, &"(append (take ts_ph_Nat_1 ts_ph_Lst_0) (drop ts_ph_Nat_1 ts_ph_Lst_0))".parse().unwrap(), &"ts_ph_Lst_0".parse().unwrap()).is_some());
+    }
+
+    #[test]
+    fn conditional_apply_playground() {
+        let mut conf = TheSyConfig::from_path("theories/goal1.smt2.th".parse().unwrap());
+        let mut thesy = TheSy::from(&conf);
+        let rules = std::mem::take(&mut conf.definitions.rws);
+        println!("{}", rules.last().unwrap().name());
+
+        // assert!(thesy.datatypes[conf.definitions.datatypes.last().unwrap()].prove_all(rules, &"(append (take ts_ph_Nat_1 ts_ph_Lst_0) (drop ts_ph_Nat_1 ts_ph_Lst_0))".parse().unwrap(), &"ts_ph_Lst_0".parse().unwrap()).is_some());
     }
 
     // TODO: test on lists
