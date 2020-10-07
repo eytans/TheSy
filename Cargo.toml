@@ -19,6 +19,11 @@ simplelog = "0.8.0"
 structopt = "0.3.17"
 z3-sys = "0.6.2"
 permutohedron = "0.2.4"
+serde = {version = "1.0.116", features = ["derive"], optional = true}
+serde_json = {version = "1.0.58", optional = true}
+
+[features]
+stats = ["serde", "serde_json", "egg/serde-1"]
 
 #[build]
 #rustflags = ["-C", "link-args=-Wl,-stack_size,0x100000000"]    # custom flags to pass to all compiler invocations

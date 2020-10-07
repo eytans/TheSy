@@ -19,6 +19,7 @@ use crate::tools::tools::choose;
 use crate::thesy::prover::Prover;
 use multimap::MultiMap;
 use crate::eggstentions::reconstruct::reconstruct;
+use crate::thesy::statistics::Stats;
 
 /// Theory Synthesizer - Explores a given theory finding and proving new lemmas.
 pub struct TheSy {
@@ -44,13 +45,15 @@ pub struct TheSy {
     iter_limit: usize,
     /// Lemmas given by user to prove. Continue exploration until all lemmas are provable then stop.
     /// If empty then TheSy will fully explore the space.
-    lemmas: Option<Vec<Vec<(RecExpr<SymbolLang>, RecExpr<SymbolLang>)>>>
+    lemmas: Option<Vec<Vec<(RecExpr<SymbolLang>, RecExpr<SymbolLang>)>>>,
+    /// If stats enable contains object collecting runtime data on thesy otherwise None.
+    pub stats: Option<Stats>,
 }
 
 /// *** Thesy ***
 impl TheSy {
     pub fn new(datatype: DataType, examples: Vec<RecExpr<SymbolLang>>, dict: Vec<Function>) -> TheSy {
-        Self::new_with_ph(vec![datatype.clone()], HashMap::from_iter(iter::once((datatype, examples))), dict,2, None)
+        Self::new_with_ph(vec![datatype.clone()], HashMap::from_iter(iter::once((datatype, examples))), dict, 2, None)
     }
 
     fn replace_ops(exp: &RecExpr<SymbolLang>, replacments: &HashMap<Symbol, Symbol>) -> RecExpr<SymbolLang> {
@@ -65,7 +68,7 @@ impl TheSy {
     pub fn new_with_ph(datatypes: Vec<DataType>, examples: HashMap<DataType, Vec<RecExpr<SymbolLang>>>, dict: Vec<Function>, ph_count: usize, lemmas: Option<Vec<(HashMap<RecExpr<SymbolLang>, RecExpr<SymbolLang>>, RecExpr<SymbolLang>, RecExpr<SymbolLang>)>>) -> TheSy {
         let datatype_to_prover: HashMap<DataType, Prover> = datatypes.iter()
             .map(|d| (d.clone(), Prover::new(d.clone()))).collect();
-        let (mut egraph, mut example_ids) = TheSy::create_graph_example_ids(&datatypes, &examples, &dict,ph_count);
+        let (mut egraph, mut example_ids) = TheSy::create_graph_example_ids(&datatypes, &examples, &dict, ph_count);
 
         let apply_rws = TheSy::create_apply_rws(&dict, ph_count);
 
@@ -86,15 +89,19 @@ impl TheSy {
                 }).collect();
                 let ex1_replaced = Self::replace_ops(&ex1, &replacments);
                 let ex2_replaced = Self::replace_ops(&ex2, &replacments);
-                types_to_vars.keys().filter(|key|datatypes.iter()
+                types_to_vars.keys().filter(|key| datatypes.iter()
                     .any(|d| d.as_exp().into_tree() == key.into_tree()))
                     .flat_map(|typ| {
                         types_to_vars[typ].values().zip(iter::once(typ).cycle()).map(|(ph, typ)| {
                             (Self::replace_op(&ex1_replaced, Symbol::from(&ph.name), Symbol::from(&Self::get_ph(typ, 0).name)),
-                            Self::replace_op(&ex2_replaced, Symbol::from(&ph.name), Symbol::from(&Self::get_ph(typ, 0).name)))
+                             Self::replace_op(&ex2_replaced, Symbol::from(&ph.name), Symbol::from(&Self::get_ph(typ, 0).name)))
                         })
                     }).collect_vec()
-        }).collect_vec());
+            }).collect_vec());
+
+        let stats = if cfg!(feature = "stats") {
+            Some(Stats::default())
+        } else { None };
 
         let mut res = TheSy {
             datatypes: datatype_to_prover,
@@ -107,7 +114,8 @@ impl TheSy {
             ite_rws,
             node_limit: 400000,
             iter_limit: 12,
-            lemmas: conjectures
+            lemmas: conjectures,
+            stats,
         };
 
         res.searchers = res.create_sygue_serchers();
@@ -194,6 +202,12 @@ impl TheSy {
     /// You have base case. Create all new ids, for each example lookup params, create edge find all ids from edge
     /// Add anchor only to ind_ph term
     pub fn increase_depth(&mut self) {
+        let mut start = None;
+        let mut nodes = None;
+        if cfg!(feature = "stats") {
+            start = Some(SystemTime::now());
+            nodes = Some(self.egraph.total_number_of_nodes());
+        }
         // First we need to update our keys as they might not be relevant anymore
         self.fix_example_ids();
         // Now apply for all matches
@@ -238,6 +252,10 @@ impl TheSy {
             }
         }
         self.egraph.rebuild();
+        if cfg!(feature = "stats") {
+            self.stats.as_mut().unwrap().term_creation.push((self.egraph.total_number_of_nodes() - nodes.unwrap(),
+                                                             SystemTime::now().duration_since(start.unwrap()).unwrap()));
+        }
     }
 
     pub fn equiv_reduc(&mut self, rules: &[Rewrite<SymbolLang, ()>]) -> StopReason {
@@ -247,6 +265,9 @@ impl TheSy {
     fn equiv_reduc_depth(&mut self, rules: &[Rewrite<SymbolLang, ()>], depth: usize) -> StopReason {
         let mut runner = Runner::default().with_time_limit(Duration::from_secs(60 * 10)).with_node_limit(self.node_limit).with_egraph(std::mem::take(&mut self.egraph)).with_iter_limit(depth);
         runner = runner.run(rules);
+        if cfg!(feature = "stats") {
+            self.stats.as_mut().unwrap().equiv_red_iterations.push(std::mem::take(&mut runner.iterations));
+        }
         self.egraph = runner.egraph;
         self.egraph.rebuild();
         runner.stop_reason.unwrap()
@@ -259,6 +280,10 @@ impl TheSy {
     /// return the conjectures ordered by representative size.
     pub fn get_conjectures(&mut self) -> Vec<(RepOrder, RecExpr<SymbolLang>, RecExpr<SymbolLang>, DataType)> {
         // TODO: make this an iterator to save alot of time during recreating conjectures
+        let mut start = None;
+        if cfg!(feature = "stats") {
+             start = Some(SystemTime::now());
+        }
         self.fix_example_ids();
         let finer_classes: HashMap<DataType, HashMap<Vec<Id>, HashSet<Id>>> = self.example_ids.iter().map(|(d, m)| {
             let mut finer_equality_classes: HashMap<Vec<Id>, HashSet<Id>> = HashMap::new();
@@ -282,10 +307,13 @@ impl TheSy {
             }
         }
         res.sort_by_key(|x| x.0.clone());
+        if cfg!(feature = "stats") {
+            self.stats.as_mut().unwrap().get_conjectures.push(SystemTime::now().duration_since(start.unwrap()).unwrap());
+        }
         res.into_iter().rev().collect_vec()
     }
 
-   fn check_equality(rules: &[Rewrite<SymbolLang, ()>], ex1: &RecExpr<SymbolLang>, ex2: &RecExpr<SymbolLang>) -> bool {
+    fn check_equality(rules: &[Rewrite<SymbolLang, ()>], ex1: &RecExpr<SymbolLang>, ex2: &RecExpr<SymbolLang>) -> bool {
         let mut egraph = EGraph::default();
         egraph.add_expr(ex1);
         egraph.add_expr(ex2);
@@ -304,10 +332,21 @@ impl TheSy {
         'outer: for (i, conjs) in lemmas.iter().enumerate() {
             for (ex1, ex2) in conjs {
                 for p in self.datatypes.values() {
+                    let start = if cfg!(feature = "stats") {
+                        Some(SystemTime::now())
+                    } else { None };
                     res = p.prove_all(rules, ex1, ex2);
                     index = i;
                     if res.is_some() {
+                        if cfg!(feature = "stats") {
+                            self.stats.as_mut().unwrap().goals_proved.push((ex1.pretty(500), ex2.pretty(500), SystemTime::now().duration_since(start.unwrap()).unwrap()));
+                        }
                         break 'outer;
+                    }
+                    else {
+                        if cfg!(feature = "stats") {
+                            self.stats.as_mut().unwrap().failed_proofs_lemmas.push((ex1.pretty(500), ex2.pretty(500), SystemTime::now().duration_since(start.unwrap()).unwrap()));
+                        }
                     }
                 }
             }
@@ -323,7 +362,7 @@ impl TheSy {
         // TODO: dont allow rules like (take ?x ?y) => (take ?x (append ?y ?y))
         println!("Running TheSy on datatypes: {} dict: {}", self.datatypes.keys().map(|x| &x.name).join(" "), self.dict.iter().map(|x| &x.name).join(" "));
         let system_rws_start = rules.len();
-        let mut found_rules  = vec![];
+        let mut found_rules = vec![];
         for r in self.apply_rws.iter().chain(self.ite_rws.iter()) {
             rules.push(r.clone());
         }
@@ -353,13 +392,26 @@ impl TheSy {
                 }
                 _ => { self.node_limit }
             };
+
+            let splitter_count = if cfg!(feature = "stats") {
+                Self::split_patterns().iter().map(|p| p.search(&self.egraph).iter().map(|m| m.substs.len()).sum::<usize>()).sum()
+            } else { 0 };
+            let start = if cfg!(feature = "stats") {
+                Some(SystemTime::now())
+            } else { None };
             // let matches = Self::split_patterns()[0].search(&self.egraph);
             // assert!(matches.iter().all(|m| self.egraph.classes().find(|c| c.id == m.eclass).unwrap().nodes.len() == 1));
             Self::case_split_all(rules, &mut self.egraph, 2, 4);
+            if cfg!(feature = "stats") {
+                self.stats.as_mut().unwrap().case_split.push((splitter_count, SystemTime::now().duration_since(start.unwrap()).unwrap()));
+            }
 
             let mut conjectures = self.get_conjectures();
             'outer: while !conjectures.is_empty() {
                 let (_, ex1, ex2, d) = conjectures.pop().unwrap();
+                let start = if cfg!(feature = "stats") {
+                    Some(SystemTime::now())
+                } else { None };
                 let mut new_rules = self.datatypes[&d].prove_ind(&rules, &ex1, &ex2);
                 if new_rules.is_some() {
                     let temp = new_rules;
@@ -367,8 +419,14 @@ impl TheSy {
                     if new_rules.is_none() {
                         new_rules = temp;
                     }
+                    if cfg!(feature = "stats") {
+                        self.stats.as_mut().unwrap().conjectures_proved.push((ex1.pretty(500), ex2.pretty(500), SystemTime::now().duration_since(start.unwrap()).unwrap()));
+                    }
                     if Self::check_equality(&rules[..], &ex1, &ex2) {
                         info!("bad conjecture {} = {}", &ex1.pretty(500), &ex2.pretty(500));
+                        if cfg!(feature = "stats") {
+                            self.stats.as_mut().unwrap().filtered_lemmas.push((ex1.pretty(500), ex2.pretty(500)));
+                        }
                         continue 'outer;
                     }
                     found_rules.extend_from_slice(&new_rules.as_ref().unwrap());
@@ -406,6 +464,10 @@ impl TheSy {
                     // Self::case_split_all(rules, &mut self.egraph, 4, 3);
                     conjectures = self.get_conjectures();
                     println!();
+                } else {
+                    if cfg!(feature = "stats") {
+                        self.stats.as_mut().unwrap().failed_proofs.push((ex1.pretty(500), ex2.pretty(500), SystemTime::now().duration_since(start.unwrap()).unwrap()));
+                    }
                 }
             }
         }
@@ -503,7 +565,7 @@ impl TheSy {
                        egraph: &mut EGraph<SymbolLang, ()>,
                        split_depth: usize, run_depth: usize,
                        dont_use: &HashSet<(Id, Vec<Id>)>,
-                        splitted_max_depth: usize) {
+                       splitted_max_depth: usize) {
         if split_depth == 0 {
             return;
         }
@@ -526,6 +588,9 @@ impl TheSy {
                     .collect_vec()
             })
             .collect_vec();
+        if splitters.is_empty() {
+            return;
+        }
         let classes: HashMap<Id, &EClass<SymbolLang, ()>> = egraph.classes().map(|c| (c.id, c)).collect();
         let mut needed: HashSet<Id> = splitters.iter().map(|x| x.0).collect();
         let mut translatable = HashSet::new();
@@ -638,8 +703,8 @@ mod test {
             create_list_type(),
             vec!["Nil".parse().unwrap(), "(Cons x Nil)".parse().unwrap(), "(Cons y (Cons x Nil))".parse().unwrap()],
             vec![Function::new("snoc".to_string(), vec!["list".parse().unwrap(), "nat".parse().unwrap()], "list".parse().unwrap()),
-            Function::new("rev".to_string(), vec!["list".parse().unwrap()], "list".parse().unwrap()),
-            Function::new("app".to_string(), vec!["list".parse().unwrap(), "list".parse().unwrap()], "list".parse().unwrap())],
+                 Function::new("rev".to_string(), vec!["list".parse().unwrap()], "list".parse().unwrap()),
+                 Function::new("app".to_string(), vec!["list".parse().unwrap(), "list".parse().unwrap()], "list".parse().unwrap())],
         )
     }
 
@@ -736,7 +801,7 @@ mod test {
         let mut syg = TheSy::new(
             nat_type.clone(),
             vec!["Z"].into_iter().map(|s| s.parse().unwrap()).collect(),
-            vec![Function::new("S".to_string(), vec!["nat".parse().unwrap()], "nat".parse().unwrap())]
+            vec![Function::new("S".to_string(), vec!["nat".parse().unwrap()], "nat".parse().unwrap())],
         );
 
         let anchor_patt: Pattern<SymbolLang> = Pattern::from_str("(typed ?x ?y)").unwrap();
@@ -757,7 +822,7 @@ mod test {
             HashMap::from_iter(iter::once((new_nat, vec!["Z"].into_iter().map(|s| s.parse().unwrap()).collect()))),
             vec![Function::new("x".to_string(), vec!["nat".parse().unwrap(), "nat".parse().unwrap()], "nat".parse().unwrap())],
             3,
-            None
+            None,
         );
 
         let results0 = anchor_patt.search(&syg.egraph);
@@ -873,7 +938,7 @@ mod test {
         let dict = vec![Function::new("filter".to_string(),
                                       vec!["(-> nat bool)", "list"].into_iter()
                                           .map(|x| x.parse().unwrap()).collect_vec(),
-                                      "list".parse().unwrap()
+                                      "list".parse().unwrap(),
         )];
         let mut thesy = TheSy::new(list_type.clone(), examples(&list_type, 2), dict.clone());
         (list_type, dict, thesy)
@@ -897,9 +962,7 @@ mod test {
     }
 
     #[test]
-    fn split_case_filter_p_and_q() {
-
-    }
+    fn split_case_filter_p_and_q() {}
 
     #[test]
     fn take_drop_equiv_red() {
