@@ -203,6 +203,7 @@ impl Prover {
             Prover::push_rw(&fixed_ex2, &fixed_ex1, text2, &mut new_rules);
             Some(new_rules)
         } else {
+            info!("Failed to prove: {} = {}", ex1.pretty(500), ex2.pretty(500));
             None
         }
     }
@@ -296,5 +297,40 @@ impl Prover {
         if i.starts_with("?") {
             i[1..].to_string()
         } else { i }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use egg::{EGraph, SymbolLang, Pattern, Runner, Searcher};
+    use crate::thesy::prover::Prover;
+    use crate::lang::{DataType, Function};
+
+    fn create_nat_type() -> DataType {
+        DataType::new("nat".to_string(), vec![
+            Function::new("Z".to_string(), vec![], "nat".parse().unwrap()),
+            Function::new("S".to_string(), vec!["nat".parse().unwrap()], "nat".parse().unwrap()),
+        ])
+    }
+
+    #[test]
+    fn wfo_trans_ok() {
+        let mut egraph = EGraph::default();
+        egraph.add_expr("(ltwf x y)".parse().as_ref().unwrap());
+        egraph.add_expr("(ltwf y z)".parse().as_ref().unwrap());
+        egraph = Runner::default().with_egraph(egraph).run(&vec![Prover::wfo_trans()][..]).egraph;
+        let pat: Pattern<SymbolLang> = "(ltwf x z)".parse().unwrap();
+        assert!(pat.search(&egraph).iter().all(|s| !s.substs.is_empty()));
+        assert!(!pat.search(&egraph).is_empty());
+    }
+
+    #[test]
+    fn wfo_nat_ok() {
+        let mut egraph = EGraph::default();
+        egraph.add_expr("(S y)".parse().as_ref().unwrap());
+        egraph = Runner::default().with_egraph(egraph).run(&Prover::wfo_datatype(&create_nat_type())[..]).egraph;
+        let pat: Pattern<SymbolLang> = "(ltwf y (S y))".parse().unwrap();
+        assert!(pat.search(&egraph).iter().all(|s| !s.substs.is_empty()));
+        assert!(!pat.search(&egraph).is_empty());
     }
 }

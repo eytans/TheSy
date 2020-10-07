@@ -3,13 +3,14 @@ pub mod parser {
     use std::io::Read;
     use std::str::FromStr;
 
-    use egg::{Pattern, RecExpr, Rewrite, SymbolLang};
+    use egg::{Pattern, RecExpr, Rewrite, SymbolLang, Var, Condition, ConditionalApplier};
     use itertools::{Itertools};
     use symbolic_expressions::Sexp;
 
     use crate::eggstentions::appliers::DiffApplier;
     use crate::lang::{DataType, Function};
     use std::collections::HashMap;
+    use crate::eggstentions::conditions::{NonPatternCondition, AndCondition};
 
     #[derive(Default, Clone, Debug)]
     pub struct Definitions {
@@ -20,7 +21,7 @@ pub mod parser {
         /// Rewrites defined by (assert forall)
         pub rws: Vec<Rewrite<SymbolLang, ()>>,
         /// Terms to prove, given as not forall
-        pub conjectures: Vec<(HashMap<RecExpr<SymbolLang>, RecExpr<SymbolLang>>, RecExpr<SymbolLang>, RecExpr<SymbolLang>)>
+        pub conjectures: Vec<(HashMap<RecExpr<SymbolLang>, RecExpr<SymbolLang>>, RecExpr<SymbolLang>, RecExpr<SymbolLang>)>,
     }
 
     impl Definitions {
@@ -74,22 +75,34 @@ pub mod parser {
                                                          sexp_list_to_recexpr(constructors)
                                                              .into_iter()
                                                              .map(|e| Function::from(e))
-                                                             .collect_vec()
-
+                                                             .collect_vec(),
                     ));
-                },
+                }
                 "declare-fun" => {
                     let fun_name = l[1].take_string().unwrap();
                     let params = sexp_list_to_recexpr(l[2].take_list().unwrap());
                     let return_type = sexp_to_recexpr(&l[3]);
                     res.functions.push(Function::new(fun_name, params, return_type));
-                },
+                }
                 "=>" => {
-                    let name = l[1].take_string().unwrap();
-                    let searcher = Pattern::from_str(&*l[2].to_string()).unwrap();
-                    let applier = Pattern::from_str(&*l[3].to_string()).unwrap();
-                    res.rws.push(rewrite!(name; searcher => applier));
-                },
+                    let (name, searcher, mut applier, conditions) = collect_rule(&mut l);
+                    if conditions.is_empty() {
+                        res.rws.push(rewrite!(name; searcher => applier));
+                    } else {
+                        let applier = ConditionalApplier { applier, condition: AndCondition::new(conditions) };
+                        res.rws.push(rewrite!(name; searcher => applier));
+                    }
+                }
+                "=|>" => {
+                    let (name, searcher, applier, conditions) = collect_rule(&mut l);
+                    if conditions.is_empty() {
+                        let dif_app = DiffApplier::new(applier);
+                        res.rws.push(rewrite!(name; searcher => dif_app));
+                    } else {
+                        let applier = DiffApplier::new(ConditionalApplier { applier, condition: AndCondition::new(conditions) });
+                        res.rws.push(rewrite!(name; searcher => applier));
+                    }
+                }
                 "<=>" => {
                     let name = l[1].take_string().unwrap();
                     let searcher: Pattern<SymbolLang> = Pattern::from_str(&*l[2].to_string()).unwrap();
@@ -100,13 +113,7 @@ pub mod parser {
                     res.rws.push(rewrite!(name + "-rev"; applier1 => searcher1));
                     // buggy macro
                     // res.rws.extend_from_slice(&rewrite!(name; searcher <=> applier));
-                },
-                "=|>" => {
-                    let name = l[1].take_string().unwrap();
-                    let searcher = Pattern::from_str(&*l[2].to_string()).unwrap();
-                    let applier = DiffApplier::new(Pattern::from_str(&*l[3].to_string()).unwrap());
-                    res.rws.push(rewrite!(name; searcher => applier));
-                },
+                }
                 "prove" => {
                     let mut forall_list = l[1].take_list().unwrap();
                     assert_eq!(forall_list[0].take_string().unwrap(), "forall");
@@ -121,10 +128,24 @@ pub mod parser {
                 }
                 _ => {
                     println!("Error parsing smtlib2 line, found {} op which is not supported", l[0].to_string())
-                },
+                }
             }
         }
         res
+    }
+
+    fn collect_rule(l: &mut Vec<Sexp>) -> (String, Pattern<SymbolLang>, Pattern<SymbolLang>, Vec<Box<dyn Condition<SymbolLang, ()>>>) {
+        let name = l[1].take_string().unwrap();
+        let searcher = Pattern::from_str(&*l[2].to_string()).unwrap();
+        let applier = Pattern::from_str(&*l[3].to_string()).unwrap();
+        let conditions = l[4..].iter().map(|s| {
+            let v_cond = s.list().unwrap();
+            let var = Var::from_str(v_cond[0].string().unwrap()).unwrap();
+            let cond: Pattern<SymbolLang> = Pattern::from_str(&*v_cond[1].to_string()).unwrap();
+            let res: Box<dyn Condition<SymbolLang, ()>> = Box::new(NonPatternCondition::new(cond, var));
+            res
+        }).collect_vec();
+        (name, searcher, applier, conditions)
     }
 
     fn sexp_list_to_recexpr(sexps: Vec<Sexp>) -> Vec<RecExpr<SymbolLang>> {
