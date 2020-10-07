@@ -353,8 +353,11 @@ impl TheSy {
                 }
                 _ => { self.node_limit }
             };
-            // let matches = Self::split_patterns()[0].search(&self.egraph);
-            // assert!(matches.iter().all(|m| self.egraph.classes().find(|c| c.id == m.eclass).unwrap().nodes.len() == 1));
+            let matches = Self::split_patterns()[0].search(&self.egraph);
+            assert!(matches.iter().all(|m| self.egraph.classes().find(|c| c.id == m.eclass).unwrap().nodes.len() == 1));
+            for m in matches {
+                println!("{}", reconstruct(&self.egraph, m.eclass, 8).map(|exp| exp.pretty(500)).unwrap_or("".to_string()));
+            }
             Self::case_split_all(rules, &mut self.egraph, 2, 4);
 
             let mut conjectures = self.get_conjectures();
@@ -547,6 +550,7 @@ impl TheSy {
             }
         }
 
+        warn!("# of splitters: {}", splitters.len());
         splitters.iter().filter(|s| translatable.contains(&s.0)).enumerate().for_each(|(i, (root, params))| {
             let mut updated_dont_use = new_dont_use.clone();
             updated_dont_use.extend(splitters.iter().take(i + 1).cloned());

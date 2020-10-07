@@ -1,7 +1,7 @@
 use egg::{RecExpr, Pattern, SymbolLang, Iteration, IterationData};
 use std::time::Duration;
 
-#[derive(Clone, Serialize, Default, Deserialize)]
+#[derive(Clone, Default)]
 struct Stats {
     pub conjectures_proved: Vec<(Pattern<SymbolLang>, Pattern<SymbolLang>, Duration)>,
     pub failed_proofs: Vec<(Pattern<SymbolLang>, Pattern<SymbolLang>, Duration)>,
