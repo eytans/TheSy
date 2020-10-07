@@ -361,6 +361,10 @@ impl TheSy {
         // TODO: run full tests
         // TODO: dont allow rules like (take ?x ?y) => (take ?x (append ?y ?y))
         println!("Running TheSy on datatypes: {} dict: {}", self.datatypes.keys().map(|x| &x.name).join(" "), self.dict.iter().map(|x| &x.name).join(" "));
+        let start_total = if cfg!(feature = "stats") {
+            Some(SystemTime::now())
+        } else { None };
+
         let system_rws_start = rules.len();
         let mut found_rules = vec![];
         for r in self.apply_rws.iter().chain(self.ite_rws.iter()) {
@@ -477,6 +481,9 @@ impl TheSy {
         }
         for _ in 0..self.apply_rws.len() {
             rules.remove(system_rws_start);
+        }
+        if cfg!(feature = "stats") {
+            self.stats.as_mut().unwrap().total_time = SystemTime::now().duration_since(start_total.unwrap()).unwrap();
         }
         found_rules
     }

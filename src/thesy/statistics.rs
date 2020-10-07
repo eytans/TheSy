@@ -22,5 +22,7 @@ pub struct Stats {
     /// Time to collect conjectures
     pub get_conjectures: Vec<Duration>,
     /// Lemmas proved and later were found to be unnecessary
-    pub filtered_lemmas: Vec<(String, String)>
+    pub filtered_lemmas: Vec<(String, String)>,
+    /// total runtime of run fn
+    pub total_time: Duration
 }
