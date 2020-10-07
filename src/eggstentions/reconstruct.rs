@@ -3,11 +3,64 @@ use std::iter;
 use std::rc::Rc;
 use std::time::SystemTime;
 
-use egg::{EGraph, Id, Language, SymbolLang};
+use egg::{EGraph, Id, Language, SymbolLang, RecExpr, EClass};
 use itertools::Itertools;
 
 use crate::tools::tools::combinations;
 use crate::tree::Tree;
+
+pub fn reconstruct(graph: &EGraph<SymbolLang, ()>, class: Id, max_depth: usize) -> Option<RecExpr<SymbolLang>> {
+    let mut translations: HashMap<Id, RecExpr<SymbolLang>> = HashMap::new();
+    let classes = graph.classes().into_iter().map(|c| (c.id, c)).collect();
+    reconstruct_inner(&classes, class, max_depth, &mut translations);
+    translations.get(&class).map(|x| x.clone())
+}
+
+pub fn reconstruct_edge(graph: &EGraph<SymbolLang, ()>, class: Id, edge: SymbolLang, max_depth: usize) -> Option<RecExpr<SymbolLang>> {
+    let mut translations: HashMap<Id, RecExpr<SymbolLang>> = HashMap::new();
+    let classes = graph.classes().into_iter().map(|c| (c.id, c)).collect();
+    for child in &edge.children {
+        reconstruct_inner(&classes, *child, max_depth - 1, &mut translations);
+    }
+    build_translation(&mut translations, &edge, class);
+    translations.get(&class).map(|x| x.clone())
+}
+
+fn reconstruct_inner(classes: &HashMap<Id, &EClass<SymbolLang, ()>>, class: Id, max_depth: usize, translations: &mut HashMap<Id, RecExpr<SymbolLang>>) {
+    if max_depth == 0 || translations.contains_key(&class) {
+        return;
+    }
+    let cur_class = classes.get(&class).unwrap();
+    let mut inner_ids = vec![];
+    for edge in &cur_class.nodes {
+        if edge.children.iter().all(|c| translations.contains_key(c)) {
+            build_translation(translations, &edge, class);
+            return;
+        }
+        inner_ids.push(edge);
+    }
+    inner_ids.sort_by_key(|c| c.children.len());
+    for edge in inner_ids {
+        for id in &edge.children {
+            reconstruct_inner(classes, *id, max_depth - 1, translations);
+        }
+        if edge.children.iter().all(|c| translations.contains_key(c)) {
+            build_translation(translations, &edge, class);
+            return;
+        }
+    }
+}
+
+fn build_translation(translations: &mut HashMap<Id, RecExpr<SymbolLang>>, edge: &SymbolLang, id: Id) {
+    let mut res = vec![];
+    let children = edge.children.iter().map(|c| {
+        let cur_len = res.len();
+        res.extend(translations[&c].as_ref().iter().cloned().map(|s| s.map_children(|child| Id::from(usize::from(child) + cur_len))));
+        Id::from(res.len() - 1)
+    }).collect_vec();
+    res.push(SymbolLang::new(edge.op, children));
+    translations.insert(id, RecExpr::from(res));
+}
 
 pub fn reconstruct_all(graph: &EGraph<SymbolLang, ()>, max_depth: usize) -> HashMap<Id, HashSet<Rc<Tree>>> {
     for c in graph.classes() {
