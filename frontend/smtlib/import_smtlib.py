@@ -170,34 +170,3 @@ class SmtLibSExpression(SExpression):
         self._repr = expr
     def __str__(self):
         return self._repr.to_smtlib(daggify=False)
-
-
-
-def main():
-    BENCHMARK_DIRS = ['benchmarks/cvc4-conj/benchmarks-dt/isaplanner']
-    TARGET_DIR = '/tmp/thesy'
-
-    import os
-
-    try: os.makedirs(TARGET_DIR)
-    except FileExistsError: pass
-
-    for d in BENCHMARK_DIRS:
-        for fn in os.listdir(d):
-            print('--  %s --' % fn)
-            infile = open(os.path.join(d, fn))
-
-            doc = SmtLibDocument(infile)
-            with open(os.path.join(TARGET_DIR, fn + '.th'), 'w') as outf:
-                for el in doc:
-                    print(el)
-                    print(el, file=outf)
-
-            print(';', set(doc.iter_used_symbols()))
-            print(';', set(doc.iter_used_types()))
-
-
-
-if __name__ == '__main__':
-    main()
-
