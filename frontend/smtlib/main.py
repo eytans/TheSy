@@ -13,7 +13,7 @@ def main():
     except FileExistsError: pass
 
     for d in BENCHMARK_DIRS:
-        for fn in ['goal3.smt2']: #os.listdir(d):
+        for fn in os.listdir(d):
             print('--  %s --' % fn)
             infile = open(os.path.join(d, fn))
 

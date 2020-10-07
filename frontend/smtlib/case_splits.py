@@ -10,7 +10,7 @@ class ExtractCaseSplits:
         sym = get_env().formula_manager.get_symbol
         #fsym = lambda ty: FreshSymbol(ty, template='?c%d')
         nat = Type('Nat')
-        skf1 = FreshSymbol(FunctionType(nat, [nat]), template='?skf%d')
+        skf1 = FreshSymbol(FunctionType(nat, [nat]), template='skf%d')
         self.ctor_pats = {
             nat: lambda ph: [sym('zero'),
                              Function(sym('succ'), [Function(skf1, [ph])])]
@@ -41,21 +41,22 @@ class ExtractCaseSplits:
                 phs.append(ph)
                 args1pat[i] = ph
 
-            headpat = Function(head, args1pat)
-            print("=|>", pat_idxs, headpat, phs)
+            headpat = SmtLibSExpression(Function(head, args1pat))
+            #print("=|>", pat_idxs, headpat, phs)
 
             for ph in phs:
                 cases = list(self._get_cases(ph))
                 if len(cases) > 1:
-                    yield [headpat] + cases
+                    yield [headpat, SExpression(['potential_split', ph] + cases)]
 
     def _get_cases(self, ph):
         try:
-            for pat in self.ctor_pats[get_type(ph)](ph):
-                yield SExpression([ph, SmtLibSExpression(pat)])
+            pats = self.ctor_pats[get_type(ph)](ph)
+            return [SmtLibSExpression(p) for p in pats]
         except KeyError:
-            pass
+            return []
 
     def _generalize_condition(self, pat, term):
         if term.is_ite():
-            yield [pat, SmtLibSExpression(term.arg(0)),'true', 'false']
+            cond = SmtLibSExpression(term.arg(0))
+            yield [pat, SExpression(['potential_split', cond, 'true', 'false'])]
