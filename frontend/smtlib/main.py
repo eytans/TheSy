@@ -1,11 +1,11 @@
-from import_smtlib import SmtLibDocument
-from case_splits import ExtractCaseSplits
-
+from .import_smtlib import SmtLibDocument
+from .case_splits import ExtractCaseSplits
 
 
 def main():
+    # BENCHMARK_DIRS = ['benchmarks/cvc4-conj/original/benchmarks-dt/leon']
     BENCHMARK_DIRS = ['benchmarks/cvc4-conj/original/benchmarks-dt/leon']
-    TARGET_DIR = '/tmp/thesy'
+    TARGET_DIR = 'benchmarks/cvc4-conj/original/benchmarks-dt/leon-thesy'
 
     import os
 
@@ -29,7 +29,6 @@ def main():
 
             print(';', set(doc.iter_used_symbols()))
             print(';', set(doc.iter_used_types()))
-
 
 
 if __name__ == '__main__':

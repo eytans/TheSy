@@ -1,6 +1,6 @@
 import typing
 import itertools
-from smtlib26 import SmtLib20ParserPlus
+from .smtlib26 import SmtLib20ParserPlus
 from pysmt.smtlib.parser import SmtLibScript
 from pysmt.fnode import FNode
 from pysmt.exceptions import PysmtTypeError

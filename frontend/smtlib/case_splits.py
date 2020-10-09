@@ -1,6 +1,6 @@
 from pysmt.fnode import FNode
 from pysmt.shortcuts import get_type, get_env, Function, FunctionType, FreshSymbol, Type
-from import_smtlib import SmtLibDocument, SExpression, SmtLibSExpression
+from .import_smtlib import SmtLibDocument, SExpression, SmtLibSExpression
 
 
 
