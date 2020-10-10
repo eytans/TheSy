@@ -78,6 +78,10 @@ impl Prover {
     }
 
     pub fn prove_base(&self, rules: &[Rewrite<SymbolLang, ()>], ex1: &RecExpr<SymbolLang>, ex2: &RecExpr<SymbolLang>) -> bool {
+        self.prove_base_split_d(rules, ex1, ex2, Self::CASE_SPLIT_DEPTH)
+    }
+
+    pub fn prove_base_split_d(&self, rules: &[Rewrite<SymbolLang, ()>], ex1: &RecExpr<SymbolLang>, ex2: &RecExpr<SymbolLang>, split_d: usize) -> bool {
         if self.not_containing_ind_var(ex1) && self.not_containing_ind_var(ex2) {
             return false;
         }
@@ -88,7 +92,7 @@ impl Prover {
             let contr_id = egraph.add_expr(&c.as_exp());
             egraph.union(contr_id, ind_id);
             let mut runner: Runner<SymbolLang, ()> = Runner::new(()).with_egraph(egraph).with_iter_limit(Self::RUN_DEPTH).run(&rules[..]);
-            TheSy::case_split_all(&rules, &mut runner.egraph, Self::CASE_SPLIT_DEPTH, Self::CASE_SPLIT_RUN);
+            TheSy::case_split_all(&rules, &mut runner.egraph, split_d, Self::CASE_SPLIT_RUN);
             !runner.egraph.equivs(&ex1, &ex2).is_empty()
         })
     }
@@ -163,12 +167,16 @@ impl Prover {
             .map(|s| s.0).collect_vec()
     }
 
+    pub fn prove_ind(&self, rules: &[Rewrite<SymbolLang, ()>], ex1: &RecExpr<SymbolLang>, ex2: &RecExpr<SymbolLang>) -> Option<Vec<(Pattern<SymbolLang>, Pattern<SymbolLang>, Rewrite<SymbolLang, ()>)>> {
+        prove_ind_split_d(rules, ex1, ex2, Self::CASE_SPLIT_DEPTH)
+    }
+
     /// Assume base case is correct and prove equality using induction.
    /// Induction hypothesis is given as a rewrite rule, using precompiled rewrite rules
    /// representing well founded order on the induction variable.
    /// Need to replace the induction variable with an expression representing a constructor and
    /// well founded order on the params of the constructor.
-    pub fn prove_ind(&self, rules: &[Rewrite<SymbolLang, ()>], ex1: &RecExpr<SymbolLang>, ex2: &RecExpr<SymbolLang>) -> Option<Vec<(Pattern<SymbolLang>, Pattern<SymbolLang>, Rewrite<SymbolLang, ()>)>> {
+    pub fn prove_ind_split_d(&self, rules: &[Rewrite<SymbolLang, ()>], ex1: &RecExpr<SymbolLang>, ex2: &RecExpr<SymbolLang>, split_d: usize) -> Option<Vec<(Pattern<SymbolLang>, Pattern<SymbolLang>, Rewrite<SymbolLang, ()>)>> {
         if self.not_containing_ind_var(ex1) && self.not_containing_ind_var(ex2) {
             return None;
         }
@@ -188,7 +196,7 @@ impl Prover {
             let contr_id = egraph.add_expr(&contr_exp);
             egraph.union(contr_id, ind_id);
             let mut runner: Runner<SymbolLang, ()> = Runner::new(()).with_egraph(egraph).with_iter_limit(Self::RUN_DEPTH).run(&rule_set[..]);
-            TheSy::case_split_all(&rule_set, &mut runner.egraph, Self::CASE_SPLIT_DEPTH, Self::CASE_SPLIT_RUN);
+            TheSy::case_split_all(&rule_set, &mut runner.egraph, split_d, Self::CASE_SPLIT_RUN);
             res = res && !runner.egraph.equivs(&ex1, &ex2).is_empty()
         }
         if res {
@@ -209,8 +217,12 @@ impl Prover {
     }
 
     pub fn prove_all(&self, rules: &[Rewrite<SymbolLang, ()>], ex1: &RecExpr<SymbolLang>, ex2: &RecExpr<SymbolLang>) -> Option<Vec<(Pattern<SymbolLang>, Pattern<SymbolLang>, Rewrite<SymbolLang, ()>)>> {
-        if self.prove_base(rules, ex1, ex2) {
-            self.prove_ind(rules, ex1, ex2)
+        self.prove_all_split_d(rules, ex1, ex2, Self::CASE_SPLIT_DEPTH)
+    }
+
+    pub fn prove_all_splid_d(&self, rules: &[Rewrite<SymbolLang, ()>], ex1: &RecExpr<SymbolLang>, ex2: &RecExpr<SymbolLang>, split_d: usize) -> Option<Vec<(Pattern<SymbolLang>, Pattern<SymbolLang>, Rewrite<SymbolLang, ()>)>> {
+        if self.prove_base_split_d(rules, ex1, ex2, split_d) {
+            self.prove_ind_split_d(rules, ex1, ex2, split_d)
         } else {
             None
         }

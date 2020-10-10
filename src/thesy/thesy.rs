@@ -335,7 +335,7 @@ impl TheSy {
                     let start = if cfg!(feature = "stats") {
                         Some(SystemTime::now())
                     } else { None };
-                    res = p.prove_all(rules, ex1, ex2);
+                    res = p.prove_all_splid_d(rules, ex1, ex2, 4);
                     index = i;
                     if res.is_some() {
                         if cfg!(feature = "stats") {
@@ -529,7 +529,7 @@ impl TheSy {
 
     /// Case splitting works by cloning the graph and merging the different possibilities.
     /// Enabling recursivly splitting all
-    fn case_split(rules: &[Rewrite<SymbolLang, ()>], egraph: &mut EGraph<SymbolLang, ()>, root: Id, splits: Vec<Id>, split_depth: usize, run_depth: usize, dont_use: &HashSet<(Id, Vec<Id>)>, split_max_trans: usize) {
+    fn case_split(rules: &[Rewrite<SymbolLang, ()>], egraph: &mut EGraph<SymbolLang, ()>, root: Id, splits: Vec<Id>, split_depth: usize, run_depth: usize, dont_use: &HashSet<(Id, Vec<Id>)>) {
         let classes = egraph.classes().collect_vec();
         // TODO: parallel
         let after_splits = splits.iter().map(|child| {
@@ -546,7 +546,7 @@ impl TheSy {
                 StopReason::Other(_) => {}
             };
             runner.egraph.rebuild();
-            Self::_case_split_all(rules, &mut runner.egraph, split_depth - 1, run_depth, dont_use, split_max_trans - 1);
+            Self::_case_split_all(rules, &mut runner.egraph, split_depth - 1, run_depth, dont_use);
             classes.iter().map(|c| (c.id, runner.egraph.find(c.id))).collect::<HashMap<Id, Id>>()
         }).collect_vec();
         let mut group_by_splits: HashMap<Vec<Id>, HashSet<Id>> = HashMap::new();
@@ -569,14 +569,13 @@ impl TheSy {
     pub(crate) fn case_split_all(rules: &[Rewrite<SymbolLang, ()>],
                                  egraph: &mut EGraph<SymbolLang, ()>,
                                  split_depth: usize, run_depth: usize) {
-        Self::_case_split_all(rules, egraph, split_depth, run_depth, &HashSet::new(), 3)
+        Self::_case_split_all(rules, egraph, split_depth, run_depth, &HashSet::new())
     }
 
     fn _case_split_all(rules: &[Rewrite<SymbolLang, ()>],
                        egraph: &mut EGraph<SymbolLang, ()>,
                        split_depth: usize, run_depth: usize,
-                       dont_use: &HashSet<(Id, Vec<Id>)>,
-                       splitted_max_depth: usize) {
+                       dont_use: &HashSet<(Id, Vec<Id>)>) {
         if split_depth == 0 {
             return;
         }
@@ -605,7 +604,7 @@ impl TheSy {
         let classes: HashMap<Id, &EClass<SymbolLang, ()>> = egraph.classes().map(|c| (c.id, c)).collect();
         let mut needed: HashSet<Id> = splitters.iter().map(|x| x.0).collect();
         let mut translatable = HashSet::new();
-        for _ in 0..splitted_max_depth {
+        for _ in 0..=split_depth {
             'outer: for id in needed.clone() {
                 let c = classes[&id];
                 if translatable.contains(&c.id) {
@@ -627,7 +626,7 @@ impl TheSy {
         splitters.iter().filter(|s| translatable.contains(&s.0)).enumerate().for_each(|(i, (root, params))| {
             let mut updated_dont_use = new_dont_use.clone();
             updated_dont_use.extend(splitters.iter().take(i + 1).cloned());
-            Self::case_split(rules, egraph, *root, params.clone(), split_depth, run_depth, &updated_dont_use, splitted_max_depth);
+            Self::case_split(rules, egraph, *root, params.clone(), split_depth, run_depth, &updated_dont_use);
         });
     }
 

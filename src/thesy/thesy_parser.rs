@@ -104,13 +104,13 @@ pub mod parser {
                     }
                 }
                 "<=>" => {
-                    let name = l[1].take_string().unwrap();
-                    let searcher: Pattern<SymbolLang> = Pattern::from_str(&*l[2].to_string()).unwrap();
-                    let applier: Pattern<SymbolLang> = Pattern::from_str(&*l[3].to_string()).unwrap();
+                    let (name, searcher, applier, conditions) = collect_rule(&mut l);
                     let searcher1 = searcher.clone();
                     let applier1 = applier.clone();
-                    res.rws.push(rewrite!(name.clone(); searcher => applier));
-                    res.rws.push(rewrite!(name + "-rev"; applier1 => searcher1));
+                    let rw1 = Rewrite::new(name.clone(), name.clone(), searcher, applier);
+                    let rw2 = Rewrite::new(name.clone()  + "-rev", name.clone()  + "-rev", searcher1, applier1);
+                    let rws = vec![rw1, rw2].into_iter().flatten().collect_vec();
+                    res.rws.extend(rws);
                     // buggy macro
                     // res.rws.extend_from_slice(&rewrite!(name; searcher <=> applier));
                 }
@@ -123,7 +123,7 @@ pub mod parser {
                             (sexp_to_recexpr(&s_list[0]), sexp_to_recexpr(&s_list[1]))
                         }).collect();
                     let mut equality = forall_list[2].take_list().unwrap();
-                    assert_eq!(equality[0].string().unwrap(), "=");
+                    assert!(equality[0].string().unwrap() == "=" || equality[0].string().unwrap() == "<=>");
                     res.conjectures.push((var_map, sexp_to_recexpr(&equality[1]), sexp_to_recexpr(&equality[2])));
                 }
                 _ => {
