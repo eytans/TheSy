@@ -36,6 +36,18 @@ class SmtLibDocument:
             if cmd.name == 'declare-fun' and cmd.args[0] in used:
                 yield self.export_func(cmd.args[0])
 
+    def iter_rws(self):
+        for cmd in self.script:
+            if cmd.name == 'assert':
+                for rule in self.export_rules(cmd.args[0]):
+                    yield rule
+
+    def iter_definitions(self):
+        for cmd in self.script:
+            if cmd.name == 'define-fun':
+                for defin in self.export_rule_def(cmd.args):
+                    yield defin
+
     def iter_rules(self):
         for cmd in self.script:
             if cmd.name == 'define-fun':

@@ -3,6 +3,12 @@ from pysmt.shortcuts import get_type, get_env, Function, FunctionType, FreshSymb
 from .import_smtlib import SmtLibDocument, SExpression, SmtLibSExpression
 
 
+def get_top_fn(exp: SmtLibSExpression):
+    applier = exp._repr._content.payload
+    if isinstance(applier, tuple) or applier is None:
+        return ("None", None)
+    return applier._content.payload
+
 
 class ExtractCaseSplits:
     def __init__(self, doc: SmtLibDocument):
@@ -17,18 +23,30 @@ class ExtractCaseSplits:
         }
 
     def guess_rules(self):
-        i = [0]
-        def mk_rule(suffix):
-            i[0] += 1
-            return SExpression(['=|>', 'split%d' % i[0]] + rule_suffix)
+        # Collect definitions for declared funcs
+        for f in self.doc.iter_decls():
+            f_name = f.elements[1]
+            param_types = f.elements[2]
+            param_types = [d for d in self.doc.iter_datatypes() for p in param_types.elements if d.elements[1] == p]
+            ret_type = f.elements[3]
+            rules = [r for r in self.doc.iter_rws() if get_top_fn(r.elements[2])[0] == f_name]
+            patterns = []
+            for r in rules:
+                patterns.append(r.elements[2]._repr._content.args)
+            exit()
 
-        for rule in self.doc.iter_rules():
-            lhs, rhs = rule.elements[2:]
-            if isinstance(lhs, SmtLibSExpression) and lhs._repr.is_function_application():
-                for rule_suffix in self._generalize_pattern(lhs._repr):
-                    yield mk_rule(rule_suffix)
-                for rule_suffix in self._generalize_condition(lhs, rhs._repr):
-                    yield mk_rule(rule_suffix)
+        # i = [0]
+        # def mk_rule(suffix):
+        #     i[0] += 1
+        #     return SExpression(['=|>', 'split%d' % i[0]] + rule_suffix)
+        #
+        # for rule in self.doc.iter_rules():
+        #     lhs, rhs = rule.elements[2:]
+        #     if isinstance(lhs, SmtLibSExpression) and lhs._repr.is_function_application():
+        #         for rule_suffix in self._generalize_pattern(lhs._repr):
+        #             yield mk_rule(rule_suffix)
+        #         for rule_suffix in self._generalize_condition(lhs, rhs._repr):
+        #             yield mk_rule(rule_suffix)
 
     def _generalize_pattern(self, term):
         head, args = term.function_name(), term.args()
