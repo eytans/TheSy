@@ -1,4 +1,5 @@
-use egg::{Applier, EGraph, Id, Pattern, SearchMatches, Subst, SymbolLang};
+use egg::{Applier, EGraph, Id, Pattern, SearchMatches, Subst, SymbolLang, Var, Searcher, Language, Analysis};
+use itertools::Itertools;
 
 pub struct DiffApplier<T: Applier<SymbolLang, ()>> {
     applier: T
@@ -39,5 +40,45 @@ impl<T: Applier<SymbolLang, ()>> Applier<SymbolLang, ()> for DiffApplier<T> {
 
     fn apply_one(&self, egraph: &mut EGraph<SymbolLang, ()>, eclass: Id, subst: &Subst) -> Vec<Id> {
         self.applier.apply_one(egraph, eclass, subst)
+    }
+}
+
+pub struct UnionApplier {
+    vars: Vec<Var>,
+}
+
+impl UnionApplier {
+    pub fn new(vars: Vec<Var>) -> UnionApplier {
+        UnionApplier{vars}
+    }
+}
+
+impl<L: Language, N: Analysis<L>> Applier<L, N> for UnionApplier {
+    fn apply_matches(&self, egraph: &mut EGraph<L, N>, matches: &[SearchMatches]) -> Vec<Id> {
+        let mut added = vec![];
+        for mat in matches {
+            for subst in &mat.substs {
+                let first = self.vars.first().unwrap();
+                let ids = self.vars.iter().skip(1).filter_map(|v| {
+                    let (to, did_something) = egraph.union(*subst.get(*first).unwrap(), *subst.get(*v).unwrap());
+                    if did_something {
+                        Some(to)
+                    } else {
+                        None
+                    }
+                    }).collect_vec();
+                added.extend(ids)
+            }
+        }
+        added
+    }
+
+    fn apply_one(&self, egraph: &mut EGraph<L, N>, eclass: Id, subst: &Subst) -> Vec<Id> {
+        unimplemented!()
+    }
+
+
+    fn vars(&self) -> Vec<Var> {
+        self.vars.clone()
     }
 }

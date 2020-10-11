@@ -4,8 +4,8 @@ from .case_splits import ExtractCaseSplits
 
 def main():
     # BENCHMARK_DIRS = ['benchmarks/cvc4-conj/original/benchmarks-dt/leon']
-    BENCHMARK_DIRS = ['benchmarks/cvc4-conj/original/benchmarks-dt/leon']
-    TARGET_DIR = 'benchmarks/cvc4-conj/original/benchmarks-dt/leon-thesy'
+    BENCHMARK_DIRS = ['benchmarks/cvc4-conj/original/benchmarks-dt/isaplanner']
+    TARGET_DIR = 'benchmarks/translated'
 
     import os
 

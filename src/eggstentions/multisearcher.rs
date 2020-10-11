@@ -3,12 +3,83 @@ pub mod multisearcher {
     use std::iter::FromIterator;
     use std::str::FromStr;
 
-    use egg::{EGraph, Id, Pattern, Searcher, SearchMatches, Subst, SymbolLang, Var};
-    use itertools::Itertools;
+    use egg::{EGraph, Id, Pattern, Searcher, SearchMatches, Subst, SymbolLang, Var, Language, Analysis};
+    use itertools::{Itertools, Either};
 
     use crate::tools::tools::Grouped;
+    use crate::eggstentions::pretty_string::PrettyString;
+    use serde::export::PhantomData;
+    use std::fmt::Debug;
+    use smallvec::alloc::fmt::Formatter;
 
-    fn get_common_vars(patterns: &mut Vec<Pattern<SymbolLang>>) -> HashMap<Var, usize> {
+    pub struct EitherSearcher<L: Language, N: Analysis<L>, A: Searcher<L, N> + Debug, B: Searcher<L, N> + Debug> {
+        node: Either<A, B>,
+        phantom: PhantomData<(L, N)>
+    }
+
+    impl<L: Language, N: Analysis<L>, A: Searcher<L, N> + Debug, B: Searcher<L, N> + Debug> EitherSearcher<L, N, A, B> {
+        pub fn left(a: A) -> EitherSearcher<L, N, A, B> {
+            EitherSearcher{node: Either::Left(a), phantom: PhantomData::default()}
+        }
+
+        pub fn right(b: B) -> EitherSearcher<L, N, A, B> {
+            EitherSearcher{node: Either::Right(b), phantom: PhantomData::default()}
+        }
+    }
+
+    impl<L: Language, N: Analysis<L>, A: Searcher<L, N> + Debug, B: Searcher<L, N> + Debug> Searcher<L, N> for EitherSearcher<L, N, A, B> {
+        fn search_eclass(&self, egraph: &EGraph<L, N>, eclass: Id) -> Option<SearchMatches> {
+            if self.node.is_left() {
+                self.node.as_ref().unwrap_left().search_eclass(egraph, eclass)
+            } else {
+                self.node.as_ref().unwrap_right().search_eclass(egraph, eclass)
+            }
+        }
+
+        fn search(&self, egraph: &EGraph<L, N>) -> Vec<SearchMatches> {
+            if self.node.is_left() {
+                self.node.as_ref().unwrap_left().search(egraph)
+            } else {
+                self.node.as_ref().unwrap_right().search(egraph)
+            }
+        }
+
+        fn vars(&self) -> Vec<Var> {
+            if self.node.is_left() {
+                self.node.as_ref().unwrap_left().vars()
+            } else {
+                self.node.as_ref().unwrap_right().vars()
+            }
+        }
+    }
+
+    impl<L: Language, N: Analysis<L>, A: Searcher<L, N> + Debug + Clone, B: Searcher<L, N> + Debug + Clone> Clone for EitherSearcher<L, N, A, B> {
+        fn clone(&self) -> Self {
+            if self.node.is_left() {
+                Self::left(self.node.as_ref().unwrap_left().clone())
+            } else {
+                Self::right(self.node.as_ref().unwrap_right().clone())
+            }
+        }
+    }
+
+    impl<L: Language, N: Analysis<L>, A: Searcher<L, N> + Debug + PrettyString, B: Searcher<L, N> + Debug + PrettyString> PrettyString for EitherSearcher<L, N, A, B> {
+        fn pretty_string(&self) -> String {
+            if self.node.is_left() {
+                self.node.as_ref().unwrap_left().pretty_string()
+            } else {
+                self.node.as_ref().unwrap_right().pretty_string()
+            }
+        }
+    }
+
+    impl<L: Language, N: Analysis<L>, A: Searcher<L, N> + Debug, B: Searcher<L, N> + Debug> Debug for EitherSearcher<L, N, A, B> {
+        fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+            self.node.fmt(f)
+        }
+    }
+
+    fn get_common_vars(patterns: &mut Vec<impl Searcher<SymbolLang, ()>>) -> HashMap<Var, usize> {
         let common_vars = patterns.iter().flat_map(|p| p.vars())
             .grouped(|v| v.clone()).iter()
             .filter_map(|(k, v)|
@@ -16,11 +87,11 @@ pub mod multisearcher {
                 else {Some((*k, v.len()))})
             .collect::<HashMap<Var, usize>>();
 
-        fn count_commons(p: &Pattern<SymbolLang>, common_vars: &HashMap<Var, usize>) -> usize {
+        fn count_commons(p: &impl Searcher<SymbolLang, ()>, common_vars: &HashMap<Var, usize>) -> usize {
             p.vars().iter().map(|v| common_vars.get(v).unwrap_or(&0)).sum()
         }
 
-        patterns.sort_by_key(|p| count_commons(&p, &common_vars));
+        patterns.sort_by_key(|p| count_commons(p, &common_vars));
         common_vars
     }
 
@@ -84,24 +155,25 @@ pub mod multisearcher {
         by_vars
     }
 
-    #[derive(Clone)]
-    pub struct MultiEqSearcher {
-        patterns: Vec<Pattern<SymbolLang>>,
+    pub struct MultiEqSearcher<A: Searcher<SymbolLang, ()>> {
+        patterns: Vec<A>,
         common_vars: HashMap<Var, usize>,
     }
 
-    impl MultiEqSearcher {
-        pub(crate) fn new(mut patterns: Vec<Pattern<SymbolLang>>) -> MultiEqSearcher {
+    impl<A: Searcher<SymbolLang, ()>> MultiEqSearcher<A> {
+        pub(crate) fn new(mut patterns: Vec<A>) -> MultiEqSearcher<A> {
             let common_vars = get_common_vars(&mut patterns);
-            MultiEqSearcher { patterns, common_vars }
-        }
-
-        pub fn pretty(&self, width: usize) -> String {
-            self.patterns.iter().map(|p| p.pretty(width)).intersperse(" ||| ".to_string()).collect()
+            MultiEqSearcher{patterns, common_vars}
         }
     }
 
-    impl Searcher<SymbolLang, ()> for MultiEqSearcher {
+    impl<A: Searcher<SymbolLang, ()> + PrettyString> PrettyString for MultiEqSearcher<A> {
+        fn pretty_string(&self) -> String {
+            self.patterns.iter().map(|p| p.pretty_string()).intersperse(" ||| ".to_string()).collect()
+        }
+    }
+
+    impl<A: Searcher<SymbolLang, ()>> Searcher<SymbolLang, ()> for MultiEqSearcher<A> {
         fn search_eclass(&self, _: &EGraph<SymbolLang, ()>, _: Id) -> Option<SearchMatches> {
             unimplemented!()
         }
@@ -150,7 +222,7 @@ pub mod multisearcher {
         }
     }
 
-    impl FromStr for MultiEqSearcher {
+    impl FromStr for MultiEqSearcher<Pattern<SymbolLang>> {
         type Err = String;
 
         fn from_str(s: &str) -> Result<Self, Self::Err> {
@@ -165,24 +237,37 @@ pub mod multisearcher {
         }
     }
 
-    #[derive(Clone)]
-    pub struct MultiDiffSearcher {
-        patterns: Vec<Pattern<SymbolLang>>,
+    impl<A: Searcher<SymbolLang, ()> + Clone> Clone for MultiEqSearcher<A> {
+        fn clone(&self) -> Self {
+            MultiEqSearcher::new(self.patterns.clone())
+        }
+    }
+
+    impl<A: Searcher<SymbolLang, ()> + Debug> Debug for MultiEqSearcher<A> {
+        fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+            f.debug_list().entries(&self.patterns).finish()
+        }
+    }
+
+    pub struct MultiDiffSearcher<A: Searcher<SymbolLang, ()>> {
+        patterns: Vec<A>,
         common_vars: HashMap<Var, usize>,
     }
 
-    impl MultiDiffSearcher {
-        pub fn new(mut patterns: Vec<Pattern<SymbolLang>>) -> MultiDiffSearcher {
+    impl<A: Searcher<SymbolLang, ()>> MultiDiffSearcher<A> {
+        pub fn new(mut patterns: Vec<A>) -> MultiDiffSearcher<A> {
             let common_vars = get_common_vars(&mut patterns);
-            MultiDiffSearcher { patterns, common_vars }
-        }
-
-        pub fn pretty(&self, width: usize) -> String {
-            self.patterns.iter().map(|p| p.pretty(width)).intersperse(" |||| ".to_string()).collect()
+            MultiDiffSearcher{patterns, common_vars}
         }
     }
 
-    impl Searcher<SymbolLang, ()> for MultiDiffSearcher {
+    // impl PrettyString for MultiDiffSearcher {
+    //     fn pretty_string(&self) -> String {
+    //         self.patterns.iter().map(|p| p.pretty_string()).intersperse(" |||| ".to_string()).collect()
+    //     }
+    // }
+
+    impl<A: Searcher<SymbolLang, ()>> Searcher<SymbolLang, ()> for MultiDiffSearcher<A> {
         fn search_eclass(&self, _: &EGraph<SymbolLang, ()>, _: Id) -> Option<SearchMatches> {
             unimplemented!()
         }
@@ -191,8 +276,6 @@ pub mod multisearcher {
             if self.patterns.len() == 1 {
                 return self.patterns[0].search(egraph);
             }
-
-            let graph_string = format!("{:#?}", egraph);
 
             let mut search_results = {
                 let mut res = Vec::new();
@@ -249,7 +332,7 @@ pub mod multisearcher {
         }
     }
 
-    impl FromStr for MultiDiffSearcher {
+    impl FromStr for MultiDiffSearcher<Pattern<SymbolLang>> {
         type Err = String;
 
         fn from_str(s: &str) -> Result<Self, Self::Err> {
@@ -261,6 +344,24 @@ pub mod multisearcher {
             } else {
                 Ok(MultiDiffSearcher::new(patterns))
             }
+        }
+    }
+
+    impl<A: Searcher<SymbolLang, ()> + Clone> Clone for MultiDiffSearcher<A> {
+        fn clone(&self) -> Self {
+            MultiDiffSearcher::new(self.patterns.clone())
+        }
+    }
+
+    impl<A: Searcher<SymbolLang, ()> + Debug> Debug for MultiDiffSearcher<A> {
+        fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+            f.debug_list().entries(&self.patterns).finish()
+        }
+    }
+
+    impl<A: Searcher<SymbolLang, ()> + PrettyString> PrettyString for MultiDiffSearcher<A> {
+        fn pretty_string(&self) -> String {
+            self.patterns.iter().map(|p| p.pretty_string()).intersperse(" ||| ".to_string()).collect()
         }
     }
 }
@@ -275,7 +376,7 @@ mod tests {
 
     #[test]
     fn eq_two_trees_one_common() {
-        let searcher: MultiEqSearcher = MultiEqSearcher::from_str("(a ?b ?c) ||| (a ?c ?d)").unwrap();
+        let searcher = MultiEqSearcher::from_str("(a ?b ?c) ||| (a ?c ?d)").unwrap();
         let mut egraph: EGraph<SymbolLang, ()> = egg::EGraph::default();
         let x = egraph.add_expr(&RecExpr::from_str("x").unwrap());
         let z = egraph.add_expr(&RecExpr::from_str("z").unwrap());
@@ -292,7 +393,7 @@ mod tests {
 
     #[test]
     fn diff_two_trees_one_common() {
-        let searcher: MultiDiffSearcher = MultiDiffSearcher::from_str("(a ?b ?c) |||| (a ?c ?d)").unwrap();
+        let searcher = MultiDiffSearcher::from_str("(a ?b ?c) |||| (a ?c ?d)").unwrap();
         let mut egraph: EGraph<SymbolLang, ()> = egg::EGraph::default();
         let x = egraph.add_expr(&RecExpr::from_str("x").unwrap());
         let z = egraph.add_expr(&RecExpr::from_str("z").unwrap());
