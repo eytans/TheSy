@@ -23,9 +23,9 @@ def main():
                     print(el)
                     print(el, file=outf)
 
-                for srule in ExtractCaseSplits(doc).guess_rules():
-                    print(srule)
-                    print(srule, file=outf)
+                # for srule in ExtractCaseSplits(doc).guess_rules():
+                #     print(srule)
+                #     print(srule, file=outf)
 
             print(';', set(doc.iter_used_symbols()))
             print(';', set(doc.iter_used_types()))

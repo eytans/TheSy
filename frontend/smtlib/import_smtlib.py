@@ -5,8 +5,7 @@ from pysmt.smtlib.parser import SmtLibScript
 from pysmt.fnode import FNode
 from pysmt.exceptions import PysmtTypeError
 from pysmt.shortcuts import Symbol, FunctionType, ForAll, Equals, \
-    Iff, Function, Bool, get_free_variables
-
+    Iff, Function, Bool, get_free_variables, TRUE, FALSE, Implies
 
 
 class SmtLibDocument:
@@ -119,6 +118,10 @@ class SmtLibDocument:
         ex = self.export_expr
 
         uvars, formula = self.extract_universal(formula)
+        precondition = None
+        if formula.is_implies():
+            precondition = formula.arg(0)
+            formula = formula.arg(1)
 
         if formula.is_equals() or formula.is_iff():
             if uvars:
@@ -132,16 +135,42 @@ class SmtLibDocument:
             for lhs, rhs in [(lhs, rhs), (rhs, lhs)]:
                 if ((lhs not in uvars) and     # avoid e.g. x => x + 0
                         fv(lhs) >= fv(rhs)):
-                    yield SExpression(['=>', self._fresh('rule%d'), ex(lhs), ex(rhs)])
+                    if precondition is not None:
+                        yield SExpression(['=>', self._fresh('rule%d'), ex(Implies(precondition, formula))])
+                    else:
+                        yield SExpression(['=>', self._fresh('rule%d'), ex(lhs), ex(rhs)])
+        elif not (formula.is_not() and self.extract_universal(formula.args()[0])[0]):
+            # this is either a not exp or an expr
+            if uvars:
+                re = {v: self._qvar_from_symbol(v) for v in uvars}
+                formula = formula.substitute(re)
+                uvars = re.values()
+            uvars = set(uvars)
+
+            equals_to = TRUE()
+            if formula.is_not():
+                formula = formula.args()[0]
+                equals_to = FALSE()
+            op = '<=>'
+            if uvars:
+                op = '=>'
+            if precondition is not None:
+                yield SExpression([op, self._fresh('rule%d'), ex(Implies(precondition, Iff(formula, equals_to)))])
+            else:
+                yield SExpression([op, self._fresh('rule%d'), ex(formula), ex(equals_to)])
 
     def export_goals(self, formula):
         ex = self.export_expr
 
-        if formula.is_not():
+        if formula.is_not() and self.extract_universal(formula.args()[0])[0]:
             formula = formula.arg(0)
             uvars, inner = self.extract_universal(formula)
             if inner.is_equals() or inner.is_iff():
                 goal = formula
+            elif inner.is_implies():
+                goal = formula
+                if (not inner.arg(1).is_equals()) and (not inner.arg(1).is_iff()):
+                    ForAll(uvars, Implies(inner.arg(0), Iff(inner.arg(1), Bool(True))))
             else:
                 goal = ForAll(uvars, Iff(inner, Bool(True)))
             yield SExpression(['prove', ex(goal)])
