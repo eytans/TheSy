@@ -3,7 +3,7 @@ pub mod parser {
     use std::io::Read;
     use std::str::FromStr;
 
-    use egg::{Pattern, RecExpr, Rewrite, SymbolLang, Var, Condition, ConditionalApplier, Applier, Searcher};
+    use egg::{Pattern, RecExpr, Rewrite, SymbolLang, Var, Condition, ConditionalApplier, Applier, Searcher, Language, PatternAst};
     use itertools::{Itertools};
     use symbolic_expressions::Sexp;
 
@@ -13,9 +13,10 @@ pub mod parser {
     use crate::eggstentions::conditions::{NonPatternCondition, AndCondition};
     use multimap::MultiMap;
     use std::ptr::eq;
-    use crate::eggstentions::multisearcher::multisearcher::{MultiDiffSearcher, EitherSearcher};
+    use crate::eggstentions::multisearcher::multisearcher::{MultiDiffSearcher, EitherSearcher, MultiEqSearcher};
     use std::fmt::Debug;
     use crate::eggstentions::pretty_string::PrettyString;
+    use crate::eggstentions::expression_ops::{IntoTree, Tree};
 
     #[derive(Default, Clone, Debug)]
     pub struct Definitions {
@@ -28,7 +29,7 @@ pub mod parser {
         /// Terms to prove, given as not forall, (vars - types, precondition, ex1, ex2)
         pub conjectures: Vec<(HashMap<RecExpr<SymbolLang>, RecExpr<SymbolLang>>, Option<RecExpr<SymbolLang>>, RecExpr<SymbolLang>, RecExpr<SymbolLang>)>,
         /// 'Heuristicly' Patterns used for function definitions. Will be used for auto case split.
-        function_patterns: MultiMap<Function, RecExpr<SymbolLang>>
+        function_patterns: MultiMap<Function, PatternAst<SymbolLang>>,
     }
 
     impl Definitions {
@@ -61,7 +62,10 @@ pub mod parser {
     fn collected_precon_conds_to_rw(name: String, precond: Option<Pattern<SymbolLang>>, searcher: impl Searcher<SymbolLang, ()> + Debug + 'static, applier: impl Applier<SymbolLang, ()> + 'static, dif_app: bool, conditions: Vec<Box<dyn Condition<SymbolLang, ()>>>) -> Result<Rewrite<SymbolLang, ()>, String> {
         if precond.is_some() {
             // Order important as root of match is root of first pattern.
-            let dif_searcher = MultiDiffSearcher::new(vec![EitherSearcher::left(searcher), EitherSearcher::right(precond.unwrap())]);
+            let dif_searcher = MultiDiffSearcher::new(vec![
+                EitherSearcher::left(searcher),
+                EitherSearcher::right(MultiEqSearcher::new(vec![precond.unwrap(), Pattern::from_str("true").unwrap()]))
+            ]);
             collected_conds_to_rw(name, dif_searcher, applier, dif_app, conditions)
         } else {
             collected_conds_to_rw(name, searcher, applier, dif_app, conditions)
@@ -91,6 +95,7 @@ pub mod parser {
         // TODO: Ite variant might not be able to use the conditional apply optimization. Fix.
 
         let mut res = Definitions::default();
+        let mut name_pats = vec![];
         for l in lines {
             if l.trim().is_empty() || l.starts_with(";") {
                 continue;
@@ -124,11 +129,19 @@ pub mod parser {
                 }
                 "=>" => {
                     let (name, precondition, mut searcher, applier, conditions) = collect_rule(&mut l);
+                    // TODO: case split on precondition?
+                    if !searcher.ast.into_tree().root().is_leaf() {
+                        name_pats.push((format!("{}", searcher.ast.into_tree().root().display_op()), searcher.ast.clone()));
+                    }
                     let rw = collected_precon_conds_to_rw(name, precondition, searcher, applier, false, conditions);
                     res.rws.push(rw.unwrap());
                 }
                 "=|>" => {
                     let (name, precondition, mut searcher, applier, conditions) = collect_rule(&mut l);
+                    // TODO: case split on precondition?
+                    if !searcher.ast.into_tree().root().is_leaf() {
+                        name_pats.push((format!("{}", searcher.ast.into_tree().root().display_op()), searcher.ast.clone()));
+                    }
                     let rw = collected_precon_conds_to_rw(name, precondition, searcher, applier, true, conditions);
                     res.rws.push(rw.unwrap());
                 }
@@ -137,6 +150,13 @@ pub mod parser {
                     if !conditions.is_empty() {
                         error!("Can't handle conditions with <=> in {}", name);
                         continue;
+                    }
+                    // TODO: case split on precondition?
+                    if !searcher.ast.into_tree().root().is_leaf() {
+                        name_pats.push((format!("{}", searcher.ast.into_tree().root().display_op()), searcher.ast.clone()));
+                    }
+                    if !applier.ast.into_tree().root().is_leaf() {
+                        name_pats.push((format!("{}", applier.ast.into_tree().root().display_op()), applier.ast.clone()));
                     }
                     let searcher1 = searcher.clone();
                     let applier1 = applier.clone();
@@ -171,6 +191,12 @@ pub mod parser {
                 _ => {
                     println!("Error parsing smtlib2 line, found {} op which is not supported", l[0].to_string())
                 }
+            }
+        }
+        for (name, pat) in name_pats {
+            let opt = res.functions.iter().find(|f| f.name == name);
+            if opt.is_some() {
+                res.function_patterns.insert(opt.unwrap().clone(), pat);
             }
         }
         res

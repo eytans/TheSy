@@ -102,8 +102,14 @@ impl Prover {
         let mut orig_egraph: EGraph<SymbolLang, ()> = EGraph::default();
         let _ = orig_egraph.add_expr(&ex1);
         let _ = orig_egraph.add_expr(&ex2);
-        precond.map(|p| orig_egraph.add_expr(p));
+        if precond.is_some() {
+            let precond_id = orig_egraph.add_expr(precond.unwrap());
+            let true_id = orig_egraph.add_expr(&RecExpr::from_str("true").unwrap());
+            orig_egraph.union(precond_id, true_id);
+            orig_egraph.add(SymbolLang::new("=", vec![precond_id, true_id]));
+        }
         let ind_id = orig_egraph.lookup(SymbolLang::new(&self.ind_var.name, vec![])).unwrap();
+        orig_egraph.rebuild();
         (orig_egraph, ind_id)
     }
 
@@ -186,7 +192,7 @@ impl Prover {
             return None;
         }
         // rewrites to encode proof
-        let mut rule_set = Self::create_hypothesis(&self.ind_var, &ex1, &ex2);
+        let mut rule_set = Self::create_hypothesis(&self.ind_var, precond, &ex1, &ex2);
         let wfo_rws = &self.wfo_rules;
         rule_set.extend(rules.iter().cloned());
         rule_set.extend(wfo_rws.iter().cloned());
@@ -253,7 +259,7 @@ impl Prover {
         }
     }
 
-    fn create_hypothesis(induction_ph: &Function, ex1: &RecExpr<SymbolLang>, ex2: &RecExpr<SymbolLang>) -> Vec<Rewrite<SymbolLang, ()>> {
+    fn create_hypothesis(induction_ph: &Function, precond: Option<&RecExpr<SymbolLang>>, ex1: &RecExpr<SymbolLang>, ex2: &RecExpr<SymbolLang>) -> Vec<Rewrite<SymbolLang, ()>> {
         assert!(!induction_ph.name.starts_with("?"));
         // used somevar but wasnt recognised as var
         let ind_replacer = "?somevar".to_string();
@@ -261,12 +267,14 @@ impl Prover {
         let clean_term2 = Self::pattern_from_exp(ex2, induction_ph, &ind_replacer);
         let pret = clean_term1.pretty(500);
         let pret2 = clean_term2.pretty(500);
-        let precondition = Pattern::from_str(&*format!("({} {} {})", Self::wfo_op(), ind_replacer, induction_ph.name)).unwrap();
-        let precond_pret = precondition.pretty(500);
+        let mut searchers = vec![EitherSearcher::left(Pattern::from_str(&*format!("({} {} {})", Self::wfo_op(), ind_replacer, induction_ph.name)).unwrap())];
+        precond.map(|p| searchers.push(EitherSearcher::right(MultiEqSearcher::new(vec![Pattern::from(p.as_ref()), Pattern::from_str("true").unwrap()]))));
+        let precondition = MultiDiffSearcher::new(searchers);
+        let precond_pret = precondition.pretty_string();
         let mut res = vec![];
         // Precondition on each direction of the hypothesis
         if pret.starts_with("(") {
-            let rw = Rewrite::new("IH1", "IH1", MultiDiffSearcher::new(vec![clean_term1.clone(), precondition.clone()]), clean_term2.clone());
+            let rw = Rewrite::new("IH1", "IH1", MultiDiffSearcher::new(vec![EitherSearcher::left(clean_term1.clone()), EitherSearcher::right(precondition.clone())]), clean_term2.clone());
             if rw.is_ok() {
                 res.push(rw.unwrap())
             } else {
@@ -275,7 +283,7 @@ impl Prover {
             }
         }
         if pret2.starts_with("(") {
-            let rw = Rewrite::new("IH2", "IH2", MultiDiffSearcher::new(vec![clean_term2.clone(), precondition.clone()]), clean_term1.clone());
+            let rw = Rewrite::new("IH2", "IH2", MultiDiffSearcher::new(vec![EitherSearcher::left(clean_term2.clone()), EitherSearcher::right(precondition.clone())]), clean_term1.clone());
             if rw.is_ok() {
                 res.push(rw.unwrap())
             } else {

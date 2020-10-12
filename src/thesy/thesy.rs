@@ -92,6 +92,8 @@ impl TheSy {
             rewrite!("and-true"; "(and true ?x)" => "?x"),
             rewrite!("and-false"; "(and false ?x)" => "false"),
             rewrite!("and-false2"; "(and ?x false)" => "false"),
+            rewrite!("not-true"; "(not true)" => "false"),
+            rewrite!("not-false"; "(not false)" => "true"),
         ];
 
         // Also common that less is skipped
@@ -161,7 +163,12 @@ impl TheSy {
         }
 
         for fun in dict.iter()
-            .chain(TheSy::collect_phs(&dict, ph_count).iter()) {
+            .chain(TheSy::collect_phs(&dict, ph_count).iter())
+            // Hack for supporting bool constant, important for preconditions or and and such.
+            .chain(vec![Function::new("true".parse().unwrap(), vec![], "bool".parse().unwrap()),
+                        Function::new("false".parse().unwrap(), vec![], "bool".parse().unwrap()),
+                        Function::new("true".parse().unwrap(), vec![], "Bool".parse().unwrap()),
+                        Function::new("false".parse().unwrap(), vec![], "Bool".parse().unwrap())].iter()){
             let id = egraph.add_expr(&fun.name.parse().unwrap());
             let type_id = egraph.add_expr(&fun.get_type());
             egraph.add(SymbolLang::new("typed", vec![id, type_id]));
