@@ -28,8 +28,6 @@ pub mod parser {
         pub rws: Vec<Rewrite<SymbolLang, ()>>,
         /// Terms to prove, given as not forall, (vars - types, precondition, ex1, ex2)
         pub conjectures: Vec<(HashMap<RecExpr<SymbolLang>, RecExpr<SymbolLang>>, Option<RecExpr<SymbolLang>>, RecExpr<SymbolLang>, RecExpr<SymbolLang>)>,
-        /// 'Heuristicly' Patterns used for function definitions. Will be used for auto case split.
-        function_patterns: MultiMap<Function, PatternAst<SymbolLang>>,
     }
 
     impl Definitions {
@@ -94,6 +92,8 @@ pub mod parser {
         // span a match expression on a second variable.
         // TODO: Ite variant might not be able to use the conditional apply optimization. Fix.
 
+        /// 'Heuristicly' Patterns used for function definitions. Will be used for auto case split.
+        let mut function_patterns: MultiMap<Function, PatternAst<SymbolLang>> = MultiMap::new();
         let mut res = Definitions::default();
         let mut name_pats = vec![];
         for l in lines {
@@ -196,9 +196,23 @@ pub mod parser {
         for (name, pat) in name_pats {
             let opt = res.functions.iter().find(|f| f.name == name);
             if opt.is_some() {
-                res.function_patterns.insert(opt.unwrap().clone(), pat);
+                function_patterns.insert(opt.unwrap().clone(), pat);
             }
         }
+        for f in &res.functions {
+            let opt_pats = function_patterns.get_vec(f);
+            let rws = opt_pats.map(|pats| {
+                for p in pats {
+                    let params = p.into_tree().children();
+                    let pat_params = params.into_iter().enumerate().filter(|(i, tree)| !tree.is_leaf()).collect_vec();
+                    if pat_params.len() <= 1 {
+                        continue;
+                    }
+
+                }
+            });
+        }
+
         res
     }
 
