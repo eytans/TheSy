@@ -421,6 +421,9 @@ impl TheSy {
         }
         if self.lemmas.is_some() && self.lemmas.as_ref().unwrap().is_empty() {
             warn!("Found all lemmas");
+            if cfg!(feature = "stats") {
+                self.stats.as_mut().unwrap().total_time = SystemTime::now().duration_since(start_total.unwrap()).unwrap();
+            }
             return found_rules;
         }
 
@@ -496,6 +499,9 @@ impl TheSy {
                     }
                     if self.lemmas.is_some() && self.lemmas.as_ref().unwrap().is_empty() {
                         println!("Found all lemmas");
+                        if cfg!(feature = "stats") {
+                            self.stats.as_mut().unwrap().total_time = SystemTime::now().duration_since(start_total.unwrap()).unwrap();
+                        }
                         return found_rules;
                     }
 

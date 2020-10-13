@@ -4,21 +4,22 @@ from .case_splits import ExtractCaseSplits
 
 def main():
     # BENCHMARK_DIRS = ['benchmarks/cvc4-conj/original/benchmarks-dt/leon']
-    BENCHMARK_DIRS = ['benchmarks/cvc4-conj/original/benchmarks-dt/isaplanner']
-    TARGET_DIR = 'benchmarks/translated'
+    BENCHMARK_DIRS = ['frontend/benchmarks/cvc4-conj/original/benchmarks-dt/isaplanner']
+    TARGET_DIRS = ['frontend/benchmarks/isaplanner_translated']
 
     import os
 
-    try: os.makedirs(TARGET_DIR)
-    except FileExistsError: pass
+    for td in TARGET_DIRS:
+        try: os.makedirs(td)
+        except FileExistsError: pass
 
-    for d in BENCHMARK_DIRS:
+    for (d, target_dir) in zip(BENCHMARK_DIRS, TARGET_DIRS):
         for fn in os.listdir(d):
             print('--  %s --' % fn)
             infile = open(os.path.join(d, fn))
 
             doc = SmtLibDocument(infile)
-            with open(os.path.join(TARGET_DIR, fn + '.th'), 'w') as outf:
+            with open(os.path.join(target_dir, fn + '.th'), 'w') as outf:
                 for el in doc:
                     print(el)
                     print(el, file=outf)
