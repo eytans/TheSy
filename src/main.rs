@@ -23,6 +23,9 @@ use crate::thesy::{thesy_parser, example_creator};
 use log::LevelFilter;
 use crate::eggstentions::pretty_string::PrettyString;
 
+#[cfg(feature = "stats")]
+use serde_json;
+
 mod eggstentions;
 mod tools;
 mod thesy;
@@ -174,9 +177,16 @@ fn main() {
     let res = TheSyConfig::from(&args).run(Some(2));
     println!("done in {}", SystemTime::now().duration_since(start).unwrap().as_millis());
     if cfg!(feature = "stats") {
-        use serde_json;
-        let stat_path = args.path.with_extension("stats.json");
-        serde_json::to_writer(File::create(stat_path).unwrap(), &res.0.stats);
+        export_json(&res.0, &args.path);
     }
     exit(0);
 }
+
+#[cfg(feature = "stats")]
+fn export_json(thesy: &TheSy, path: &PathBuf) {
+    let stat_path = path.with_extension("stats.json");
+    serde_json::to_writer(File::create(stat_path).unwrap(), &thesy.stats);
+}
+
+#[cfg(not(feature = "stats"))]
+fn export_json(thesy: &TheSy, path: &PathBuf) {}

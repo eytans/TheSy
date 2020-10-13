@@ -21,6 +21,7 @@ use multimap::MultiMap;
 use crate::eggstentions::reconstruct::reconstruct;
 use crate::thesy::statistics::Stats;
 use crate::eggstentions::conditions::{NonPatternCondition, AndCondition};
+use std::process::exit;
 
 /// Theory Synthesizer - Explores a given theory finding and proving new lemmas.
 pub struct TheSy {
@@ -77,9 +78,12 @@ impl TheSy {
         let ite_rws: Vec<Rewrite<SymbolLang, ()>> = TheSy::create_ite_rws();
 
         let eq_searcher = MultiEqSearcher::new(vec![Pattern::from_str("true").unwrap(), Pattern::from_str("(= ?x ?y)").unwrap()]);
-        let union_applier = UnionApplier::new(vec![Var::from_str("?x").unwrap(), Var::from_str("?y").unwrap()]);
+        let eq_searcher2 = MultiEqSearcher::new(vec![Pattern::from_str("true").unwrap(), Pattern::from_str("(= ?x ?y)").unwrap()]);
+        let eq_applier1 = DiffApplier::new(Pattern::from_str("?x").unwrap());
+        let eq_applier2 = DiffApplier::new(Pattern::from_str("?y").unwrap());
         let equality_rws = vec![rewrite!("equality"; "(= ?x ?x)" => "true"),
-                                rewrite!("equality-true"; eq_searcher => union_applier),
+                                rewrite!("equality-true"; eq_searcher => eq_applier1),
+                                rewrite!("equality-true2"; eq_searcher2 => eq_applier2),
                                 // TODO: I would like to split by equality but not a possibility with current conditions.
                                 // rewrite!("equality-split"; "(= ?x ?y)" => "(potential_split (= ?x ?y) true false)" if {NonPatternCondition::new(Pattern::from_str("").unwrap(), Var::from_str("?"))})
         ];
@@ -427,20 +431,26 @@ impl TheSy {
             return found_rules;
         }
 
+        let split_rule = rules.iter().find(|r| r.name() == "ite_split").unwrap().clone();
         for depth in 0..max_depth {
             println!("Starting depth {}", depth + 1);
             self.increase_depth();
+
+            // TODO: move to function
             self.node_limit = match self.equiv_reduc(&rules[..]) {
                 StopReason::NodeLimit(x) => {
                     info!("Reached node limit. Increasing maximum graph size.");
+                    // TODO: decide dynamically
                     x + 50000
                 }
                 _ => { self.node_limit }
             };
 
+            // TODO: move to function
             let splitter_count = if cfg!(feature = "stats") {
                 Self::split_patterns().iter().map(|p| p.search(&self.egraph).iter().map(|m| m.substs.len()).sum::<usize>()).sum()
             } else { 0 };
+            // TODO: move to function
             let start = if cfg!(feature = "stats") {
                 Some(SystemTime::now())
             } else { None };
@@ -450,7 +460,12 @@ impl TheSy {
             // for m in matches {
             //     println!("{}", reconstruct(&self.egraph, m.eclass, 8).map(|exp| exp.pretty(500)).unwrap_or("".to_string()));
             // }
+
+            // TODO: case split + check all conjectures should be a function.
+            // TODO: After finishing checking all conjectures in final depth (if a lemma was found) try case split again then finish.
+            // TODO: can be a single loop with max depth
             Self::case_split_all(rules, &mut self.egraph, 2, 4);
+            // TODO: move to function
             if cfg!(feature = "stats") {
                 self.stats.as_mut().unwrap().case_split.push((splitter_count, SystemTime::now().duration_since(start.unwrap()).unwrap()));
             }
@@ -485,6 +500,7 @@ impl TheSy {
                         rules.insert(new_rules_index, r.3);
                     }
 
+                    // Should be a function
                     loop {
                         lemma = self.check_lemmas(rules);
                         if lemma.is_none() {
@@ -513,7 +529,6 @@ impl TheSy {
                         }
                         _ => { self.node_limit }
                     };
-                    // Self::case_split_all(rules, &mut self.egraph, 4, 3);
                     conjectures = self.get_conjectures();
                     println!();
                 } else {
@@ -674,7 +689,6 @@ impl TheSy {
                 }
             }
         }
-
         warn!("# of splitters: {}", splitters.len());
         splitters.iter().filter(|s| translatable.contains(&s.0)).enumerate().for_each(|(i, (root, params))| {
             let mut updated_dont_use = new_dont_use.clone();
@@ -733,7 +747,7 @@ mod test {
     use crate::thesy::thesy::{TheSy};
     use crate::lang::{DataType, Function};
     use crate::eggstentions::appliers::DiffApplier;
-    use crate::eggstentions::expression_ops::{Tree};
+    use crate::eggstentions::expression_ops::{Tree, IntoTree};
     use crate::TheSyConfig;
     use egg::test::run;
     use crate::thesy::prover::Prover;
@@ -1014,7 +1028,7 @@ mod test {
         thesy.increase_depth();
         thesy.increase_depth();
         let mut filter_rules = create_filter_rules();
-        filter_rules.extend(thesy.apply_rws.iter().cloned());
+        filter_rules.extend(thesy.system_rws.iter().cloned());
         thesy.equiv_reduc(&filter_rules);
         TheSy::case_split_all(&filter_rules, &mut thesy.egraph, 4, 4);
         for (o, c1, c2, d) in thesy.get_conjectures() {
@@ -1071,5 +1085,15 @@ mod test {
         // assert!(thesy.datatypes[conf.definitions.datatypes.last().unwrap()].prove_all(rules, &"(append (take ts_ph_Nat_1 ts_ph_Lst_0) (drop ts_ph_Nat_1 ts_ph_Lst_0))".parse().unwrap(), &"ts_ph_Lst_0".parse().unwrap()).is_some());
     }
 
-    // TODO: test on lists
+    #[test]
+    fn test_ite_split_rule() {
+        let mut egraph: EGraph<SymbolLang, ()> = EGraph::default();
+        egraph.add_expr(&RecExpr::from_str("(ite z x y)").unwrap());
+        egraph.rebuild();
+        let rules = TheSy::create_ite_rws();
+        assert!(!rules[2].search(&egraph).is_empty());
+        let matches = &*rules[2].search(&egraph);
+        rules[2].apply(&mut egraph, matches);
+        egraph.dot().to_dot("graph.dot");
+    }
 }
