@@ -65,12 +65,16 @@ def run_isabelle(fn):
         f.writelines(lines)
 
     start_time = datetime.now()
-    res = subprocess.run(CMD + [fn[:-4]], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    try:
+        res = subprocess.run(CMD + [fn[:-4]], stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=60*60*3)
+        out = res.stdout.decode("utf8")
+        error = res.stderr.decode("utf8")
+    except subprocess.TimeoutExpired:
+        out = ""
+        error = "Timeout Exception"
     end_time = datetime.now()
     out_fn = os.path.join(TARGET_DIR, os.path.basename(fn))
     shutil.copyfile(fn, out_fn)
-    out = res.stdout.decode("utf8")
-    error = res.stderr.decode("utf8")
     with open(out_fn + ".log", 'w') as f:
         f.write(out)
     with open(out_fn + ".err", 'w') as f:
