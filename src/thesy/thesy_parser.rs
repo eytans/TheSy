@@ -3,7 +3,7 @@ pub mod parser {
     use std::io::Read;
     use std::str::FromStr;
 
-    use egg::{Pattern, RecExpr, Rewrite, SymbolLang, Var, Condition, ConditionalApplier, Applier, Searcher, Language, PatternAst};
+    use egg::{Pattern, RecExpr, Rewrite, SymbolLang, Var, Condition, ConditionalApplier, Applier, Searcher, Language, PatternAst, ENodeOrVar, Id};
     use itertools::{Itertools};
     use symbolic_expressions::Sexp;
 
@@ -17,6 +17,7 @@ pub mod parser {
     use std::fmt::Debug;
     use crate::eggstentions::pretty_string::PrettyString;
     use crate::eggstentions::expression_ops::{IntoTree, Tree};
+    use crate::thesy::TheSy;
 
     #[derive(Default, Clone, Debug)]
     pub struct Definitions {
@@ -193,24 +194,125 @@ pub mod parser {
                 }
             }
         }
+
         for (name, pat) in name_pats {
             let opt = res.functions.iter().find(|f| f.name == name);
             if opt.is_some() {
                 function_patterns.insert(opt.unwrap().clone(), pat);
             }
         }
+
+        fn get_splitters(datatype: &DataType, root_var: &ENodeOrVar<SymbolLang>) -> Vec<String> {
+            datatype.constructors.iter().map(|c|
+                if c.params.is_empty() {
+                    c.name.clone()
+                } else {
+                    format!("({} {})", c.name, (0..c.params.len()).map(|i| format!("(param_{}_{} {})", datatype.name, i, root_var.display_op())).join(" "))
+                }
+            ).collect_vec()
+        }
+
         for f in &res.functions {
             let opt_pats = function_patterns.get_vec(f);
             let rws = opt_pats.map(|pats| {
-                for p in pats {
-                    let params = p.into_tree().children();
-                    let pat_params = params.into_iter().enumerate().filter(|(i, tree)| !tree.is_leaf()).collect_vec();
-                    if pat_params.len() <= 1 {
-                        continue;
-                    }
+                let relevant_params = f.params.iter().enumerate().filter_map(|(i, t)| {
+                    let datatype = res.datatypes.iter().find(|d|
+                        d.name == t.into_tree().root().op.to_string());
+                    let res = datatype.map(|d| (i, t, d));
+                    // TODO: also filter by whether the other params are always the same or var and one pattern.
+                    // TODO: if there is a pattern use it for screening
+                    res.filter(|(i, t, d)|
+                        d.constructors.iter().all(|c|
+                            pats.iter().any(|p|
+                                p.into_tree().children()[*i].root().display_op().to_string() == c.name)))
+                });
+                let mut x = 0;
 
-                }
-            });
+                let mut fresh_v = (|| {
+                    x = x + 1;
+                    Var::from_str(&*("?autovar".to_string() + &*x.to_string())).unwrap()
+                });
+
+                let mut fresh_vars = (|exp: RecExpr<ENodeOrVar<SymbolLang>>, vars: &mut HashMap<Var, Var>| {
+                    RecExpr::from(exp.as_ref().iter().cloned().map(|e| match e {
+                        ENodeOrVar::ENode(n) => { ENodeOrVar::ENode(n) }
+                        ENodeOrVar::Var(v) => {
+                            if !vars.contains_key(&v) {
+                                vars.insert(v, fresh_v());
+                            }
+                            ENodeOrVar::Var(vars[&v])
+                        }
+                    }).collect_vec())
+                });
+                let param_pats = relevant_params.filter_map(|(i, t, d)| {
+                    let mut par_pats = (0..f.params.len()).map(|_| None).collect_vec();
+                    for p in pats.iter().filter(|p|
+                        // Take only patterns where the i param is being matched
+                        match p.into_tree().children()[i].root() {
+                            ENodeOrVar::ENode(_) => { true }
+                            ENodeOrVar::Var(_) => { false }
+                        }) {
+                        let mut vars = HashMap::new();
+                        for j in 0..f.params.len() {
+                            if i == j { continue; }
+                            if let ENodeOrVar::ENode(par_pat) = p.into_tree().children()[j].root() {
+                                if par_pats[j].is_none() {
+                                    // replace vars
+                                    let replaced = fresh_vars(p.into_tree().children()[j].clone().into(), &mut vars);
+                                    par_pats[j] = Some(replaced);
+                                } else {
+                                    error!("Something bad is happening here, should be only a single pattern");
+                                }
+                            }
+                        }
+                    }
+                    Some((i, d, par_pats)).filter(|(_, _, ps)| ps.iter().any(|o| o.is_some()))
+                }).collect_vec();
+
+                param_pats.into_iter().map(|(index, datatype, param_pat)| {
+                    let mut nodes = vec![];
+                    let children = param_pat.into_iter().map(|o| {
+                        if o.is_none() {
+                            nodes.push(ENodeOrVar::Var(fresh_v()));
+                            Id::from(nodes.len() - 1)
+                        } else {
+                            let cur_len = nodes.len();
+                            nodes.extend(o.unwrap().as_ref().iter().cloned().map(|s|
+                                match s {
+                                    ENodeOrVar::ENode(n) => {
+                                        ENodeOrVar::ENode(n.map_children(|child| Id::from(usize::from(child) + cur_len)))
+                                    }
+                                    ENodeOrVar::Var(v) => {ENodeOrVar::Var(v)}
+                                }));
+                            Id::from(nodes.len() - 1)
+                        }
+                    }).collect_vec();
+                    nodes.push(ENodeOrVar::ENode(SymbolLang::new(&f.name, children)));
+                    let searcher = Pattern::from(RecExpr::from(nodes));
+                    let root_var: &ENodeOrVar<SymbolLang> = searcher.ast.into_tree().children()[index].root();
+                    let root_v_opt = if let &ENodeOrVar::Var(v) = root_var {
+                        Some(v)
+                    } else {
+                        None
+                    };
+                    // TODO: Add datatype filter patterns as condition
+                    let mut cond_texts = vec![];
+                    let conds: Vec<Box<dyn Condition<SymbolLang, ()>>> = datatype.constructors.iter().map(|c| c.apply_params(
+                        (0..c.params.len()).map(|i| RecExpr::from_str(&*("?param_".to_owned() + &*i.to_string())).unwrap()).collect_vec()
+                    )).map(|exp| {
+                        cond_texts.push(format!("Cond(var: {}, pat: {})", root_v_opt.as_ref().unwrap().to_string(), exp.pretty(1000)));
+                        let cond: Box<dyn Condition<SymbolLang, ()>> = Box::new(NonPatternCondition::new(Pattern::from_str(&*exp.pretty(1000)).unwrap(), root_v_opt.unwrap()));
+                        cond
+                    }).collect_vec();
+                    let applier_text = format!("({} {} {})", TheSy::SPLITTER, root_var.display_op(), get_splitters(datatype, root_var).join(" "));
+                    let applier = Pattern::from_str(&*applier_text).unwrap();
+                    let rule_name = format!("{}_split_{}", f.name, index);
+                    println!("{} => {} if {}", searcher.pretty_string(), applier_text, cond_texts.join(" "));
+                    let cond = AndCondition::new(conds);
+                    rewrite!(rule_name; searcher => applier if cond)
+                }).collect_vec()
+            }).unwrap_or(vec![]);
+            res.rws.extend_from_slice(&rws);
         }
 
         res

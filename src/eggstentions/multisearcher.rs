@@ -8,9 +8,9 @@ pub mod multisearcher {
 
     use crate::tools::tools::Grouped;
     use crate::eggstentions::pretty_string::PrettyString;
-    use serde::export::PhantomData;
     use std::fmt::Debug;
     use smallvec::alloc::fmt::Formatter;
+    use std::marker::PhantomData;
 
     pub struct EitherSearcher<L: Language, N: Analysis<L>, A: Searcher<L, N> + Debug, B: Searcher<L, N> + Debug> {
         node: Either<A, B>,
@@ -30,25 +30,25 @@ pub mod multisearcher {
     impl<L: Language, N: Analysis<L>, A: Searcher<L, N> + Debug, B: Searcher<L, N> + Debug> Searcher<L, N> for EitherSearcher<L, N, A, B> {
         fn search_eclass(&self, egraph: &EGraph<L, N>, eclass: Id) -> Option<SearchMatches> {
             if self.node.is_left() {
-                self.node.as_ref().unwrap_left().search_eclass(egraph, eclass)
+                self.node.as_ref().left().unwrap().search_eclass(egraph, eclass)
             } else {
-                self.node.as_ref().unwrap_right().search_eclass(egraph, eclass)
+                self.node.as_ref().right().unwrap().search_eclass(egraph, eclass)
             }
         }
 
         fn search(&self, egraph: &EGraph<L, N>) -> Vec<SearchMatches> {
             if self.node.is_left() {
-                self.node.as_ref().unwrap_left().search(egraph)
+                self.node.as_ref().left().unwrap().search(egraph)
             } else {
-                self.node.as_ref().unwrap_right().search(egraph)
+                self.node.as_ref().right().unwrap().search(egraph)
             }
         }
 
         fn vars(&self) -> Vec<Var> {
             if self.node.is_left() {
-                self.node.as_ref().unwrap_left().vars()
+                self.node.as_ref().left().unwrap().vars()
             } else {
-                self.node.as_ref().unwrap_right().vars()
+                self.node.as_ref().right().unwrap().vars()
             }
         }
     }
@@ -56,9 +56,9 @@ pub mod multisearcher {
     impl<L: Language, N: Analysis<L>, A: Searcher<L, N> + Debug + Clone, B: Searcher<L, N> + Debug + Clone> Clone for EitherSearcher<L, N, A, B> {
         fn clone(&self) -> Self {
             if self.node.is_left() {
-                Self::left(self.node.as_ref().unwrap_left().clone())
+                Self::left(self.node.as_ref().left().unwrap().clone())
             } else {
-                Self::right(self.node.as_ref().unwrap_right().clone())
+                Self::right(self.node.as_ref().right().unwrap().clone())
             }
         }
     }
@@ -66,9 +66,9 @@ pub mod multisearcher {
     impl<L: Language, N: Analysis<L>, A: Searcher<L, N> + Debug + PrettyString, B: Searcher<L, N> + Debug + PrettyString> PrettyString for EitherSearcher<L, N, A, B> {
         fn pretty_string(&self) -> String {
             if self.node.is_left() {
-                self.node.as_ref().unwrap_left().pretty_string()
+                self.node.as_ref().left().unwrap().pretty_string()
             } else {
-                self.node.as_ref().unwrap_right().pretty_string()
+                self.node.as_ref().right().unwrap().pretty_string()
             }
         }
     }

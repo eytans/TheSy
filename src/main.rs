@@ -174,6 +174,7 @@ fn main() {
     let res = TheSyConfig::from(&args).run(Some(2));
     println!("done in {}", SystemTime::now().duration_since(start).unwrap().as_millis());
     if cfg!(feature = "stats") {
+        use serde_json;
         let stat_path = args.path.with_extension("stats.json");
         serde_json::to_writer(File::create(stat_path).unwrap(), &res.0.stats);
     }

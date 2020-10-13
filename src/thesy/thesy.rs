@@ -531,7 +531,7 @@ impl TheSy {
     /// Appears at the start of every placeholder var
     pub(crate) const PH_START: &'static str = "ts_ph";
     /// To be used as the op of edges representing potential split
-    const SPLITTER: &'static str = "potential_split";
+    pub const SPLITTER: &'static str = "potential_split";
     /// Pattern to find all available splitter edges. Limited arbitrarily to 5 possible splits.
     fn split_patterns() -> Vec<Pattern<SymbolLang>> {
         vec![
