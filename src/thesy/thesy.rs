@@ -10,7 +10,7 @@ use egg::StopReason::Saturated;
 use itertools::Itertools;
 use log::{debug, info, trace, warn};
 
-use crate::eggstentions::appliers::DiffApplier;
+use crate::eggstentions::appliers::{DiffApplier, UnionApplier};
 use crate::eggstentions::costs::{MinRep, RepOrder};
 use crate::eggstentions::expression_ops::{IntoTree, RecExpSlice, Tree};
 use crate::eggstentions::multisearcher::multisearcher::{MultiDiffSearcher, MultiEqSearcher};
@@ -20,6 +20,7 @@ use crate::thesy::prover::Prover;
 use multimap::MultiMap;
 use crate::eggstentions::reconstruct::reconstruct;
 use crate::thesy::statistics::Stats;
+use crate::eggstentions::conditions::{NonPatternCondition, AndCondition};
 
 /// Theory Synthesizer - Explores a given theory finding and proving new lemmas.
 pub struct TheSy {
@@ -30,22 +31,23 @@ pub struct TheSy {
     /// egraph which is expanded as part of the exploration
     pub egraph: EGraph<SymbolLang, ()>,
     /// searchers used to create the next depth of terms
-    searchers: HashMap<String, (MultiDiffSearcher, Vec<(Var, RecExpr<SymbolLang>)>)>,
+    searchers: HashMap<String, (MultiDiffSearcher<Pattern<SymbolLang>>, Vec<(Var, RecExpr<SymbolLang>)>)>,
     /// map maintaining the connection between eclasses created by sygue
     /// and their associated eclasses with `ind_ph` replaced by symbolic examples.
     example_ids: HashMap<DataType, HashMap<Id, Vec<Id>>>,
     /// Flattern apply rewrites are used for high order function such as fold.
+    /// Ite rewrites
+    /// Equality rewrite
+    /// Or and And rewrites
     /// TODO: add support for partial application
-    apply_rws: Vec<Rewrite<SymbolLang, ()>>,
-    /// Rewrites to support ite
-    ite_rws: Vec<Rewrite<SymbolLang, ()>>,
+    system_rws: Vec<Rewrite<SymbolLang, ()>>,
     /// Limits to use in equiv reduc
     node_limit: usize,
     /// Limits to use in equiv reduc
     iter_limit: usize,
     /// Lemmas given by user to prove. Continue exploration until all lemmas are provable then stop.
-    /// If empty then TheSy will fully explore the space.
-    lemmas: Option<Vec<Vec<(RecExpr<SymbolLang>, RecExpr<SymbolLang>)>>>,
+    /// If empty then TheSy will fully explore the space. (precondition, ex1, ex2)
+    lemmas: Option<Vec<Vec<(Option<RecExpr<SymbolLang>>, RecExpr<SymbolLang>, RecExpr<SymbolLang>)>>>,
     /// If stats enable contains object collecting runtime data on thesy otherwise None.
     pub stats: Option<Stats>,
 }
@@ -65,7 +67,7 @@ impl TheSy {
         Self::replace_ops(exp, &HashMap::from_iter(iter::once((orig, replacment))))
     }
 
-    pub fn new_with_ph(datatypes: Vec<DataType>, examples: HashMap<DataType, Vec<RecExpr<SymbolLang>>>, dict: Vec<Function>, ph_count: usize, lemmas: Option<Vec<(HashMap<RecExpr<SymbolLang>, RecExpr<SymbolLang>>, RecExpr<SymbolLang>, RecExpr<SymbolLang>)>>) -> TheSy {
+    pub fn new_with_ph(datatypes: Vec<DataType>, examples: HashMap<DataType, Vec<RecExpr<SymbolLang>>>, dict: Vec<Function>, ph_count: usize, lemmas: Option<Vec<(HashMap<RecExpr<SymbolLang>, RecExpr<SymbolLang>>, Option<RecExpr<SymbolLang>>, RecExpr<SymbolLang>, RecExpr<SymbolLang>)>>) -> TheSy {
         let datatype_to_prover: HashMap<DataType, Prover> = datatypes.iter()
             .map(|d| (d.clone(), Prover::new(d.clone()))).collect();
         let (mut egraph, mut example_ids) = TheSy::create_graph_example_ids(&datatypes, &examples, &dict, ph_count);
@@ -74,8 +76,37 @@ impl TheSy {
 
         let ite_rws: Vec<Rewrite<SymbolLang, ()>> = TheSy::create_ite_rws();
 
+        let eq_searcher = MultiEqSearcher::new(vec![Pattern::from_str("true").unwrap(), Pattern::from_str("(= ?x ?y)").unwrap()]);
+        let union_applier = UnionApplier::new(vec![Var::from_str("?x").unwrap(), Var::from_str("?y").unwrap()]);
+        let equality_rws = vec![rewrite!("equality"; "(= ?x ?x)" => "true"),
+                                rewrite!("equality-true"; eq_searcher => union_applier),
+                                // TODO: I would like to split by equality but not a possibility with current conditions.
+                                // rewrite!("equality-split"; "(= ?x ?y)" => "(potential_split (= ?x ?y) true false)" if {NonPatternCondition::new(Pattern::from_str("").unwrap(), Var::from_str("?"))})
+        ];
+
+        // Need to also add rules for or and and as they are commonly skipped.
+        let bool_rws = vec![
+            rewrite!("or-true"; "(or true ?x)" => "true"),
+            rewrite!("or-true2"; "(or ?x true)" => "true"),
+            rewrite!("or-false"; "(or false ?x)" => "?x"),
+            rewrite!("and-true"; "(and true ?x)" => "?x"),
+            rewrite!("and-false"; "(and false ?x)" => "false"),
+            rewrite!("and-false2"; "(and ?x false)" => "false"),
+            rewrite!("not-true"; "(not true)" => "false"),
+            rewrite!("not-false"; "(not false)" => "true"),
+        ];
+
+        // Also common that less is skipped
+        let less_rws = vec![
+            rewrite!("less-zero"; "(less zero zero)" => "false"),
+            rewrite!("less-zs"; "(less zero (succ ?x))" => "true"),
+            rewrite!("less-succ"; "(less (succ ?y) (succ ?x))" => "(less ?y ?x)")
+        ];
+
+        let system_rws = apply_rws.into_iter().chain(ite_rws.into_iter()).chain(equality_rws.into_iter()).chain(bool_rws.into_iter()).chain(less_rws.into_iter()).collect_vec();
+
         let conjectures = lemmas.map(|v| v.into_iter()
-            .map(|(vars, ex1, ex2)| {
+            .map(|(vars, precond, ex1, ex2)| {
                 let mut types_to_vars: HashMap<RecExpr<SymbolLang>, HashMap<Symbol, Function>> = HashMap::new();
                 for v in vars {
                     if !types_to_vars.contains_key(&v.1) {
@@ -87,13 +118,15 @@ impl TheSy {
                 let replacments: HashMap<Symbol, Symbol> = types_to_vars.values().flat_map(|v| {
                     v.iter().map(|(k, f)| (*k, Symbol::from(&f.name)))
                 }).collect();
+                let precond_replaced = precond.map(|p| Self::replace_ops(&p, &replacments));
                 let ex1_replaced = Self::replace_ops(&ex1, &replacments);
                 let ex2_replaced = Self::replace_ops(&ex2, &replacments);
                 types_to_vars.keys().filter(|key| datatypes.iter()
                     .any(|d| d.as_exp().into_tree() == key.into_tree()))
                     .flat_map(|typ| {
                         types_to_vars[typ].values().zip(iter::once(typ).cycle()).map(|(ph, typ)| {
-                            (Self::replace_op(&ex1_replaced, Symbol::from(&ph.name), Symbol::from(&Self::get_ph(typ, 0).name)),
+                            (precond_replaced.clone().map(|p| Self::replace_op(&p, Symbol::from(&ph.name), Symbol::from(&Self::get_ph(typ, 0).name))),
+                             Self::replace_op(&ex1_replaced, Symbol::from(&ph.name), Symbol::from(&Self::get_ph(typ, 0).name)),
                              Self::replace_op(&ex2_replaced, Symbol::from(&ph.name), Symbol::from(&Self::get_ph(typ, 0).name)))
                         })
                     }).collect_vec()
@@ -110,8 +143,7 @@ impl TheSy {
             // sygue_rules: vec![],
             searchers: HashMap::new(),
             example_ids,
-            apply_rws,
-            ite_rws,
+            system_rws,
             node_limit: 400000,
             iter_limit: 12,
             lemmas: conjectures,
@@ -131,7 +163,12 @@ impl TheSy {
         }
 
         for fun in dict.iter()
-            .chain(TheSy::collect_phs(&dict, ph_count).iter()) {
+            .chain(TheSy::collect_phs(&dict, ph_count).iter())
+            // Hack for supporting bool constant, important for preconditions or and and such.
+            .chain(vec![Function::new("true".parse().unwrap(), vec![], "bool".parse().unwrap()),
+                        Function::new("false".parse().unwrap(), vec![], "bool".parse().unwrap()),
+                        Function::new("true".parse().unwrap(), vec![], "Bool".parse().unwrap()),
+                        Function::new("false".parse().unwrap(), vec![], "Bool".parse().unwrap())].iter()){
             let id = egraph.add_expr(&fun.name.parse().unwrap());
             let type_id = egraph.add_expr(&fun.get_type());
             egraph.add(SymbolLang::new("typed", vec![id, type_id]));
@@ -164,7 +201,7 @@ impl TheSy {
         format!("sygueanchor")
     }
 
-    fn create_sygue_serchers(&self) -> HashMap<String, (MultiDiffSearcher, Vec<(Var, RecExpr<SymbolLang>)>)> {
+    fn create_sygue_serchers(&self) -> HashMap<String, (MultiDiffSearcher<Pattern<SymbolLang>>, Vec<(Var, RecExpr<SymbolLang>)>)> {
         let mut res = HashMap::new();
         self.dict.iter().for_each(|fun| {
             if !fun.params.is_empty() {
@@ -282,7 +319,7 @@ impl TheSy {
         // TODO: make this an iterator to save alot of time during recreating conjectures
         let mut start = None;
         if cfg!(feature = "stats") {
-             start = Some(SystemTime::now());
+            start = Some(SystemTime::now());
         }
         self.fix_example_ids();
         let finer_classes: HashMap<DataType, HashMap<Vec<Id>, HashSet<Id>>> = self.example_ids.iter().map(|(d, m)| {
@@ -322,7 +359,8 @@ impl TheSy {
         !runner.egraph.equivs(ex1, ex2).is_empty()
     }
 
-    fn check_lemmas(&mut self, rules: &mut Vec<Rewrite<SymbolLang, ()>>) -> Option<Vec<(Pattern<SymbolLang>, Pattern<SymbolLang>, Rewrite<SymbolLang, ()>)>> {
+    fn check_lemmas(&mut self, rules: &mut Vec<Rewrite<SymbolLang, ()>>)
+                    -> Option<Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, Rewrite<SymbolLang, ()>)>> {
         if self.lemmas.is_none() {
             return None;
         }
@@ -330,20 +368,19 @@ impl TheSy {
         let mut res = None;
         let mut index = 0;
         'outer: for (i, conjs) in lemmas.iter().enumerate() {
-            for (ex1, ex2) in conjs {
+            for (precond, ex1, ex2) in conjs {
                 for p in self.datatypes.values() {
                     let start = if cfg!(feature = "stats") {
                         Some(SystemTime::now())
                     } else { None };
-                    res = p.prove_all(rules, ex1, ex2);
+                    res = p.prove_all_split_d(rules, Option::from(precond), ex1, ex2, 4);
                     index = i;
                     if res.is_some() {
                         if cfg!(feature = "stats") {
                             self.stats.as_mut().unwrap().goals_proved.push((ex1.pretty(500), ex2.pretty(500), SystemTime::now().duration_since(start.unwrap()).unwrap()));
                         }
                         break 'outer;
-                    }
-                    else {
+                    } else {
                         if cfg!(feature = "stats") {
                             self.stats.as_mut().unwrap().failed_proofs_lemmas.push((ex1.pretty(500), ex2.pretty(500), SystemTime::now().duration_since(start.unwrap()).unwrap()));
                         }
@@ -357,7 +394,7 @@ impl TheSy {
         res
     }
 
-    pub fn run(&mut self, rules: &mut Vec<Rewrite<SymbolLang, ()>>, max_depth: usize) -> Vec<(Pattern<SymbolLang>, Pattern<SymbolLang>, Rewrite<SymbolLang, ()>)> {
+    pub fn run(&mut self, rules: &mut Vec<Rewrite<SymbolLang, ()>>, max_depth: usize) -> Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, Rewrite<SymbolLang, ()>)> {
         // TODO: run full tests
         // TODO: dont allow rules like (take ?x ?y) => (take ?x (append ?y ?y))
         println!("Running TheSy on datatypes: {} dict: {}", self.datatypes.keys().map(|x| &x.name).join(" "), self.dict.iter().map(|x| &x.name).join(" "));
@@ -367,7 +404,7 @@ impl TheSy {
 
         let system_rws_start = rules.len();
         let mut found_rules = vec![];
-        for r in self.apply_rws.iter().chain(self.ite_rws.iter()) {
+        for r in self.system_rws.iter() {
             rules.push(r.clone());
         }
         let new_rules_index = rules.len();
@@ -376,9 +413,9 @@ impl TheSy {
         while lemma.is_some() {
             found_rules.extend_from_slice(&lemma.as_ref().unwrap());
             for r in lemma.unwrap() {
-                warn!("proved: {}", r.2.long_name());
+                warn!("proved: {}", r.3.long_name());
                 // inserting like this so new rule will apply before running into node limit.
-                rules.insert(new_rules_index, r.2);
+                rules.insert(new_rules_index, r.3);
             }
             lemma = self.check_lemmas(rules);
         }
@@ -388,6 +425,7 @@ impl TheSy {
         }
 
         for depth in 0..max_depth {
+            println!("Starting depth {}", depth + 1);
             self.increase_depth();
             self.node_limit = match self.equiv_reduc(&rules[..]) {
                 StopReason::NodeLimit(x) => {
@@ -439,9 +477,9 @@ impl TheSy {
                     }
                     found_rules.extend_from_slice(&new_rules.as_ref().unwrap());
                     for r in new_rules.unwrap() {
-                        warn!("proved: {}", r.2.long_name());
+                        warn!("proved: {}", r.3.long_name());
                         // inserting like this so new rule will apply before running into node limit.
-                        rules.insert(new_rules_index, r.2);
+                        rules.insert(new_rules_index, r.3);
                     }
 
                     loop {
@@ -451,9 +489,9 @@ impl TheSy {
                         }
                         found_rules.extend_from_slice(&lemma.as_ref().unwrap());
                         for r in lemma.unwrap() {
-                            println!("proved: {}", r.2.long_name());
+                            println!("proved: {}", r.3.long_name());
                             // inserting like this so new rule will apply before running into node limit.
-                            rules.insert(new_rules_index, r.2);
+                            rules.insert(new_rules_index, r.3);
                         }
                     }
                     if self.lemmas.is_some() && self.lemmas.as_ref().unwrap().is_empty() {
@@ -479,7 +517,7 @@ impl TheSy {
                 }
             }
         }
-        for _ in 0..self.apply_rws.len() {
+        for _ in 0..self.system_rws.len() {
             rules.remove(system_rws_start);
         }
         if cfg!(feature = "stats") {
@@ -505,9 +543,18 @@ impl TheSy {
     }
 
     fn create_ite_rws() -> Vec<Rewrite<SymbolLang, ()>> {
+        let potential_split_conc = format!("({} ?z true false)", Self::SPLITTER);
+        let applier: Pattern<SymbolLang> = potential_split_conc.parse().unwrap();
+        let true_cond = NonPatternCondition::new(Pattern::from_str("true").unwrap(), Var::from_str("?z").unwrap());
+        let false_cond = NonPatternCondition::new(Pattern::from_str("false").unwrap(), Var::from_str("?z").unwrap());
+        let cond_applier = ConditionalApplier { applier, condition: AndCondition::new(vec![Box::new(true_cond), Box::new(false_cond)]) };
+        let split = Rewrite::new("ite_split", "ite_split",
+                                 Pattern::from_str("(ite ?z ?x ?y)").unwrap(),
+                                 DiffApplier::new(cond_applier)).unwrap();
         vec![
             rewrite!("ite_true"; "(ite true ?x ?y)" => "?x"),
-            rewrite!("ite_false"; "(ite false ?x ?y)" => "?y")
+            rewrite!("ite_false"; "(ite false ?x ?y)" => "?y"),
+            split
         ]
     }
 
@@ -529,7 +576,7 @@ impl TheSy {
 
     /// Case splitting works by cloning the graph and merging the different possibilities.
     /// Enabling recursivly splitting all
-    fn case_split(rules: &[Rewrite<SymbolLang, ()>], egraph: &mut EGraph<SymbolLang, ()>, root: Id, splits: Vec<Id>, split_depth: usize, run_depth: usize, dont_use: &HashSet<(Id, Vec<Id>)>, split_max_trans: usize) {
+    fn case_split(rules: &[Rewrite<SymbolLang, ()>], egraph: &mut EGraph<SymbolLang, ()>, root: Id, splits: Vec<Id>, split_depth: usize, run_depth: usize, dont_use: &HashSet<(Id, Vec<Id>)>) {
         let classes = egraph.classes().collect_vec();
         // TODO: parallel
         let after_splits = splits.iter().map(|child| {
@@ -546,7 +593,7 @@ impl TheSy {
                 StopReason::Other(_) => {}
             };
             runner.egraph.rebuild();
-            Self::_case_split_all(rules, &mut runner.egraph, split_depth - 1, run_depth, dont_use, split_max_trans - 1);
+            Self::_case_split_all(rules, &mut runner.egraph, split_depth - 1, run_depth, dont_use);
             classes.iter().map(|c| (c.id, runner.egraph.find(c.id))).collect::<HashMap<Id, Id>>()
         }).collect_vec();
         let mut group_by_splits: HashMap<Vec<Id>, HashSet<Id>> = HashMap::new();
@@ -569,14 +616,13 @@ impl TheSy {
     pub(crate) fn case_split_all(rules: &[Rewrite<SymbolLang, ()>],
                                  egraph: &mut EGraph<SymbolLang, ()>,
                                  split_depth: usize, run_depth: usize) {
-        Self::_case_split_all(rules, egraph, split_depth, run_depth, &HashSet::new(), 3)
+        Self::_case_split_all(rules, egraph, split_depth, run_depth, &HashSet::new())
     }
 
     fn _case_split_all(rules: &[Rewrite<SymbolLang, ()>],
                        egraph: &mut EGraph<SymbolLang, ()>,
                        split_depth: usize, run_depth: usize,
-                       dont_use: &HashSet<(Id, Vec<Id>)>,
-                       splitted_max_depth: usize) {
+                       dont_use: &HashSet<(Id, Vec<Id>)>) {
         if split_depth == 0 {
             return;
         }
@@ -605,7 +651,7 @@ impl TheSy {
         let classes: HashMap<Id, &EClass<SymbolLang, ()>> = egraph.classes().map(|c| (c.id, c)).collect();
         let mut needed: HashSet<Id> = splitters.iter().map(|x| x.0).collect();
         let mut translatable = HashSet::new();
-        for _ in 0..splitted_max_depth {
+        for _ in 0..=split_depth {
             'outer: for id in needed.clone() {
                 let c = classes[&id];
                 if translatable.contains(&c.id) {
@@ -627,7 +673,7 @@ impl TheSy {
         splitters.iter().filter(|s| translatable.contains(&s.0)).enumerate().for_each(|(i, (root, params))| {
             let mut updated_dont_use = new_dont_use.clone();
             updated_dont_use.extend(splitters.iter().take(i + 1).cloned());
-            Self::case_split(rules, egraph, *root, params.clone(), split_depth, run_depth, &updated_dont_use, splitted_max_depth);
+            Self::case_split(rules, egraph, *root, params.clone(), split_depth, run_depth, &updated_dont_use);
         });
     }
 

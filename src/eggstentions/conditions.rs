@@ -1,6 +1,7 @@
 use egg::{Pattern, SymbolLang, Condition, EGraph, Var, Subst, Id, Searcher, Language, Analysis};
 use smallvec::alloc::str::FromStr;
 use itertools::Itertools;
+use crate::eggstentions::pretty_string::PrettyString;
 
 pub struct NonPatternCondition {
     pattern: Pattern<SymbolLang>,

@@ -33,7 +33,6 @@ class ExtractCaseSplits:
             patterns = []
             for r in rules:
                 patterns.append(r.elements[2]._repr._content.args)
-            exit()
 
         # i = [0]
         # def mk_rule(suffix):

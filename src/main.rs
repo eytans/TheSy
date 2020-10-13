@@ -21,6 +21,7 @@ use crate::thesy::thesy_parser::parser::Definitions;
 use crate::tools::tools::choose;
 use crate::thesy::{thesy_parser, example_creator};
 use log::LevelFilter;
+use crate::eggstentions::pretty_string::PrettyString;
 
 mod eggstentions;
 mod tools;
@@ -116,8 +117,13 @@ impl TheSyConfig {
         let mut thesy = TheSy::from(self.borrow());
         let results = thesy.run(&mut rules, max_depth.unwrap_or(2));
         let new_rules_text = results.iter()
-            .map(|(searcher, applier, rw)|
-                format!("(=> \"{} => {}\" {} {})", searcher.pretty(1000), applier.pretty(1000), searcher.pretty(1000), applier.pretty(1000)))
+            .map(|(precond, searcher, applier, rw)|
+                if precond.is_some() {
+                    let precond = precond.as_ref().unwrap();
+                    format!("(=> \"{} |> {} => {}\" (=> {} (= {} {})))", precond.pretty_string(), searcher.pretty(1000), applier.pretty(1000), precond.pretty_string(), searcher.pretty(1000), applier.pretty(1000))
+                } else {
+                    format!("(=> \"{} => {}\" {} {})", searcher.pretty(1000), applier.pretty(1000), searcher.pretty(1000), applier.pretty(1000))
+                })
             .join("\n");
         File::create(&self.output).unwrap().write_all(new_rules_text.as_bytes()).unwrap();
         (thesy, rules)
