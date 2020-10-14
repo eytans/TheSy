@@ -1,0 +1,11 @@
+(declare-datatype Nat ((Z) (S (proj1-S Nat))))
+(declare-fun <2 (Nat Nat) Bool)
+(declare-fun +2 (Nat Nat) Nat)
+(assert (forall ((x Nat)) (not (<2 x Z))))
+(assert (forall ((z Nat)) (<2 Z (S z))))
+(assert
+  (forall ((z Nat) (x2 Nat)) (= (<2 (S x2) (S z)) (<2 x2 z))))
+(assert (forall ((y Nat)) (= (+2 Z y) y)))
+(assert (forall ((y Nat) (z Nat)) (= (+2 (S z) y) (S (+2 z y)))))
+(assert (not (forall ((i Nat) (m Nat)) (<2 i (S (+2 m i))))))
+(check-sat)
