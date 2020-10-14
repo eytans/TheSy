@@ -379,11 +379,8 @@ impl TheSy {
         res.into_iter().rev().collect_vec()
     }
 
-    fn check_equality(rules: &[Rewrite<SymbolLang, ()>], ex1: &RecExpr<SymbolLang>, ex2: &RecExpr<SymbolLang>) -> bool {
-        let mut egraph = EGraph::default();
-        egraph.add_expr(ex1);
-        egraph.add_expr(ex2);
-        egraph.rebuild();
+    pub fn check_equality(rules: &[Rewrite<SymbolLang, ()>], precond: &Option<RecExpr<SymbolLang>>, ex1: &RecExpr<SymbolLang>, ex2: &RecExpr<SymbolLang>) -> bool {
+        let mut egraph = Prover::create_graph(precond.as_ref(), &ex1, &ex2);
         let runner = Runner::default().with_iter_limit(8).with_time_limit(Duration::from_secs(60)).with_node_limit(10000).with_egraph(egraph).run(rules);
         !runner.egraph.equivs(ex1, ex2).is_empty()
     }
@@ -477,7 +474,7 @@ impl TheSy {
                         new_rules = temp;
                     }
                     self.stats_update_proved(&ex1, &ex2, start);
-                    if Self::check_equality(&rules[..], &ex1, &ex2) {
+                    if Self::check_equality(&rules[..], &None, &ex1, &ex2) {
                         info!("bad conjecture {} = {}", &ex1.pretty(500), &ex2.pretty(500));
                         self.stats_update_filtered_conjecture(&ex1, &ex2);
                         continue 'outer;

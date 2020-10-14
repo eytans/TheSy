@@ -47,7 +47,8 @@ struct CliOpt {
     /// Run as prover or ignore goals
     #[structopt(name = "proof mode", short="p", long="prove")]
     proof_mode: Option<bool>,
-
+    #[structopt(name = "check equivalence", short="c", long="check-equiv")]
+    check_equiv: bool
 }
 
 impl From<&CliOpt> for TheSyConfig {
@@ -182,7 +183,16 @@ fn main() {
     }
 
     let start = SystemTime::now();
-    let res = TheSyConfig::from(&args).run(Some(2));
+    let mut config = TheSyConfig::from(&args);
+    if args.check_equiv {
+        for (vars, precond, ex1, ex2) in &config.definitions.conjectures {
+            if TheSy::check_equality(&config.definitions.rws, precond, ex1, ex2) {
+                println!("proved: {}{} = {}", precond.as_ref().map(|x| format!("{} => ", x.pretty(500))).unwrap_or("".to_string()), ex1.pretty(500), ex2.pretty(500))
+            }
+        }
+        exit(0)
+    }
+    let res = config.run(Some(2));
     println!("done in {}", SystemTime::now().duration_since(start).unwrap().as_millis());
     if cfg!(feature = "stats") {
         export_json(&res.0, &args.path);
