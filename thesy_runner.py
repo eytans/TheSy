@@ -53,6 +53,6 @@ if __name__ == '__main__':
     files = [os.path.join(args.inputdir, fn) for fn in os.listdir(args.inputdir) if fn.endswith(".th") and not fn.endswith("res.th")]
     # isa_files = ["./temp/" + f for f in isa_files]
     cg.set_memory_limit(32, 'gigabytes')
-    pn = 15
+    pn = 32
     pool = multiprocessing.Pool(pn)
     pool.map(run_thesy, files)

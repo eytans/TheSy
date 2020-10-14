@@ -2,7 +2,6 @@ import functools
 from pysmt.smtlib.parser import SmtLib20Parser, SmtLibScript, SmtLibCommand
 
 
-
 class SmtLib20ParserPlus(SmtLib20Parser):
     """
     An extended parser for SMTLIB with support for datatypes (`declare-datatypes` command)
@@ -11,6 +10,31 @@ class SmtLib20ParserPlus(SmtLib20Parser):
         SmtLib20Parser.__init__(self, *a)
 
         self.commands['declare-datatypes'] = self._cmd_declare_datatypes
+        self.commands['declare-datatype'] = self._cmd_declare_datatype
+        self.commands['declare-const'] = self._cmd_declare_const
+
+    def _cmd_declare_datatype(self, current, tokens):
+        """(declare-datatype <name> ((<ctor> (<arg> <type>)*)*))"""
+        name = self.parse_atom(tokens, current)
+        type_ = self.env.type_manager.Type(name)
+        self.cache.bind(name, type_)
+
+        self.consume_opening(tokens, current)
+        ctors = []
+        cur = tokens.consume()
+        while cur != ')':
+            ctor = self.parse_atom(tokens, current)
+            namedparams = self.parse_named_params_inline(tokens, current)  # also consumes the final ')'
+            ctor_type = self.env.type_manager.FunctionType(type_, [t for (_,t) in namedparams])
+            v = self._get_var(ctor, ctor_type)
+            ctors.append((v, namedparams))
+            self._declare_accessors(type_, namedparams)
+            if namedparams: v = functools.partial(self._function_call_helper, v)
+            self.cache.bind(ctor, v)
+            cur = tokens.consume()
+        self.consume_closing(tokens, current)
+
+        return SmtLibCommand('declare-datatypes', [[], [(type_, ctors)]])
 
     def _cmd_declare_datatypes(self, current, tokens):
         """(declare-datatypes (<param>*) ((<name> (<ctor> (<arg> <type>)*)*)*))"""

@@ -1,11 +1,14 @@
 import typing
 import itertools
+
+from pysmt.typing import Type
+
 from .smtlib26 import SmtLib20ParserPlus
 from pysmt.smtlib.parser import SmtLibScript
 from pysmt.fnode import FNode
 from pysmt.exceptions import PysmtTypeError
 from pysmt.shortcuts import Symbol, FunctionType, ForAll, Equals, \
-    Iff, Function, Bool, get_free_variables, TRUE, FALSE, Implies
+    Iff, Function, Bool, get_free_variables, TRUE, FALSE, Implies, get_env
 
 
 class SmtLibDocument:
@@ -16,6 +19,14 @@ class SmtLibDocument:
     script: SmtLibScript
 
     def __init__(self, s: typing.TextIO):
+        # sym = get_env().formula_manager.get_or_create_symbol
+        # nat = Type('nat')
+        # list = Type('list')
+        # bool = Type('Bool')
+        # token_dt = Type('Token')
+        # sym('is-succ', FunctionType(bool, [nat]))
+        # sym('is-cons', FunctionType(bool, [list]))
+        # sym('is-ESC', FunctionType(bool, [token_dt]))
         p = SmtLib20ParserPlus()
         self.script = p.get_script(s)
         self._fresh_cnt = itertools.count()
@@ -34,6 +45,8 @@ class SmtLibDocument:
         for cmd in self.script:
             if cmd.name == 'declare-fun' and cmd.args[0] in used:
                 yield self.export_func(cmd.args[0])
+            if cmd.name == 'declare-const' and cmd.args[0] in used:
+                yield self.export_const(cmd.args[0])
 
     def iter_rws(self):
         for cmd in self.script:
@@ -98,6 +111,12 @@ class SmtLibDocument:
         ty = self.export_type
         return SExpression(['declare-fun', df.symbol_name(),
             SExpression([ty(t) for t in type_.param_types]), ty(type_.return_type)])
+
+    def export_const(self, df):
+        type_ = df.symbol_type()
+        ty = self.export_type
+        return SExpression(['declare-fun', df.symbol_name(),
+                            SExpression([]), ty(type_)])
 
     def export_type(self, type_):
         assert not (type_.is_function_type() or type_.is_array_type()) # TODO compound types
