@@ -9,7 +9,7 @@ pub mod parser {
 
     use crate::eggstentions::appliers::DiffApplier;
     use crate::lang::{DataType, Function};
-    use std::collections::HashMap;
+    use std::collections::{HashMap, HashSet};
     use crate::eggstentions::conditions::{NonPatternCondition, AndCondition};
     use multimap::MultiMap;
     use std::ptr::eq;
@@ -18,6 +18,7 @@ pub mod parser {
     use crate::eggstentions::pretty_string::PrettyString;
     use crate::eggstentions::expression_ops::{IntoTree, Tree};
     use crate::thesy::TheSy;
+    use crate::tools::tools::combinations;
 
     #[derive(Default, Clone, Debug)]
     pub struct Definitions {
@@ -245,7 +246,7 @@ pub mod parser {
                     }).collect_vec())
                 });
                 let param_pats = relevant_params.filter_map(|(i, t, d)| {
-                    let mut par_pats = (0..f.params.len()).map(|_| None).collect_vec();
+                    let mut par_pats = (0..f.params.len()).map(|_| vec![]).collect_vec();
                     for p in pats.iter().filter(|p|
                         // Take only patterns where the i param is being matched
                         match p.into_tree().children()[i].root() {
@@ -256,61 +257,65 @@ pub mod parser {
                         for j in 0..f.params.len() {
                             if i == j { continue; }
                             if let ENodeOrVar::ENode(par_pat) = p.into_tree().children()[j].root() {
-                                if par_pats[j].is_none() {
-                                    // replace vars
-                                    let replaced = fresh_vars(p.into_tree().children()[j].clone().into(), &mut vars);
-                                    par_pats[j] = Some(replaced);
-                                } else {
-                                    error!("Something bad is happening here, should be only a single pattern");
-                                }
+                                // replace vars
+                                let replaced = fresh_vars(p.into_tree().children()[j].clone().into(), &mut vars);
+                                par_pats[j].push(replaced);
                             }
                         }
                     }
-                    Some((i, d, par_pats)).filter(|(_, _, ps)| ps.iter().any(|o| o.is_some()))
+                    Some((i, d, par_pats)).filter(|(_, _, ps)| ps.iter().any(|v| !v.is_empty()))
                 }).collect_vec();
 
-                param_pats.into_iter().map(|(index, datatype, param_pat)| {
-                    let mut nodes = vec![];
-                    let children = param_pat.into_iter().map(|o| {
-                        if o.is_none() {
-                            nodes.push(ENodeOrVar::Var(fresh_v()));
-                            Id::from(nodes.len() - 1)
-                        } else {
+                param_pats.into_iter().flat_map(|(index, datatype, param_pat)| {
+                    let patterns_and_vars = param_pat.into_iter()
+                        .map(|v|
+                            if v.is_empty() {
+                                let mut exp = RecExpr::default();
+                                exp.add(ENodeOrVar::Var(fresh_v()));
+                                vec![exp]
+                            } else {
+                                v
+                            }).collect_vec();
+                    let mut res = vec![];
+                    for combs in  combinations(patterns_and_vars.iter().cloned().map(|x| x.into_iter())) {
+                        let mut nodes = vec![];
+                        let children = combs.into_iter().map(|exp| {
                             let cur_len = nodes.len();
-                            nodes.extend(o.unwrap().as_ref().iter().cloned().map(|s|
+                            nodes.extend(exp.as_ref().iter().cloned().map(|s|
                                 match s {
                                     ENodeOrVar::ENode(n) => {
                                         ENodeOrVar::ENode(n.map_children(|child| Id::from(usize::from(child) + cur_len)))
                                     }
-                                    ENodeOrVar::Var(v) => {ENodeOrVar::Var(v)}
+                                    ENodeOrVar::Var(v) => { ENodeOrVar::Var(v) }
                                 }));
                             Id::from(nodes.len() - 1)
-                        }
-                    }).collect_vec();
-                    nodes.push(ENodeOrVar::ENode(SymbolLang::new(&f.name, children)));
-                    let searcher = Pattern::from(RecExpr::from(nodes));
-                    let root_var: &ENodeOrVar<SymbolLang> = searcher.ast.into_tree().children()[index].root();
-                    let root_v_opt = if let &ENodeOrVar::Var(v) = root_var {
-                        Some(v)
-                    } else {
-                        None
-                    };
-                    // TODO: Add datatype filter patterns as condition
-                    let mut cond_texts = vec![];
-                    let conds: Vec<Box<dyn Condition<SymbolLang, ()>>> = datatype.constructors.iter().map(|c| c.apply_params(
-                        (0..c.params.len()).map(|i| RecExpr::from_str(&*("?param_".to_owned() + &*i.to_string())).unwrap()).collect_vec()
-                    )).map(|exp| {
-                        cond_texts.push(format!("Cond(var: {}, pat: {})", root_v_opt.as_ref().unwrap().to_string(), exp.pretty(1000)));
-                        let cond: Box<dyn Condition<SymbolLang, ()>> = Box::new(NonPatternCondition::new(Pattern::from_str(&*exp.pretty(1000)).unwrap(), root_v_opt.unwrap()));
-                        cond
-                    }).collect_vec();
-                    let applier_text = format!("({} {} {})", TheSy::SPLITTER, root_var.display_op(), get_splitters(datatype, root_var).join(" "));
-                    let applier = Pattern::from_str(&*applier_text).unwrap();
-                    let rule_name = format!("{}_split_{}", f.name, index);
-                    println!("{} => {} if {}", searcher.pretty_string(), applier_text, cond_texts.join(" "));
-                    let cond = AndCondition::new(conds);
-                    Rewrite::new(rule_name.clone(), rule_name, searcher, DiffApplier::new(ConditionalApplier{applier, condition: cond})).unwrap()
-                    // rewrite!(rule_name; searcher => applier if cond)
+                        }).collect_vec();
+                        nodes.push(ENodeOrVar::ENode(SymbolLang::new(&f.name, children)));
+                        let searcher = Pattern::from(RecExpr::from(nodes));
+                        let root_var: &ENodeOrVar<SymbolLang> = searcher.ast.into_tree().children()[index].root();
+                        let root_v_opt = if let &ENodeOrVar::Var(v) = root_var {
+                            Some(v)
+                        } else {
+                            None
+                        };
+                        // TODO: Add datatype filter patterns as condition
+                        let mut cond_texts = vec![];
+                        let conds: Vec<Box<dyn Condition<SymbolLang, ()>>> = datatype.constructors.iter().map(|c| c.apply_params(
+                            (0..c.params.len()).map(|i| RecExpr::from_str(&*("?param_".to_owned() + &*i.to_string())).unwrap()).collect_vec()
+                        )).map(|exp| {
+                            cond_texts.push(format!("Cond(var: {}, pat: {})", root_v_opt.as_ref().unwrap().to_string(), exp.pretty(1000)));
+                            let cond: Box<dyn Condition<SymbolLang, ()>> = Box::new(NonPatternCondition::new(Pattern::from_str(&*exp.pretty(1000)).unwrap(), root_v_opt.unwrap()));
+                            cond
+                        }).collect_vec();
+                        let applier_text = format!("({} {} {})", TheSy::SPLITTER, root_var.display_op(), get_splitters(datatype, root_var).join(" "));
+                        let applier = Pattern::from_str(&*applier_text).unwrap();
+                        let rule_name = format!("{}_split_{}_{}", f.name, index, res.len());
+                        println!("{} => {} if {}", searcher.pretty_string(), applier_text, cond_texts.join(" "));
+                        let cond = AndCondition::new(conds);
+                        res.push(Rewrite::new(rule_name.clone(), rule_name, searcher, DiffApplier::new(ConditionalApplier { applier, condition: cond })).unwrap());
+                        // rewrite!(rule_name; searcher => applier if cond)
+                    }
+                    res
                 }).collect_vec()
             }).unwrap_or(vec![]);
             res.rws.extend_from_slice(&rws);
