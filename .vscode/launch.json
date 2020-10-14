@@ -8,6 +8,14 @@
             "module": "frontend.smtlib.main",
             "console": "integratedTerminal",
             "justMyCode": false
+        },
+        {
+            "name": "Python: frontend.isabelle",
+            "type": "python",
+            "request": "launch",
+            "module": "frontend.isabelle.main",
+            "console": "integratedTerminal",
+            "justMyCode": false
         }
     ]
 }
