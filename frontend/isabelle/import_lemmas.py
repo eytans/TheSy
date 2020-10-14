@@ -31,7 +31,8 @@ class TheoryDocument:
             self.funcs += mo.group(1).split()
 
         for mo in self.LEMMA_RE.finditer(whole_text):
-            self.lemmas += [self.parse_lemma(mo.group(2))]
+            if mo.group(1) != 'unknown':
+                self.lemmas += [self.parse_lemma(mo.group(2))]
 
     def merge(self, other):
         self.ctors += other.ctors
@@ -58,6 +59,7 @@ class TheoryDocument:
             elif token == r'\<Longrightarrow>':
                 e = stack.pop()
                 stack.append(['=>', SExpression(e)])
+                stack.append([])
             else:
                 stack[-1].append(token)
         
@@ -71,18 +73,23 @@ class TheoryDocument:
         sig = self._mk_env(fv)
         for func in self.funcs:
             sig[func] = func.replace('twoSpec', '2').replace('Special', '')
-        return [self.subst(e, sig) for e in lemma]
+        phi = [self.subst(e, sig) for e in lemma]
+        if len(phi) == 1: phi.append('true')
+        return SExpression(['='] + phi)
 
     def find_vars(self, sexpr):
         fv = set()
         if isinstance(sexpr, SExpression):
             for e in sexpr.elements: fv |= self.find_vars(e)
         elif isinstance(sexpr, str):
-            if all(sexpr not in s for s in [self.ctors, self.funcs, self.BUILTINS]):
+            name = self._flat_name(sexpr)
+            if all(name not in s for s in [self.ctors, self.funcs, self.BUILTINS]):
                 fv.add(sexpr)
         return fv
 
     def subst(self, sexpr, subst):
+        if isinstance(sexpr, str):
+            sexpr = self._flat_name(sexpr)  # not so pretty here
         if sexpr in subst:
             return subst[sexpr]
         elif isinstance(sexpr, SExpression):
@@ -92,6 +99,9 @@ class TheoryDocument:
 
     def _mk_env(self, var_names):
         return {v: f"?{v}" for v in var_names}
+
+    def _flat_name(self, name):
+        return name.split('.')[-1]
 
 
 class SExpression:
