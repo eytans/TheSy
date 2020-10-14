@@ -309,7 +309,8 @@ pub mod parser {
                     let rule_name = format!("{}_split_{}", f.name, index);
                     println!("{} => {} if {}", searcher.pretty_string(), applier_text, cond_texts.join(" "));
                     let cond = AndCondition::new(conds);
-                    rewrite!(rule_name; searcher => applier if cond)
+                    Rewrite::new(rule_name.clone(), rule_name, searcher, DiffApplier::new(ConditionalApplier{applier, condition: cond})).unwrap()
+                    // rewrite!(rule_name; searcher => applier if cond)
                 }).collect_vec()
             }).unwrap_or(vec![]);
             res.rws.extend_from_slice(&rws);

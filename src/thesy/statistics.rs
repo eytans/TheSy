@@ -12,7 +12,7 @@ pub struct Stats {
     /// Same as prev but for given goals
     pub goals_proved: Vec<(String, String, Duration)>,
     /// Same as prev but for given goals
-    pub failed_proofs_lemmas: Vec<(String, String, Duration)>,
+    pub failed_proofs_goals: Vec<(String, String, Duration)>,
     /// The iteration stats from egg foreach equivalence reduction done.
     pub equiv_red_iterations: Vec<Vec<Iteration<()>>>,
     /// Number of initial splitters and total time to complete case splitting. Not including prover.

@@ -48,7 +48,7 @@ pub struct TheSy {
     iter_limit: usize,
     /// Lemmas given by user to prove. Continue exploration until all lemmas are provable then stop.
     /// If empty then TheSy will fully explore the space. (precondition, ex1, ex2)
-    lemmas: Option<Vec<Vec<(Option<RecExpr<SymbolLang>>, RecExpr<SymbolLang>, RecExpr<SymbolLang>)>>>,
+    goals: Option<Vec<Vec<(Option<RecExpr<SymbolLang>>, RecExpr<SymbolLang>, RecExpr<SymbolLang>)>>>,
     /// If stats enable contains object collecting runtime data on thesy otherwise None.
     pub stats: Option<Stats>,
 }
@@ -78,12 +78,9 @@ impl TheSy {
         let ite_rws: Vec<Rewrite<SymbolLang, ()>> = TheSy::create_ite_rws();
 
         let eq_searcher = MultiEqSearcher::new(vec![Pattern::from_str("true").unwrap(), Pattern::from_str("(= ?x ?y)").unwrap()]);
-        let eq_searcher2 = MultiEqSearcher::new(vec![Pattern::from_str("true").unwrap(), Pattern::from_str("(= ?x ?y)").unwrap()]);
-        let eq_applier1 = DiffApplier::new(Pattern::from_str("?x").unwrap());
-        let eq_applier2 = DiffApplier::new(Pattern::from_str("?y").unwrap());
+        let union_applier = UnionApplier::new(vec![Var::from_str("?x").unwrap(), Var::from_str("?y").unwrap()]);
         let equality_rws = vec![rewrite!("equality"; "(= ?x ?x)" => "true"),
-                                rewrite!("equality-true"; eq_searcher => eq_applier1),
-                                rewrite!("equality-true2"; eq_searcher2 => eq_applier2),
+                                rewrite!("equality-true"; eq_searcher => union_applier),
                                 // TODO: I would like to split by equality but not a possibility with current conditions.
                                 // rewrite!("equality-split"; "(= ?x ?y)" => "(potential_split (= ?x ?y) true false)" if {NonPatternCondition::new(Pattern::from_str("").unwrap(), Var::from_str("?"))})
         ];
@@ -102,7 +99,7 @@ impl TheSy {
 
         // Also common that less is skipped
         let less_rws = vec![
-            rewrite!("less-zero"; "(less zero zero)" => "false"),
+            rewrite!("less-zero"; "(less ?x zero)" => "false"),
             rewrite!("less-zs"; "(less zero (succ ?x))" => "true"),
             rewrite!("less-succ"; "(less (succ ?y) (succ ?x))" => "(less ?y ?x)")
         ];
@@ -150,7 +147,7 @@ impl TheSy {
             system_rws,
             node_limit: 400000,
             iter_limit: 12,
-            lemmas: conjectures,
+            goals: conjectures,
             stats,
         };
 
@@ -172,7 +169,7 @@ impl TheSy {
             .chain(vec![Function::new("true".parse().unwrap(), vec![], "bool".parse().unwrap()),
                         Function::new("false".parse().unwrap(), vec![], "bool".parse().unwrap()),
                         Function::new("true".parse().unwrap(), vec![], "Bool".parse().unwrap()),
-                        Function::new("false".parse().unwrap(), vec![], "Bool".parse().unwrap())].iter()){
+                        Function::new("false".parse().unwrap(), vec![], "Bool".parse().unwrap())].iter()) {
             let id = egraph.add_expr(&fun.name.parse().unwrap());
             let type_id = egraph.add_expr(&fun.get_type());
             egraph.add(SymbolLang::new("typed", vec![id, type_id]));
@@ -311,6 +308,15 @@ impl TheSy {
         }
         self.egraph = runner.egraph;
         self.egraph.rebuild();
+        let true_pat: Pattern<SymbolLang> = "true".parse().unwrap();
+        let false_pat: Pattern<SymbolLang> = "false".parse().unwrap();
+        if true_pat.search(&self.egraph)[0].eclass == false_pat.search(&self.egraph)[0].eclass {
+            let class = self.egraph.classes().find(|c| c.id == true_pat.search(&self.egraph)[0].eclass);
+            for edge in class.unwrap().nodes.iter() {
+                println!("{}", edge.display_op());
+            }
+            panic!("Bad bad bad: true = false");
+        }
         runner.stop_reason.unwrap()
     }
 
@@ -363,12 +369,12 @@ impl TheSy {
         !runner.egraph.equivs(ex1, ex2).is_empty()
     }
 
-    fn check_lemmas(&mut self, rules: &mut Vec<Rewrite<SymbolLang, ()>>)
-                    -> Option<Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, Rewrite<SymbolLang, ()>)>> {
-        if self.lemmas.is_none() {
+    fn check_goals(&mut self, rules: &mut Vec<Rewrite<SymbolLang, ()>>)
+                   -> Option<Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, Rewrite<SymbolLang, ()>)>> {
+        if self.goals.is_none() {
             return None;
         }
-        let mut lemmas = self.lemmas.as_mut().unwrap();
+        let mut lemmas = self.goals.as_mut().unwrap();
         let mut res = None;
         let mut index = 0;
         'outer: for (i, conjs) in lemmas.iter().enumerate() {
@@ -377,7 +383,7 @@ impl TheSy {
                     let start = if cfg!(feature = "stats") {
                         Some(SystemTime::now())
                     } else { None };
-                    res = p.prove_all_split_d(rules, Option::from(precond), ex1, ex2, 4);
+                    res = p.prove_all_split_d(rules, Option::from(precond), ex1, ex2, 3);
                     index = i;
                     if res.is_some() {
                         if cfg!(feature = "stats") {
@@ -386,7 +392,7 @@ impl TheSy {
                         break 'outer;
                     } else {
                         if cfg!(feature = "stats") {
-                            self.stats.as_mut().unwrap().failed_proofs_lemmas.push((ex1.pretty(500), ex2.pretty(500), SystemTime::now().duration_since(start.unwrap()).unwrap()));
+                            self.stats.as_mut().unwrap().failed_proofs_goals.push((ex1.pretty(500), ex2.pretty(500), SystemTime::now().duration_since(start.unwrap()).unwrap()));
                         }
                     }
                 }
@@ -402,9 +408,7 @@ impl TheSy {
         // TODO: run full tests
         // TODO: dont allow rules like (take ?x ?y) => (take ?x (append ?y ?y))
         println!("Running TheSy on datatypes: {} dict: {}", self.datatypes.keys().map(|x| &x.name).join(" "), self.dict.iter().map(|x| &x.name).join(" "));
-        let start_total = if cfg!(feature = "stats") {
-            Some(SystemTime::now())
-        } else { None };
+        let start_total = Self::stats_get_time();
 
         let system_rws_start = rules.len();
         let mut found_rules = vec![];
@@ -413,47 +417,20 @@ impl TheSy {
         }
         let new_rules_index = rules.len();
 
-        let mut lemma = self.check_lemmas(rules);
-        while lemma.is_some() {
-            found_rules.extend_from_slice(&lemma.as_ref().unwrap());
-            for r in lemma.unwrap() {
-                warn!("proved: {}", r.3.long_name());
-                // inserting like this so new rule will apply before running into node limit.
-                rules.insert(new_rules_index, r.3);
-            }
-            lemma = self.check_lemmas(rules);
-        }
-        if self.lemmas.is_some() && self.lemmas.as_ref().unwrap().is_empty() {
-            warn!("Found all lemmas");
-            if cfg!(feature = "stats") {
-                self.stats.as_mut().unwrap().total_time = SystemTime::now().duration_since(start_total.unwrap()).unwrap();
-            }
+        if self.prove_goals(rules, &mut found_rules, new_rules_index, start_total) {
             return found_rules;
         }
 
-        let split_rule = rules.iter().find(|r| r.name() == "ite_split").unwrap().clone();
         for depth in 0..max_depth {
             println!("Starting depth {}", depth + 1);
             self.increase_depth();
+            let stop_reason = self.equiv_reduc(&rules[..]);
+            self.update_node_limit(stop_reason);
 
-            // TODO: move to function
-            self.node_limit = match self.equiv_reduc(&rules[..]) {
-                StopReason::NodeLimit(x) => {
-                    info!("Reached node limit. Increasing maximum graph size.");
-                    // TODO: decide dynamically
-                    x + 50000
-                }
-                _ => { self.node_limit }
-            };
-
-            // TODO: move to function
             let splitter_count = if cfg!(feature = "stats") {
                 Self::split_patterns().iter().map(|p| p.search(&self.egraph).iter().map(|m| m.substs.len()).sum::<usize>()).sum()
             } else { 0 };
-            // TODO: move to function
-            let start = if cfg!(feature = "stats") {
-                Some(SystemTime::now())
-            } else { None };
+            let start = TheSy::stats_get_time();
 
             // let matches = Self::split_patterns()[0].search(&self.egraph);
             // assert!(matches.iter().all(|m| self.egraph.classes().find(|c| c.id == m.eclass).unwrap().nodes.len() == 1));
@@ -465,7 +442,6 @@ impl TheSy {
             // TODO: After finishing checking all conjectures in final depth (if a lemma was found) try case split again then finish.
             // TODO: can be a single loop with max depth
             Self::case_split_all(rules, &mut self.egraph, 2, 4);
-            // TODO: move to function
             if cfg!(feature = "stats") {
                 self.stats.as_mut().unwrap().case_split.push((splitter_count, SystemTime::now().duration_since(start.unwrap()).unwrap()));
             }
@@ -473,9 +449,7 @@ impl TheSy {
             let mut conjectures = self.get_conjectures();
             'outer: while !conjectures.is_empty() {
                 let (_, ex1, ex2, d) = conjectures.pop().unwrap();
-                let start = if cfg!(feature = "stats") {
-                    Some(SystemTime::now())
-                } else { None };
+                let start = Self::stats_get_time();
                 let mut new_rules = self.datatypes[&d].prove_ind(&rules, &ex1, &ex2);
                 if new_rules.is_some() {
                     let temp = new_rules;
@@ -483,16 +457,13 @@ impl TheSy {
                     if new_rules.is_none() {
                         new_rules = temp;
                     }
-                    if cfg!(feature = "stats") {
-                        self.stats.as_mut().unwrap().conjectures_proved.push((ex1.pretty(500), ex2.pretty(500), SystemTime::now().duration_since(start.unwrap()).unwrap()));
-                    }
+                    self.stats_update_proved(&ex1, &ex2, start);
                     if Self::check_equality(&rules[..], &ex1, &ex2) {
                         info!("bad conjecture {} = {}", &ex1.pretty(500), &ex2.pretty(500));
-                        if cfg!(feature = "stats") {
-                            self.stats.as_mut().unwrap().filtered_lemmas.push((ex1.pretty(500), ex2.pretty(500)));
-                        }
+                        self.stats_update_filtered_conjecture(&ex1, &ex2);
                         continue 'outer;
                     }
+
                     found_rules.extend_from_slice(&new_rules.as_ref().unwrap());
                     for r in new_rules.unwrap() {
                         warn!("proved: {}", r.3.long_name());
@@ -500,51 +471,88 @@ impl TheSy {
                         rules.insert(new_rules_index, r.3);
                     }
 
-                    // Should be a function
-                    loop {
-                        lemma = self.check_lemmas(rules);
-                        if lemma.is_none() {
-                            break;
-                        }
-                        found_rules.extend_from_slice(&lemma.as_ref().unwrap());
-                        for r in lemma.unwrap() {
-                            println!("proved: {}", r.3.long_name());
-                            // inserting like this so new rule will apply before running into node limit.
-                            rules.insert(new_rules_index, r.3);
-                        }
-                    }
-                    if self.lemmas.is_some() && self.lemmas.as_ref().unwrap().is_empty() {
-                        println!("Found all lemmas");
-                        if cfg!(feature = "stats") {
-                            self.stats.as_mut().unwrap().total_time = SystemTime::now().duration_since(start_total.unwrap()).unwrap();
-                        }
+                    if self.prove_goals(rules, &mut found_rules, new_rules_index, start_total) {
                         return found_rules;
                     }
 
                     let reduc_depth = 3;
-                    self.node_limit = match self.equiv_reduc_depth(&rules[..], reduc_depth) {
-                        StopReason::NodeLimit(x) => {
-                            println!("Reached node limit. Increasing maximum graph size.");
-                            x + 50000
-                        }
-                        _ => { self.node_limit }
-                    };
+                    let stop_reason = self.equiv_reduc_depth(&rules[..], reduc_depth);
+                    self.update_node_limit(stop_reason);
                     conjectures = self.get_conjectures();
                     println!();
                 } else {
-                    if cfg!(feature = "stats") {
-                        self.stats.as_mut().unwrap().failed_proofs.push((ex1.pretty(500), ex2.pretty(500), SystemTime::now().duration_since(start.unwrap()).unwrap()));
-                    }
+                    self.stats_update_failed_proof(ex1, ex2, start)
                 }
             }
         }
         for _ in 0..self.system_rws.len() {
             rules.remove(system_rws_start);
         }
+        self.stats_update_total(start_total);
+        found_rules
+    }
+
+    fn update_node_limit(&mut self, reason: StopReason) {
+        self.node_limit = match reason {
+            StopReason::NodeLimit(x) => {
+                info!("Reached node limit. Increasing maximum graph size.");
+                // TODO: decide dynamically
+                x + 50000
+            }
+            _ => { self.node_limit }
+        };
+    }
+
+    /// Attempt to prove all lemmas with retry. Return true if finished all goals.
+    fn prove_goals(&mut self, rules: &mut Vec<Rewrite<SymbolLang, ()>>, found_rules: &mut Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, Rewrite<SymbolLang, ()>)>, new_rules_index: usize, start_total: Option<SystemTime>) -> bool {
+        loop {
+            let lemma = self.check_goals(rules);
+            if lemma.is_none() {
+                break;
+            }
+            found_rules.extend_from_slice(&lemma.as_ref().unwrap());
+            for r in lemma.unwrap() {
+                println!("proved: {}", r.3.long_name());
+                // inserting like this so new rule will apply before running into node limit.
+                rules.insert(new_rules_index, r.3);
+            }
+        }
+        if self.goals.is_some() && self.goals.as_ref().unwrap().is_empty() {
+            warn!("Found all lemmas");
+            self.stats_update_total(start_total);
+            return true;
+        }
+        false
+    }
+
+    fn stats_update_proved(&mut self, ex1: &RecExpr<SymbolLang>, ex2: &RecExpr<SymbolLang>, start: Option<SystemTime>) {
+        if cfg!(feature = "stats") {
+            self.stats.as_mut().unwrap().conjectures_proved.push((ex1.pretty(500), ex2.pretty(500), SystemTime::now().duration_since(start.unwrap()).unwrap()));
+        }
+    }
+
+    fn stats_update_filtered_conjecture(&mut self, ex1: &RecExpr<SymbolLang>, ex2: &RecExpr<SymbolLang>) {
+        if cfg!(feature = "stats") {
+            self.stats.as_mut().unwrap().filtered_lemmas.push((ex1.pretty(500), ex2.pretty(500)));
+        }
+    }
+
+    fn stats_update_failed_proof(&mut self, ex1: RecExpr<SymbolLang>, ex2: RecExpr<SymbolLang>, start: Option<SystemTime>) {
+        if cfg!(feature = "stats") {
+            self.stats.as_mut().unwrap().failed_proofs.push((ex1.pretty(500), ex2.pretty(500), SystemTime::now().duration_since(start.unwrap()).unwrap()));
+        }
+    }
+
+    fn stats_update_total(&mut self, start_total: Option<SystemTime>) {
         if cfg!(feature = "stats") {
             self.stats.as_mut().unwrap().total_time = SystemTime::now().duration_since(start_total.unwrap()).unwrap();
         }
-        found_rules
+    }
+
+    fn stats_get_time() -> Option<SystemTime> {
+        if cfg!(feature = "stats") {
+            Some(SystemTime::now())
+        } else { None }
     }
 
     // *************** Thesy statics *****************
