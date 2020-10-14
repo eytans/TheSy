@@ -1,7 +1,8 @@
 import typing
 import itertools
+import functools
 
-from pysmt.typing import Type
+from pysmt.typing import Type, BOOL
 
 from .smtlib26 import SmtLib20ParserPlus
 from pysmt.smtlib.parser import SmtLibScript
@@ -19,15 +20,14 @@ class SmtLibDocument:
     script: SmtLibScript
 
     def __init__(self, s: typing.TextIO):
-        # sym = get_env().formula_manager.get_or_create_symbol
-        # nat = Type('nat')
-        # list = Type('list')
-        # bool = Type('Bool')
-        # token_dt = Type('Token')
-        # sym('is-succ', FunctionType(bool, [nat]))
-        # sym('is-cons', FunctionType(bool, [list]))
-        # sym('is-ESC', FunctionType(bool, [token_dt]))
-        p = SmtLib20ParserPlus()
+        sym = get_env().formula_manager.get_or_create_symbol
+        Nat, list_, Token = Type('Nat'), Type('list'), Type('Token')
+
+        p = SmtLibDocumentParser()
+        p.predeclare(sym('is-cons', FunctionType(BOOL, [list_])))  #
+        p.predeclare(sym('is-succ', FunctionType(BOOL, [Nat])))    # hard-coded :/
+        p.predeclare(sym('is-ESC',  FunctionType(BOOL, [Token])))  #
+
         self.script = p.get_script(s)
         self._fresh_cnt = itertools.count()
 
@@ -216,6 +216,24 @@ class SmtLibDocument:
 
     def _fresh(self, template):
         return template % self._fresh_cnt.__next__()
+
+
+class SmtLibDocumentParser(SmtLib20ParserPlus):
+    """
+    Extends the parser with a configurable preamble.
+    """
+    
+    def __init__(self, *a):
+        self.preamble = {}
+        super().__init__(*a)
+
+    def predeclare(self, symbol):
+        self.preamble[symbol.symbol_name()] = \
+            functools.partial(self._function_call_helper, symbol)
+
+    def _reset(self):
+        super()._reset()
+        self.cache.update(self.preamble)
 
 
 class SExpression:

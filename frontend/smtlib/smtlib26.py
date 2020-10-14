@@ -4,10 +4,11 @@ from pysmt.smtlib.parser import SmtLib20Parser, SmtLibScript, SmtLibCommand
 
 class SmtLib20ParserPlus(SmtLib20Parser):
     """
-    An extended parser for SMTLIB with support for datatypes (`declare-datatypes` command)
+    An extended parser for SMTLIB with support for datatypes
+    (`declare-datatype` and `declare-datatypes` command).
     """
     def __init__(self, *a):
-        SmtLib20Parser.__init__(self, *a)
+        super().__init__(*a)
 
         self.commands['declare-datatypes'] = self._cmd_declare_datatypes
         self.commands['declare-datatype'] = self._cmd_declare_datatype
@@ -23,18 +24,26 @@ class SmtLib20ParserPlus(SmtLib20Parser):
         ctors = []
         cur = tokens.consume()
         while cur != ')':
-            ctor = self.parse_atom(tokens, current)
-            namedparams = self.parse_named_params_inline(tokens, current)  # also consumes the final ')'
-            ctor_type = self.env.type_manager.FunctionType(type_, [t for (_,t) in namedparams])
-            v = self._get_var(ctor, ctor_type)
-            ctors.append((v, namedparams))
-            self._declare_accessors(type_, namedparams)
-            if namedparams: v = functools.partial(self._function_call_helper, v)
-            self.cache.bind(ctor, v)
+            ctor_def = self._subcmd_ctor(type_, tokens, current)
+            ctors.append(ctor_def)
             cur = tokens.consume()
         self.consume_closing(tokens, current)
 
         return SmtLibCommand('declare-datatypes', [[], [(type_, ctors)]])
+
+    def _subcmd_ctor(self, datatype, tokens, current):
+        name = self.parse_atom(tokens, current)
+        namedparams = self.parse_named_params_inline(tokens, current)  # also consumes the final ')'
+        ctor_type = self.env.type_manager.FunctionType(datatype, [t for (_,t) in namedparams])
+        ctor = self._get_var(name, ctor_type)
+        self._declare_accessors(datatype, namedparams)
+        if namedparams: self._bind_function(ctor)
+        else: self.cache.bind(name, ctor)
+        return (ctor, namedparams)
+
+    def _bind_function(self, fsymbol):
+        self.cache.bind(fsymbol.symbol_name(),
+            functools.partial(self._function_call_helper, fsymbol))
 
     def _cmd_declare_datatypes(self, current, tokens):
         """(declare-datatypes (<param>*) ((<name> (<ctor> (<arg> <type>)*)*)*))"""

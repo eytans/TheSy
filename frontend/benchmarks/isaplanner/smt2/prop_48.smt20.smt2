@@ -1,10 +1,5 @@
 (declare-datatype Nat ((Z) (S (proj1-S Nat))))
 (declare-datatype list ((nil) (cons (head Nat) (tail list))))
-
-(declare-fun is-succ (Nat) Bool)
-(declare-fun is-cons (list) Bool)
-;(declare-fun is-ESC (Token) Bool)
-
 (declare-fun last (list) Nat)
 (declare-fun butlast (list) list)
 (declare-fun ++ (list list) list)

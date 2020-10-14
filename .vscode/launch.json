@@ -2,10 +2,10 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: frontend/smtlib",
+            "name": "Python: frontend.smtlib",
             "type": "python",
             "request": "launch",
-            "program": "frontend/smtlib/main.py",
+            "module": "frontend.smtlib.main",
             "console": "integratedTerminal",
             "justMyCode": false
         }

@@ -1,0 +1,7 @@
+(datatype list2 () ((nil2 list2) (cons2 sk list2 list2)))
+(declare-fun zip (list2 list2) list)
+(=> rule0 (zip nil2 ?y) nil)
+(=> rule1 (zip (cons2 ?z ?x2) nil2) nil)
+(=> rule2 (zip (cons2 ?z ?x2) (cons2 ?x3 ?x4)) (cons (pair2 ?z ?x3) (zip ?x2 ?x4)))
+(=> rule3 (cons (pair2 ?z ?x3) (zip ?x2 ?x4)) (zip (cons2 ?z ?x2) (cons2 ?x3 ?x4)))
+(prove (forall ((ys list2)(x sk)(y0 sk)(xs list2)) (= (zip (cons2 x xs) (cons2 y0 ys)) (cons (pair2 x y0) (zip xs ys)))))
