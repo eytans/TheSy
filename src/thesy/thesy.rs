@@ -20,7 +20,7 @@ use crate::thesy::prover::Prover;
 use multimap::MultiMap;
 use crate::eggstentions::reconstruct::reconstruct;
 use crate::thesy::statistics::Stats;
-use crate::eggstentions::conditions::{NonPatternCondition, AndCondition};
+use crate::eggstentions::conditions::{NonPatternCondition, AndCondition, PatternCondition};
 use std::process::exit;
 
 /// Theory Synthesizer - Explores a given theory finding and proving new lemmas.
@@ -104,7 +104,26 @@ impl TheSy {
             rewrite!("less-succ"; "(less (succ ?y) (succ ?x))" => "(less ?y ?x)")
         ];
 
-        let system_rws = apply_rws.into_iter().chain(ite_rws.into_iter()).chain(equality_rws.into_iter()).chain(bool_rws.into_iter()).chain(less_rws.into_iter()).collect_vec();
+        let cons_conc_searcher: MultiEqSearcher<Pattern<SymbolLang>> = MultiEqSearcher::new(vec!["true".parse().unwrap(), "(is-cons ?x)".parse().unwrap()]);
+        let cons_conclusion: DiffApplier<Pattern<SymbolLang>> = DiffApplier::new("(cons (isconsex ?x))".parse().unwrap());
+
+        let is_rws: Vec<Rewrite<SymbolLang, ()>> = vec![
+            rewrite!("is_cons_true"; "(is-cons ?x)" => "true" if PatternCondition::new("(cons ?y)".parse().unwrap(), Var::from_str("?x").unwrap())),
+            rewrite!("is_cons_false"; "(is-cons ?x)" => "false" if PatternCondition::new("nil".parse().unwrap(), Var::from_str("?x").unwrap())),
+            rewrite!("is_cons_conclusion"; cons_conc_searcher => cons_conclusion),
+            // rewrite!("is_cons_false"; "(is-cons ?x)" => "false" if ConditionEqual::parse("nil", "?x")),
+            // rewrite!("is_succ_true"; "(is-succ ?x)" => "true" if ConditionEqual::parse("(succ ?y)", "?x")),
+            // rewrite!("is_succ_false"; "(is-succ ?x)" => "false" if ConditionEqual::parse("zero", "?x")),
+            // rewrite!("is_ESC_true"; "(is-ESC ?x)" => "true" if ConditionEqual::parse("ESC", "?x")),
+        ];
+
+        let system_rws = apply_rws.into_iter()
+            .chain(ite_rws.into_iter())
+            .chain(equality_rws.into_iter())
+            .chain(bool_rws.into_iter())
+            .chain(less_rws.into_iter())
+            .chain(is_rws.into_iter())
+            .collect_vec();
 
         let conjectures = lemmas.map(|v| v.into_iter()
             .map(|(vars, precond, ex1, ex2)| {

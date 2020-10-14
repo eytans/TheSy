@@ -5,8 +5,8 @@ from pysmt.environment import reset_env
 
 def main():
     # BENCHMARK_DIRS = ['benchmarks/cvc4-conj/original/benchmarks-dt/leon']
-    BENCHMARK_DIRS = ['frontend/benchmarks/isaplanner/smt2']
-    TARGET_DIRS = ['frontend/benchmarks/isaplanner']
+    BENCHMARK_DIRS = ['/home/eytan.s/Apps/benchmarks/benchmarks/isaplanner_smt']
+    TARGET_DIRS = ['/home/eytan.s/Apps/benchmarks/benchmarks/isaplanner_smt_th']
 
     import os
 
@@ -21,7 +21,12 @@ def main():
             infile = open(os.path.join(d, fn))
 
             reset_env()
-            doc = SmtLibDocument(infile)
+            try:
+                doc = SmtLibDocument(infile)
+            except:
+                print(f"bad {fn}")
+                print(traceback.format_exc())
+                continue
 
             with open(os.path.join(target_dir, fn + '.th'), 'w') as outf:
                 for el in doc:

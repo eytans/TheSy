@@ -26,7 +26,7 @@ def run_thesy(fn):
     in_my_cgroup()
     print(f"running {fn}")
     try:
-        res = subprocess.run(CMD + [fn], stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=60*60*3)
+        res = subprocess.run(CMD + [fn], stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=60*60*1)
         out = res.stdout.decode("utf8")
         error = res.stderr.decode("utf8")
     except subprocess.TimeoutExpired:

@@ -44,6 +44,10 @@ struct CliOpt {
     ph_count: usize,
     /// Previous results to read
     dependencies: Vec<String>,
+    /// Run as prover or ignore goals
+    #[structopt(name = "proof mode", short="p", long="prove")]
+    proof_mode: Option<bool>,
+
 }
 
 impl From<&CliOpt> for TheSyConfig {
@@ -52,7 +56,9 @@ impl From<&CliOpt> for TheSyConfig {
             thesy_parser::parser::parse_file(opts.path.to_str().unwrap().to_string()),
             opts.ph_count,
             vec![],
-            opts.path.with_extension("res.th"))
+            opts.path.with_extension("res.th"),
+            opts.proof_mode.unwrap_or(true)
+        )
     }
 }
 
@@ -64,10 +70,11 @@ struct TheSyConfig {
     dep_results: Vec<Vec<Rewrite<SymbolLang, ()>>>,
     output: PathBuf,
     prerun: bool,
+    proof_mode: bool,
 }
 
 impl TheSyConfig {
-    pub fn new(definitions: Definitions, ph_count: usize, dependencies: Vec<TheSyConfig>, output: PathBuf) -> TheSyConfig {
+    pub fn new(definitions: Definitions, ph_count: usize, dependencies: Vec<TheSyConfig>, output: PathBuf, proof_mode: bool) -> TheSyConfig {
         let func_len = definitions.functions.len();
         TheSyConfig {
             definitions,
@@ -76,6 +83,7 @@ impl TheSyConfig {
             dep_results: vec![],
             output,
             prerun: false,
+            proof_mode
         }
         // prerun: func_len > 2}
     }
@@ -90,7 +98,7 @@ impl TheSyConfig {
 
     pub fn from_path(path: String) -> TheSyConfig {
         let definitions = thesy_parser::parser::parse_file(path.clone());
-        TheSyConfig::new(definitions, 2, vec![], PathBuf::from(path).with_extension("res"))
+        TheSyConfig::new(definitions, 2, vec![], PathBuf::from(path).with_extension("res"), true)
     }
 
     /// Run thesy using current configuration returning (thesy instance, previous + new rewrites)
@@ -151,7 +159,7 @@ impl From<&TheSyConfig> for TheSy {
                            examples,
                            dict,
                            conf.ph_count,
-                           conjectures)
+                           if conf.proof_mode {conjectures} else {None})
     }
 }
 
