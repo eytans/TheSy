@@ -1,0 +1,8 @@
+(=> "(Prop_84.take (len z) z) => (z)" (take (len ?z) ?z) (?z))
+(=> "(Prop_84.take (len z) z) <= (z)" (?z) (take (len ?z) ?z))
+(=> "(Prop_84.take z (Prop_84.take z x2)) => (Prop_84.take z x2)" (take ?z (take ?z ?x2)) (take ?z ?x2))
+(=> "(Prop_84.take z (Prop_84.take z x2)) <= (Prop_84.take z x2)" (take ?z ?x2) (take ?z (take ?z ?x2)))
+(=> "(x (x z x2) x3) => (x z (x x2 x3))" (++ (++ ?z ?x2) ?x3) (++ ?z (++ ?x2 ?x3)))
+(=> "(x (x z x2) x3) <= (x z (x x2 x3))" (++ ?z (++ ?x2 ?x3)) (++ (++ ?z ?x2) ?x3))
+(=> "(Prop_84.take (S (len z)) z) => (z)" (take (S (len ?z)) ?z) (?z))
+(=> "(Prop_84.take (S (len z)) z) <= (z)" (?z) (take (S (len ?z)) ?z))
