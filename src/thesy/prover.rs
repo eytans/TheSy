@@ -24,7 +24,7 @@ pub struct Prover {
 impl Prover {
     const CASE_SPLIT_DEPTH: usize = 2;
     const CASE_SPLIT_RUN: usize = 4;
-    const RUN_DEPTH: usize = 8;
+    const RUN_DEPTH: usize = 12;
 
     pub fn new(datatype: DataType) -> Prover {
         let wfo_rules = Self::wfo_datatype(&datatype);
@@ -216,22 +216,26 @@ impl Prover {
             res = res && !runner.egraph.equivs(&ex1, &ex2).is_empty()
         }
         if res {
-            let fixed_precond = precond.map(|p| Self::pattern_from_exp(p, &self.ind_var, &("?".to_owned() + &self.ind_var.name)));
-            let fixed_ex1 = Self::pattern_from_exp(ex1, &self.ind_var, &("?".to_owned() + &self.ind_var.name));
-            let fixed_ex2 = Self::pattern_from_exp(ex2, &self.ind_var, &("?".to_owned() + &self.ind_var.name));
-            let precond_text = fixed_precond.as_ref().map_or("".to_owned(), |p| p.pretty_string() + " |> ");
-            let text1 = precond_text.to_owned() + &*fixed_ex1.pretty(80) + " => " + &*fixed_ex2.pretty(80);
-            let text2 = precond_text.to_owned() + &*fixed_ex2.pretty(80) + " => " + &*fixed_ex1.pretty(80);
-            let mut new_rules = vec![];
-            // println!("proved: {}", text1);
-            // TODO: dont do it so half assed
-            Prover::push_rw(fixed_precond.clone(), &fixed_ex1, &fixed_ex2, text1, &mut new_rules);
-            Prover::push_rw(fixed_precond, &fixed_ex2, &fixed_ex1, text2, &mut new_rules);
-            Some(new_rules)
+            Some(Self::rw_from_exp(precond, ex1, ex2, &self.ind_var))
         } else {
             info!("Failed to prove: {} = {}", ex1.pretty(500), ex2.pretty(500));
             None
         }
+    }
+
+    pub fn rw_from_exp(precond: Option<&RecExpr<SymbolLang>>, ex1: &RecExpr<SymbolLang>, ex2: &RecExpr<SymbolLang>, ind_var: &Function) -> Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, Rewrite<SymbolLang, ()>)> {
+        let fixed_precond = precond.map(|p| Self::pattern_from_exp(p, &ind_var, &("?".to_owned() + &ind_var.name)));
+        let fixed_ex1 = Self::pattern_from_exp(ex1, ind_var, &("?".to_owned() + &ind_var.name));
+        let fixed_ex2 = Self::pattern_from_exp(ex2, ind_var, &("?".to_owned() + &ind_var.name));
+        let precond_text = fixed_precond.as_ref().map_or("".to_owned(), |p| p.pretty_string() + " |> ");
+        let text1 = precond_text.to_owned() + &*fixed_ex1.pretty(80) + " => " + &*fixed_ex2.pretty(80);
+        let text2 = precond_text.to_owned() + &*fixed_ex2.pretty(80) + " => " + &*fixed_ex1.pretty(80);
+        let mut new_rules: Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, Rewrite<SymbolLang, ()>)> = vec![];
+        // println!("proved: {}", text1);
+        // TODO: dont do it so half assed
+        Prover::push_rw(fixed_precond.clone(), &fixed_ex1, &fixed_ex2, text1, &mut new_rules);
+        Prover::push_rw(fixed_precond, &fixed_ex2, &fixed_ex1, text2, &mut new_rules);
+        new_rules
     }
 
     pub fn prove_all(&self, rules: &[Rewrite<SymbolLang, ()>], ex1: &RecExpr<SymbolLang>, ex2: &RecExpr<SymbolLang>)
@@ -299,7 +303,7 @@ impl Prover {
         res
     }
 
-    fn pattern_from_exp(exp: &RecExpr<SymbolLang>, induction_ph: &Function, sub_ind: &String) -> Pattern<SymbolLang> {
+    pub fn pattern_from_exp(exp: &RecExpr<SymbolLang>, induction_ph: &Function, sub_ind: &String) -> Pattern<SymbolLang> {
         let mut res_exp: RecExpr<ENodeOrVar<SymbolLang>> = RecExpr::default();
         fn add_to_exp(res: &mut RecExpr<ENodeOrVar<SymbolLang>>, inp: &RecExpSlice<SymbolLang>, induction_ph: &String, sub_ind: &String) -> Id {
             let mut ids = inp.children().iter().map(|c| add_to_exp(res, c, induction_ph, sub_ind)).collect_vec();

@@ -276,7 +276,7 @@ pub mod parser {
                             } else {
                                 v
                             }).collect_vec();
-                    let mut res = vec![];
+                    let mut res: Vec<Rewrite<SymbolLang, ()>> = vec![];
                     for combs in  combinations(patterns_and_vars.iter().cloned().map(|x| x.into_iter())) {
                         let mut nodes = vec![];
                         let children = combs.into_iter().map(|exp| {
@@ -308,7 +308,7 @@ pub mod parser {
                             cond
                         }).collect_vec();
                         let applier_text = format!("({} {} {})", TheSy::SPLITTER, root_var.display_op(), get_splitters(datatype, root_var).join(" "));
-                        let applier = Pattern::from_str(&*applier_text).unwrap();
+                        let applier: Pattern<SymbolLang> = Pattern::from_str(&*applier_text).unwrap();
                         let rule_name = format!("{}_split_{}_{}", f.name, index, res.len());
                         println!("{} => {} if {}", searcher.pretty_string(), applier_text, cond_texts.join(" "));
                         let cond = AndCondition::new(conds);
