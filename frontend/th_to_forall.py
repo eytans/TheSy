@@ -32,6 +32,8 @@ def to_str_no_qm(sexp):
             return sexp.value()[1:]
         return sexp.value()
     if not isinstance(sexp, list):
+        if isinstance(sexp, int) and sexp > 0:
+            return {'+' + str(sexp)}
         return str(sexp)
     children = [to_str_no_qm(c) for c in sexp]
     return f"({' '.join(children)})"
