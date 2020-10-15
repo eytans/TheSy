@@ -94,7 +94,7 @@ def main():
         import csv
         with open('chart.csv', 'w') as csvout:
             w = csv.writer(csvout)
-            w.writerow(['Benchmark', 'Hipster found', 'Hipster < TheSy', 'TheSy found', 'TheSy < Hipster', 'TheSy Time', 'Hipster TheSy'])
+            w.writerow(['Benchmark', 'Hipster found', 'Hipster < TheSy', 'TheSy found', 'TheSy < Hipster', 'TheSy Time', 'Hipster Time'])
             for row in export_data:
                 w.writerow(row)
 
