@@ -16,7 +16,8 @@ def main():
 
     for (d, target_dir) in zip(BENCHMARK_DIRS, TARGET_DIRS):
         for fn in os.listdir(d):
-
+            if os.path.isdir(os.path.join(d, fn)):
+                continue
             print('--  %s  --' % fn)
             infile = open(os.path.join(d, fn))
 
