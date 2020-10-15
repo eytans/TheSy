@@ -12,7 +12,7 @@
 (prove (forall ((ts_ph_Nat_0 U)) (= (== (S Z) ts_ph_Nat_0) (== ts_ph_Nat_0 (S Z)))))
 (prove (forall ((ts_ph_Nat_0 U)) (= (== ts_ph_Nat_0 (S Z)) (== (S Z) ts_ph_Nat_0))))
 (prove (forall ((ts_ph_Nat_0 U)) (= (<=2 ts_ph_Nat_0 (S ts_ph_Nat_0)) true)))
-(prove (forall ((ts_ph_list2_0 U) (ts_ph_Nat_0 U)) (= (== (len ts_ph_list2_0) ts_ph_Nat_0) (== ts_ph_Nat_0 (len ts_ph_list2_0)))))
+(prove (forall ((ts_ph_Nat_0 U) (ts_ph_list2_0 U)) (= (== (len ts_ph_list2_0) ts_ph_Nat_0) (== ts_ph_Nat_0 (len ts_ph_list2_0)))))
 (prove (forall ((ts_ph_Nat_0 U) (ts_ph_list2_0 U)) (= (== ts_ph_Nat_0 (len ts_ph_list2_0)) (== (len ts_ph_list2_0) ts_ph_Nat_0))))
 (prove (forall ((ts_ph_Nat_0 U) (ts_ph_Nat_1 U)) (= (== ts_ph_Nat_0 ts_ph_Nat_1) (== ts_ph_Nat_1 ts_ph_Nat_0))))
 (prove (forall ((ts_ph_Nat_0 U) (ts_ph_Nat_1 U)) (= (== ts_ph_Nat_1 ts_ph_Nat_0) (== ts_ph_Nat_0 ts_ph_Nat_1))))

@@ -1,6 +1,3 @@
-(=> "(=> (x z y) (y)) => (z)" (?y) (?z))
-(=> "(=> (x z y) (y)) <= (z)" (?z) (?y))
+(=> "[(=> (x z y) (y)), (z)]" (=> (== ?z ?y) (= (?y) (?z))))
 (=> "(x y y)" (== ?y ?y) true)
-(=> "(x y y)" true (== ?y ?y))
 (=> "(not (x y (S (S y))))" (not (== ?y (S (S ?y)))) true)
-(=> "(not (x y (S (S y))))" true (not (== ?y (S (S ?y)))))

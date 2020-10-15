@@ -88,17 +88,23 @@ class TheoryDocument:
         S = SExpression
         eq = S(['='] + phi)
         if as_goal:
-            if precond: return None  #  no chance :(    # eq = S(['=>', precond, eq])
+            #if precond: return None  #  no chance :(
+            if precond: eq = S(['=>', precond, eq])
             qv = S([S([v, 'U']) for v in sorted(fv)])  # sorting just to keep order stable
             return S(['prove', S(['forall', qv, eq])])
         else:
+            if precond: eq = S(['=>', precond, eq])
             return eq
 
     def export_rules(self, lemma):
         eq = self.export_lemma(lemma, as_goal=False)
         S = SExpression
-        yield S(['=>', f'"{" => ".join(str(x) for x in lemma)}"'] + eq.elements[1:])
-        yield S(['=>', f'"{" <= ".join(str(x) for x in lemma)}"'] + list(reversed(eq.elements[1:])))
+        if eq.elements[0] == '=':
+            for (d, (lhs, rhs)) in [('=>', eq.elements[1:]), ('<=', list(reversed(eq.elements[1:])))]:
+                if self.find_qvars(rhs) <= self.find_qvars(lhs):
+                    yield S(['=>', f'"{f" {d} ".join(str(x) for x in lemma)}"', lhs, rhs])
+        else:
+            yield S(['=>', f'"{lemma}"', eq])
 
     def find_vars(self, sexpr):
         fv = set()
@@ -109,6 +115,14 @@ class TheoryDocument:
             if all(name not in s for s in [self.ctors, self.funcs, self.BUILTINS]):
                 fv.add(sexpr)
         return fv
+
+    def find_qvars(self, sexpr):
+        qv = set()
+        if isinstance(sexpr, SExpression):
+            for e in sexpr.elements: qv |= self.find_qvars(e)
+        elif isinstance(sexpr, str) and sexpr.startswith('?'):
+            qv.add(sexpr)
+        return qv
 
     def subst(self, sexpr, subst):
         if isinstance(sexpr, str):

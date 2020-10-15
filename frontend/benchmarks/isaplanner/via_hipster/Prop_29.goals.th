@@ -1,3 +1,5 @@
+(prove (forall ((y U) (z U)) (=> (== z y) (= (y) (z)))))
+(prove (forall ((y U) (z U)) (=> (elem y z) (= (ins1 y z) (z)))))
 (prove (forall ((y U)) (= (== y y) true)))
 (prove (forall ((y U)) (= (not (== y (S y))) true)))
 (prove (forall ((y U) (z U)) (= (ins1 y (ins1 y z)) (ins1 y z))))
