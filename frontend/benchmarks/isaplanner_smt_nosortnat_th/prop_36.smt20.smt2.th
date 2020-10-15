@@ -1,0 +1,7 @@
+(datatype list () ((nil list) (cons sk list list)))
+(declare-fun takeWhile (fun13 list) list)
+(declare-fun apply13 (fun13 sk) Bool)
+(=> rule0 (takeWhile ?x nil) nil)
+(=> rule1 (=> (apply13 x z) (= (takeWhile ?x (cons ?z ?xs)) (cons ?z (takeWhile ?x ?xs)))))
+(=> rule2 (=> (apply13 x z) (= (takeWhile ?x (cons ?z ?xs)) (cons ?z (takeWhile ?x ?xs)))))
+(=> rule3 (=> (not (apply13 x z)) (= (takeWhile ?x (cons ?z ?xs)) nil)))
