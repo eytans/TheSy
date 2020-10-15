@@ -1,0 +1,6 @@
+(=> "(drop ?ts_ph_Nat_0 nil2) => nil2" (drop ?ts_ph_Nat_0 nil2) nil2)
+(=> "(zip ?ts_ph_list2_0 nil2) => nil" (zip ?ts_ph_list2_0 nil2) nil)
+(=> "(drop (S ?ts_ph_Nat_1) ?ts_ph_list2_0) => (drop (S Z) (drop ?ts_ph_Nat_1 ?ts_ph_list2_0))" (drop (S ?ts_ph_Nat_1) ?ts_ph_list2_0) (drop (S Z) (drop ?ts_ph_Nat_1 ?ts_ph_list2_0)))
+(=> "(drop (S Z) (drop ?ts_ph_Nat_1 ?ts_ph_list2_0)) => (drop (S ?ts_ph_Nat_1) ?ts_ph_list2_0)" (drop (S Z) (drop ?ts_ph_Nat_1 ?ts_ph_list2_0)) (drop (S ?ts_ph_Nat_1) ?ts_ph_list2_0))
+(=> "(drop ?ts_ph_Nat_1 (drop ?ts_ph_Nat_0 ?ts_ph_list2_1)) => (drop ?ts_ph_Nat_0 (drop ?ts_ph_Nat_1 ?ts_ph_list2_1))" (drop ?ts_ph_Nat_1 (drop ?ts_ph_Nat_0 ?ts_ph_list2_1)) (drop ?ts_ph_Nat_0 (drop ?ts_ph_Nat_1 ?ts_ph_list2_1)))
+(=> "(drop ?ts_ph_Nat_0 (drop ?ts_ph_Nat_1 ?ts_ph_list2_1)) => (drop ?ts_ph_Nat_1 (drop ?ts_ph_Nat_0 ?ts_ph_list2_1))" (drop ?ts_ph_Nat_0 (drop ?ts_ph_Nat_1 ?ts_ph_list2_1)) (drop ?ts_ph_Nat_1 (drop ?ts_ph_Nat_0 ?ts_ph_list2_1)))
