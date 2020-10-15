@@ -45,7 +45,7 @@ if __name__ == '__main__':
     parser.add_argument("inputdir", nargs='+')
     parser.add_argument('-p', '--prove', action='store_true', default=False)
     args = parser.parse_args()
-    CMD.append(str(args.prove))
+    CMD.append(str(args.prove).lower())
     p = subprocess.run(BUILD_CMD, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
     if p.returncode != 0:
         print(p.stderr.decode())
