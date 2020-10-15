@@ -43,7 +43,7 @@ pub struct TheSy {
     /// Equality rewrite
     /// Or and And rewrites
     /// TODO: add support for partial application
-    system_rws: Vec<Rewrite<SymbolLang, ()>>,
+    pub system_rws: Vec<Rewrite<SymbolLang, ()>>,
     /// Limits to use in equiv reduc
     node_limit: usize,
     /// Limits to use in equiv reduc
