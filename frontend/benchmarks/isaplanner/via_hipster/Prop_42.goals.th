@@ -1,0 +1,1 @@
+(prove (forall ((y U) (z U)) (= (take y (take y z)) (take y z))))

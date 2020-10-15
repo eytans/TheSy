@@ -1,0 +1,7 @@
+(prove (forall ((x U) (y U)) (= (max y x) (max x y))))
+(prove (forall ((x U)) (= (max x x) (x))))
+(prove (forall ((y U)) (= (height (mirror y)) (height y))))
+(prove (forall ((y U)) (= (mirror (mirror y)) (y))))
+(prove (forall ((x U)) (= (max x (S x)) (S x))))
+(prove (forall ((x U) (y U)) (= (max x (max x y)) (max x y))))
+(prove (forall ((x U)) (= (max x (S (S x))) (S (S x)))))

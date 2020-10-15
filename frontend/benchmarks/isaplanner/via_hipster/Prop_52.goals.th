@@ -1,0 +1,6 @@
+(prove (forall ((x2 U) (z U)) (= (=> (x x2 z) (z)) (x2))))
+(prove (forall ((z U)) (= (x z z) true)))
+(prove (forall ((z U)) (= (not (x z (S z))) true)))
+(prove (forall ((x2 U) (x3 U) (x4 U)) (= (== (== x2 x3) x4) (== x2 (== x3 x4)))))
+(prove (forall ((x2 U) (x3 U)) (= (rev (== (rev x3) x2)) (== (rev x2) x3))))
+(prove (forall ((z U)) (= (not (x z (S (S z)))) true)))
