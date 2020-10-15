@@ -1,6 +1,0 @@
-(=> "(x (x z x2) x3) => (x z (x x2 x3))" (++ (++ ?z ?x2) ?x3) (++ ?z (++ ?x2 ?x3)))
-(=> "(x (x z x2) x3) <= (x z (x x2 x3))" (++ ?z (++ ?x2 ?x3)) (++ (++ ?z ?x2) ?x3))
-(=> "(Prop_85.rev (x (Prop_85.rev x2) z)) => (x (Prop_85.rev z) x2)" (rev (++ (rev ?x2) ?z)) (++ (rev ?z) ?x2))
-(=> "(Prop_85.rev (x (Prop_85.rev x2) z)) <= (x (Prop_85.rev z) x2)" (++ (rev ?z) ?x2) (rev (++ (rev ?x2) ?z)))
-(=> "(Prop_85.rev (Prop_85.rev z)) => (z)" (rev (rev ?z)) (?z))
-(=> "(Prop_85.rev (Prop_85.rev z)) <= (z)" (?z) (rev (rev ?z)))

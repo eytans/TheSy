@@ -1,2 +1,0 @@
-(=> "(Prop_42.take y (Prop_42.take y z)) => (Prop_42.take y z)" (take ?y (take ?y ?z)) (take ?y ?z))
-(=> "(Prop_42.take y (Prop_42.take y z)) <= (Prop_42.take y z)" (take ?y ?z) (take ?y (take ?y ?z)))

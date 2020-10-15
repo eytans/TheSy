@@ -1,8 +1,0 @@
-(=> "(Prop_32.min y x) => (Prop_32.min x y)" (min ?y ?x) (min ?x ?y))
-(=> "(Prop_32.min y x) <= (Prop_32.min x y)" (min ?x ?y) (min ?y ?x))
-(=> "(Prop_32.min x x) => (x)" (min ?x ?x) (?x))
-(=> "(Prop_32.min x x) <= (x)" (?x) (min ?x ?x))
-(=> "(Prop_32.min x (S x)) => (x)" (min ?x (S ?x)) (?x))
-(=> "(Prop_32.min x (S x)) <= (x)" (?x) (min ?x (S ?x)))
-(=> "(Prop_32.min (Prop_32.min x y) z) => (Prop_32.min x (Prop_32.min y z))" (min (min ?x ?y) ?z) (min ?x (min ?y ?z)))
-(=> "(Prop_32.min (Prop_32.min x y) z) <= (Prop_32.min x (Prop_32.min y z))" (min ?x (min ?y ?z)) (min (min ?x ?y) ?z))

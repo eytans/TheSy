@@ -1,8 +1,0 @@
-(=> "(Prop_31.min y x) => (Prop_31.min x y)" (min ?y ?x) (min ?x ?y))
-(=> "(Prop_31.min y x) <= (Prop_31.min x y)" (min ?x ?y) (min ?y ?x))
-(=> "(Prop_31.min x x) => (x)" (min ?x ?x) (?x))
-(=> "(Prop_31.min x x) <= (x)" (?x) (min ?x ?x))
-(=> "(Prop_31.min x (S x)) => (x)" (min ?x (S ?x)) (?x))
-(=> "(Prop_31.min x (S x)) <= (x)" (?x) (min ?x (S ?x)))
-(=> "(Prop_31.min (Prop_31.min x y) z) => (Prop_31.min x (Prop_31.min y z))" (min (min ?x ?y) ?z) (min ?x (min ?y ?z)))
-(=> "(Prop_31.min (Prop_31.min x y) z) <= (Prop_31.min x (Prop_31.min y z))" (min ?x (min ?y ?z)) (min (min ?x ?y) ?z))

@@ -1,2 +1,6 @@
+(prove (forall ((y U)) (=> (sorted y) (= (sort y) (y)))))
+(prove (forall ((x2 U) (y U) (z U)) (=> (&& x2 y) (= (<=2 z z) (x2)))))
+(prove (forall ((x2 U) (y U) (z U)) (=> (&& x2 y) (= (<=2 z (S z)) (x2)))))
 (prove (forall ((y U)) (= (not (<=2 (S y) y)) true)))
+(prove (forall ((y U) (z U)) (=> (<=2 z y) (= (not (<=2 (S y) z)) true))))
 (prove (forall ((y U)) (= (not (<=2 (S (S y)) y)) true)))

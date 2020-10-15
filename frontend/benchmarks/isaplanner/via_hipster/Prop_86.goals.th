@@ -1,3 +1,8 @@
+(prove (forall ((y U) (z U)) (=> (== z y) (= (y) (z)))))
 (prove (forall ((y U)) (= (not (<2 y y)) true)))
+(prove (forall ((y U) (z U)) (=> (<2 z y) (= (not (<2 y z)) true))))
 (prove (forall ((y U)) (= (== y y) true)))
 (prove (forall ((y U)) (= (<2 y (S y)) true)))
+(prove (forall ((y U) (z U)) (=> (<2 z y) (= (not (<2 (S y) z)) true))))
+(prove (forall ((y U) (z U)) (=> (<2 y z) (= (<2 y (S z)) true))))
+(prove (forall ((y U) (z U)) (=> (<2 z y) (= (not (<2 y (S z))) true))))

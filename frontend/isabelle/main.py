@@ -88,8 +88,8 @@ def get_func_aliases(name, doc, infile, stats):
     common = set(doc.funcs) & set(cognate_funcs)
     th, smt = [[f for f in l if f not in common]
                 for l in [doc.funcs, cognate_funcs]]
-    #if len(th) != len(smt):
-    stats['mismatch'].append((name, th, smt))
+    if len(th) != len(smt):
+        stats['mismatch'].append((name, th, smt))
 
     return dict(zip(th, smt))
 
@@ -97,7 +97,13 @@ def get_func_aliases(name, doc, infile, stats):
 UGLY_MANUAL_ALIASES = {
     'Prop_02.thy': {'x': '==', 'y': '++', 'twoSpec': '+2'},
     'Prop_03.thy': {'x': '==', 'y': '++', 'twoSpec': '<=2'},
+    'Prop_55.thy': {'x': '++', 'twoSpec': '-2'},
+    'Prop_65.thy': {'twoSpec': '<2', 'twoSpectwoSpec': '+2'},
+    'Prop_69.thy': {'twoSpec': '<=2', 'twoSpectwoSpec': '+2'},
+    'Prop_54.thy': {'twoSpec': '-2', 'twoSpectwoSpec': '+2'},
+    'Prop_72.thy': {'x': '++', 'twoSpec': '-2'},
     'Prop_75.thy': {'x': '==', 'twoSpec': '+2'},
+    'Prop_76.thy': {'y': '++', 'x': '=='},
     'Prop_78.thy': {'x': '&&', 'twoSpec': '<=2'}
 }
 
