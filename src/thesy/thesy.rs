@@ -22,6 +22,7 @@ use crate::eggstentions::reconstruct::reconstruct;
 use crate::thesy::statistics::Stats;
 use crate::eggstentions::conditions::{NonPatternCondition, AndCondition, PatternCondition};
 use std::process::exit;
+use std::cmp::Ordering;
 
 /// Theory Synthesizer - Explores a given theory finding and proving new lemmas.
 pub struct TheSy {
@@ -344,7 +345,7 @@ impl TheSy {
     /// are equal for examples but not for ind_var.
     /// Each such class (e.g. fine class) is represented using a single minimal term.
     /// return the conjectures ordered by representative size.
-    pub fn get_conjectures(&mut self) -> Vec<(RepOrder, RecExpr<SymbolLang>, RecExpr<SymbolLang>, DataType)> {
+    pub fn get_conjectures(&mut self) -> Vec<((RepOrder, RepOrder), RecExpr<SymbolLang>, RecExpr<SymbolLang>, DataType)> {
         // TODO: make this an iterator to save alot of time during recreating conjectures
         let mut start = None;
         if cfg!(feature = "stats") {
@@ -367,8 +368,8 @@ impl TheSy {
             for set in m.values() {
                 if set.len() < 2 { continue; }
                 for couple in choose(&set.iter().collect_vec()[..], 2) {
-                    let max = if reps[couple[0]].0 >= reps[couple[1]].0 { reps[couple[0]].0.clone() } else { reps[couple[1]].0.clone() };
-                    res.push((max, reps[couple[0]].1.clone(), reps[couple[1]].1.clone(), d.clone()));
+                    let max_cop = if reps[couple[0]].0 > reps[couple[1]].0 { (reps[couple[0]].0.clone(), reps[couple[1]].0.clone()) } else { (reps[couple[1]].0.clone(), reps[couple[0]].0.clone()) };
+                    res.push((max_cop, reps[couple[0]].1.clone(), reps[couple[1]].1.clone(), d.clone()));
                 }
             }
         }
@@ -454,6 +455,7 @@ impl TheSy {
             //     println!("{}", reconstruct(&self.egraph, m.eclass, 8).map(|exp| exp.pretty(500)).unwrap_or("".to_string()));
             // }
 
+            let conjs_before_cases = self.get_conjectures();
             // TODO: case split + check all conjectures should be a function.
             // TODO: After finishing checking all conjectures in final depth (if a lemma was found) try case split again then finish.
             // TODO: can be a single loop with max depth
@@ -463,6 +465,38 @@ impl TheSy {
             }
 
             let mut conjectures = self.get_conjectures();
+            for (o, ex1, ex2, d) in conjs_before_cases.into_iter().rev() {
+                if conjectures.iter().any(|(_, other_ex1, other_ex2, _)|
+                    other_ex1 == &ex1 && &ex2 == other_ex2) {
+                    continue
+                }
+                if Self::check_equality(&rules[..], &None, &ex1, &ex2) {
+                    self.stats_update_filtered_conjecture(&ex1, &ex2);
+                    continue;
+                }
+                // Might be a false conjecture that just doesnt get picked anymore in reconstruct.
+                let mut new_rules = self.datatypes[&d].prove_all(rules, &ex1, &ex2);
+                if new_rules.is_none() {
+                    continue;
+                } else {
+                    let temp = new_rules;
+                    new_rules = self.datatypes[&d].generalize_prove(&rules, &ex1, &ex2);
+                    if new_rules.is_none() {
+                        new_rules = temp;
+                    }
+                }
+                self.stats_update_proved(&ex1, &ex2, start);
+                found_rules.extend_from_slice(new_rules.as_ref().unwrap());
+                for r in new_rules.unwrap() {
+                    warn!("proved: {}", r.3.long_name());
+                    // inserting like this so new rule will apply before running into node limit.
+                    rules.insert(new_rules_index, r.3);
+                }
+                if self.prove_goals(rules, &mut found_rules, new_rules_index, start_total) {
+                    return found_rules;
+                }
+            }
+
             'outer: while !conjectures.is_empty() {
                 let (_, ex1, ex2, d) = conjectures.pop().unwrap();
                 let start = Self::stats_get_time();
