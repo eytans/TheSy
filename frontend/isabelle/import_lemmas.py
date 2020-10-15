@@ -101,9 +101,8 @@ class TheoryDocument:
         S = SExpression
         if eq.elements[0] == '=':
             for (d, (lhs, rhs)) in [('=>', eq.elements[1:]), ('<=', list(reversed(eq.elements[1:])))]:
-                if self.find_qvars(rhs) < self.find_qvars(lhs):
+                if self.find_qvars(rhs) <= self.find_qvars(lhs):
                     yield S(['=>', f'"{f" {d} ".join(str(x) for x in lemma)}"', lhs, rhs])
-            #yield S(['=>', f'"{" <= ".join(str(x) for x in lemma)}"'] + )
         else:
             yield S(['=>', f'"{lemma}"', eq])
 

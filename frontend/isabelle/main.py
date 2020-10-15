@@ -24,7 +24,7 @@ def main():
     stats = {'theories': 0, 'lemmas': 0, 'mismatch': []}
 
     for d in BENCHMARK_DIRS:
-        for fn in os.listdir(d):
+        for fn in ['Prop_18.thy']: #os.listdir(d):
             if fn.endswith('.thy'):
                 print('--  %s  --' % fn)
                 infile = open(os.path.join(d, fn))
@@ -97,6 +97,8 @@ def get_func_aliases(name, doc, infile, stats):
 UGLY_MANUAL_ALIASES = {
     'Prop_02.thy': {'x': '==', 'y': '++', 'twoSpec': '+2'},
     'Prop_03.thy': {'x': '==', 'y': '++', 'twoSpec': '<=2'},
+    'Prop_18.thy': {'twoSpectwoSpec': '+2', 'twoSpec': '<=2'},
+    'Prop_21.thy': {'twoSpectwoSpec': '+2', 'twoSpec': '<=2'},
     'Prop_55.thy': {'x': '++', 'twoSpec': '-2'},
     'Prop_65.thy': {'twoSpec': '<2', 'twoSpectwoSpec': '+2'},
     'Prop_69.thy': {'twoSpec': '<=2', 'twoSpectwoSpec': '+2'},

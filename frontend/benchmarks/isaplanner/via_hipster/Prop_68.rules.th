@@ -6,3 +6,7 @@
 (=> "(not (twoSpec (S y) y))" (not (<=2 (S ?y) ?y)) true)
 (=> "[(=> (twoSpec z y) (not (twoSpec (S y) z)))]" (=> (<=2 ?z ?y) (= (not (<=2 (S ?y) ?z)) true)))
 (=> "[(=> (twoSpec y z) (twoSpec y (S z)))]" (=> (<=2 ?y ?z) (= (<=2 ?y (S ?z)) true)))
+(=> "(delete z (delete y x2)) => (delete y (delete z x2))" (delete ?z (delete ?y ?x2)) (delete ?y (delete ?z ?x2)))
+(=> "(delete z (delete y x2)) <= (delete y (delete z x2))" (delete ?y (delete ?z ?x2)) (delete ?z (delete ?y ?x2)))
+(=> "(delete y (delete y z)) => (delete y z)" (delete ?y (delete ?y ?z)) (delete ?y ?z))
+(=> "(delete y (delete y z)) <= (delete y z)" (delete ?y ?z) (delete ?y (delete ?y ?z)))

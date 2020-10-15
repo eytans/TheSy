@@ -3,3 +3,5 @@
 (=> "(twoSpec (S x) x) => (S Z)" (-2 (S ?x) ?x) (S Z))
 (=> "(twoSpec x (S (S x))) => (Z)" (-2 ?x (S (S ?x))) (Z))
 (=> "(twoSpec (S (S x)) x) => (S (S Z))" (-2 (S (S ?x)) ?x) (S (S Z)))
+(=> "(twoSpec (len (Prop_67.butlast y)) z) => (twoSpec (len y) (S z))" (-2 (len (butlast ?y)) ?z) (-2 (len ?y) (S ?z)))
+(=> "(twoSpec (len (Prop_67.butlast y)) z) <= (twoSpec (len y) (S z))" (-2 (len ?y) (S ?z)) (-2 (len (butlast ?y)) ?z))

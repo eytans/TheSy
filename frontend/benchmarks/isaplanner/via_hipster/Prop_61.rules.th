@@ -1,0 +1,4 @@
+(=> "(lastOfTwo y (x y z)) => (lastOfTwo y z)" (lastOfTwo ?y (++ ?y ?z)) (lastOfTwo ?y ?z))
+(=> "(lastOfTwo y (x y z)) <= (lastOfTwo y z)" (lastOfTwo ?y ?z) (lastOfTwo ?y (++ ?y ?z)))
+(=> "(x (x z x2) x3) => (x z (x x2 x3))" (++ (++ ?z ?x2) ?x3) (++ ?z (++ ?x2 ?x3)))
+(=> "(x (x z x2) x3) <= (x z (x x2 x3))" (++ ?z (++ ?x2 ?x3)) (++ (++ ?z ?x2) ?x3))
