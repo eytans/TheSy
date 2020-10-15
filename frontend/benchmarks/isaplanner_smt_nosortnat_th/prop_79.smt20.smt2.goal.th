@@ -1,0 +1,4 @@
+(prove (forall ((ts_ph_Nat_0 U)) (= (-2 ts_ph_Nat_0 Z) ts_ph_Nat_0)))
+(prove (forall ((ts_ph_Nat_0 U)) (= (-2 ts_ph_Nat_0 ts_ph_Nat_0) Z)))
+(prove (forall ((ts_ph_Nat_0 U)) (= (-2 (S ts_ph_Nat_0) ts_ph_Nat_0) (S Z))))
+(prove (forall ((ts_ph_Nat_0 U)) (= (-2 ts_ph_Nat_0 (S ts_ph_Nat_0)) Z)))

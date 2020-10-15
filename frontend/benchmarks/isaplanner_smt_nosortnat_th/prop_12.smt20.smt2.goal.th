@@ -1,0 +1,7 @@
+(prove (forall ((ts_ph_Nat_0 U)) (= (drop ts_ph_Nat_0 ()) ())))
+(prove (forall ((ts_ph_Nat_0 U) (ts_ph_list_1 U) (ts_ph_fun1_1 U)) (= (drop ts_ph_Nat_0 (map2 ts_ph_fun1_1 ts_ph_list_1)) (map2 ts_ph_fun1_1 (drop ts_ph_Nat_0 ts_ph_list_1)))))
+(prove (forall ((ts_ph_Nat_0 U) (ts_ph_list_1 U) (ts_ph_fun1_1 U)) (= (map2 ts_ph_fun1_1 (drop ts_ph_Nat_0 ts_ph_list_1)) (drop ts_ph_Nat_0 (map2 ts_ph_fun1_1 ts_ph_list_1)))))
+(prove (forall ((ts_ph_Nat_0 U) (ts_ph_list_1 U)) (= (drop (S ts_ph_Nat_0) ts_ph_list_1) (drop (S Z) (drop ts_ph_Nat_0 ts_ph_list_1)))))
+(prove (forall ((ts_ph_Nat_0 U) (ts_ph_list_1 U)) (= (drop (S Z) (drop ts_ph_Nat_0 ts_ph_list_1)) (drop (S ts_ph_Nat_0) ts_ph_list_1))))
+(prove (forall ((ts_ph_Nat_0 U) (ts_ph_Nat_1 U) (ts_ph_list_1 U)) (= (drop ts_ph_Nat_1 (drop ts_ph_Nat_0 ts_ph_list_1)) (drop ts_ph_Nat_0 (drop ts_ph_Nat_1 ts_ph_list_1)))))
+(prove (forall ((ts_ph_Nat_0 U) (ts_ph_Nat_1 U) (ts_ph_list_1 U)) (= (drop ts_ph_Nat_0 (drop ts_ph_Nat_1 ts_ph_list_1)) (drop ts_ph_Nat_1 (drop ts_ph_Nat_0 ts_ph_list_1)))))

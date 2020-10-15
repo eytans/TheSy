@@ -1,0 +1,1 @@
+(prove (forall ((ts_ph_list2_0 U)) (= (zip ts_ph_list2_0 nil2) ())))

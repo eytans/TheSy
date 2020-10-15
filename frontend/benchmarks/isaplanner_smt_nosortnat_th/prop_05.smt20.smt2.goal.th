@@ -1,0 +1,8 @@
+(prove (forall ((ts_ph_Nat_0 U)) (= (== ts_ph_Nat_0 Z) (== Z ts_ph_Nat_0))))
+(prove (forall ((ts_ph_Nat_0 U)) (= (== Z ts_ph_Nat_0) (== ts_ph_Nat_0 Z))))
+(prove (forall ((ts_ph_Nat_0 U)) (= (== ts_ph_Nat_0 ts_ph_Nat_0) true)))
+(prove (forall ((ts_ph_Nat_0 U)) (= (== ts_ph_Nat_0 (S Z)) (== (S Z) ts_ph_Nat_0))))
+(prove (forall ((ts_ph_Nat_0 U)) (= (== (S Z) ts_ph_Nat_0) (== ts_ph_Nat_0 (S Z)))))
+(prove (forall ((ts_ph_Nat_0 U)) (= (== (S ts_ph_Nat_0) ts_ph_Nat_0) (== ts_ph_Nat_0 (S ts_ph_Nat_0)))))
+(prove (forall ((ts_ph_Nat_0 U)) (= (== ts_ph_Nat_0 (S ts_ph_Nat_0)) (== (S ts_ph_Nat_0) ts_ph_Nat_0))))
+(prove (forall ((ts_ph_Nat_0 U)) (= (== (S ts_ph_Nat_0) ts_ph_Nat_0) false)))
