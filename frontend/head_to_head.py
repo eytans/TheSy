@@ -10,7 +10,12 @@ def main():
     HIPSTER_DIR = 'frontend/benchmarks/isaplanner/via_hipster'
     OUTPUT_HIPSTER = 'Prop_%s.goals.th'
 
-    for bm in ['02']:
+    import argparse
+    a = argparse.ArgumentParser()
+    a.add_argument('benchmarks', nargs='+')
+    a = a.parse_args()
+
+    for bm in a.benchmarks:
         preamble_fn = os.path.join(THESY_DIR, INPUT_THEORY % bm)
         thesy_rules_fn = os.path.join(THESY_DIR, OUTPUT_THESY % bm)
         hipster_goals_fn = os.path.join(HIPSTER_DIR, OUTPUT_HIPSTER % bm)
@@ -20,7 +25,9 @@ def main():
             for fn in [preamble_fn, thesy_rules_fn, hipster_goals_fn]:
                 print(open(fn).read(), file=outf)
         
-        os.system('./target/release/Thesy -c ' + tmp_fn)
+        os.system('./target/release/TheSy -c ' + tmp_fn)
+
+        print(open(hipster_goals_fn).read())
 
 
 main()
