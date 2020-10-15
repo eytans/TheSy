@@ -12,7 +12,7 @@ def find_in_path(filename: str, path: [str]):
 
 def main():
     BENCHMARK_DIRS = ['frontend/benchmarks/isaplanner/via_hipster']
-    COGNATE_SMT_DIRS = ['frontend/benchmarks/isaplanner/smt2']
+    COGNATE_SMT_DIRS = ['frontend/benchmarks/isaplanner_smt_nosortnat']
     TARGET_DIRS = [] #'frontend/benchmarks/isaplanner']
 
     import os
@@ -24,7 +24,7 @@ def main():
     stats = {'theories': 0, 'lemmas': 0, 'mismatch': []}
 
     for d in BENCHMARK_DIRS:
-        for fn in ['Prop_02.thy']: # os.listdir(d):
+        for fn in os.listdir(d):
             if fn.endswith('.thy'):
                 print('--  %s  --' % fn)
                 infile = open(os.path.join(d, fn))
@@ -52,15 +52,16 @@ def main():
                     with open(os.path.join(d, fn.replace('.thy', '.goals.th')), 'w') as outf:
                         for t, lem in doc.lemmas:
                             goal = doc.export_lemma(lem, as_goal=True)
-                            print(f" - {goal}")
-                            print(goal, file=outf)
+                            if goal:
+                                print(f" - {goal}")
+                                print(goal, file=outf)
                             #print(f" - {t} {lem}")
                             #print(f"   {doc.find_vars(lem[0])} {doc.export_lemma(lem)}")
 
                     with open(os.path.join(d, fn.replace('.thy', '.rules.th')), 'w') as outf:
                         for t, lem in doc.lemmas:
                             for rule in doc.export_rules(lem):
-                                print(f" + {rule}")
+                                #print(f" + {rule}")
                                 print(rule, file=outf)
 
                     if doc.lemmas:
@@ -75,7 +76,7 @@ def main():
 
 def grab_smt_declares(infile):
     import re
-    decl = re.compile(r'\(declare-fun (.*?) ')
+    decl = re.compile(r'\(declare-fun \|?(.*?)\|? ')
     for line in infile:
         mo = decl.match(line)
         if mo: yield mo.group(1)
@@ -87,14 +88,17 @@ def get_func_aliases(name, doc, infile, stats):
     common = set(doc.funcs) & set(cognate_funcs)
     th, smt = [[f for f in l if f not in common]
                 for l in [doc.funcs, cognate_funcs]]
-    if len(th) != len(smt):
-        stats['mismatch'].append((name, th, smt))
+    #if len(th) != len(smt):
+    stats['mismatch'].append((name, th, smt))
 
     return dict(zip(th, smt))
 
 
 UGLY_MANUAL_ALIASES = {
-    'Prop_02.thy': {'x': '==', 'y': '++', 'twoSpec': '+2'}
+    'Prop_02.thy': {'x': '==', 'y': '++', 'twoSpec': '+2'},
+    'Prop_03.thy': {'x': '==', 'y': '++', 'twoSpec': '<=2'},
+    'Prop_75.thy': {'x': '==', 'twoSpec': '+2'},
+    'Prop_78.thy': {'x': '&&', 'twoSpec': '<=2'}
 }
 
 

@@ -1,3 +1,2 @@
-(prove (forall ((y U) (z U)) (= (=> (== z y) (y)) (z))))
 (prove (forall ((y U)) (= (== y y) true)))
 (prove (forall ((y U)) (= (not (== y (S (S y)))) true)))
