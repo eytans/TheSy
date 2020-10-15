@@ -1,0 +1,5 @@
+(prove (forall ((x U)) (= (+2 x Z) (x))))
+(prove (forall ((x U) (y U)) (= (+2 x (S y)) (S (+2 x y)))))
+(prove (forall ((x2 U) (y U) (z U)) (= (drop (+2 y z) x2) (drop y (drop z x2)))))
+(prove (forall ((x U) (y U) (z U)) (= (+2 (+2 x y) z) (+2 x (+2 y z)))))
+(prove (forall ((x U) (y U)) (= (+2 y x) (+2 x y))))

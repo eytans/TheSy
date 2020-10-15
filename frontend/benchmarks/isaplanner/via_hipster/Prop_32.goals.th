@@ -1,0 +1,4 @@
+(prove (forall ((x U) (y U)) (= (min y x) (min x y))))
+(prove (forall ((x U)) (= (min x x) (x))))
+(prove (forall ((x U)) (= (min x (S x)) (x))))
+(prove (forall ((x U) (y U) (z U)) (= (min (min x y) z) (min x (min y z)))))

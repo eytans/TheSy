@@ -1,0 +1,2 @@
+(prove (forall ((x2 U) (z U)) (= (take z (take z x2)) (take z x2))))
+(prove (forall ((x2 U) (x3 U) (z U)) (= (++ (++ z x2) x3) (++ z (++ x2 x3)))))

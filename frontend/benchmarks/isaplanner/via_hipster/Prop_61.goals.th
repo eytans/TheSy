@@ -1,0 +1,2 @@
+(prove (forall ((y U) (z U)) (= (lastOfTwo y (++ y z)) (lastOfTwo y z))))
+(prove (forall ((x2 U) (x3 U) (z U)) (= (++ (++ z x2) x3) (++ z (++ x2 x3)))))
