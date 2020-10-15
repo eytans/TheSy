@@ -38,7 +38,7 @@ def to_str_no_qm(sexp):
 for f in files:
     f = os.path.join(args.inputdir, f)
     with open(f) as fp:
-        rules = [sexpdata.loads(l) for l in fp.readlines()]
+        rules = [sexpdata.loads(l, nil='nilSpec') for l in fp.readlines()]
     res = [f"(prove (forall ({' '.join([f'({s[1:]} U)' for s in collect_symbols(r[2]).union(collect_symbols(r[1])) if s.startswith('?')])}) (= {to_str_no_qm(r[2])} {to_str_no_qm(r[3])})))\n" for r in rules]
     with open(f[:-7] + '.goal.th', 'w') as fp:
         fp.writelines(res)
