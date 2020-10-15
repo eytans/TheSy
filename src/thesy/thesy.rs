@@ -23,6 +23,7 @@ use crate::thesy::statistics::Stats;
 use crate::eggstentions::conditions::{NonPatternCondition, AndCondition, PatternCondition};
 use std::process::exit;
 use std::cmp::Ordering;
+use crate::eggstentions::pretty_string::PrettyString;
 
 /// Theory Synthesizer - Explores a given theory finding and proving new lemmas.
 pub struct TheSy {
@@ -112,10 +113,9 @@ impl TheSy {
             rewrite!("is_cons_true"; "(is-cons ?x)" => "true" if PatternCondition::new("(cons ?y)".parse().unwrap(), Var::from_str("?x").unwrap())),
             rewrite!("is_cons_false"; "(is-cons ?x)" => "false" if PatternCondition::new("nil".parse().unwrap(), Var::from_str("?x").unwrap())),
             rewrite!("is_cons_conclusion"; cons_conc_searcher => cons_conclusion),
-            // rewrite!("is_cons_false"; "(is-cons ?x)" => "false" if ConditionEqual::parse("nil", "?x")),
-            // rewrite!("is_succ_true"; "(is-succ ?x)" => "true" if ConditionEqual::parse("(succ ?y)", "?x")),
-            // rewrite!("is_succ_false"; "(is-succ ?x)" => "false" if ConditionEqual::parse("zero", "?x")),
-            // rewrite!("is_ESC_true"; "(is-ESC ?x)" => "true" if ConditionEqual::parse("ESC", "?x")),
+            rewrite!("is_succ_true"; "(is-succ ?x)" => "true" if PatternCondition::new("(succ ?y)".parse().unwrap(), "?x".parse().unwrap())),
+            rewrite!("is_succ_false"; "(is-succ ?x)" => "false" if PatternCondition::new("zero".parse().unwrap(), "?x".parse().unwrap())),
+            rewrite!("is_ESC_true"; "(is-ESC ?x)" => "true" if PatternCondition::new("ESC".parse().unwrap(), "?x".parse().unwrap())),
         ];
 
         let system_rws = apply_rws.into_iter()
@@ -465,7 +465,7 @@ impl TheSy {
             }
 
             let mut conjectures = self.get_conjectures();
-            for (o, ex1, ex2, d) in conjs_before_cases.into_iter().rev() {
+            for (o, mut ex1, mut ex2, d) in conjs_before_cases.into_iter().rev() {
                 if conjectures.iter().any(|(_, other_ex1, other_ex2, _)|
                     other_ex1 == &ex1 && &ex2 == other_ex2) {
                     continue
@@ -483,6 +483,10 @@ impl TheSy {
                     new_rules = self.datatypes[&d].generalize_prove(&rules, &ex1, &ex2);
                     if new_rules.is_none() {
                         new_rules = temp;
+                    } else {
+                        ex1 = new_rules.as_ref().unwrap()[0].1.pretty_string().parse().unwrap();
+                        ex2 = new_rules.as_ref().unwrap()[0].2.pretty_string().parse().unwrap();
+                        println!("generalized as case_split");
                     }
                 }
                 self.stats_update_proved(&ex1, &ex2, start);
@@ -495,10 +499,13 @@ impl TheSy {
                 if self.prove_goals(rules, &mut found_rules, new_rules_index, start_total) {
                     return found_rules;
                 }
+                let reduc_depth = 3;
+                let stop_reason = self.equiv_reduc_depth(&rules[..], reduc_depth);
+                self.update_node_limit(stop_reason);
             }
 
             'outer: while !conjectures.is_empty() {
-                let (_, ex1, ex2, d) = conjectures.pop().unwrap();
+                let (_, mut ex1, mut ex2, d) = conjectures.pop().unwrap();
                 let start = Self::stats_get_time();
                 let mut new_rules = self.datatypes[&d].prove_ind(&rules, &ex1, &ex2);
                 if new_rules.is_some() {
@@ -506,13 +513,17 @@ impl TheSy {
                     new_rules = self.datatypes[&d].generalize_prove(&rules, &ex1, &ex2);
                     if new_rules.is_none() {
                         new_rules = temp;
+                    } else {
+                        ex1 = new_rules.as_ref().unwrap()[0].1.pretty_string().parse().unwrap();
+                        ex2 = new_rules.as_ref().unwrap()[0].2.pretty_string().parse().unwrap();
+                        println!("generalized as case_split");
                     }
-                    self.stats_update_proved(&ex1, &ex2, start);
                     if Self::check_equality(&rules[..], &None, &ex1, &ex2) {
                         info!("bad conjecture {} = {}", &ex1.pretty(500), &ex2.pretty(500));
                         self.stats_update_filtered_conjecture(&ex1, &ex2);
                         continue 'outer;
                     }
+                    self.stats_update_proved(&ex1, &ex2, start);
 
                     found_rules.extend_from_slice(&new_rules.as_ref().unwrap());
                     for r in new_rules.unwrap() {
