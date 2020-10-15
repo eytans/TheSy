@@ -20,8 +20,10 @@ use crate::thesy::prover::Prover;
 use multimap::MultiMap;
 use crate::eggstentions::reconstruct::reconstruct;
 use crate::thesy::statistics::Stats;
-use crate::eggstentions::conditions::{NonPatternCondition, AndCondition};
+use crate::eggstentions::conditions::{NonPatternCondition, AndCondition, PatternCondition};
 use std::process::exit;
+use std::cmp::Ordering;
+use crate::eggstentions::pretty_string::PrettyString;
 
 /// Theory Synthesizer - Explores a given theory finding and proving new lemmas.
 pub struct TheSy {
@@ -104,7 +106,25 @@ impl TheSy {
             rewrite!("less-succ"; "(less (succ ?y) (succ ?x))" => "(less ?y ?x)")
         ];
 
-        let system_rws = apply_rws.into_iter().chain(ite_rws.into_iter()).chain(equality_rws.into_iter()).chain(bool_rws.into_iter()).chain(less_rws.into_iter()).collect_vec();
+        let cons_conc_searcher: MultiEqSearcher<Pattern<SymbolLang>> = MultiEqSearcher::new(vec!["true".parse().unwrap(), "(is-cons ?x)".parse().unwrap()]);
+        let cons_conclusion: DiffApplier<Pattern<SymbolLang>> = DiffApplier::new("(cons (isconsex ?x))".parse().unwrap());
+
+        let is_rws: Vec<Rewrite<SymbolLang, ()>> = vec![
+            rewrite!("is_cons_true"; "(is-cons ?x)" => "true" if PatternCondition::new("(cons ?y)".parse().unwrap(), Var::from_str("?x").unwrap())),
+            rewrite!("is_cons_false"; "(is-cons ?x)" => "false" if PatternCondition::new("nil".parse().unwrap(), Var::from_str("?x").unwrap())),
+            rewrite!("is_cons_conclusion"; cons_conc_searcher => cons_conclusion),
+            rewrite!("is_succ_true"; "(is-succ ?x)" => "true" if PatternCondition::new("(succ ?y)".parse().unwrap(), "?x".parse().unwrap())),
+            rewrite!("is_succ_false"; "(is-succ ?x)" => "false" if PatternCondition::new("zero".parse().unwrap(), "?x".parse().unwrap())),
+            rewrite!("is_ESC_true"; "(is-ESC ?x)" => "true" if PatternCondition::new("ESC".parse().unwrap(), "?x".parse().unwrap())),
+        ];
+
+        let system_rws = apply_rws.into_iter()
+            .chain(ite_rws.into_iter())
+            .chain(equality_rws.into_iter())
+            .chain(bool_rws.into_iter())
+            .chain(less_rws.into_iter())
+            .chain(is_rws.into_iter())
+            .collect_vec();
 
         let conjectures = lemmas.map(|v| v.into_iter()
             .map(|(vars, precond, ex1, ex2)| {
@@ -325,7 +345,7 @@ impl TheSy {
     /// are equal for examples but not for ind_var.
     /// Each such class (e.g. fine class) is represented using a single minimal term.
     /// return the conjectures ordered by representative size.
-    pub fn get_conjectures(&mut self) -> Vec<(RepOrder, RecExpr<SymbolLang>, RecExpr<SymbolLang>, DataType)> {
+    pub fn get_conjectures(&mut self) -> Vec<((RepOrder, RepOrder), RecExpr<SymbolLang>, RecExpr<SymbolLang>, DataType)> {
         // TODO: make this an iterator to save alot of time during recreating conjectures
         let mut start = None;
         if cfg!(feature = "stats") {
@@ -348,8 +368,8 @@ impl TheSy {
             for set in m.values() {
                 if set.len() < 2 { continue; }
                 for couple in choose(&set.iter().collect_vec()[..], 2) {
-                    let max = if reps[couple[0]].0 >= reps[couple[1]].0 { reps[couple[0]].0.clone() } else { reps[couple[1]].0.clone() };
-                    res.push((max, reps[couple[0]].1.clone(), reps[couple[1]].1.clone(), d.clone()));
+                    let max_cop = if reps[couple[0]].0 > reps[couple[1]].0 { (reps[couple[0]].0.clone(), reps[couple[1]].0.clone()) } else { (reps[couple[1]].0.clone(), reps[couple[0]].0.clone()) };
+                    res.push((max_cop, reps[couple[0]].1.clone(), reps[couple[1]].1.clone(), d.clone()));
                 }
             }
         }
@@ -360,11 +380,8 @@ impl TheSy {
         res.into_iter().rev().collect_vec()
     }
 
-    fn check_equality(rules: &[Rewrite<SymbolLang, ()>], ex1: &RecExpr<SymbolLang>, ex2: &RecExpr<SymbolLang>) -> bool {
-        let mut egraph = EGraph::default();
-        egraph.add_expr(ex1);
-        egraph.add_expr(ex2);
-        egraph.rebuild();
+    pub fn check_equality(rules: &[Rewrite<SymbolLang, ()>], precond: &Option<RecExpr<SymbolLang>>, ex1: &RecExpr<SymbolLang>, ex2: &RecExpr<SymbolLang>) -> bool {
+        let mut egraph = Prover::create_graph(precond.as_ref(), &ex1, &ex2);
         let runner = Runner::default().with_iter_limit(8).with_time_limit(Duration::from_secs(60)).with_node_limit(10000).with_egraph(egraph).run(rules);
         !runner.egraph.equivs(ex1, ex2).is_empty()
     }
@@ -438,6 +455,7 @@ impl TheSy {
             //     println!("{}", reconstruct(&self.egraph, m.eclass, 8).map(|exp| exp.pretty(500)).unwrap_or("".to_string()));
             // }
 
+            let conjs_before_cases = self.get_conjectures();
             // TODO: case split + check all conjectures should be a function.
             // TODO: After finishing checking all conjectures in final depth (if a lemma was found) try case split again then finish.
             // TODO: can be a single loop with max depth
@@ -447,8 +465,47 @@ impl TheSy {
             }
 
             let mut conjectures = self.get_conjectures();
+            for (o, mut ex1, mut ex2, d) in conjs_before_cases.into_iter().rev() {
+                if conjectures.iter().any(|(_, other_ex1, other_ex2, _)|
+                    other_ex1 == &ex1 && &ex2 == other_ex2) {
+                    continue
+                }
+                if Self::check_equality(&rules[..], &None, &ex1, &ex2) {
+                    self.stats_update_filtered_conjecture(&ex1, &ex2);
+                    continue;
+                }
+                // Might be a false conjecture that just doesnt get picked anymore in reconstruct.
+                let mut new_rules = self.datatypes[&d].prove_all(rules, &ex1, &ex2);
+                if new_rules.is_none() {
+                    continue;
+                } else {
+                    let temp = new_rules;
+                    new_rules = self.datatypes[&d].generalize_prove(&rules, &ex1, &ex2);
+                    if new_rules.is_none() {
+                        new_rules = temp;
+                    } else {
+                        ex1 = new_rules.as_ref().unwrap()[0].1.pretty_string().parse().unwrap();
+                        ex2 = new_rules.as_ref().unwrap()[0].2.pretty_string().parse().unwrap();
+                        println!("generalized as case_split");
+                    }
+                }
+                self.stats_update_proved(&ex1, &ex2, start);
+                found_rules.extend_from_slice(new_rules.as_ref().unwrap());
+                for r in new_rules.unwrap() {
+                    warn!("proved: {}", r.3.long_name());
+                    // inserting like this so new rule will apply before running into node limit.
+                    rules.insert(new_rules_index, r.3);
+                }
+                if self.prove_goals(rules, &mut found_rules, new_rules_index, start_total) {
+                    return found_rules;
+                }
+                let reduc_depth = 3;
+                let stop_reason = self.equiv_reduc_depth(&rules[..], reduc_depth);
+                self.update_node_limit(stop_reason);
+            }
+
             'outer: while !conjectures.is_empty() {
-                let (_, ex1, ex2, d) = conjectures.pop().unwrap();
+                let (_, mut ex1, mut ex2, d) = conjectures.pop().unwrap();
                 let start = Self::stats_get_time();
                 let mut new_rules = self.datatypes[&d].prove_ind(&rules, &ex1, &ex2);
                 if new_rules.is_some() {
@@ -456,13 +513,17 @@ impl TheSy {
                     new_rules = self.datatypes[&d].generalize_prove(&rules, &ex1, &ex2);
                     if new_rules.is_none() {
                         new_rules = temp;
+                    } else {
+                        ex1 = new_rules.as_ref().unwrap()[0].1.pretty_string().parse().unwrap();
+                        ex2 = new_rules.as_ref().unwrap()[0].2.pretty_string().parse().unwrap();
+                        println!("generalized as case_split");
                     }
-                    self.stats_update_proved(&ex1, &ex2, start);
-                    if Self::check_equality(&rules[..], &ex1, &ex2) {
+                    if Self::check_equality(&rules[..], &None, &ex1, &ex2) {
                         info!("bad conjecture {} = {}", &ex1.pretty(500), &ex2.pretty(500));
                         self.stats_update_filtered_conjecture(&ex1, &ex2);
                         continue 'outer;
                     }
+                    self.stats_update_proved(&ex1, &ex2, start);
 
                     found_rules.extend_from_slice(&new_rules.as_ref().unwrap());
                     for r in new_rules.unwrap() {

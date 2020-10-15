@@ -44,6 +44,11 @@ struct CliOpt {
     ph_count: usize,
     /// Previous results to read
     dependencies: Vec<String>,
+    /// Run as prover or ignore goals
+    #[structopt(name = "proof mode", short="p", long="prove")]
+    proof_mode: Option<bool>,
+    #[structopt(name = "check equivalence", short="c", long="check-equiv")]
+    check_equiv: bool
 }
 
 impl From<&CliOpt> for TheSyConfig {
@@ -52,7 +57,9 @@ impl From<&CliOpt> for TheSyConfig {
             thesy_parser::parser::parse_file(opts.path.to_str().unwrap().to_string()),
             opts.ph_count,
             vec![],
-            opts.path.with_extension("res.th"))
+            opts.path.with_extension("res.th"),
+            opts.proof_mode.unwrap_or(true)
+        )
     }
 }
 
@@ -64,10 +71,11 @@ struct TheSyConfig {
     dep_results: Vec<Vec<Rewrite<SymbolLang, ()>>>,
     output: PathBuf,
     prerun: bool,
+    proof_mode: bool,
 }
 
 impl TheSyConfig {
-    pub fn new(definitions: Definitions, ph_count: usize, dependencies: Vec<TheSyConfig>, output: PathBuf) -> TheSyConfig {
+    pub fn new(definitions: Definitions, ph_count: usize, dependencies: Vec<TheSyConfig>, output: PathBuf, proof_mode: bool) -> TheSyConfig {
         let func_len = definitions.functions.len();
         TheSyConfig {
             definitions,
@@ -76,6 +84,7 @@ impl TheSyConfig {
             dep_results: vec![],
             output,
             prerun: false,
+            proof_mode
         }
         // prerun: func_len > 2}
     }
@@ -90,7 +99,7 @@ impl TheSyConfig {
 
     pub fn from_path(path: String) -> TheSyConfig {
         let definitions = thesy_parser::parser::parse_file(path.clone());
-        TheSyConfig::new(definitions, 2, vec![], PathBuf::from(path).with_extension("res"))
+        TheSyConfig::new(definitions, 2, vec![], PathBuf::from(path).with_extension("res"), true)
     }
 
     /// Run thesy using current configuration returning (thesy instance, previous + new rewrites)
@@ -151,7 +160,7 @@ impl From<&TheSyConfig> for TheSy {
                            examples,
                            dict,
                            conf.ph_count,
-                           conjectures)
+                           if conf.proof_mode {conjectures} else {None})
     }
 }
 
@@ -174,7 +183,16 @@ fn main() {
     }
 
     let start = SystemTime::now();
-    let res = TheSyConfig::from(&args).run(Some(2));
+    let mut config = TheSyConfig::from(&args);
+    if args.check_equiv {
+        for (vars, precond, ex1, ex2) in &config.definitions.conjectures {
+            if TheSy::check_equality(&config.definitions.rws, precond, ex1, ex2) {
+                println!("proved: {}{} = {}", precond.as_ref().map(|x| format!("{} => ", x.pretty(500))).unwrap_or("".to_string()), ex1.pretty(500), ex2.pretty(500))
+            }
+        }
+        exit(0)
+    }
+    let res = config.run(Some(2));
     println!("done in {}", SystemTime::now().duration_since(start).unwrap().as_millis());
     if cfg!(feature = "stats") {
         export_json(&res.0, &args.path);

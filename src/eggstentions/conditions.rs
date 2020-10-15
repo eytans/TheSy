@@ -24,6 +24,26 @@ impl Condition<SymbolLang, ()> for NonPatternCondition {
     }
 }
 
+pub struct PatternCondition {
+    cond: NonPatternCondition
+}
+
+impl PatternCondition {
+    pub fn new(pattern: Pattern<SymbolLang>, root: Var) -> PatternCondition {
+        PatternCondition{cond: NonPatternCondition{pattern, root}}
+    }
+}
+
+impl Condition<SymbolLang, ()> for PatternCondition {
+    fn check(&self, egraph: &mut EGraph<SymbolLang, ()>, eclass: Id, subst: &Subst) -> bool {
+        !self.cond.check(egraph, eclass, subst)
+    }
+
+    fn vars(&self) -> Vec<Var> {
+        self.cond.vars()
+    }
+}
+
 pub struct AndCondition<L: Language, N: Analysis<L>> {
     conditions: Vec<Box<dyn Condition<L, N>>>
 }
