@@ -1,0 +1,26 @@
+(declare-sort sk2 0)
+(declare-sort sk 0)
+(declare-datatype list2 ((nil2) (cons2 (head2 sk) (tail2 list2))))
+(declare-datatype Nat ((Z) (S (proj1-S Nat))))
+(declare-datatype list ((nil) (cons (head Nat) (tail list))))
+(declare-fun len (list2) Nat)
+(declare-fun last (list) Nat)
+(declare-fun drop (Nat list2) list2)
+(declare-fun <2 (Nat Nat) Bool)
+(assert (= (last nil) Z))
+(assert (forall ((y Nat)) (= (last (cons y nil)) y)))
+(assert
+  (forall ((y Nat) (x2 Nat) (x3 list))
+    (= (last (cons y (cons x2 x3))) (last (cons x2 x3)))))
+(assert (forall ((x Nat)) (not (<2 x Z))))
+(assert (forall ((z Nat)) (<2 Z (S z))))
+(assert
+  (forall ((z Nat) (x2 Nat)) (= (<2 (S x2) (S z)) (<2 x2 z))))
+(assert (= (len nil2) Z))
+(assert
+  (forall ((y sk) (xs list2)) (= (len (cons2 y xs)) (S (len xs)))))
+(assert (forall ((y list2)) (= (drop Z y) y)))
+(assert (forall ((z Nat)) (= (drop (S z) nil2) nil2)))
+(assert
+  (forall ((z Nat) (x2 sk) (x3 list2))
+    (= (drop (S z) (cons2 x2 x3)) (drop z x3))))

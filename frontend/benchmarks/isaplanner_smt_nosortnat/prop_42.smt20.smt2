@@ -1,0 +1,10 @@
+(declare-sort sk2 0)
+(declare-sort sk 0)
+(declare-datatype list ((nil) (cons (head sk) (tail list))))
+(declare-datatype Nat ((Z) (S (proj1-S Nat))))
+(declare-fun take (Nat list) list)
+(assert (forall ((y list)) (= (take Z y) nil)))
+(assert (forall ((z Nat)) (= (take (S z) nil) nil)))
+(assert
+  (forall ((z Nat) (x2 sk) (x3 list))
+    (= (take (S z) (cons x2 x3)) (cons x2 (take z x3)))))
