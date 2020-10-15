@@ -465,6 +465,7 @@ impl TheSy {
             }
 
             let mut conjectures = self.get_conjectures();
+            let mut changed = false;
             for (o, mut ex1, mut ex2, d) in conjs_before_cases.into_iter().rev() {
                 if conjectures.iter().any(|(_, other_ex1, other_ex2, _)|
                     other_ex1 == &ex1 && &ex2 == other_ex2) {
@@ -489,6 +490,7 @@ impl TheSy {
                         println!("generalized as case_split");
                     }
                 }
+                changed = true;
                 self.stats_update_proved(&ex1, &ex2, start);
                 found_rules.extend_from_slice(new_rules.as_ref().unwrap());
                 for r in new_rules.unwrap() {
@@ -499,6 +501,9 @@ impl TheSy {
                 if self.prove_goals(rules, &mut found_rules, new_rules_index, start_total) {
                     return found_rules;
                 }
+            }
+
+            if changed {
                 let reduc_depth = 3;
                 let stop_reason = self.equiv_reduc_depth(&rules[..], reduc_depth);
                 self.update_node_limit(stop_reason);
