@@ -1,4 +1,4 @@
-Benchmark,Hipster found,Hipster < TheSy,TheSy found,TheSy < Hipster,TheSy Time,Hipster TheSy
+Benchmark,Hipster found,Hipster < TheSy,TheSy found,TheSy < Hipster,TheSy Time,Hipster Time
 Prop_20,7,3,3,2,0.596513873,1424.082553
 Prop_21,12,0,24,0,824.390544443,213.317341
 Prop_22,5,5,13,0,2200.244523398,180.211175
