@@ -13,6 +13,8 @@ def collect_symbols(sexp):
     if isinstance(sexp, sexpdata.Symbol):
         return {sexp.value()}
     if isinstance(sexp, int):
+        if sexp > 0:
+            return {'+' + str(sexp)}
         return {str(sexp)}
     if isinstance(sexp, str):
         return {sexp}
