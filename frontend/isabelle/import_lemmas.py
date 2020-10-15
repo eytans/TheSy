@@ -21,6 +21,8 @@ class TheoryDocument:
         self.funcs = []
         self.lemmas = []
 
+        self.aliases = {}
+
         whole_text = s.read()
 
         for mo in self.DATATYPE_RE.finditer(whole_text):
@@ -68,14 +70,24 @@ class TheoryDocument:
             e = [SExpression(stack.pop() + e)]
         return e[0]
 
-    def export_lemma(self, lemma):
+    def export_lemma(self, lemma, as_goal=False):
         fv = functools.reduce(lambda a,b: a | b, (self.find_vars(e) for e in lemma))
-        sig = self._mk_env(fv)
+        sig = {}
+        if not as_goal:
+            sig.update(self._mk_env(fv))
         for func in self.funcs:
             sig[func] = func.replace('twoSpec', '2').replace('Special', '')
+        sig.update(self.aliases)
         phi = [self.subst(e, sig) for e in lemma]
         if len(phi) == 1: phi.append('true')
-        return SExpression(['='] + phi)
+
+        S = SExpression
+        eq = S(['='] + phi)
+        if as_goal:
+            qv = S([S([v, 'U']) for v in sorted(fv)])  # sorting just to keep order stable
+            return S(['prove', S(['forall', qv, eq])])
+        else:
+            return eq
 
     def find_vars(self, sexpr):
         fv = set()
