@@ -1,0 +1,49 @@
+Collecting statistics
+(leq ?__x0 ?__y1) => (or (= ?__x0 ?__y1) (less ?__x0 ?__y1))
+(or (= ?__x0 ?__y1) (less ?__x0 ?__y1)) => (leq ?__x0 ?__y1)
+(take ?x nil) => nil
+(take zero ?x2) => nil
+(take (succ ?x) (cons ?y ?z)) => (cons ?y (take ?x ?z))
+(cons ?y (take ?x ?z)) => (take (succ ?x) (cons ?y ?z))
+(zip nil ?x3) => znil
+(zip ?x4 nil) => znil
+(zip (cons ?x ?y5) (cons ?z6 ?w)) => (zcons (mkpair ?x ?z6) (zip ?y5 ?w))
+(zcons (mkpair ?x ?z6) (zip ?y5 ?w)) => (zip (cons ?x ?y5) (cons ?z6 ?w))
+(ztake ?x znil) => znil
+(ztake zero ?x7) => znil
+(ztake (succ ?x) (zcons ?y8 ?z9)) => (zcons ?y8 (ztake ?x ?z9))
+(zcons ?y8 (ztake ?x ?z9)) => (ztake (succ ?x) (zcons ?y8 ?z9))
+(take ?autovar5 (cons ?autovar2 ?autovar3)) => (potential_split ?autovar5 (succ (param_Nat_0 ?autovar5)) zero) if Cond(var: ?autovar5, pat: (succ ?param_0)) Cond(var: ?autovar5, pat: zero)
+(take (succ ?autovar4) ?autovar6) => (potential_split ?autovar6 (cons (param_Lst_0 ?autovar6) (param_Lst_1 ?autovar6)) nil) if Cond(var: ?autovar6, pat: (cons ?param_0 ?param_1)) Cond(var: ?autovar6, pat: nil)
+(zip ?autovar7 (cons ?autovar3 ?autovar4)) => (potential_split ?autovar7 (cons (param_Lst_0 ?autovar7) (param_Lst_1 ?autovar7)) nil) if Cond(var: ?autovar7, pat: (cons ?param_0 ?param_1)) Cond(var: ?autovar7, pat: nil)
+(zip (cons ?autovar5 ?autovar6) ?autovar8) => (potential_split ?autovar8 (cons (param_Lst_0 ?autovar8) (param_Lst_1 ?autovar8)) nil) if Cond(var: ?autovar8, pat: (cons ?param_0 ?param_1)) Cond(var: ?autovar8, pat: nil)
+(ztake ?autovar5 (zcons ?autovar2 ?autovar3)) => (potential_split ?autovar5 (succ (param_Nat_0 ?autovar5)) zero) if Cond(var: ?autovar5, pat: (succ ?param_0)) Cond(var: ?autovar5, pat: zero)
+(ztake (succ ?autovar4) ?autovar6) => (potential_split ?autovar6 (zcons (param_ZLst_0 ?autovar6) (param_ZLst_1 ?autovar6)) znil) if Cond(var: ?autovar6, pat: (zcons ?param_0 ?param_1)) Cond(var: ?autovar6, pat: znil)
+ ex is: zero
+ ex is: (succ zero)
+ ex is: (succ (succ zero))
+ ex is: nil
+ ex is: (cons autovar_Nat_0 nil)
+ ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+ ex is: (mkpair autovar_Nat_0 autovar_Nat_1)
+ ex is: znil
+ ex is: (zcons autovar_Pair_0 znil)
+ ex is: (zcons autovar_Pair_1 (zcons autovar_Pair_0 znil))
+Running TheSy on datatypes: Lst ZLst Nat Pair dict: take zip ztake leq succ zero cons nil mkpair zcons znil
+01:11:49 [0m[33m[WARN] [0m# of splitters: 3
+01:11:49 [0m[33m[WARN] [0m# of splitters: 3
+01:11:49 [0m[33m[WARN] [0m# of splitters: 2
+01:11:49 [0m[33m[WARN] [0m# of splitters: 1
+01:11:49 [0m[33m[WARN] [0m# of splitters: 1
+01:11:49 [0m[33m[WARN] [0m# of splitters: 1
+01:11:49 [0m[33m[WARN] [0m# of splitters: 2
+01:11:49 [0m[33m[WARN] [0m# of splitters: 1
+01:11:49 [0m[33m[WARN] [0m# of splitters: 1
+01:11:49 [0m[33m[WARN] [0m# of splitters: 2
+01:11:49 [0m[33m[WARN] [0m# of splitters: 1
+01:11:49 [0m[33m[WARN] [0m# of splitters: 1
+01:11:49 [0m[33m[WARN] [0m# of splitters: 1
+proved: (ztake ?ts_ph_Nat_0 (zip ?ts_ph_Lst_1 ?ts_ph_Lst_2)) => (zip (take ?ts_ph_Nat_0 ?ts_ph_Lst_1) (take ?ts_ph_Nat_0 ?ts_ph_Lst_2))
+proved: (zip (take ?ts_ph_Nat_0 ?ts_ph_Lst_1) (take ?ts_ph_Nat_0 ?ts_ph_Lst_2)) => (ztake ?ts_ph_Nat_0 (zip ?ts_ph_Lst_1 ?ts_ph_Lst_2))
+01:11:49 [0m[33m[WARN] [0mFound all lemmas
+done in 9

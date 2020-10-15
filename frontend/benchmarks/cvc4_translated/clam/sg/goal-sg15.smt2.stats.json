@@ -1,0 +1,1 @@
+{"conjectures_proved":[],"failed_proofs":[],"goals_proved":[["(plus ts_ph_Nat_0 (succ ts_ph_Nat_0))","(succ (plus ts_ph_Nat_0 ts_ph_Nat_0))",{"secs":0,"nanos":682125}]],"failed_proofs_goals":[],"equiv_red_iterations":[],"case_split":[],"term_creation":[],"get_conjectures":[],"filtered_lemmas":[],"total_time":{"secs":0,"nanos":737321}}

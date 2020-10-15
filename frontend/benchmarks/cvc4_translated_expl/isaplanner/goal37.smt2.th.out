@@ -1,0 +1,94 @@
+Collecting statistics
+(leq ?__x0 ?__y1) => (or (= ?__x0 ?__y1) (less ?__x0 ?__y1))
+(or (= ?__x0 ?__y1) (less ?__x0 ?__y1)) => (leq ?__x0 ?__y1)
+(mem ?x nil) => false
+(mem ?x (cons ?y ?z)) => (or (= ?x ?y) (mem ?x ?z))
+(or (= ?x ?y) (mem ?x ?z)) => (mem ?x (cons ?y ?z))
+(delete ?x nil) => nil
+(delete ?x (cons ?y ?z)) => (ite (= ?x ?y) (delete ?x ?z) (cons ?y (delete ?x ?z)))
+(ite (= ?x ?y) (delete ?x ?z) (cons ?y (delete ?x ?z))) => (delete ?x (cons ?y ?z))
+ ex is: zero
+ ex is: (succ zero)
+ ex is: (succ (succ zero))
+ ex is: nil
+ ex is: (cons autovar_Nat_0 nil)
+ ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+Running TheSy on datatypes: Nat Lst dict: mem delete leq succ zero cons nil
+Starting depth 1
+01:23:41 [0m[33m[WARN] [0m# of splitters: 6
+01:23:41 [0m[33m[WARN] [0m# of splitters: 5
+01:23:41 [0m[33m[WARN] [0m# of splitters: 5
+01:23:41 [0m[33m[WARN] [0m# of splitters: 4
+01:23:42 [0m[33m[WARN] [0m# of splitters: 4
+01:23:42 [0m[33m[WARN] [0m# of splitters: 3
+01:23:42 [0m[33m[WARN] [0m# of splitters: 3
+01:23:42 [0m[33m[WARN] [0m# of splitters: 2
+01:23:42 [0m[33m[WARN] [0m# of splitters: 2
+01:23:42 [0m[33m[WARN] [0m# of splitters: 1
+01:23:42 [0m[33m[WARN] [0m# of splitters: 1
+01:23:42 [0m[33m[WARN] [0mproved: (leq zero ?ts_ph_Nat_0) => true
+
+Starting depth 2
+01:23:42 [0m[33m[WARN] [0m# of splitters: 40
+01:23:43 [0m[33m[WARN] [0m# of splitters: 34
+01:23:46 [0m[33m[WARN] [0m# of splitters: 39
+01:23:47 [0m[33m[WARN] [0m# of splitters: 33
+01:23:53 [0m[33m[WARN] [0m# of splitters: 38
+01:23:58 [0m[33m[WARN] [0m# of splitters: 32
+01:24:40 [0m[33m[WARN] [0m# of splitters: 37
+01:24:48 [0m[33m[WARN] [0m# of splitters: 31
+01:24:51 [0m[33m[WARN] [0m# of splitters: 36
+01:24:53 [0m[33m[WARN] [0m# of splitters: 30
+01:24:53 [0m[33m[WARN] [0m# of splitters: 35
+01:25:00 [0m[33m[WARN] [0m# of splitters: 29
+01:25:00 [0m[33m[WARN] [0m# of splitters: 34
+01:25:04 [0m[33m[WARN] [0m# of splitters: 23
+01:25:07 [0m[33m[WARN] [0m# of splitters: 33
+01:25:15 [0m[33m[WARN] [0m# of splitters: 15
+01:25:16 [0m[33m[WARN] [0m# of splitters: 30
+01:25:16 [0m[33m[WARN] [0m# of splitters: 21
+01:25:19 [0m[33m[WARN] [0m# of splitters: 29
+01:25:25 [0m[33m[WARN] [0m# of splitters: 20
+01:25:27 [0m[33m[WARN] [0m# of splitters: 28
+01:25:33 [0m[33m[WARN] [0m# of splitters: 27
+01:25:37 [0m[33m[WARN] [0m# of splitters: 17
+01:25:37 [0m[33m[WARN] [0m# of splitters: 26
+01:25:38 [0m[33m[WARN] [0m# of splitters: 12
+01:25:40 [0m[33m[WARN] [0m# of splitters: 24
+01:25:40 [0m[33m[WARN] [0m# of splitters: 14
+01:25:40 [0m[33m[WARN] [0m# of splitters: 24
+01:25:40 [0m[33m[WARN] [0m# of splitters: 16
+01:25:42 [0m[33m[WARN] [0m# of splitters: 23
+01:25:46 [0m[33m[WARN] [0m# of splitters: 19
+01:25:49 [0m[33m[WARN] [0m# of splitters: 22
+01:25:50 [0m[33m[WARN] [0m# of splitters: 18
+01:25:51 [0m[33m[WARN] [0m# of splitters: 21
+01:25:54 [0m[33m[WARN] [0m# of splitters: 19
+01:25:55 [0m[33m[WARN] [0m# of splitters: 20
+01:25:56 [0m[33m[WARN] [0m# of splitters: 19
+01:26:00 [0m[33m[WARN] [0m# of splitters: 17
+01:26:04 [0m[33m[WARN] [0m# of splitters: 16
+01:26:10 [0m[33m[WARN] [0m# of splitters: 16
+01:26:13 [0m[33m[WARN] [0m# of splitters: 15
+01:26:14 [0m[33m[WARN] [0m# of splitters: 12
+01:26:18 [0m[33m[WARN] [0m# of splitters: 14
+01:26:18 [0m[33m[WARN] [0m# of splitters: 14
+01:26:18 [0m[33m[WARN] [0m# of splitters: 11
+01:26:19 [0m[33m[WARN] [0m# of splitters: 12
+01:26:21 [0m[33m[WARN] [0m# of splitters: 12
+01:26:24 [0m[33m[WARN] [0m# of splitters: 11
+01:26:25 [0m[33m[WARN] [0m# of splitters: 11
+01:26:30 [0m[33m[WARN] [0m# of splitters: 10
+01:26:30 [0m[33m[WARN] [0m# of splitters: 7
+01:26:30 [0m[33m[WARN] [0m# of splitters: 10
+01:26:30 [0m[33m[WARN] [0m# of splitters: 10
+01:26:33 [0m[33m[WARN] [0m# of splitters: 8
+01:26:34 [0m[33m[WARN] [0mproved: (leq (succ zero) (succ ?ts_ph_Nat_0)) => true
+01:26:34 [0m[33m[WARN] [0m# of splitters: 1
+01:26:34 [0m[33m[WARN] [0mproved: (mem ?ts_ph_Nat_1 (delete ?ts_ph_Nat_1 ?ts_ph_Lst_0)) => false
+
+01:26:35 [0m[33m[WARN] [0m# of splitters: 1
+01:26:35 [0m[33m[WARN] [0mproved: (delete ?ts_ph_Nat_1 ?ts_ph_Lst_0) => (delete ?ts_ph_Nat_1 (delete ?ts_ph_Nat_1 ?ts_ph_Lst_0))
+01:26:35 [0m[33m[WARN] [0mproved: (delete ?ts_ph_Nat_1 (delete ?ts_ph_Nat_1 ?ts_ph_Lst_0)) => (delete ?ts_ph_Nat_1 ?ts_ph_Lst_0)
+
+done in 174265

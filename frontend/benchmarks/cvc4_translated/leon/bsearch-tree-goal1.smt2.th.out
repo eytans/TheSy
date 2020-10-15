@@ -1,0 +1,48 @@
+Collecting statistics
+(less zero zero) => false
+(less zero (succ ?x)) => true
+(less (succ ?x) (succ ?y)) => (less ?x ?y)
+(less ?x ?y) => (less (succ ?x) (succ ?y))
+(leq ?__x0 ?__y1) => (or (= ?__x0 ?__y1) (less ?__x0 ?__y1))
+(or (= ?__x0 ?__y1) (less ?__x0 ?__y1)) => (leq ?__x0 ?__y1)
+(plus zero ?n) => ?n
+(plus (succ ?n) ?m) => (succ (plus ?n ?m))
+(succ (plus ?n ?m)) => (plus (succ ?n) ?m)
+(nmax ?n ?m) => (ite (less ?n ?m) ?m ?n)
+(ite (less ?n ?m) ?m ?n) => (nmax ?n ?m)
+(append nil ?x2) => ?x2
+(append (cons ?x ?y3) ?z) => (cons ?x (append ?y3 ?z))
+(cons ?x (append ?y3 ?z)) => (append (cons ?x ?y3) ?z)
+(len nil) => zero
+zero => (len nil)
+(len (cons ?x ?y4)) => (succ (len ?y4))
+(mem ?x nil) => false
+(mem ?x (cons ?y ?z)) => (or (= ?x ?y) (mem ?x ?z))
+(or (= ?x ?y) (mem ?x ?z)) => (mem ?x (cons ?y ?z))
+(tinsert leaf ?i) => (node ?i leaf leaf)
+(node ?i leaf leaf) => (tinsert leaf ?i)
+(tinsert (node ?d ?l ?r) ?i) => (ite (less ?d ?i) (node ?d ?l (tinsert ?r ?i)) (node ?d (tinsert ?l ?i) ?r))
+(ite (less ?d ?i) (node ?d ?l (tinsert ?r ?i)) (node ?d (tinsert ?l ?i) ?r)) => (tinsert (node ?d ?l ?r) ?i)
+(height leaf) => zero
+zero => (height leaf)
+(height (node ?x ?y5 ?z6)) => (succ (nmax (height ?y5) (height ?z6)))
+(tinsert-all ?x7 nil) => ?x7
+(tinsert-all ?x8 (cons ?n ?l9)) => (tinsert (tinsert-all ?x8 ?l9) ?n)
+(tinsert (tinsert-all ?x8 ?l9) ?n) => (tinsert-all ?x8 (cons ?n ?l9))
+(tsize leaf) => zero
+zero => (tsize leaf)
+(tsize (node ?x ?l ?r)) => (succ (plus (tsize ?l) (tsize ?r)))
+(tremove leaf ?i) => leaf
+(tremove (node ?d ?l ?r) ?i) => (node ?d (tremove ?l ?i) ?r)
+(tremove (node ?d ?l ?r) ?i) => (node ?d (tremove ?l ?i) ?r)
+(tremove (node ?d ?l ?r) ?i) => (node ?d ?l (tremove ?r ?i))
+(tremove (node ?d ?l ?r) ?i) => (node ?d ?l (tremove ?r ?i))
+(tremove (node ?d leaf ?r) ?d) => ?r
+(tremove (node ?d (node ?ld ?ll ?lr) ?r) ?d) => (node ?ld (tremove (node ?ld ?ll ?lr) ?ld) ?r)
+(tremove-all ?x10 nil) => ?x10
+(tremove-all ?x11 (cons ?n ?l12)) => (tremove-all (tremove ?x11 ?n) ?l12)
+(tremove-all (tremove ?x11 ?n) ?l12) => (tremove-all ?x11 (cons ?n ?l12))
+(tcontains leaf ?i) => false
+(tcontains (node ?d ?l ?r) ?i) => (or (= ?d ?i) (tcontains ?l ?i) (tcontains ?r ?i))
+(or (= ?d ?i) (tcontains ?l ?i) (tcontains ?r ?i)) => (tcontains (node ?d ?l ?r) ?i)
+(tsorted leaf) => true

@@ -1,0 +1,52 @@
+Collecting statistics
+(less zero zero) => false
+(less zero (succ ?x)) => true
+(less (succ ?x) (succ ?y)) => (less ?x ?y)
+(less ?x ?y) => (less (succ ?x) (succ ?y))
+(leq ?__x0 ?__y1) => (or (= ?__x0 ?__y1) (less ?__x0 ?__y1))
+(or (= ?__x0 ?__y1) (less ?__x0 ?__y1)) => (leq ?__x0 ?__y1)
+(plus zero ?n) => ?n
+(plus (succ ?n) ?m) => (succ (plus ?n ?m))
+(succ (plus ?n ?m)) => (plus (succ ?n) ?m)
+(len nil) => zero
+zero => (len nil)
+(len (cons ?x ?y2)) => (succ (len ?y2))
+(rsorted nil) => true
+(rsorted (cons ?x nil)) => true
+(rsorted (cons ?x (cons ?z ?y3))) => (and (rsorted (cons ?z ?y3)) (or (= ?z ?x) (less ?z ?x)))
+(and (rsorted (cons ?z ?y3)) (or (= ?z ?x) (less ?z ?x))) => (rsorted (cons ?x (cons ?z ?y3)))
+(sorted nil) => true
+(sorted (cons ?x nil)) => true
+(sorted (cons ?x (cons ?z ?y4))) => (and (rsorted (cons ?z ?y4)) (or (= ?x ?z) (less ?x ?z)))
+(and (rsorted (cons ?z ?y4)) (or (= ?x ?z) (less ?x ?z))) => (sorted (cons ?x (cons ?z ?y4)))
+(rightHeight hleaf) => zero
+zero => (rightHeight hleaf)
+(rightHeight (heap ?k ?v ?l ?r)) => (succ (rightHeight ?r))
+(rank hleaf) => zero
+zero => (rank hleaf)
+(rank (heap ?k ?v ?l ?r)) => ?k
+(hasLeftistProperty hleaf) => true
+(hasLeftistProperty (heap ?k ?v ?l ?r)) => (and (hasLeftistProperty ?l) (hasLeftistProperty ?r) (or (= (rightHeight ?r) (rightHeight ?l)) (less (rightHeight ?r) (rightHeight ?l))) (= ?k (succ (rightHeight ?r))))
+(hsize hleaf) => zero
+zero => (hsize hleaf)
+(hsize (heap ?k ?v ?l ?r)) => (succ (plus (hsize ?l) (hsize ?r)))
+(mergea ?v ?l ?r) => (ite (or (= (rank ?r) (rank ?l)) (less (rank ?r) (rank ?l))) (heap (succ (rank ?r)) ?v ?l ?r) (heap (succ (rank ?l)) ?v ?r ?l))
+(ite (or (= (rank ?r) (rank ?l)) (less (rank ?r) (rank ?l))) (heap (succ (rank ?r)) ?v ?l ?r) (heap (succ (rank ?l)) ?v ?r ?l)) => (mergea ?v ?l ?r)
+(merge ?h hleaf) => ?h
+(merge hleaf ?h) => ?h
+(merge (heap ?k1 ?v1 ?l1 ?r1) (heap ?k2 ?v2 ?l2 ?r2)) => (ite (less ?v2 ?v1) (mergea ?v1 ?l1 (merge ?r1 (heap ?k2 ?v2 ?l2 ?r2))) (mergea ?v2 ?l2 (merge (heap ?k1 ?v1 ?l1 ?r1) ?r2)))
+(ite (less ?v2 ?v1) (mergea ?v1 ?l1 (merge ?r1 (heap ?k2 ?v2 ?l2 ?r2))) (mergea ?v2 ?l2 (merge (heap ?k1 ?v1 ?l1 ?r1) ?r2))) => (merge (heap ?k1 ?v1 ?l1 ?r1) (heap ?k2 ?v2 ?l2 ?r2))
+(hinsert ?h ?n) => (merge (heap (succ zero) ?n hleaf hleaf) ?h)
+(merge (heap (succ zero) ?n hleaf hleaf) ?h) => (hinsert ?h ?n)
+(hinsert-all nil ?h) => ?h
+(hinsert-all (cons ?n ?l5) ?h) => (hinsert (hinsert-all ?l5 ?h) ?n)
+(hinsert (hinsert-all ?l5 ?h) ?n) => (hinsert-all (cons ?n ?l5) ?h)
+(qheapsorta hleaf ?l6) => ?l6
+(qheapsorta (heap ?k ?v ?l ?r) ?x7) => (qheapsorta (merge ?l ?r) (cons ?v ?x7))
+(qheapsort ?l8) => (qheapsorta (hinsert-all ?l8 hleaf) nil)
+(qheapsorta (hinsert-all ?l8 hleaf) nil) => (qheapsort ?l8)
+(heapsorta hleaf) => nil
+nil => (heapsorta hleaf)
+(heapsorta (heap ?k ?v ?l ?r)) => (cons ?v (heapsorta (merge ?l ?r)))
+(heapsort ?l9) => (heapsorta (hinsert-all ?l9 hleaf))
+(heapsorta (hinsert-all ?l9 hleaf)) => (heapsort ?l9)

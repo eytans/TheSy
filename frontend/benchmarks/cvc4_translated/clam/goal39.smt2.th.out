@@ -1,0 +1,9 @@
+Collecting statistics
+(leq ?__x0 ?__y1) => (or (= ?__x0 ?__y1) (less ?__x0 ?__y1))
+(or (= ?__x0 ?__y1) (less ?__x0 ?__y1)) => (leq ?__x0 ?__y1)
+(drop ?x nil) => nil
+(drop zero ?x2) => ?x2
+(drop (succ ?x) (cons ?y ?z)) => (drop ?x ?z)
+(mem ?x nil) => false
+(mem ?x (cons ?y ?z)) => (or (= ?x ?y) (mem ?x ?z))
+(or (= ?x ?y) (mem ?x ?z)) => (mem ?x (cons ?y ?z))

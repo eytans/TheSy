@@ -1,0 +1,22 @@
+Collecting statistics
+(leq ?__x0 ?__y1) => (or (= ?__x0 ?__y1) (less ?__x0 ?__y1))
+(or (= ?__x0 ?__y1) (less ?__x0 ?__y1)) => (leq ?__x0 ?__y1)
+(plus zero ?n) => ?n
+(plus (succ ?n) ?m) => (succ (plus ?n ?m))
+(succ (plus ?n ?m)) => (plus (succ ?n) ?m)
+(count ?x nil) => zero
+(count ?x (cons ?y ?z)) => (ite (= ?x ?y) (succ (count ?x ?z)) (count ?x ?z))
+(ite (= ?x ?y) (succ (count ?x ?z)) (count ?x ?z)) => (count ?x (cons ?y ?z))
+ ex is: zero
+ ex is: (succ zero)
+ ex is: (succ (succ zero))
+ ex is: nil
+ ex is: (cons autovar_Nat_0 nil)
+ ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+Running TheSy on datatypes: Lst Nat dict: plus count leq succ zero cons nil
+01:13:06 [0m[33m[WARN] [0m# of splitters: 1
+01:13:06 [0m[33m[WARN] [0m# of splitters: 1
+proved: (plus (succ zero) (count ?ts_ph_Nat_0 ?ts_ph_Lst_1)) => (count ?ts_ph_Nat_0 (cons ?ts_ph_Nat_0 ?ts_ph_Lst_1))
+proved: (count ?ts_ph_Nat_0 (cons ?ts_ph_Nat_0 ?ts_ph_Lst_1)) => (plus (succ zero) (count ?ts_ph_Nat_0 ?ts_ph_Lst_1))
+01:13:06 [0m[33m[WARN] [0mFound all lemmas
+done in 1

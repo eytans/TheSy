@@ -1,0 +1,28 @@
+Collecting statistics
+(leq ?__x0 ?__y1) => (or (= ?__x0 ?__y1) (less ?__x0 ?__y1))
+(or (= ?__x0 ?__y1) (less ?__x0 ?__y1)) => (leq ?__x0 ?__y1)
+(plus zero ?n) => ?n
+(plus (succ ?n) ?m) => (succ (plus ?n ?m))
+(succ (plus ?n ?m)) => (plus (succ ?n) ?m)
+(even zero) => true
+true => (even zero)
+(even (succ ?n)) => (not (even ?n))
+(not (even ?n)) => (even (succ ?n))
+(even (plus ?x ?y)) => (even (plus ?x (succ (succ ?y))))
+(even (plus ?x (succ (succ ?y)))) => (even (plus ?x ?y))
+ ex is: zero
+ ex is: (succ zero)
+ ex is: (succ (succ zero))
+Running TheSy on datatypes: Nat dict: plus even leq succ zero
+Starting depth 1
+01:11:27 [0m[33m[WARN] [0mproved: (plus ?ts_ph_Nat_0 zero) => ?ts_ph_Nat_0
+
+01:11:27 [0m[33m[WARN] [0mproved: (leq zero ?ts_ph_Nat_0) => true
+
+Starting depth 2
+01:11:27 [0m[33m[WARN] [0mproved: (plus ?ts_ph_Nat_0 (succ ?ts_ph_Nat_1)) => (succ (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1))
+01:11:27 [0m[33m[WARN] [0mproved: (succ (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1)) => (plus ?ts_ph_Nat_0 (succ ?ts_ph_Nat_1))
+proved: (even (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1)) => (even (plus ?ts_ph_Nat_1 ?ts_ph_Nat_0))
+proved: (even (plus ?ts_ph_Nat_1 ?ts_ph_Nat_0)) => (even (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1))
+01:11:27 [0m[33m[WARN] [0mFound all lemmas
+done in 147

@@ -1,0 +1,9 @@
+Collecting statistics
+(leq ?__x0 ?__y1) => (or (= ?__x0 ?__y1) (less ?__x0 ?__y1))
+(or (= ?__x0 ?__y1) (less ?__x0 ?__y1)) => (leq ?__x0 ?__y1)
+(append nil ?x) => ?x
+(append (cons ?x2 ?y) ?z) => (cons ?x2 (append ?y ?z))
+(cons ?x2 (append ?y ?z)) => (append (cons ?x2 ?y) ?z)
+(mem ?x3 nil) => false
+(mem ?x4 (cons ?y5 ?z)) => (or (= ?x4 ?y5) (mem ?x4 ?z))
+(or (= ?x4 ?y5) (mem ?x4 ?z)) => (mem ?x4 (cons ?y5 ?z))

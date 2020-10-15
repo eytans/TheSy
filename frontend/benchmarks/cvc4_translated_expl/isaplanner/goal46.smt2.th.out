@@ -1,0 +1,27 @@
+Collecting statistics
+(leq ?__x0 ?__y1) => (or (= ?__x0 ?__y1) (less ?__x0 ?__y1))
+(or (= ?__x0 ?__y1) (less ?__x0 ?__y1)) => (leq ?__x0 ?__y1)
+(zip nil ?x) => znil
+(zip ?x nil) => znil
+(zip (cons ?x2 ?y) (cons ?z ?w)) => (zcons (mkpair ?x2 ?z) (zip ?y ?w))
+(zcons (mkpair ?x2 ?z) (zip ?y ?w)) => (zip (cons ?x2 ?y) (cons ?z ?w))
+(zip ?autovar7 (cons ?autovar3 ?autovar4)) => (potential_split ?autovar7 (cons (param_Lst_0 ?autovar7) (param_Lst_1 ?autovar7)) nil) if Cond(var: ?autovar7, pat: (cons ?param_0 ?param_1)) Cond(var: ?autovar7, pat: nil)
+(zip (cons ?autovar5 ?autovar6) ?autovar8) => (potential_split ?autovar8 (cons (param_Lst_0 ?autovar8) (param_Lst_1 ?autovar8)) nil) if Cond(var: ?autovar8, pat: (cons ?param_0 ?param_1)) Cond(var: ?autovar8, pat: nil)
+ ex is: zero
+ ex is: (succ zero)
+ ex is: (succ (succ zero))
+ ex is: nil
+ ex is: (cons autovar_Nat_0 nil)
+ ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+Running TheSy on datatypes: Lst Nat dict: zip leq succ zero cons nil
+Starting depth 1
+01:51:22 [0m[33m[WARN] [0m# of splitters: 1
+01:51:22 [0m[33m[WARN] [0m# of splitters: 2
+01:51:22 [0m[33m[WARN] [0mproved: (leq zero ?ts_ph_Nat_0) => true
+Starting depth 2
+01:51:22 [0m[33m[WARN] [0m# of splitters: 2
+01:51:22 [0m[33m[WARN] [0m# of splitters: 1
+01:51:22 [0m[33m[WARN] [0m# of splitters: 1
+01:51:22 [0m[33m[WARN] [0mproved: (leq (succ zero) (succ ?ts_ph_Nat_0)) => true
+
+done in 196

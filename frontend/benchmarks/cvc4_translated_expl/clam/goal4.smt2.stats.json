@@ -1,0 +1,636 @@
+{
+  "conjectures_proved": [
+    [
+      "(leq zero ts_ph_Nat_0)",
+      "true",
+      {
+        "secs": 0,
+        "nanos": 1325468
+      }
+    ],
+    [
+      "true",
+      "(leq zero ts_ph_Nat_0)",
+      {
+        "secs": 0,
+        "nanos": 164502
+      }
+    ],
+    [
+      "(append ts_ph_Lst_0 nil)",
+      "ts_ph_Lst_0",
+      {
+        "secs": 0,
+        "nanos": 147991
+      }
+    ],
+    [
+      "true",
+      "(leq (succ zero) (succ ts_ph_Nat_0))",
+      {
+        "secs": 0,
+        "nanos": 808913236
+      }
+    ],
+    [
+      "(leq (succ zero) (double ts_ph_Nat_0))",
+      "(leq (succ zero) ts_ph_Nat_0)",
+      {
+        "secs": 0,
+        "nanos": 810060455
+      }
+    ],
+    [
+      "(append (append ts_ph_Lst_0 ts_ph_Lst_1) ts_ph_Lst_1)",
+      "(append ts_ph_Lst_0 (append ts_ph_Lst_1 ts_ph_Lst_1))",
+      {
+        "secs": 0,
+        "nanos": 599248
+      }
+    ]
+  ],
+  "failed_proofs": [
+    [
+      "(len (append ts_ph_Lst_0 ts_ph_Lst_0))",
+      "(double (len ts_ph_Lst_0))",
+      {
+        "secs": 0,
+        "nanos": 261176
+      }
+    ],
+    [
+      "(leq ts_ph_Nat_0 (double ts_ph_Nat_0))",
+      "true",
+      {
+        "secs": 0,
+        "nanos": 231259
+      }
+    ],
+    [
+      "(leq ts_ph_Nat_0 (succ ts_ph_Nat_0))",
+      "true",
+      {
+        "secs": 0,
+        "nanos": 169471
+      }
+    ],
+    [
+      "(leq ts_ph_Nat_0 (succ ts_ph_Nat_0))",
+      "(leq ts_ph_Nat_0 (double ts_ph_Nat_0))",
+      {
+        "secs": 0,
+        "nanos": 302285
+      }
+    ],
+    [
+      "(double (len ts_ph_Lst_0))",
+      "(len (append ts_ph_Lst_0 ts_ph_Lst_0))",
+      {
+        "secs": 0,
+        "nanos": 320238
+      }
+    ],
+    [
+      "true",
+      "(leq ts_ph_Nat_0 (succ ts_ph_Nat_0))",
+      {
+        "secs": 0,
+        "nanos": 171817
+      }
+    ],
+    [
+      "true",
+      "(leq ts_ph_Nat_0 (double ts_ph_Nat_0))",
+      {
+        "secs": 0,
+        "nanos": 227572
+      }
+    ],
+    [
+      "(leq ts_ph_Nat_0 (double ts_ph_Nat_0))",
+      "(leq ts_ph_Nat_0 (succ ts_ph_Nat_0))",
+      {
+        "secs": 0,
+        "nanos": 303376
+      }
+    ],
+    [
+      "(leq (succ ts_ph_Nat_0) (double ts_ph_Nat_0))",
+      "(leq (succ zero) ts_ph_Nat_0)",
+      {
+        "secs": 0,
+        "nanos": 4426496
+      }
+    ]
+  ],
+  "goals_proved": [],
+  "failed_proofs_goals": [],
+  "equiv_red_iterations": [
+    [
+      {
+        "egraph_nodes": 153,
+        "egraph_classes": 153,
+        "applied": {
+          "rule0": 19,
+          "rule2": 1,
+          "rule4": 2,
+          "rule6": 5,
+          "rule7": 6,
+          "rule9": 1,
+          "rule11": 2
+        },
+        "hook_time": 5e-8,
+        "search_time": 0.000244684,
+        "apply_time": 0.000041579,
+        "rebuild_time": 0.000052951,
+        "total_time": 0.000339344,
+        "data": null,
+        "n_rebuilds": 36,
+        "stop_reason": null
+      },
+      {
+        "egraph_nodes": 211,
+        "egraph_classes": 175,
+        "applied": {
+          "rule7": 1,
+          "rule8": 29,
+          "equality": 5,
+          "less-zero": 5,
+          "less-zs": 2,
+          "less-succ": 2
+        },
+        "hook_time": 3.1e-8,
+        "search_time": 0.00028954,
+        "apply_time": 0.000055715,
+        "rebuild_time": 0.000031359,
+        "total_time": 0.000376735,
+        "data": null,
+        "n_rebuilds": 27,
+        "stop_reason": null
+      },
+      {
+        "egraph_nodes": 240,
+        "egraph_classes": 160,
+        "applied": {
+          "rule8": 6,
+          "or-true": 3,
+          "or-true2": 2
+        },
+        "hook_time": 2e-8,
+        "search_time": 0.000286163,
+        "apply_time": 0.000044555,
+        "rebuild_time": 0.0000213,
+        "total_time": 0.000352149,
+        "data": null,
+        "n_rebuilds": 7,
+        "stop_reason": null
+      },
+      {
+        "egraph_nodes": 247,
+        "egraph_classes": 156,
+        "applied": {
+          "rule8": 6
+        },
+        "hook_time": 2e-8,
+        "search_time": 0.000277898,
+        "apply_time": 0.000040347,
+        "rebuild_time": 0.000018124,
+        "total_time": 0.000336509,
+        "data": null,
+        "n_rebuilds": 5,
+        "stop_reason": null
+      },
+      {
+        "egraph_nodes": 254,
+        "egraph_classes": 157,
+        "applied": {
+          "rule8": 1
+        },
+        "hook_time": 3e-8,
+        "search_time": 0.000281224,
+        "apply_time": 0.000039164,
+        "rebuild_time": 0.000016081,
+        "total_time": 0.000336619,
+        "data": null,
+        "n_rebuilds": 1,
+        "stop_reason": null
+      },
+      {
+        "egraph_nodes": 255,
+        "egraph_classes": 157,
+        "applied": {},
+        "hook_time": 3e-8,
+        "search_time": 0.000291765,
+        "apply_time": 0.000038863,
+        "rebuild_time": 0.000015159,
+        "total_time": 0.000346017,
+        "data": null,
+        "n_rebuilds": 0,
+        "stop_reason": null
+      },
+      {
+        "egraph_nodes": 255,
+        "egraph_classes": 157,
+        "applied": {},
+        "hook_time": 0.0,
+        "search_time": 0.0,
+        "apply_time": 0.0,
+        "rebuild_time": 0.0,
+        "total_time": 0.0,
+        "data": null,
+        "n_rebuilds": 0,
+        "stop_reason": "Saturated"
+      }
+    ],
+    [
+      {
+        "egraph_nodes": 255,
+        "egraph_classes": 157,
+        "applied": {
+          "(append ?ts_ph_Lst_0 nil) => ?ts_ph_Lst_0": 2,
+          "(leq zero ?ts_ph_Nat_0) => true": 2
+        },
+        "hook_time": 2e-8,
+        "search_time": 0.000317262,
+        "apply_time": 0.000043503,
+        "rebuild_time": 0.000028163,
+        "total_time": 0.000389079,
+        "data": null,
+        "n_rebuilds": 6,
+        "stop_reason": null
+      },
+      {
+        "egraph_nodes": 251,
+        "egraph_classes": 149,
+        "applied": {
+          "rule8": 11
+        },
+        "hook_time": 2e-8,
+        "search_time": 0.000301182,
+        "apply_time": 0.00004757,
+        "rebuild_time": 0.000018916,
+        "total_time": 0.000367809,
+        "data": null,
+        "n_rebuilds": 11,
+        "stop_reason": null
+      },
+      {
+        "egraph_nodes": 262,
+        "egraph_classes": 149,
+        "applied": {
+          "rule8": 1
+        },
+        "hook_time": 3e-8,
+        "search_time": 0.00030539,
+        "apply_time": 0.000046408,
+        "rebuild_time": 0.0000157,
+        "total_time": 0.000367628,
+        "data": null,
+        "n_rebuilds": 1,
+        "stop_reason": null
+      },
+      {
+        "egraph_nodes": 263,
+        "egraph_classes": 149,
+        "applied": {},
+        "hook_time": 0.0,
+        "search_time": 0.0,
+        "apply_time": 0.0,
+        "rebuild_time": 0.0,
+        "total_time": 0.0,
+        "data": null,
+        "n_rebuilds": 0,
+        "stop_reason": {
+          "IterationLimit": 3
+        }
+      }
+    ],
+    [
+      {
+        "egraph_nodes": 2032,
+        "egraph_classes": 1918,
+        "applied": {
+          "rule0": 138,
+          "rule4": 4,
+          "rule6": 31,
+          "rule7": 505,
+          "rule8": 609,
+          "rule11": 25,
+          "(append ?ts_ph_Lst_0 nil) => ?ts_ph_Lst_0": 6,
+          "(leq zero ?ts_ph_Nat_0) => true": 8
+        },
+        "hook_time": 9.1e-8,
+        "search_time": 0.003320706,
+        "apply_time": 0.001075502,
+        "rebuild_time": 0.00094307,
+        "total_time": 0.0053394,
+        "data": null,
+        "n_rebuilds": 945,
+        "stop_reason": null
+      },
+      {
+        "egraph_nodes": 3404,
+        "egraph_classes": 1964,
+        "applied": {
+          "rule11": 1,
+          "equality": 8,
+          "less-zero": 8,
+          "less-zs": 4,
+          "less-succ": 30
+        },
+        "hook_time": 1.2e-7,
+        "search_time": 0.004052276,
+        "apply_time": 0.000169953,
+        "rebuild_time": 0.000276937,
+        "total_time": 0.004499405,
+        "data": null,
+        "n_rebuilds": 20,
+        "stop_reason": null
+      },
+      {
+        "egraph_nodes": 3397,
+        "egraph_classes": 1906,
+        "applied": {
+          "or-true": 4,
+          "or-true2": 6
+        },
+        "hook_time": 9e-8,
+        "search_time": 0.003577354,
+        "apply_time": 0.000166717,
+        "rebuild_time": 0.000216391,
+        "total_time": 0.003960602,
+        "data": null,
+        "n_rebuilds": 2,
+        "stop_reason": null
+      },
+      {
+        "egraph_nodes": 3393,
+        "egraph_classes": 1892,
+        "applied": {},
+        "hook_time": 3.1e-8,
+        "search_time": 0.003580851,
+        "apply_time": 0.000157519,
+        "rebuild_time": 0.000201663,
+        "total_time": 0.003940995,
+        "data": null,
+        "n_rebuilds": 0,
+        "stop_reason": null
+      },
+      {
+        "egraph_nodes": 3393,
+        "egraph_classes": 1892,
+        "applied": {
+          "rule7": 28,
+          "rule8": 374
+        },
+        "hook_time": 1.3e-7,
+        "search_time": 0.004163246,
+        "apply_time": 2.062984245,
+        "rebuild_time": 0.000644404,
+        "total_time": 2.067792447,
+        "data": null,
+        "n_rebuilds": 351,
+        "stop_reason": null
+      },
+      {
+        "egraph_nodes": 3789,
+        "egraph_classes": 1886,
+        "applied": {
+          "rule8": 123
+        },
+        "hook_time": 7e-8,
+        "search_time": 0.005405406,
+        "apply_time": 0.001188617,
+        "rebuild_time": 0.000276816,
+        "total_time": 0.006871009,
+        "data": null,
+        "n_rebuilds": 88,
+        "stop_reason": null
+      },
+      {
+        "egraph_nodes": 3916,
+        "egraph_classes": 1890,
+        "applied": {
+          "rule8": 62
+        },
+        "hook_time": 1.31e-7,
+        "search_time": 0.008478512,
+        "apply_time": 0.001261346,
+        "rebuild_time": 0.000286804,
+        "total_time": 0.010026893,
+        "data": null,
+        "n_rebuilds": 42,
+        "stop_reason": null
+      },
+      {
+        "egraph_nodes": 3982,
+        "egraph_classes": 1894,
+        "applied": {
+          "rule8": 70
+        },
+        "hook_time": 2.61e-7,
+        "search_time": 0.004814183,
+        "apply_time": 0.000988367,
+        "rebuild_time": 0.000223104,
+        "total_time": 0.006025794,
+        "data": null,
+        "n_rebuilds": 35,
+        "stop_reason": null
+      },
+      {
+        "egraph_nodes": 4068,
+        "egraph_classes": 1910,
+        "applied": {
+          "rule8": 30
+        },
+        "hook_time": 3e-8,
+        "search_time": 0.004105536,
+        "apply_time": 0.000983548,
+        "rebuild_time": 0.000220879,
+        "total_time": 0.005310094,
+        "data": null,
+        "n_rebuilds": 22,
+        "stop_reason": null
+      },
+      {
+        "egraph_nodes": 4102,
+        "egraph_classes": 1914,
+        "applied": {
+          "rule8": 4
+        },
+        "hook_time": 2.9e-8,
+        "search_time": 0.005079276,
+        "apply_time": 0.001226289,
+        "rebuild_time": 0.00025231,
+        "total_time": 0.006558015,
+        "data": null,
+        "n_rebuilds": 4,
+        "stop_reason": null
+      },
+      {
+        "egraph_nodes": 4106,
+        "egraph_classes": 1914,
+        "applied": {},
+        "hook_time": 4e-8,
+        "search_time": 0.005753858,
+        "apply_time": 0.001307643,
+        "rebuild_time": 0.000250155,
+        "total_time": 0.007312007,
+        "data": null,
+        "n_rebuilds": 0,
+        "stop_reason": null
+      },
+      {
+        "egraph_nodes": 4106,
+        "egraph_classes": 1914,
+        "applied": {},
+        "hook_time": 0.0,
+        "search_time": 0.0,
+        "apply_time": 0.0,
+        "rebuild_time": 0.0,
+        "total_time": 0.0,
+        "data": null,
+        "n_rebuilds": 0,
+        "stop_reason": "Saturated"
+      }
+    ],
+    [
+      {
+        "egraph_nodes": 4106,
+        "egraph_classes": 1914,
+        "applied": {
+          "(append ?ts_ph_Lst_0 (append ?ts_ph_Lst_1 ?ts_ph_Lst_2)) => (append (append ?ts_ph_Lst_0 ?ts_ph_Lst_1) ?ts_ph_Lst_2)": 923,
+          "(append (append ?ts_ph_Lst_0 ?ts_ph_Lst_1) ?ts_ph_Lst_2) => (append ?ts_ph_Lst_0 (append ?ts_ph_Lst_1 ?ts_ph_Lst_2))": 1230,
+          "(leq (succ zero) ?ts_ph_Nat_0) => (leq (succ zero) (double ?ts_ph_Nat_0))": 10,
+          "(leq (succ zero) (succ ?ts_ph_Nat_0)) => true": 2
+        },
+        "hook_time": 3e-8,
+        "search_time": 0.005285067,
+        "apply_time": 0.062750811,
+        "rebuild_time": 0.001082456,
+        "total_time": 0.069118474,
+        "data": null,
+        "n_rebuilds": 739,
+        "stop_reason": null
+      },
+      {
+        "egraph_nodes": 6446,
+        "egraph_classes": 2089,
+        "applied": {
+          "rule0": 8,
+          "rule6": 5,
+          "(leq (succ zero) ?ts_ph_Nat_0) => (leq (succ zero) (double ?ts_ph_Nat_0))": 8
+        },
+        "hook_time": 5e-8,
+        "search_time": 0.078555005,
+        "apply_time": 0.000193237,
+        "rebuild_time": 0.000376816,
+        "total_time": 0.079125228,
+        "data": null,
+        "n_rebuilds": 10,
+        "stop_reason": null
+      },
+      {
+        "egraph_nodes": 6480,
+        "egraph_classes": 2108,
+        "applied": {
+          "rule0": 8,
+          "rule4": 4,
+          "less-succ": 4,
+          "(leq (succ zero) ?ts_ph_Nat_0) => (leq (succ zero) (double ?ts_ph_Nat_0))": 8
+        },
+        "hook_time": 5e-8,
+        "search_time": 0.004692782,
+        "apply_time": 0.000191614,
+        "rebuild_time": 0.000293537,
+        "total_time": 0.005178063,
+        "data": null,
+        "n_rebuilds": 13,
+        "stop_reason": null
+      },
+      {
+        "egraph_nodes": 6536,
+        "egraph_classes": 2140,
+        "applied": {},
+        "hook_time": 0.0,
+        "search_time": 0.0,
+        "apply_time": 0.0,
+        "rebuild_time": 0.0,
+        "total_time": 0.0,
+        "data": null,
+        "n_rebuilds": 0,
+        "stop_reason": {
+          "IterationLimit": 3
+        }
+      }
+    ]
+  ],
+  "case_split": [
+    [
+      0,
+      {
+        "secs": 0,
+        "nanos": 507414
+      }
+    ],
+    [
+      0,
+      {
+        "secs": 0,
+        "nanos": 349987826
+      }
+    ]
+  ],
+  "term_creation": [
+    [
+      108,
+      {
+        "secs": 0,
+        "nanos": 238753
+      }
+    ],
+    [
+      1769,
+      {
+        "secs": 0,
+        "nanos": 3065401
+      }
+    ]
+  ],
+  "get_conjectures": [
+    {
+      "secs": 0,
+      "nanos": 458230
+    },
+    {
+      "secs": 0,
+      "nanos": 415669
+    },
+    {
+      "secs": 0,
+      "nanos": 432811
+    },
+    {
+      "secs": 0,
+      "nanos": 349527452
+    },
+    {
+      "secs": 0,
+      "nanos": 456780968
+    },
+    {
+      "secs": 0,
+      "nanos": 87689211
+    }
+  ],
+  "filtered_lemmas": [
+    [
+      "true",
+      "(leq zero ts_ph_Nat_0)"
+    ]
+  ],
+  "total_time": {
+    "secs": 3,
+    "nanos": 197101231
+  }
+}

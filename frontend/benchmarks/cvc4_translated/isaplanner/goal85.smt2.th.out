@@ -1,0 +1,58 @@
+Collecting statistics
+(leq ?__x0 ?__y1) => (or (= ?__x0 ?__y1) (less ?__x0 ?__y1))
+(or (= ?__x0 ?__y1) (less ?__x0 ?__y1)) => (leq ?__x0 ?__y1)
+(append nil ?x) => ?x
+(append (cons ?x2 ?y) ?z) => (cons ?x2 (append ?y ?z))
+(cons ?x2 (append ?y ?z)) => (append (cons ?x2 ?y) ?z)
+(len nil) => zero
+zero => (len nil)
+(len (cons ?x3 ?y)) => (succ (len ?y))
+(drop ?x4 nil) => nil
+(drop zero ?x) => ?x
+(drop (succ ?x5) (cons ?y6 ?z)) => (drop ?x5 ?z)
+(take ?x7 nil) => nil
+(take zero ?x) => nil
+(take (succ ?x8) (cons ?y9 ?z)) => (cons ?y9 (take ?x8 ?z))
+(cons ?y9 (take ?x8 ?z)) => (take (succ ?x8) (cons ?y9 ?z))
+(zip nil ?x) => znil
+(zip ?x nil) => znil
+(zip (cons ?x10 ?y) (cons ?z11 ?w)) => (zcons (mkpair ?x10 ?z11) (zip ?y ?w))
+(zcons (mkpair ?x10 ?z11) (zip ?y ?w)) => (zip (cons ?x10 ?y) (cons ?z11 ?w))
+(zappend znil ?x12) => ?x12
+(zappend (zcons ?x13 ?y14) ?z15) => (zcons ?x13 (zappend ?y14 ?z15))
+(zcons ?x13 (zappend ?y14 ?z15)) => (zappend (zcons ?x13 ?y14) ?z15)
+(drop ?autovar5 (cons ?autovar2 ?autovar3)) => (potential_split ?autovar5 (succ (param_Nat_0 ?autovar5)) zero) if Cond(var: ?autovar5, pat: (succ ?param_0)) Cond(var: ?autovar5, pat: zero)
+(drop (succ ?autovar4) ?autovar6) => (potential_split ?autovar6 (cons (param_Lst_0 ?autovar6) (param_Lst_1 ?autovar6)) nil) if Cond(var: ?autovar6, pat: (cons ?param_0 ?param_1)) Cond(var: ?autovar6, pat: nil)
+(take ?autovar5 (cons ?autovar2 ?autovar3)) => (potential_split ?autovar5 (succ (param_Nat_0 ?autovar5)) zero) if Cond(var: ?autovar5, pat: (succ ?param_0)) Cond(var: ?autovar5, pat: zero)
+(take (succ ?autovar4) ?autovar6) => (potential_split ?autovar6 (cons (param_Lst_0 ?autovar6) (param_Lst_1 ?autovar6)) nil) if Cond(var: ?autovar6, pat: (cons ?param_0 ?param_1)) Cond(var: ?autovar6, pat: nil)
+(zip ?autovar7 (cons ?autovar3 ?autovar4)) => (potential_split ?autovar7 (cons (param_Lst_0 ?autovar7) (param_Lst_1 ?autovar7)) nil) if Cond(var: ?autovar7, pat: (cons ?param_0 ?param_1)) Cond(var: ?autovar7, pat: nil)
+(zip (cons ?autovar5 ?autovar6) ?autovar8) => (potential_split ?autovar8 (cons (param_Lst_0 ?autovar8) (param_Lst_1 ?autovar8)) nil) if Cond(var: ?autovar8, pat: (cons ?param_0 ?param_1)) Cond(var: ?autovar8, pat: nil)
+ ex is: zero
+ ex is: (succ zero)
+ ex is: (succ (succ zero))
+ ex is: nil
+ ex is: (cons autovar_Nat_0 nil)
+ ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+ ex is: (mkpair autovar_Nat_0 autovar_Nat_1)
+ ex is: znil
+ ex is: (zcons autovar_Pair_0 znil)
+ ex is: (zcons autovar_Pair_1 (zcons autovar_Pair_0 znil))
+Running TheSy on datatypes: Lst Nat Pair ZLst dict: append len drop take zip zappend leq succ zero cons nil mkpair zcons znil
+01:11:49 [0m[33m[WARN] [0m# of splitters: 2
+01:11:49 [0m[33m[WARN] [0m# of splitters: 2
+01:11:49 [0m[33m[WARN] [0m# of splitters: 1
+01:11:49 [0m[33m[WARN] [0m# of splitters: 1
+01:11:49 [0m[33m[WARN] [0m# of splitters: 2
+01:11:49 [0m[33m[WARN] [0m# of splitters: 1
+01:11:49 [0m[33m[WARN] [0m# of splitters: 1
+01:11:49 [0m[33m[WARN] [0m# of splitters: 2
+01:11:49 [0m[33m[WARN] [0m# of splitters: 1
+01:11:49 [0m[33m[WARN] [0m# of splitters: 1
+proved: (zip (append ?ts_ph_Lst_0 ?ts_ph_Lst_1) ?ts_ph_Lst_3) => (zappend
+  (zip ?ts_ph_Lst_0 (take (len ?ts_ph_Lst_0) ?ts_ph_Lst_3))
+  (zip ?ts_ph_Lst_1 (drop (len ?ts_ph_Lst_0) ?ts_ph_Lst_3)))
+proved: (zappend
+  (zip ?ts_ph_Lst_0 (take (len ?ts_ph_Lst_0) ?ts_ph_Lst_3))
+  (zip ?ts_ph_Lst_1 (drop (len ?ts_ph_Lst_0) ?ts_ph_Lst_3))) => (zip (append ?ts_ph_Lst_0 ?ts_ph_Lst_1) ?ts_ph_Lst_3)
+01:11:49 [0m[33m[WARN] [0mFound all lemmas
+done in 16

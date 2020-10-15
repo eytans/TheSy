@@ -1,0 +1,147 @@
+Collecting statistics
+(leq ?__x0 ?__y1) => (or (= ?__x0 ?__y1) (less ?__x0 ?__y1))
+(or (= ?__x0 ?__y1) (less ?__x0 ?__y1)) => (leq ?__x0 ?__y1)
+(less ?x zero) => false
+(less zero (succ ?x)) => true
+(less (succ ?x) (succ ?y)) => (less ?x ?y)
+(less ?x ?y) => (less (succ ?x) (succ ?y))
+(mem ?x nil) => false
+(mem ?x (cons ?y ?z)) => (or (= ?x ?y) (mem ?x ?z))
+(or (= ?x ?y) (mem ?x ?z)) => (mem ?x (cons ?y ?z))
+(insort ?i nil) => (cons ?i nil)
+(cons ?i nil) => (insort ?i nil)
+(insort ?i (cons ?x ?y2)) => (ite (less ?i ?x) (cons ?i (cons ?x ?y2)) (cons ?x (insort ?i ?y2)))
+(ite (less ?i ?x) (cons ?i (cons ?x ?y2)) (cons ?x (insort ?i ?y2))) => (insort ?i (cons ?x ?y2))
+(sort nil) => nil
+nil => (sort nil)
+(sort (cons ?x ?y3)) => (insort ?x (sort ?y3))
+(insort ?x (sort ?y3)) => (sort (cons ?x ?y3))
+(less ?autovar5 (succ ?autovar1)) => (potential_split ?autovar5 (succ (param_Nat_0 ?autovar5)) zero) if Cond(var: ?autovar5, pat: (succ ?param_0)) Cond(var: ?autovar5, pat: zero)
+(less ?autovar5 (succ ?autovar3)) => (potential_split ?autovar5 (succ (param_Nat_0 ?autovar5)) zero) if Cond(var: ?autovar5, pat: (succ ?param_0)) Cond(var: ?autovar5, pat: zero)
+(less zero ?autovar6) => (potential_split ?autovar6 (succ (param_Nat_0 ?autovar6)) zero) if Cond(var: ?autovar6, pat: (succ ?param_0)) Cond(var: ?autovar6, pat: zero)
+(less (succ ?autovar4) ?autovar6) => (potential_split ?autovar6 (succ (param_Nat_0 ?autovar6)) zero) if Cond(var: ?autovar6, pat: (succ ?param_0)) Cond(var: ?autovar6, pat: zero)
+ ex is: zero
+ ex is: (succ zero)
+ ex is: (succ (succ zero))
+ ex is: nil
+ ex is: (cons autovar_Nat_0 nil)
+ ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+Running TheSy on datatypes: Nat Lst dict: less mem insort sort leq succ zero cons nil
+Starting depth 1
+01:29:56 [0m[33m[WARN] [0m# of splitters: 11
+01:29:56 [0m[33m[WARN] [0m# of splitters: 11
+01:29:58 [0m[33m[WARN] [0m# of splitters: 8
+01:29:59 [0m[33m[WARN] [0m# of splitters: 9
+01:29:59 [0m[33m[WARN] [0m# of splitters: 7
+01:29:59 [0m[33m[WARN] [0m# of splitters: 8
+01:29:59 [0m[33m[WARN] [0m# of splitters: 5
+01:30:00 [0m[33m[WARN] [0m# of splitters: 7
+01:30:00 [0m[33m[WARN] [0m# of splitters: 4
+01:30:00 [0m[33m[WARN] [0m# of splitters: 6
+01:30:00 [0m[33m[WARN] [0m# of splitters: 6
+01:30:00 [0m[33m[WARN] [0m# of splitters: 5
+01:30:00 [0m[33m[WARN] [0m# of splitters: 5
+01:30:00 [0m[33m[WARN] [0m# of splitters: 4
+01:30:00 [0m[33m[WARN] [0m# of splitters: 4
+01:30:00 [0m[33m[WARN] [0m# of splitters: 3
+01:30:00 [0m[33m[WARN] [0m# of splitters: 3
+01:30:00 [0m[33m[WARN] [0m# of splitters: 2
+01:30:01 [0m[33m[WARN] [0m# of splitters: 2
+01:30:01 [0m[33m[WARN] [0m# of splitters: 1
+01:30:01 [0m[33m[WARN] [0m# of splitters: 1
+01:30:01 [0m[33m[WARN] [0mproved: (leq zero ?ts_ph_Nat_0) => true
+01:30:01 [0m[33m[WARN] [0m# of splitters: 2
+01:30:01 [0m[33m[WARN] [0m# of splitters: 1
+01:30:01 [0m[33m[WARN] [0m# of splitters: 1
+01:30:01 [0m[33m[WARN] [0mproved: (insort zero ?ts_ph_Lst_0) => (cons zero ?ts_ph_Lst_0)
+01:30:01 [0m[33m[WARN] [0mproved: (cons zero ?ts_ph_Lst_0) => (insort zero ?ts_ph_Lst_0)
+
+01:30:01 [0m[33m[WARN] [0mproved: (less ?ts_ph_Nat_0 ?ts_ph_Nat_0) => false
+
+Starting depth 2
+01:30:01 [0m[33m[WARN] [0m# of splitters: 31
+01:30:01 [0m[33m[WARN] [0m# of splitters: 31
+01:32:24 [0m[33m[WARN] [0m# of splitters: 17
+01:32:59 [0m[33m[WARN] [0m# of splitters: 30
+01:33:56 [0m[33m[WARN] [0m# of splitters: 19
+01:34:21 [0m[33m[WARN] [0m# of splitters: 29
+01:34:39 [0m[33m[WARN] [0m# of splitters: 22
+01:34:40 [0m[33m[WARN] [0mStopped case split due to node limit
+01:34:41 [0m[33m[WARN] [0mStopped case split due to node limit
+01:34:43 [0m[33m[WARN] [0mStopped case split due to node limit
+01:34:44 [0m[33m[WARN] [0mStopped case split due to node limit
+01:34:45 [0m[33m[WARN] [0m# of splitters: 28
+01:34:58 [0m[33m[WARN] [0m# of splitters: 21
+01:34:58 [0m[33m[WARN] [0mStopped case split due to node limit
+01:34:59 [0m[33m[WARN] [0mStopped case split due to node limit
+01:35:00 [0m[33m[WARN] [0m# of splitters: 26
+01:35:11 [0m[33m[WARN] [0m# of splitters: 27
+01:35:31 [0m[33m[WARN] [0m# of splitters: 25
+01:36:06 [0m[33m[WARN] [0m# of splitters: 25
+01:36:21 [0m[33m[WARN] [0m# of splitters: 24
+01:36:36 [0m[33m[WARN] [0m# of splitters: 24
+01:37:04 [0m[33m[WARN] [0m# of splitters: 23
+01:37:18 [0m[33m[WARN] [0m# of splitters: 23
+01:37:30 [0m[33m[WARN] [0m# of splitters: 22
+01:37:35 [0m[33m[WARN] [0m# of splitters: 23
+01:37:48 [0m[33m[WARN] [0m# of splitters: 21
+01:37:56 [0m[33m[WARN] [0m# of splitters: 21
+01:38:02 [0m[33m[WARN] [0m# of splitters: 20
+01:38:03 [0m[33m[WARN] [0m# of splitters: 21
+01:38:06 [0m[33m[WARN] [0m# of splitters: 19
+01:38:39 [0m[33m[WARN] [0m# of splitters: 19
+01:38:42 [0m[33m[WARN] [0m# of splitters: 18
+01:38:52 [0m[33m[WARN] [0m# of splitters: 18
+01:38:55 [0m[33m[WARN] [0m# of splitters: 17
+01:39:01 [0m[33m[WARN] [0m# of splitters: 17
+01:39:01 [0m[33m[WARN] [0m# of splitters: 16
+01:39:08 [0m[33m[WARN] [0m# of splitters: 16
+01:39:26 [0m[33m[WARN] [0m# of splitters: 15
+01:39:41 [0m[33m[WARN] [0m# of splitters: 15
+01:39:59 [0m[33m[WARN] [0m# of splitters: 14
+01:40:11 [0m[33m[WARN] [0m# of splitters: 14
+01:40:22 [0m[33m[WARN] [0m# of splitters: 13
+01:40:38 [0m[33m[WARN] [0m# of splitters: 13
+01:40:51 [0m[33m[WARN] [0m# of splitters: 12
+01:41:00 [0m[33m[WARN] [0m# of splitters: 12
+01:41:13 [0m[33m[WARN] [0m# of splitters: 11
+01:41:28 [0m[33m[WARN] [0m# of splitters: 11
+01:41:40 [0m[33m[WARN] [0m# of splitters: 10
+01:41:52 [0m[33m[WARN] [0m# of splitters: 10
+01:42:00 [0m[33m[WARN] [0m# of splitters: 9
+01:42:14 [0m[33m[WARN] [0m# of splitters: 9
+01:42:30 [0m[33m[WARN] [0m# of splitters: 8
+01:42:39 [0m[33m[WARN] [0m# of splitters: 8
+01:42:59 [0m[33m[WARN] [0m# of splitters: 7
+01:43:11 [0m[33m[WARN] [0m# of splitters: 7
+01:43:25 [0m[33m[WARN] [0m# of splitters: 6
+01:43:37 [0m[33m[WARN] [0m# of splitters: 6
+01:43:46 [0m[33m[WARN] [0m# of splitters: 5
+01:43:57 [0m[33m[WARN] [0m# of splitters: 5
+01:44:09 [0m[33m[WARN] [0m# of splitters: 4
+01:44:25 [0m[33m[WARN] [0m# of splitters: 4
+01:44:39 [0m[33m[WARN] [0m# of splitters: 3
+01:44:44 [0m[33m[WARN] [0m# of splitters: 3
+01:44:52 [0m[33m[WARN] [0m# of splitters: 2
+01:44:56 [0m[33m[WARN] [0m# of splitters: 2
+01:45:01 [0m[33m[WARN] [0m# of splitters: 1
+01:45:01 [0m[33m[WARN] [0m# of splitters: 1
+01:45:01 [0m[33m[WARN] [0m# of splitters: 1
+01:45:01 [0m[33m[WARN] [0m# of splitters: 1
+01:45:01 [0m[33m[WARN] [0mproved: (less ?ts_ph_Nat_0 (succ ?ts_ph_Nat_0)) => true
+01:45:01 [0m[33m[WARN] [0m# of splitters: 1
+01:45:01 [0m[33m[WARN] [0m# of splitters: 1
+01:45:01 [0m[33m[WARN] [0mproved: (less (succ ?ts_ph_Nat_0) ?ts_ph_Nat_0) => false
+01:45:01 [0m[33m[WARN] [0mproved: (leq (succ zero) (succ ?ts_ph_Nat_0)) => true
+01:45:01 [0m[33m[WARN] [0m# of splitters: 1
+01:45:01 [0m[33m[WARN] [0m# of splitters: 1
+01:45:01 [0m[33m[WARN] [0m# of splitters: 1
+01:45:01 [0m[33m[WARN] [0m# of splitters: 1
+01:45:01 [0m[33m[WARN] [0m# of splitters: 1
+01:45:01 [0m[33m[WARN] [0m# of splitters: 1
+01:45:01 [0m[33m[WARN] [0m# of splitters: 1
+01:45:01 [0m[33m[WARN] [0m# of splitters: 1
+01:45:01 [0m[33m[WARN] [0m# of splitters: 1
+01:45:01 [0m[33m[WARN] [0mproved: (mem ?ts_ph_Nat_1 (insort ?ts_ph_Nat_1 ?ts_ph_Lst_0)) => true
+
+done in 907824

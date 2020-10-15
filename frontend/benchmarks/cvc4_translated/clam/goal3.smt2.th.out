@@ -1,0 +1,23 @@
+Collecting statistics
+(leq ?__x0 ?__y1) => (or (= ?__x0 ?__y1) (less ?__x0 ?__y1))
+(or (= ?__x0 ?__y1) (less ?__x0 ?__y1)) => (leq ?__x0 ?__y1)
+(plus zero ?n) => ?n
+(plus (succ ?n) ?m) => (succ (plus ?n ?m))
+(succ (plus ?n ?m)) => (plus (succ ?n) ?m)
+(append nil ?x) => ?x
+(append (cons ?x2 ?y) ?z) => (cons ?x2 (append ?y ?z))
+(cons ?x2 (append ?y ?z)) => (append (cons ?x2 ?y) ?z)
+(len nil) => zero
+zero => (len nil)
+(len (cons ?x3 ?y)) => (succ (len ?y))
+ ex is: zero
+ ex is: (succ zero)
+ ex is: (succ (succ zero))
+ ex is: nil
+ ex is: (cons autovar_Nat_0 nil)
+ ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+Running TheSy on datatypes: Nat Lst dict: plus append len leq succ zero cons nil
+proved: (len (append ?ts_ph_Lst_0 ?ts_ph_Lst_2)) => (plus (len ?ts_ph_Lst_0) (len ?ts_ph_Lst_2))
+proved: (plus (len ?ts_ph_Lst_0) (len ?ts_ph_Lst_2)) => (len (append ?ts_ph_Lst_0 ?ts_ph_Lst_2))
+01:11:27 [0m[33m[WARN] [0mFound all lemmas
+done in 1

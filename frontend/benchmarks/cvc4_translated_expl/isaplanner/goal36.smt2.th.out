@@ -1,0 +1,11 @@
+Collecting statistics
+(leq ?__x0 ?__y1) => (or (= ?__x0 ?__y1) (less ?__x0 ?__y1))
+(or (= ?__x0 ?__y1) (less ?__x0 ?__y1)) => (leq ?__x0 ?__y1)
+(take ?x nil) => nil
+(take zero ?x2) => nil
+(take (succ ?x) (cons ?y ?z)) => (cons ?y (take ?x ?z))
+(cons ?y (take ?x ?z)) => (take (succ ?x) (cons ?y ?z))
+(takeWhile nil) => nil
+nil => (takeWhile nil)
+(takeWhile (cons ?x ?y3)) => (ite (P ?x) (cons ?x (takeWhile ?y3)) nil)
+(ite (P ?x) (cons ?x (takeWhile ?y3)) nil) => (takeWhile (cons ?x ?y3))

@@ -1,0 +1,26 @@
+Collecting statistics
+(leq ?__x0 ?__y1) => (or (= ?__x0 ?__y1) (less ?__x0 ?__y1))
+(or (= ?__x0 ?__y1) (less ?__x0 ?__y1)) => (leq ?__x0 ?__y1)
+(plus zero ?n) => ?n
+(plus (succ ?n) ?m) => (succ (plus ?n ?m))
+(succ (plus ?n ?m)) => (plus (succ ?n) ?m)
+(mult zero ?n) => zero
+(mult (succ ?n) ?m) => (plus (mult ?n ?m) ?m)
+(plus (mult ?n ?m) ?m) => (mult (succ ?n) ?m)
+(fac zero) => (succ zero)
+(succ zero) => (fac zero)
+(fac (succ ?n)) => (mult (fac ?n) ?n)
+(mult (fac ?n) ?n) => (fac (succ ?n))
+(qfac zero ?n) => ?n
+(qfac (succ ?n) ?m) => (qfac ?n (mult ?m ?n))
+(qfac ?n (mult ?m ?n)) => (qfac (succ ?n) ?m)
+(mult (fac ?x) ?y) => (qfac ?x ?y)
+(qfac ?x ?y) => (mult (fac ?x) ?y)
+ ex is: zero
+ ex is: (succ zero)
+ ex is: (succ (succ zero))
+Running TheSy on datatypes: Nat dict: plus mult fac qfac leq succ zero
+proved: (fac ?ts_ph_Nat_0) => (qfac ?ts_ph_Nat_0 (succ zero))
+proved: (qfac ?ts_ph_Nat_0 (succ zero)) => (fac ?ts_ph_Nat_0)
+01:11:27 [0m[33m[WARN] [0mFound all lemmas
+done in 1

@@ -1,0 +1,57 @@
+Collecting statistics
+(leq ?__x0 ?__y1) => (or (= ?__x0 ?__y1) (less ?__x0 ?__y1))
+(or (= ?__x0 ?__y1) (less ?__x0 ?__y1)) => (leq ?__x0 ?__y1)
+(plus zero ?n) => ?n
+(plus (succ ?n) ?m) => (succ (plus ?n ?m))
+(succ (plus ?n ?m)) => (plus (succ ?n) ?m)
+(mult zero ?n) => zero
+(mult (succ ?n) ?m) => (plus (mult ?n ?m) ?m)
+(plus (mult ?n ?m) ?m) => (mult (succ ?n) ?m)
+(qmult zero ?n ?m) => ?m
+(qmult (succ ?n) ?m ?p) => (qmult ?n ?m (plus ?p ?m))
+(qmult ?n ?m (plus ?p ?m)) => (qmult (succ ?n) ?m ?p)
+ ex is: zero
+ ex is: (succ zero)
+ ex is: (succ (succ zero))
+Running TheSy on datatypes: Nat dict: plus mult qmult leq succ zero
+Starting depth 1
+01:11:27 [0m[33m[WARN] [0mproved: (plus ?ts_ph_Nat_0 zero) => ?ts_ph_Nat_0
+
+01:11:27 [0m[33m[WARN] [0mproved: (leq zero ?ts_ph_Nat_0) => true
+
+01:11:27 [0m[33m[WARN] [0mproved: (mult ?ts_ph_Nat_0 zero) => zero
+
+01:11:27 [0m[33m[WARN] [0mproved: (qmult ?ts_ph_Nat_0 zero ?ts_ph_Nat_1) => ?ts_ph_Nat_1
+
+Starting depth 2
+generalizing (plus (plus ts_ph_Nat_0 ts_ph_Nat_1) ts_ph_Nat_1) = (plus ts_ph_Nat_0 (plus ts_ph_Nat_1 ts_ph_Nat_1))
+01:11:31 [0m[33m[WARN] [0mproved: (plus (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1) ?ts_ph_Nat_2) => (plus ?ts_ph_Nat_0 (plus ?ts_ph_Nat_1 ?ts_ph_Nat_2))
+01:11:31 [0m[33m[WARN] [0mproved: (plus ?ts_ph_Nat_0 (plus ?ts_ph_Nat_1 ?ts_ph_Nat_2)) => (plus (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1) ?ts_ph_Nat_2)
+01:11:31 [0m[33m[WARN] [0mproved: (succ (succ ?ts_ph_Nat_0)) => (succ (plus ?ts_ph_Nat_0 (succ zero)))
+01:11:31 [0m[33m[WARN] [0mproved: (succ (plus ?ts_ph_Nat_0 (succ zero))) => (succ (succ ?ts_ph_Nat_0))
+01:11:31 [0m[33m[WARN] [0mproved: (plus (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0) (succ zero)) => (plus ?ts_ph_Nat_0 (succ ?ts_ph_Nat_0))
+01:11:31 [0m[33m[WARN] [0mproved: (plus ?ts_ph_Nat_0 (succ ?ts_ph_Nat_0)) => (plus (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0) (succ zero))
+01:11:31 [0m[33m[WARN] [0mproved: (succ (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0)) => (plus (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0) (succ zero))
+01:11:31 [0m[33m[WARN] [0mproved: (plus (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0) (succ zero)) => (succ (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0))
+01:11:31 [0m[33m[WARN] [0mproved: (qmult (succ zero) (succ zero) ?ts_ph_Nat_0) => (succ ?ts_ph_Nat_0)
+01:11:31 [0m[33m[WARN] [0mproved: (succ ?ts_ph_Nat_0) => (qmult (succ zero) (succ zero) ?ts_ph_Nat_0)
+01:11:31 [0m[33m[WARN] [0mproved: (qmult (succ zero) (succ zero) ?ts_ph_Nat_0) => (mult (succ ?ts_ph_Nat_0) (succ zero))
+01:11:31 [0m[33m[WARN] [0mproved: (mult (succ ?ts_ph_Nat_0) (succ zero)) => (qmult (succ zero) (succ zero) ?ts_ph_Nat_0)
+01:11:31 [0m[33m[WARN] [0mproved: (qmult ?ts_ph_Nat_1 (succ zero) ?ts_ph_Nat_0) => (qmult (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1) (succ zero) zero)
+01:11:31 [0m[33m[WARN] [0mproved: (qmult (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1) (succ zero) zero) => (qmult ?ts_ph_Nat_1 (succ zero) ?ts_ph_Nat_0)
+01:11:31 [0m[33m[WARN] [0mproved: (qmult (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0) (succ zero) ?ts_ph_Nat_0) => (plus ?ts_ph_Nat_0 (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0))
+01:11:31 [0m[33m[WARN] [0mproved: (plus ?ts_ph_Nat_0 (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0)) => (qmult (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0) (succ zero) ?ts_ph_Nat_0)
+01:11:31 [0m[33m[WARN] [0mproved: (mult (mult ?ts_ph_Nat_0 ?ts_ph_Nat_0) (succ zero)) => (qmult (mult ?ts_ph_Nat_0 ?ts_ph_Nat_0) (succ zero) zero)
+01:11:31 [0m[33m[WARN] [0mproved: (qmult (mult ?ts_ph_Nat_0 ?ts_ph_Nat_0) (succ zero) zero) => (mult (mult ?ts_ph_Nat_0 ?ts_ph_Nat_0) (succ zero))
+01:11:32 [0m[33m[WARN] [0mproved: (mult (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0) (succ zero)) => (qmult (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0) (succ zero) zero)
+01:11:32 [0m[33m[WARN] [0mproved: (qmult (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0) (succ zero) zero) => (mult (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0) (succ zero))
+01:11:33 [0m[33m[WARN] [0mproved: (plus ?ts_ph_Nat_0 (qmult ?ts_ph_Nat_0 ?ts_ph_Nat_0 zero)) => (qmult (qmult ?ts_ph_Nat_0 ?ts_ph_Nat_0 zero) (succ zero) ?ts_ph_Nat_0)
+01:11:33 [0m[33m[WARN] [0mproved: (qmult (qmult ?ts_ph_Nat_0 ?ts_ph_Nat_0 zero) (succ zero) ?ts_ph_Nat_0) => (plus ?ts_ph_Nat_0 (qmult ?ts_ph_Nat_0 ?ts_ph_Nat_0 zero))
+01:12:02 [0m[33m[WARN] [0mproved: (mult ?ts_ph_Nat_0 (succ zero)) => ?ts_ph_Nat_0
+
+01:12:33 [0m[33m[WARN] [0mproved: (plus ?ts_ph_Nat_1 ?ts_ph_Nat_0) => (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1)
+01:12:33 [0m[33m[WARN] [0mproved: (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1) => (plus ?ts_ph_Nat_1 ?ts_ph_Nat_0)
+proved: (plus (mult ?ts_ph_Nat_0 ?ts_ph_Nat_3) ?ts_ph_Nat_1) => (qmult ?ts_ph_Nat_0 ?ts_ph_Nat_3 ?ts_ph_Nat_1)
+proved: (qmult ?ts_ph_Nat_0 ?ts_ph_Nat_3 ?ts_ph_Nat_1) => (plus (mult ?ts_ph_Nat_0 ?ts_ph_Nat_3) ?ts_ph_Nat_1)
+01:12:33 [0m[33m[WARN] [0mFound all lemmas
+done in 65601

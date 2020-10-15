@@ -1,0 +1,44 @@
+Collecting statistics
+(leq ?__x0 ?__y1) => (or (= ?__x0 ?__y1) (less ?__x0 ?__y1))
+(or (= ?__x0 ?__y1) (less ?__x0 ?__y1)) => (leq ?__x0 ?__y1)
+(less ?x zero) => false
+(less zero (succ ?x)) => true
+(less (succ ?x) (succ ?y)) => (less ?x ?y)
+(less ?x ?y) => (less (succ ?x) (succ ?y))
+(len nil) => zero
+zero => (len nil)
+(len (cons ?x ?y2)) => (succ (len ?y2))
+(drop ?x nil) => nil
+(drop zero ?x3) => ?x3
+(drop (succ ?x) (cons ?y ?z)) => (drop ?x ?z)
+(last (cons ?x ?y4)) => (ite (= ?y4 nil) ?x (last ?y4))
+(ite (= ?y4 nil) ?x (last ?y4)) => (last (cons ?x ?y4))
+(less ?autovar5 (succ ?autovar1)) => (potential_split ?autovar5 (succ (param_Nat_0 ?autovar5)) zero) if Cond(var: ?autovar5, pat: (succ ?param_0)) Cond(var: ?autovar5, pat: zero)
+(less ?autovar5 (succ ?autovar3)) => (potential_split ?autovar5 (succ (param_Nat_0 ?autovar5)) zero) if Cond(var: ?autovar5, pat: (succ ?param_0)) Cond(var: ?autovar5, pat: zero)
+(less zero ?autovar6) => (potential_split ?autovar6 (succ (param_Nat_0 ?autovar6)) zero) if Cond(var: ?autovar6, pat: (succ ?param_0)) Cond(var: ?autovar6, pat: zero)
+(less (succ ?autovar4) ?autovar6) => (potential_split ?autovar6 (succ (param_Nat_0 ?autovar6)) zero) if Cond(var: ?autovar6, pat: (succ ?param_0)) Cond(var: ?autovar6, pat: zero)
+(drop ?autovar5 (cons ?autovar2 ?autovar3)) => (potential_split ?autovar5 (succ (param_Nat_0 ?autovar5)) zero) if Cond(var: ?autovar5, pat: (succ ?param_0)) Cond(var: ?autovar5, pat: zero)
+(drop (succ ?autovar4) ?autovar6) => (potential_split ?autovar6 (cons (param_Lst_0 ?autovar6) (param_Lst_1 ?autovar6)) nil) if Cond(var: ?autovar6, pat: (cons ?param_0 ?param_1)) Cond(var: ?autovar6, pat: nil)
+ ex is: zero
+ ex is: (succ zero)
+ ex is: (succ (succ zero))
+ ex is: nil
+ ex is: (cons autovar_Nat_0 nil)
+ ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+Running TheSy on datatypes: Lst Nat dict: less len drop last leq succ zero cons nil
+01:12:27 [0m[33m[WARN] [0m# of splitters: 1
+01:12:27 [0m[33m[WARN] [0m# of splitters: 2
+01:12:27 [0m[33m[WARN] [0m# of splitters: 1
+01:12:27 [0m[33m[WARN] [0m# of splitters: 2
+01:12:27 [0m[33m[WARN] [0m# of splitters: 1
+01:12:27 [0m[33m[WARN] [0m# of splitters: 2
+01:12:27 [0m[33m[WARN] [0m# of splitters: 2
+01:12:27 [0m[33m[WARN] [0m# of splitters: 73
+01:12:28 [0m[33m[WARN] [0m# of splitters: 2
+01:12:28 [0m[33m[WARN] [0m# of splitters: 2
+01:12:28 [0m[33m[WARN] [0m# of splitters: 1
+01:12:28 [0m[33m[WARN] [0m# of splitters: 1
+proved: (less ?ts_ph_Nat_1 (len ?ts_ph_Lst_0)) |> (last (drop ?ts_ph_Nat_1 ?ts_ph_Lst_0)) => (last ?ts_ph_Lst_0)
+proved: (less ?ts_ph_Nat_1 (len ?ts_ph_Lst_0)) |> (last ?ts_ph_Lst_0) => (last (drop ?ts_ph_Nat_1 ?ts_ph_Lst_0))
+01:12:28 [0m[33m[WARN] [0mFound all lemmas
+done in 904

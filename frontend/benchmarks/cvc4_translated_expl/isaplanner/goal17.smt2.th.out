@@ -1,0 +1,42 @@
+Collecting statistics
+(leq ?__x0 ?__y1) => (or (= ?__x0 ?__y1) (less ?__x0 ?__y1))
+(or (= ?__x0 ?__y1) (less ?__x0 ?__y1)) => (leq ?__x0 ?__y1)
+(less ?x zero) => false
+(less zero (succ ?x)) => true
+(less (succ ?x) (succ ?y)) => (less ?x ?y)
+(less ?x ?y) => (less (succ ?x) (succ ?y))
+(less ?autovar5 (succ ?autovar1)) => (potential_split ?autovar5 (succ (param_Nat_0 ?autovar5)) zero) if Cond(var: ?autovar5, pat: (succ ?param_0)) Cond(var: ?autovar5, pat: zero)
+(less ?autovar5 (succ ?autovar3)) => (potential_split ?autovar5 (succ (param_Nat_0 ?autovar5)) zero) if Cond(var: ?autovar5, pat: (succ ?param_0)) Cond(var: ?autovar5, pat: zero)
+(less zero ?autovar6) => (potential_split ?autovar6 (succ (param_Nat_0 ?autovar6)) zero) if Cond(var: ?autovar6, pat: (succ ?param_0)) Cond(var: ?autovar6, pat: zero)
+(less (succ ?autovar4) ?autovar6) => (potential_split ?autovar6 (succ (param_Nat_0 ?autovar6)) zero) if Cond(var: ?autovar6, pat: (succ ?param_0)) Cond(var: ?autovar6, pat: zero)
+ ex is: zero
+ ex is: (succ zero)
+ ex is: (succ (succ zero))
+Running TheSy on datatypes: Nat dict: less leq succ zero
+Starting depth 1
+02:17:29 [0m[33m[WARN] [0m# of splitters: 2
+02:17:29 [0m[33m[WARN] [0m# of splitters: 2
+02:17:29 [0m[33m[WARN] [0m# of splitters: 1
+02:17:29 [0m[33m[WARN] [0mproved: (less ?ts_ph_Nat_0 ?ts_ph_Nat_0) => false
+02:17:29 [0m[33m[WARN] [0mproved: (leq zero ?ts_ph_Nat_0) => true
+Starting depth 2
+02:17:29 [0m[33m[WARN] [0m# of splitters: 2
+02:17:29 [0m[33m[WARN] [0m# of splitters: 2
+02:17:29 [0m[33m[WARN] [0m# of splitters: 1
+02:17:29 [0m[33m[WARN] [0m# of splitters: 1
+02:17:29 [0m[33m[WARN] [0m# of splitters: 1
+02:17:29 [0m[33m[WARN] [0m# of splitters: 1
+02:17:29 [0m[33m[WARN] [0mproved: (leq (succ zero) (succ ?ts_ph_Nat_0)) => true
+02:17:29 [0m[33m[WARN] [0m# of splitters: 1
+02:17:29 [0m[33m[WARN] [0m# of splitters: 1
+02:17:29 [0m[33m[WARN] [0mproved: (less ?ts_ph_Nat_0 (succ ?ts_ph_Nat_0)) => (leq (succ zero) (succ ?ts_ph_Nat_0))
+02:17:29 [0m[33m[WARN] [0mproved: (leq (succ zero) (succ ?ts_ph_Nat_0)) => (less ?ts_ph_Nat_0 (succ ?ts_ph_Nat_0))
+02:17:29 [0m[33m[WARN] [0m# of splitters: 1
+02:17:29 [0m[33m[WARN] [0m# of splitters: 1
+02:17:29 [0m[33m[WARN] [0m# of splitters: 1
+02:17:29 [0m[33m[WARN] [0m# of splitters: 1
+02:17:29 [0m[33m[WARN] [0m# of splitters: 1
+02:17:29 [0m[33m[WARN] [0m# of splitters: 1
+02:17:29 [0m[33m[WARN] [0mproved: (less (succ ?ts_ph_Nat_0) ?ts_ph_Nat_0) => false
+
+done in 179

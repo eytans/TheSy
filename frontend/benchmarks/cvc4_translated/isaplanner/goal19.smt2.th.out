@@ -1,0 +1,29 @@
+Collecting statistics
+(leq ?__x0 ?__y1) => (or (= ?__x0 ?__y1) (less ?__x0 ?__y1))
+(or (= ?__x0 ?__y1) (less ?__x0 ?__y1)) => (leq ?__x0 ?__y1)
+(minus zero ?n) => zero
+(minus ?n zero) => ?n
+(minus (succ ?n) (succ ?m)) => (minus ?n ?m)
+(minus ?n ?m) => (minus (succ ?n) (succ ?m))
+(len nil) => zero
+zero => (len nil)
+(len (cons ?x ?y)) => (succ (len ?y))
+(drop ?x nil) => nil
+(drop zero ?x2) => ?x2
+(drop (succ ?x) (cons ?y3 ?z)) => (drop ?x ?z)
+(minus ?autovar4 (succ ?autovar2)) => (potential_split ?autovar4 (succ (param_Nat_0 ?autovar4)) zero) if Cond(var: ?autovar4, pat: (succ ?param_0)) Cond(var: ?autovar4, pat: zero)
+(minus (succ ?autovar3) ?autovar5) => (potential_split ?autovar5 (succ (param_Nat_0 ?autovar5)) zero) if Cond(var: ?autovar5, pat: (succ ?param_0)) Cond(var: ?autovar5, pat: zero)
+(drop ?autovar5 (cons ?autovar2 ?autovar3)) => (potential_split ?autovar5 (succ (param_Nat_0 ?autovar5)) zero) if Cond(var: ?autovar5, pat: (succ ?param_0)) Cond(var: ?autovar5, pat: zero)
+(drop (succ ?autovar4) ?autovar6) => (potential_split ?autovar6 (cons (param_Lst_0 ?autovar6) (param_Lst_1 ?autovar6)) nil) if Cond(var: ?autovar6, pat: (cons ?param_0 ?param_1)) Cond(var: ?autovar6, pat: nil)
+ ex is: zero
+ ex is: (succ zero)
+ ex is: (succ (succ zero))
+ ex is: nil
+ ex is: (cons autovar_Nat_0 nil)
+ ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+Running TheSy on datatypes: Lst Nat dict: minus len drop leq succ zero cons nil
+01:11:54 [0m[33m[WARN] [0m# of splitters: 1
+proved: (len (drop ?ts_ph_Nat_1 ?ts_ph_Lst_0)) => (minus (len ?ts_ph_Lst_0) ?ts_ph_Nat_1)
+proved: (minus (len ?ts_ph_Lst_0) ?ts_ph_Nat_1) => (len (drop ?ts_ph_Nat_1 ?ts_ph_Lst_0))
+01:11:54 [0m[33m[WARN] [0mFound all lemmas
+done in 3

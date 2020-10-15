@@ -1,0 +1,64 @@
+Collecting statistics
+(leq ?__x0 ?__y1) => (or (= ?__x0 ?__y1) (less ?__x0 ?__y1))
+(or (= ?__x0 ?__y1) (less ?__x0 ?__y1)) => (leq ?__x0 ?__y1)
+(append nil ?x) => ?x
+(append (cons ?x2 ?y) ?z) => (cons ?x2 (append ?y ?z))
+(cons ?x2 (append ?y ?z)) => (append (cons ?x2 ?y) ?z)
+(len nil) => zero
+zero => (len nil)
+(len (cons ?x3 ?y)) => (succ (len ?y))
+(rotate zero ?x) => ?x
+(rotate (succ ?n) nil) => nil
+(rotate (succ ?n) (cons ?y4 ?x)) => (rotate ?n (append ?x (cons ?y4 nil)))
+(rotate ?n (append ?x (cons ?y4 nil))) => (rotate (succ ?n) (cons ?y4 ?x))
+(append (append ?x (cons ?y5 nil)) ?z) => (append ?x (cons ?y5 ?z))
+(append ?x (cons ?y5 ?z)) => (append (append ?x (cons ?y5 nil)) ?z)
+(append (append ?x ?y) (cons ?z6 nil)) => (append ?x (append ?y (cons ?z6 nil)))
+(append ?x (append ?y (cons ?z6 nil))) => (append (append ?x ?y) (cons ?z6 nil))
+(append ?autovar4 (cons ?autovar3 nil)) => (potential_split ?autovar4 (cons (param_Lst_0 ?autovar4) (param_Lst_1 ?autovar4)) nil) if Cond(var: ?autovar4, pat: (cons ?param_0 ?param_1)) Cond(var: ?autovar4, pat: nil)
+(rotate ?autovar7 nil) => (potential_split ?autovar7 (succ (param_Nat_0 ?autovar7)) zero) if Cond(var: ?autovar7, pat: (succ ?param_0)) Cond(var: ?autovar7, pat: zero)
+(rotate ?autovar7 (cons ?autovar3 ?autovar4)) => (potential_split ?autovar7 (succ (param_Nat_0 ?autovar7)) zero) if Cond(var: ?autovar7, pat: (succ ?param_0)) Cond(var: ?autovar7, pat: zero)
+(rotate (succ ?autovar5) ?autovar8) => (potential_split ?autovar8 (cons (param_Lst_0 ?autovar8) (param_Lst_1 ?autovar8)) nil) if Cond(var: ?autovar8, pat: (cons ?param_0 ?param_1)) Cond(var: ?autovar8, pat: nil)
+(rotate (succ ?autovar6) ?autovar8) => (potential_split ?autovar8 (cons (param_Lst_0 ?autovar8) (param_Lst_1 ?autovar8)) nil) if Cond(var: ?autovar8, pat: (cons ?param_0 ?param_1)) Cond(var: ?autovar8, pat: nil)
+ ex is: zero
+ ex is: (succ zero)
+ ex is: (succ (succ zero))
+ ex is: nil
+ ex is: (cons autovar_Nat_0 nil)
+ ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+Running TheSy on datatypes: Lst Nat dict: append len rotate leq succ zero cons nil
+Starting depth 1
+01:11:27 [0m[33m[WARN] [0m# of splitters: 15
+01:11:27 [0m[33m[WARN] [0m# of splitters: 24
+01:11:27 [0m[33m[WARN] [0m# of splitters: 4
+01:11:27 [0m[33m[WARN] [0m# of splitters: 18
+01:11:27 [0m[33m[WARN] [0m# of splitters: 17
+01:11:27 [0m[33m[WARN] [0m# of splitters: 17
+01:11:27 [0m[33m[WARN] [0m# of splitters: 16
+01:11:27 [0m[33m[WARN] [0m# of splitters: 18
+01:11:27 [0m[33m[WARN] [0m# of splitters: 15
+01:11:27 [0m[33m[WARN] [0m# of splitters: 18
+01:11:27 [0m[33m[WARN] [0m# of splitters: 6
+01:11:28 [0m[33m[WARN] [0m# of splitters: 17
+01:11:28 [0m[33m[WARN] [0m# of splitters: 41
+01:29:28 [0m[33m[WARN] [0mStopped case split due to time limit
+01:47:56 [0m[33m[WARN] [0mStopped case split due to time limit
+01:47:57 [0m[33m[WARN] [0mproved: (append ?ts_ph_Lst_0 nil) => ?ts_ph_Lst_0
+01:47:57 [0m[33m[WARN] [0m# of splitters: 2
+01:47:57 [0m[33m[WARN] [0m# of splitters: 3
+01:47:57 [0m[33m[WARN] [0m# of splitters: 5
+01:47:57 [0m[33m[WARN] [0m# of splitters: 4
+01:47:57 [0m[33m[WARN] [0m# of splitters: 4
+01:47:57 [0m[33m[WARN] [0m# of splitters: 1
+01:47:57 [0m[33m[WARN] [0m# of splitters: 6
+01:47:57 [0m[33m[WARN] [0m# of splitters: 1
+01:47:57 [0m[33m[WARN] [0m# of splitters: 2
+01:47:57 [0m[33m[WARN] [0m# of splitters: 2
+01:47:57 [0m[33m[WARN] [0m# of splitters: 2
+01:47:57 [0m[33m[WARN] [0m# of splitters: 1
+01:47:57 [0m[33m[WARN] [0m# of splitters: 1
+01:47:57 [0m[33m[WARN] [0m# of splitters: 1
+proved: (rotate (len ?ts_ph_Lst_0) (append ?ts_ph_Lst_0 ?ts_ph_Lst_1)) => (append ?ts_ph_Lst_1 ?ts_ph_Lst_0)
+proved: (append ?ts_ph_Lst_1 ?ts_ph_Lst_0) => (rotate (len ?ts_ph_Lst_0) (append ?ts_ph_Lst_0 ?ts_ph_Lst_1))
+01:47:57 [0m[33m[WARN] [0mFound all lemmas
+done in 2190371

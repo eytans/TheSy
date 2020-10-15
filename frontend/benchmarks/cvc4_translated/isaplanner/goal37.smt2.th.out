@@ -1,0 +1,20 @@
+Collecting statistics
+(leq ?__x0 ?__y1) => (or (= ?__x0 ?__y1) (less ?__x0 ?__y1))
+(or (= ?__x0 ?__y1) (less ?__x0 ?__y1)) => (leq ?__x0 ?__y1)
+(mem ?x nil) => false
+(mem ?x (cons ?y ?z)) => (or (= ?x ?y) (mem ?x ?z))
+(or (= ?x ?y) (mem ?x ?z)) => (mem ?x (cons ?y ?z))
+(delete ?x nil) => nil
+(delete ?x (cons ?y ?z)) => (ite (= ?x ?y) (delete ?x ?z) (cons ?y (delete ?x ?z)))
+(ite (= ?x ?y) (delete ?x ?z) (cons ?y (delete ?x ?z))) => (delete ?x (cons ?y ?z))
+ ex is: zero
+ ex is: (succ zero)
+ ex is: (succ (succ zero))
+ ex is: nil
+ ex is: (cons autovar_Nat_0 nil)
+ ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+Running TheSy on datatypes: Lst Nat dict: mem delete leq succ zero cons nil
+01:11:39 [0m[33m[WARN] [0m# of splitters: 1
+proved: (not (mem ?ts_ph_Nat_1 (delete ?ts_ph_Nat_1 ?ts_ph_Lst_0))) => true
+01:11:39 [0m[33m[WARN] [0mFound all lemmas
+done in 1

@@ -1,0 +1,11 @@
+Collecting statistics
+(leq ?__x0 ?__y1) => (or (= ?__x0 ?__y1) (less ?__x0 ?__y1))
+(or (= ?__x0 ?__y1) (less ?__x0 ?__y1)) => (leq ?__x0 ?__y1)
+(mem ?x nil) => false
+(mem ?x (cons ?y ?z)) => (or (= ?x ?y) (mem ?x ?z))
+(or (= ?x ?y) (mem ?x ?z)) => (mem ?x (cons ?y ?z))
+(lst-mem ?n ?x2) => (mem ?n ?x2)
+(mem ?n ?x2) => (lst-mem ?n ?x2)
+(lst-union nil ?x3) => ?x3
+(lst-union (cons ?n ?x4) ?y5) => (ite (lst-mem ?n ?y5) (lst-union ?x4 ?y5) (cons ?n (lst-union ?x4 ?y5)))
+(ite (lst-mem ?n ?y5) (lst-union ?x4 ?y5) (cons ?n (lst-union ?x4 ?y5))) => (lst-union (cons ?n ?x4) ?y5)

@@ -1,0 +1,40 @@
+Collecting statistics
+(leq ?__x0 ?__y1) => (or (= ?__x0 ?__y1) (less ?__x0 ?__y1))
+(or (= ?__x0 ?__y1) (less ?__x0 ?__y1)) => (leq ?__x0 ?__y1)
+(qrevaflat leaf ?x) => ?x
+(qrevaflat (node ?d ?l ?r) ?x) => (qrevaflat ?l (cons ?d (qrevaflat ?r ?x)))
+(qrevaflat ?l (cons ?d (qrevaflat ?r ?x))) => (qrevaflat (node ?d ?l ?r) ?x)
+(append nil ?x) => ?x
+(append (cons ?x2 ?y) ?z) => (cons ?x2 (append ?y ?z))
+(cons ?x2 (append ?y ?z)) => (append (cons ?x2 ?y) ?z)
+(rev nil) => nil
+nil => (rev nil)
+(rev (cons ?x3 ?y)) => (append (rev ?y) (cons ?x3 nil))
+(append (rev ?y) (cons ?x3 nil)) => (rev (cons ?x3 ?y))
+(qreva nil ?x) => ?x
+(qreva (cons ?z4 ?x) ?y) => (qreva ?x (cons ?z4 ?y))
+(qreva ?x (cons ?z4 ?y)) => (qreva (cons ?z4 ?x) ?y)
+(revflat leaf) => nil
+nil => (revflat leaf)
+(revflat (node ?d ?l ?r)) => (append (revflat ?l) (cons ?d (revflat ?r)))
+(append (revflat ?l) (cons ?d (revflat ?r))) => (revflat (node ?d ?l ?r))
+(append (revflat ?x5) ?y) => (qrevaflat ?x5 ?y)
+(qrevaflat ?x5 ?y) => (append (revflat ?x5) ?y)
+(append ?autovar6 (cons ?autovar2 nil)) => (potential_split ?autovar6 (cons (param_Lst_0 ?autovar6) (param_Lst_1 ?autovar6)) nil) if Cond(var: ?autovar6, pat: (cons ?param_0 ?param_1)) Cond(var: ?autovar6, pat: nil)
+(append ?autovar6 (cons ?autovar4 (revflat ?autovar5))) => (potential_split ?autovar6 (cons (param_Lst_0 ?autovar6) (param_Lst_1 ?autovar6)) nil) if Cond(var: ?autovar6, pat: (cons ?param_0 ?param_1)) Cond(var: ?autovar6, pat: nil)
+ ex is: zero
+ ex is: (succ zero)
+ ex is: (succ (succ zero))
+ ex is: nil
+ ex is: (cons autovar_Nat_0 nil)
+ ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+ ex is: leaf
+ ex is: (node autovar_Nat_0 leaf leaf)
+ ex is: (node autovar_Nat_1 (node autovar_Nat_0 leaf leaf) (node autovar_Nat_0 leaf leaf))
+Running TheSy on datatypes: Tree Nat Lst dict: append rev qreva revflat qrevaflat leq succ zero cons nil node leaf
+01:11:27 [0m[33m[WARN] [0m# of splitters: 1
+01:11:27 [0m[33m[WARN] [0m# of splitters: 3
+proved: (revflat ?ts_ph_Tree_0) => (qrevaflat ?ts_ph_Tree_0 nil)
+proved: (qrevaflat ?ts_ph_Tree_0 nil) => (revflat ?ts_ph_Tree_0)
+01:11:27 [0m[33m[WARN] [0mFound all lemmas
+done in 2

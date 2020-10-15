@@ -1,0 +1,31 @@
+Collecting statistics
+(leq ?__x0 ?__y1) => (or (= ?__x0 ?__y1) (less ?__x0 ?__y1))
+(or (= ?__x0 ?__y1) (less ?__x0 ?__y1)) => (leq ?__x0 ?__y1)
+(plus zero ?n) => ?n
+(plus (succ ?n) ?m) => (succ (plus ?n ?m))
+(succ (plus ?n ?m)) => (plus (succ ?n) ?m)
+(mult zero ?n) => zero
+(mult (succ ?n) ?m) => (plus (mult ?n ?m) ?m)
+(plus (mult ?n ?m) ?m) => (mult (succ ?n) ?m)
+(qmult zero ?n ?m) => ?m
+(qmult (succ ?n) ?m ?p) => (qmult ?n ?m (plus ?p ?m))
+(qmult ?n ?m (plus ?p ?m)) => (qmult (succ ?n) ?m ?p)
+(plus (mult ?x ?y) ?z) => (qmult ?x ?y ?z)
+(qmult ?x ?y ?z) => (plus (mult ?x ?y) ?z)
+ ex is: zero
+ ex is: (succ zero)
+ ex is: (succ (succ zero))
+Running TheSy on datatypes: Nat dict: plus mult qmult leq succ zero
+Starting depth 1
+01:25:17 [0m[33m[WARN] [0mproved: (mult ?ts_ph_Nat_0 zero) => zero
+01:25:17 [0m[33m[WARN] [0mproved: (leq zero ?ts_ph_Nat_0) => true
+
+01:25:17 [0m[33m[WARN] [0mproved: (qmult ?ts_ph_Nat_0 ?ts_ph_Nat_1 zero) => (mult ?ts_ph_Nat_0 ?ts_ph_Nat_1)
+01:25:17 [0m[33m[WARN] [0mproved: (mult ?ts_ph_Nat_0 ?ts_ph_Nat_1) => (qmult ?ts_ph_Nat_0 ?ts_ph_Nat_1 zero)
+
+Starting depth 2
+01:25:19 [0m[33m[WARN] [0mproved: (leq (succ zero) (succ ?ts_ph_Nat_0)) => true
+01:25:20 [0m[33m[WARN] [0mproved: (leq (succ zero) (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0)) => (leq (succ zero) ?ts_ph_Nat_0)
+01:25:20 [0m[33m[WARN] [0mproved: (leq (succ zero) ?ts_ph_Nat_0) => (leq (succ zero) (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0))
+
+done in 5599

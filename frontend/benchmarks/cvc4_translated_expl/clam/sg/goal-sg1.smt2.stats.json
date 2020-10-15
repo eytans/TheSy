@@ -1,0 +1,608 @@
+{
+  "conjectures_proved": [
+    [
+      "(leq zero ts_ph_Nat_0)",
+      "true",
+      {
+        "secs": 0,
+        "nanos": 771245
+      }
+    ],
+    [
+      "(double ts_ph_Nat_0)",
+      "(plus ts_ph_Nat_0 ts_ph_Nat_0)",
+      {
+        "secs": 0,
+        "nanos": 1220398
+      }
+    ],
+    [
+      "(plus ts_ph_Nat_0 ts_ph_Nat_0)",
+      "(double ts_ph_Nat_0)",
+      {
+        "secs": 0,
+        "nanos": 321761
+      }
+    ],
+    [
+      "(plus ts_ph_Nat_0 zero)",
+      "ts_ph_Nat_0",
+      {
+        "secs": 0,
+        "nanos": 199409
+      }
+    ],
+    [
+      "(plus ts_ph_Nat_1 ts_ph_Nat_0)",
+      "(plus ts_ph_Nat_0 ts_ph_Nat_1)",
+      {
+        "secs": 0,
+        "nanos": 209848
+      }
+    ],
+    [
+      "(plus ts_ph_Nat_1 (plus ts_ph_Nat_0 ts_ph_Nat_1))",
+      "(plus ts_ph_Nat_0 (double ts_ph_Nat_1))",
+      {
+        "secs": 0,
+        "nanos": 6406166
+      }
+    ],
+    [
+      "(double (plus ts_ph_Nat_0 ts_ph_Nat_1))",
+      "(plus (double ts_ph_Nat_0) (double ts_ph_Nat_1))",
+      {
+        "secs": 0,
+        "nanos": 9267771
+      }
+    ],
+    [
+      "(leq (succ zero) (succ ts_ph_Nat_0))",
+      "true",
+      {
+        "secs": 0,
+        "nanos": 9949976
+      }
+    ],
+    [
+      "(leq (succ zero) (double ts_ph_Nat_0))",
+      "(leq (succ zero) ts_ph_Nat_0)",
+      {
+        "secs": 0,
+        "nanos": 11460806
+      }
+    ],
+    [
+      "(plus ts_ph_Nat_0 (double ts_ph_Nat_1))",
+      "(plus ts_ph_Nat_1 (plus ts_ph_Nat_0 ts_ph_Nat_1))",
+      {
+        "secs": 0,
+        "nanos": 1117552
+      }
+    ],
+    [
+      "(plus (double ts_ph_Nat_0) (double ts_ph_Nat_1))",
+      "(double (plus ts_ph_Nat_0 ts_ph_Nat_1))",
+      {
+        "secs": 0,
+        "nanos": 2600699
+      }
+    ],
+    [
+      "(plus ts_ph_Nat_0 (plus ts_ph_Nat_0 ts_ph_Nat_1))",
+      "(plus ts_ph_Nat_1 (double ts_ph_Nat_0))",
+      {
+        "secs": 0,
+        "nanos": 976905
+      }
+    ],
+    [
+      "true",
+      "(leq (succ zero) (succ ts_ph_Nat_0))",
+      {
+        "secs": 0,
+        "nanos": 31490436
+      }
+    ],
+    [
+      "(leq (succ zero) ts_ph_Nat_0)",
+      "(leq (succ zero) (double ts_ph_Nat_0))",
+      {
+        "secs": 0,
+        "nanos": 43974165
+      }
+    ],
+    [
+      "(succ (plus ts_ph_Nat_0 (double ts_ph_Nat_1)))",
+      "(succ (plus ts_ph_Nat_1 (plus ts_ph_Nat_0 ts_ph_Nat_1)))",
+      {
+        "secs": 0,
+        "nanos": 2711179
+      }
+    ],
+    [
+      "(succ (plus ts_ph_Nat_1 (double ts_ph_Nat_0)))",
+      "(succ (plus ts_ph_Nat_0 (plus ts_ph_Nat_0 ts_ph_Nat_1)))",
+      {
+        "secs": 0,
+        "nanos": 1753670
+      }
+    ]
+  ],
+  "failed_proofs": [
+    [
+      "true",
+      "(leq ts_ph_Nat_0 (double ts_ph_Nat_0))",
+      {
+        "secs": 0,
+        "nanos": 294850
+      }
+    ],
+    [
+      "true",
+      "(leq ts_ph_Nat_0 (succ ts_ph_Nat_0))",
+      {
+        "secs": 0,
+        "nanos": 172598
+      }
+    ],
+    [
+      "(leq ts_ph_Nat_0 (succ ts_ph_Nat_0))",
+      "(leq ts_ph_Nat_0 (double ts_ph_Nat_0))",
+      {
+        "secs": 0,
+        "nanos": 365233
+      }
+    ],
+    [
+      "(leq (succ zero) (succ ts_ph_Nat_0))",
+      "(leq ts_ph_Nat_0 (double ts_ph_Nat_0))",
+      {
+        "secs": 0,
+        "nanos": 32232305
+      }
+    ],
+    [
+      "(leq ts_ph_Nat_0 (succ ts_ph_Nat_0))",
+      "(leq (succ zero) (succ ts_ph_Nat_0))",
+      {
+        "secs": 0,
+        "nanos": 31875968
+      }
+    ],
+    [
+      "(leq (succ ts_ph_Nat_0) (double ts_ph_Nat_0))",
+      "(leq (succ zero) (double ts_ph_Nat_0))",
+      {
+        "secs": 0,
+        "nanos": 45253674
+      }
+    ],
+    [
+      "(leq (succ ts_ph_Nat_0) (double ts_ph_Nat_0))",
+      "(leq (succ zero) ts_ph_Nat_0)",
+      {
+        "secs": 0,
+        "nanos": 44761880
+      }
+    ]
+  ],
+  "goals_proved": [],
+  "failed_proofs_goals": [],
+  "equiv_red_iterations": [
+    [
+      {
+        "egraph_nodes": 98,
+        "egraph_classes": 98,
+        "applied": {
+          "rule0": 19,
+          "rule2": 5,
+          "rule3": 6,
+          "rule5": 1,
+          "rule7": 2,
+          "rule9": 3
+        },
+        "hook_time": 6e-8,
+        "search_time": 0.000156147,
+        "apply_time": 0.000049033,
+        "rebuild_time": 0.000053722,
+        "total_time": 0.000259032,
+        "data": null,
+        "n_rebuilds": 33,
+        "stop_reason": null
+      },
+      {
+        "egraph_nodes": 159,
+        "egraph_classes": 123,
+        "applied": {
+          "rule3": 2,
+          "rule4": 5,
+          "rule9": 1,
+          "rule10": 5,
+          "equality": 5,
+          "less-zero": 5,
+          "less-zs": 2,
+          "less-succ": 2
+        },
+        "hook_time": 4e-8,
+        "search_time": 0.00020533,
+        "apply_time": 0.000035127,
+        "rebuild_time": 0.000020539,
+        "total_time": 0.000261126,
+        "data": null,
+        "n_rebuilds": 10,
+        "stop_reason": null
+      },
+      {
+        "egraph_nodes": 165,
+        "egraph_classes": 104,
+        "applied": {
+          "rule4": 2,
+          "rule10": 2,
+          "or-true": 3,
+          "or-true2": 2
+        },
+        "hook_time": 4e-8,
+        "search_time": 0.000191404,
+        "apply_time": 0.000041188,
+        "rebuild_time": 0.000014949,
+        "total_time": 0.000247671,
+        "data": null,
+        "n_rebuilds": 5,
+        "stop_reason": null
+      },
+      {
+        "egraph_nodes": 166,
+        "egraph_classes": 96,
+        "applied": {},
+        "hook_time": 4e-8,
+        "search_time": 0.000182878,
+        "apply_time": 0.000030207,
+        "rebuild_time": 9.608e-6,
+        "total_time": 0.000222923,
+        "data": null,
+        "n_rebuilds": 0,
+        "stop_reason": null
+      },
+      {
+        "egraph_nodes": 166,
+        "egraph_classes": 96,
+        "applied": {},
+        "hook_time": 0.0,
+        "search_time": 0.0,
+        "apply_time": 0.0,
+        "rebuild_time": 0.0,
+        "total_time": 0.0,
+        "data": null,
+        "n_rebuilds": 0,
+        "stop_reason": "Saturated"
+      }
+    ],
+    [
+      {
+        "egraph_nodes": 166,
+        "egraph_classes": 96,
+        "applied": {
+          "(plus ?ts_ph_Nat_0 zero) => ?ts_ph_Nat_0": 4,
+          "(plus ?ts_ph_Nat_0 ?ts_ph_Nat_0) => (double ?ts_ph_Nat_0)": 2,
+          "(leq zero ?ts_ph_Nat_0) => true": 2
+        },
+        "hook_time": 3e-8,
+        "search_time": 0.000210871,
+        "apply_time": 0.000037071,
+        "rebuild_time": 0.000029395,
+        "total_time": 0.000277467,
+        "data": null,
+        "n_rebuilds": 12,
+        "stop_reason": null
+      },
+      {
+        "egraph_nodes": 158,
+        "egraph_classes": 82,
+        "applied": {
+          "rule4": 1,
+          "rule10": 1
+        },
+        "hook_time": 4e-8,
+        "search_time": 0.000180383,
+        "apply_time": 0.000035117,
+        "rebuild_time": 9.969e-6,
+        "total_time": 0.000225609,
+        "data": null,
+        "n_rebuilds": 1,
+        "stop_reason": null
+      },
+      {
+        "egraph_nodes": 160,
+        "egraph_classes": 82,
+        "applied": {},
+        "hook_time": 4.1e-8,
+        "search_time": 0.000182216,
+        "apply_time": 0.000033884,
+        "rebuild_time": 8.827e-6,
+        "total_time": 0.000225127,
+        "data": null,
+        "n_rebuilds": 0,
+        "stop_reason": null
+      },
+      {
+        "egraph_nodes": 160,
+        "egraph_classes": 82,
+        "applied": {},
+        "hook_time": 0.0,
+        "search_time": 0.0,
+        "apply_time": 0.0,
+        "rebuild_time": 0.0,
+        "total_time": 0.0,
+        "data": null,
+        "n_rebuilds": 0,
+        "stop_reason": "Saturated"
+      }
+    ],
+    [
+      {
+        "egraph_nodes": 160,
+        "egraph_classes": 82,
+        "applied": {
+          "(plus ?ts_ph_Nat_0 ?ts_ph_Nat_1) => (plus ?ts_ph_Nat_1 ?ts_ph_Nat_0)": 1
+        },
+        "hook_time": 4e-8,
+        "search_time": 0.000196824,
+        "apply_time": 0.000046057,
+        "rebuild_time": 0.000010039,
+        "total_time": 0.00025306,
+        "data": null,
+        "n_rebuilds": 2,
+        "stop_reason": null
+      },
+      {
+        "egraph_nodes": 159,
+        "egraph_classes": 80,
+        "applied": {},
+        "hook_time": 4e-8,
+        "search_time": 0.000192866,
+        "apply_time": 0.000044435,
+        "rebuild_time": 8.516e-6,
+        "total_time": 0.000246017,
+        "data": null,
+        "n_rebuilds": 0,
+        "stop_reason": null
+      },
+      {
+        "egraph_nodes": 159,
+        "egraph_classes": 80,
+        "applied": {},
+        "hook_time": 0.0,
+        "search_time": 0.0,
+        "apply_time": 0.0,
+        "rebuild_time": 0.0,
+        "total_time": 0.0,
+        "data": null,
+        "n_rebuilds": 0,
+        "stop_reason": "Saturated"
+      }
+    ],
+    [
+      {
+        "egraph_nodes": 531,
+        "egraph_classes": 452,
+        "applied": {
+          "rule0": 118,
+          "rule2": 3,
+          "rule3": 53,
+          "rule4": 4,
+          "rule7": 5,
+          "rule9": 34,
+          "rule10": 4,
+          "(plus ?ts_ph_Nat_0 ?ts_ph_Nat_1) => (plus ?ts_ph_Nat_1 ?ts_ph_Nat_0)": 32,
+          "(plus ?ts_ph_Nat_0 ?ts_ph_Nat_0) => (double ?ts_ph_Nat_0)": 6,
+          "(leq zero ?ts_ph_Nat_0) => true": 8
+        },
+        "hook_time": 4e-8,
+        "search_time": 0.000838843,
+        "apply_time": 0.000370493,
+        "rebuild_time": 0.000162889,
+        "total_time": 0.001372366,
+        "data": null,
+        "n_rebuilds": 180,
+        "stop_reason": null
+      },
+      {
+        "egraph_nodes": 863,
+        "egraph_classes": 554,
+        "applied": {
+          "rule4": 34,
+          "rule10": 30,
+          "equality": 8,
+          "less-zero": 8,
+          "less-zs": 5,
+          "less-succ": 39
+        },
+        "hook_time": 2.9e-8,
+        "search_time": 0.001141037,
+        "apply_time": 0.000250105,
+        "rebuild_time": 0.000095672,
+        "total_time": 0.001486954,
+        "data": null,
+        "n_rebuilds": 39,
+        "stop_reason": null
+      },
+      {
+        "egraph_nodes": 920,
+        "egraph_classes": 487,
+        "applied": {
+          "rule4": 16,
+          "rule10": 12,
+          "or-true": 3,
+          "or-true2": 7
+        },
+        "hook_time": 4e-8,
+        "search_time": 0.001084349,
+        "apply_time": 0.000280593,
+        "rebuild_time": 0.000069623,
+        "total_time": 0.001434705,
+        "data": null,
+        "n_rebuilds": 12,
+        "stop_reason": null
+      },
+      {
+        "egraph_nodes": 945,
+        "egraph_classes": 474,
+        "applied": {
+          "rule4": 8,
+          "rule10": 4
+        },
+        "hook_time": 4e-8,
+        "search_time": 0.001127541,
+        "apply_time": 0.000287286,
+        "rebuild_time": 0.00005268,
+        "total_time": 0.001467647,
+        "data": null,
+        "n_rebuilds": 4,
+        "stop_reason": null
+      },
+      {
+        "egraph_nodes": 957,
+        "egraph_classes": 474,
+        "applied": {
+          "rule4": 1,
+          "rule10": 1
+        },
+        "hook_time": 4e-8,
+        "search_time": 0.00111088,
+        "apply_time": 0.000290652,
+        "rebuild_time": 0.000050426,
+        "total_time": 0.001452088,
+        "data": null,
+        "n_rebuilds": 1,
+        "stop_reason": null
+      },
+      {
+        "egraph_nodes": 959,
+        "egraph_classes": 474,
+        "applied": {},
+        "hook_time": 4e-8,
+        "search_time": 0.001111872,
+        "apply_time": 0.000291995,
+        "rebuild_time": 0.000049715,
+        "total_time": 0.001453831,
+        "data": null,
+        "n_rebuilds": 0,
+        "stop_reason": null
+      },
+      {
+        "egraph_nodes": 959,
+        "egraph_classes": 474,
+        "applied": {},
+        "hook_time": 0.0,
+        "search_time": 0.0,
+        "apply_time": 0.0,
+        "rebuild_time": 0.0,
+        "total_time": 0.0,
+        "data": null,
+        "n_rebuilds": 0,
+        "stop_reason": "Saturated"
+      }
+    ]
+  ],
+  "case_split": [
+    [
+      0,
+      {
+        "secs": 0,
+        "nanos": 235928
+      }
+    ],
+    [
+      0,
+      {
+        "secs": 0,
+        "nanos": 2026749
+      }
+    ]
+  ],
+  "term_creation": [
+    [
+      70,
+      {
+        "secs": 0,
+        "nanos": 119006
+      }
+    ],
+    [
+      372,
+      {
+        "secs": 0,
+        "nanos": 592886
+      }
+    ]
+  ],
+  "get_conjectures": [
+    {
+      "secs": 0,
+      "nanos": 204859
+    },
+    {
+      "secs": 0,
+      "nanos": 185092
+    },
+    {
+      "secs": 0,
+      "nanos": 183128
+    },
+    {
+      "secs": 0,
+      "nanos": 173880
+    },
+    {
+      "secs": 0,
+      "nanos": 1912041
+    },
+    {
+      "secs": 0,
+      "nanos": 1865453
+    }
+  ],
+  "filtered_lemmas": [
+    [
+      "(plus ts_ph_Nat_0 ts_ph_Nat_0)",
+      "(double ts_ph_Nat_0)"
+    ],
+    [
+      "(succ (plus ts_ph_Nat_0 (plus ts_ph_Nat_0 ts_ph_Nat_1)))",
+      "(succ (plus ts_ph_Nat_1 (double ts_ph_Nat_0)))"
+    ],
+    [
+      "(plus ts_ph_Nat_0 (double ts_ph_Nat_1))",
+      "(plus ts_ph_Nat_1 (plus ts_ph_Nat_0 ts_ph_Nat_1))"
+    ],
+    [
+      "(plus (double ts_ph_Nat_0) (double ts_ph_Nat_1))",
+      "(double (plus ts_ph_Nat_0 ts_ph_Nat_1))"
+    ],
+    [
+      "(plus ts_ph_Nat_0 (plus ts_ph_Nat_0 ts_ph_Nat_1))",
+      "(plus ts_ph_Nat_1 (double ts_ph_Nat_0))"
+    ],
+    [
+      "true",
+      "(leq (succ zero) (succ ts_ph_Nat_0))"
+    ],
+    [
+      "(leq (succ zero) ts_ph_Nat_0)",
+      "(leq (succ zero) (double ts_ph_Nat_0))"
+    ],
+    [
+      "(succ (plus ts_ph_Nat_0 (double ts_ph_Nat_1)))",
+      "(succ (plus ts_ph_Nat_1 (plus ts_ph_Nat_0 ts_ph_Nat_1)))"
+    ],
+    [
+      "(succ (plus ts_ph_Nat_1 (double ts_ph_Nat_0)))",
+      "(succ (plus ts_ph_Nat_0 (plus ts_ph_Nat_0 ts_ph_Nat_1)))"
+    ]
+  ],
+  "total_time": {
+    "secs": 0,
+    "nanos": 271006758
+  }
+}

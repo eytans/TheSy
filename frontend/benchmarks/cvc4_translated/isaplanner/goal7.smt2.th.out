@@ -1,0 +1,19 @@
+Collecting statistics
+(leq ?__x0 ?__y1) => (or (= ?__x0 ?__y1) (less ?__x0 ?__y1))
+(or (= ?__x0 ?__y1) (less ?__x0 ?__y1)) => (leq ?__x0 ?__y1)
+(plus zero ?n) => ?n
+(plus (succ ?n) ?m) => (succ (plus ?n ?m))
+(succ (plus ?n ?m)) => (plus (succ ?n) ?m)
+(minus zero ?n) => zero
+(minus ?n zero) => ?n
+(minus (succ ?n) (succ ?m)) => (minus ?n ?m)
+(minus ?n ?m) => (minus (succ ?n) (succ ?m))
+(minus ?autovar4 (succ ?autovar2)) => (potential_split ?autovar4 (succ (param_Nat_0 ?autovar4)) zero) if Cond(var: ?autovar4, pat: (succ ?param_0)) Cond(var: ?autovar4, pat: zero)
+(minus (succ ?autovar3) ?autovar5) => (potential_split ?autovar5 (succ (param_Nat_0 ?autovar5)) zero) if Cond(var: ?autovar5, pat: (succ ?param_0)) Cond(var: ?autovar5, pat: zero)
+ ex is: zero
+ ex is: (succ zero)
+ ex is: (succ (succ zero))
+Running TheSy on datatypes: Nat dict: plus minus leq succ zero
+proved: (minus (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1) ?ts_ph_Nat_0) => ?ts_ph_Nat_1
+02:15:01 [0m[33m[WARN] [0mFound all lemmas
+done in 3

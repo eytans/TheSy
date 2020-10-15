@@ -1,0 +1,93 @@
+Collecting statistics
+(leq ?__x0 ?__y1) => (or (= ?__x0 ?__y1) (less ?__x0 ?__y1))
+(or (= ?__x0 ?__y1) (less ?__x0 ?__y1)) => (leq ?__x0 ?__y1)
+(less ?x zero) => false
+(less zero (succ ?x)) => true
+(less (succ ?x) (succ ?y)) => (less ?x ?y)
+(less ?x ?y) => (less (succ ?x) (succ ?y))
+(plus zero ?n) => ?n
+(plus (succ ?n) ?m) => (succ (plus ?n ?m))
+(succ (plus ?n ?m)) => (plus (succ ?n) ?m)
+(less ?autovar5 (succ ?autovar1)) => (potential_split ?autovar5 (succ (param_Nat_0 ?autovar5)) zero) if Cond(var: ?autovar5, pat: (succ ?param_0)) Cond(var: ?autovar5, pat: zero)
+(less ?autovar5 (succ ?autovar3)) => (potential_split ?autovar5 (succ (param_Nat_0 ?autovar5)) zero) if Cond(var: ?autovar5, pat: (succ ?param_0)) Cond(var: ?autovar5, pat: zero)
+(less zero ?autovar6) => (potential_split ?autovar6 (succ (param_Nat_0 ?autovar6)) zero) if Cond(var: ?autovar6, pat: (succ ?param_0)) Cond(var: ?autovar6, pat: zero)
+(less (succ ?autovar4) ?autovar6) => (potential_split ?autovar6 (succ (param_Nat_0 ?autovar6)) zero) if Cond(var: ?autovar6, pat: (succ ?param_0)) Cond(var: ?autovar6, pat: zero)
+ ex is: zero
+ ex is: (succ zero)
+ ex is: (succ (succ zero))
+Running TheSy on datatypes: Nat dict: less plus leq succ zero
+01:14:07 [0m[33m[WARN] [0m# of splitters: 1
+Starting depth 1
+01:14:07 [0m[33m[WARN] [0m# of splitters: 2
+01:14:07 [0m[33m[WARN] [0m# of splitters: 2
+01:14:07 [0m[33m[WARN] [0m# of splitters: 1
+01:14:07 [0m[33m[WARN] [0mproved: (leq zero ?ts_ph_Nat_0) => true
+01:14:07 [0m[33m[WARN] [0m# of splitters: 1
+01:14:07 [0m[33m[WARN] [0mproved: (plus ?ts_ph_Nat_0 zero) => ?ts_ph_Nat_0
+01:14:07 [0m[33m[WARN] [0m# of splitters: 1
+
+01:14:07 [0m[33m[WARN] [0mproved: (less ?ts_ph_Nat_0 ?ts_ph_Nat_0) => false
+01:14:07 [0m[33m[WARN] [0m# of splitters: 1
+
+Starting depth 2
+01:14:07 [0m[33m[WARN] [0m# of splitters: 8
+01:14:07 [0m[33m[WARN] [0m# of splitters: 8
+01:14:07 [0m[33m[WARN] [0m# of splitters: 4
+01:14:08 [0m[33m[WARN] [0m# of splitters: 7
+01:14:08 [0m[33m[WARN] [0m# of splitters: 3
+01:14:08 [0m[33m[WARN] [0m# of splitters: 6
+01:14:08 [0m[33m[WARN] [0m# of splitters: 5
+01:14:08 [0m[33m[WARN] [0m# of splitters: 5
+01:14:08 [0m[33m[WARN] [0m# of splitters: 4
+01:14:08 [0m[33m[WARN] [0m# of splitters: 4
+01:14:08 [0m[33m[WARN] [0m# of splitters: 3
+01:14:08 [0m[33m[WARN] [0m# of splitters: 3
+01:14:08 [0m[33m[WARN] [0m# of splitters: 2
+01:14:08 [0m[33m[WARN] [0m# of splitters: 2
+01:14:08 [0m[33m[WARN] [0m# of splitters: 1
+01:14:08 [0m[33m[WARN] [0m# of splitters: 1
+01:14:08 [0m[33m[WARN] [0m# of splitters: 1
+01:14:08 [0m[33m[WARN] [0m# of splitters: 1
+01:14:09 [0m[33m[WARN] [0mproved: (less (succ ?ts_ph_Nat_0) ?ts_ph_Nat_0) => false
+01:14:09 [0m[33m[WARN] [0m# of splitters: 1
+01:14:09 [0m[33m[WARN] [0mproved: (succ ?ts_ph_Nat_0) => (plus ?ts_ph_Nat_0 (succ zero))
+01:14:09 [0m[33m[WARN] [0mproved: (plus ?ts_ph_Nat_0 (succ zero)) => (succ ?ts_ph_Nat_0)
+01:14:09 [0m[33m[WARN] [0m# of splitters: 1
+01:14:09 [0m[33m[WARN] [0m# of splitters: 1
+01:14:09 [0m[33m[WARN] [0m# of splitters: 1
+generalizing (plus (plus ts_ph_Nat_0 ts_ph_Nat_1) ts_ph_Nat_1) = (plus ts_ph_Nat_0 (plus ts_ph_Nat_1 ts_ph_Nat_1))
+01:14:09 [0m[33m[WARN] [0mproved: (plus (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1) ?ts_ph_Nat_2) => (plus ?ts_ph_Nat_0 (plus ?ts_ph_Nat_1 ?ts_ph_Nat_2))
+01:14:09 [0m[33m[WARN] [0mproved: (plus ?ts_ph_Nat_0 (plus ?ts_ph_Nat_1 ?ts_ph_Nat_2)) => (plus (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1) ?ts_ph_Nat_2)
+01:14:09 [0m[33m[WARN] [0m# of splitters: 1
+01:14:09 [0m[33m[WARN] [0m# of splitters: 15
+01:14:09 [0m[33m[WARN] [0m# of splitters: 17
+01:14:09 [0m[33m[WARN] [0m# of splitters: 16
+01:14:09 [0m[33m[WARN] [0m# of splitters: 1
+01:14:09 [0m[33m[WARN] [0m# of splitters: 1
+01:14:09 [0m[33m[WARN] [0m# of splitters: 15
+01:14:09 [0m[33m[WARN] [0mproved: (less (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1) ?ts_ph_Nat_0) => (less (succ ?ts_ph_Nat_0) ?ts_ph_Nat_0)
+01:14:09 [0m[33m[WARN] [0m# of splitters: 1
+01:14:09 [0m[33m[WARN] [0m# of splitters: 1
+01:14:09 [0m[33m[WARN] [0m# of splitters: 3
+01:14:09 [0m[33m[WARN] [0m# of splitters: 1
+01:14:09 [0m[33m[WARN] [0m# of splitters: 15
+01:14:09 [0m[33m[WARN] [0m# of splitters: 17
+01:14:10 [0m[33m[WARN] [0m# of splitters: 16
+01:14:10 [0m[33m[WARN] [0m# of splitters: 1
+01:14:10 [0m[33m[WARN] [0m# of splitters: 1
+01:14:10 [0m[33m[WARN] [0m# of splitters: 1
+01:14:11 [0m[33m[WARN] [0m# of splitters: 3
+01:14:11 [0m[33m[WARN] [0m# of splitters: 1
+01:14:11 [0m[33m[WARN] [0mproved: (less ?ts_ph_Nat_0 (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1)) => (less zero ?ts_ph_Nat_1)
+01:14:11 [0m[33m[WARN] [0m# of splitters: 1
+01:14:11 [0m[33m[WARN] [0m# of splitters: 1
+01:14:11 [0m[33m[WARN] [0m# of splitters: 3
+01:14:11 [0m[33m[WARN] [0m# of splitters: 1
+01:14:11 [0m[33m[WARN] [0m# of splitters: 15
+01:14:11 [0m[33m[WARN] [0m# of splitters: 39
+01:14:14 [0m[33m[WARN] [0m# of splitters: 13
+proved: (or
+  (= ?ts_ph_Nat_2 (plus ?ts_ph_Nat_2 ?ts_ph_Nat_0))
+  (less ?ts_ph_Nat_2 (plus ?ts_ph_Nat_2 ?ts_ph_Nat_0))) => true
+01:14:14 [0m[33m[WARN] [0mFound all lemmas
+done in 7295

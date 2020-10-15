@@ -1,0 +1,36 @@
+Collecting statistics
+(leq ?__x0 ?__y1) => (or (= ?__x0 ?__y1) (less ?__x0 ?__y1))
+(or (= ?__x0 ?__y1) (less ?__x0 ?__y1)) => (leq ?__x0 ?__y1)
+(append nil ?x) => ?x
+(append (cons ?x2 ?y) ?z) => (cons ?x2 (append ?y ?z))
+(cons ?x2 (append ?y ?z)) => (append (cons ?x2 ?y) ?z)
+(drop ?x3 nil) => nil
+(drop zero ?x) => ?x
+(drop (succ ?x4) (cons ?y5 ?z)) => (drop ?x4 ?z)
+(take ?x6 nil) => nil
+(take zero ?x) => nil
+(take (succ ?x7) (cons ?y8 ?z)) => (cons ?y8 (take ?x7 ?z))
+(cons ?y8 (take ?x7 ?z)) => (take (succ ?x7) (cons ?y8 ?z))
+(dropWhile nil) => nil
+nil => (dropWhile nil)
+(dropWhile (cons ?x9 ?y)) => (ite (P ?x9) (dropWhile ?y) (cons ?x9 ?y))
+(ite (P ?x9) (dropWhile ?y) (cons ?x9 ?y)) => (dropWhile (cons ?x9 ?y))
+(takeWhile nil) => nil
+nil => (takeWhile nil)
+(takeWhile (cons ?x10 ?y)) => (ite (P ?x10) (cons ?x10 (takeWhile ?y)) nil)
+(ite (P ?x10) (cons ?x10 (takeWhile ?y)) nil) => (takeWhile (cons ?x10 ?y))
+(drop ?autovar5 (cons ?autovar2 ?autovar3)) => (potential_split ?autovar5 (succ (param_Nat_0 ?autovar5)) zero) if Cond(var: ?autovar5, pat: (succ ?param_0)) Cond(var: ?autovar5, pat: zero)
+(drop (succ ?autovar4) ?autovar6) => (potential_split ?autovar6 (cons (param_Lst_0 ?autovar6) (param_Lst_1 ?autovar6)) nil) if Cond(var: ?autovar6, pat: (cons ?param_0 ?param_1)) Cond(var: ?autovar6, pat: nil)
+(take ?autovar5 (cons ?autovar2 ?autovar3)) => (potential_split ?autovar5 (succ (param_Nat_0 ?autovar5)) zero) if Cond(var: ?autovar5, pat: (succ ?param_0)) Cond(var: ?autovar5, pat: zero)
+(take (succ ?autovar4) ?autovar6) => (potential_split ?autovar6 (cons (param_Lst_0 ?autovar6) (param_Lst_1 ?autovar6)) nil) if Cond(var: ?autovar6, pat: (cons ?param_0 ?param_1)) Cond(var: ?autovar6, pat: nil)
+ ex is: zero
+ ex is: (succ zero)
+ ex is: (succ (succ zero))
+ ex is: nil
+ ex is: (cons autovar_Nat_0 nil)
+ ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+Running TheSy on datatypes: Nat Lst dict: P append drop take dropWhile takeWhile leq succ zero cons nil
+01:12:20 [0m[33m[WARN] [0m# of splitters: 1
+proved: (append (takeWhile ?ts_ph_Lst_0) (dropWhile ?ts_ph_Lst_0)) => ?ts_ph_Lst_0
+01:12:20 [0m[33m[WARN] [0mFound all lemmas
+done in 1

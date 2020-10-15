@@ -1,0 +1,2 @@
+thread 'main' panicked at 'called `Result::unwrap()` on an `Err` value: "Found a list in the head position: [String(\"x\"), String(\"Nat\")]"', src/thesy/thesy_parser.rs:343:65
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

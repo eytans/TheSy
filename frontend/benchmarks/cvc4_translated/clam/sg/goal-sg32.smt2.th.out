@@ -1,0 +1,49 @@
+Collecting statistics
+(leq ?__x0 ?__y1) => (or (= ?__x0 ?__y1) (less ?__x0 ?__y1))
+(or (= ?__x0 ?__y1) (less ?__x0 ?__y1)) => (leq ?__x0 ?__y1)
+(append nil ?x) => ?x
+(append (cons ?x2 ?y) ?z) => (cons ?x2 (append ?y ?z))
+(cons ?x2 (append ?y ?z)) => (append (cons ?x2 ?y) ?z)
+(len nil) => zero
+zero => (len nil)
+(len (cons ?x3 ?y)) => (succ (len ?y))
+(rotate zero ?x) => ?x
+(rotate (succ ?n) nil) => nil
+(rotate (succ ?n) (cons ?y4 ?x)) => (rotate ?n (append ?x (cons ?y4 nil)))
+(rotate ?n (append ?x (cons ?y4 nil))) => (rotate (succ ?n) (cons ?y4 ?x))
+(rotate (len ?x) (append ?x ?y)) => (append ?y ?x)
+(append ?y ?x) => (rotate (len ?x) (append ?x ?y))
+(rotate ?autovar10 nil) => (potential_split ?autovar10 (succ (param_Nat_0 ?autovar10)) zero) if Cond(var: ?autovar10, pat: (succ ?param_0)) Cond(var: ?autovar10, pat: zero)
+(rotate ?autovar10 (cons ?autovar3 ?autovar4)) => (potential_split ?autovar10 (succ (param_Nat_0 ?autovar10)) zero) if Cond(var: ?autovar10, pat: (succ ?param_0)) Cond(var: ?autovar10, pat: zero)
+(rotate ?autovar10 (append ?autovar5 ?autovar6)) => (potential_split ?autovar10 (succ (param_Nat_0 ?autovar10)) zero) if Cond(var: ?autovar10, pat: (succ ?param_0)) Cond(var: ?autovar10, pat: zero)
+(rotate (succ ?autovar7) ?autovar11) => (potential_split ?autovar11 (cons (param_Lst_0 ?autovar11) (param_Lst_1 ?autovar11)) nil) if Cond(var: ?autovar11, pat: (cons ?param_0 ?param_1)) Cond(var: ?autovar11, pat: nil)
+(rotate (succ ?autovar8) ?autovar11) => (potential_split ?autovar11 (cons (param_Lst_0 ?autovar11) (param_Lst_1 ?autovar11)) nil) if Cond(var: ?autovar11, pat: (cons ?param_0 ?param_1)) Cond(var: ?autovar11, pat: nil)
+(rotate (len ?autovar9) ?autovar11) => (potential_split ?autovar11 (cons (param_Lst_0 ?autovar11) (param_Lst_1 ?autovar11)) nil) if Cond(var: ?autovar11, pat: (cons ?param_0 ?param_1)) Cond(var: ?autovar11, pat: nil)
+ ex is: zero
+ ex is: (succ zero)
+ ex is: (succ (succ zero))
+ ex is: nil
+ ex is: (cons autovar_Nat_0 nil)
+ ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+Running TheSy on datatypes: Lst Nat dict: append len rotate leq succ zero cons nil
+01:11:27 [0m[33m[WARN] [0m# of splitters: 3
+01:11:27 [0m[33m[WARN] [0m# of splitters: 2
+01:11:27 [0m[33m[WARN] [0m# of splitters: 7
+01:11:27 [0m[33m[WARN] [0m# of splitters: 2
+01:11:27 [0m[33m[WARN] [0m# of splitters: 2
+01:11:27 [0m[33m[WARN] [0m# of splitters: 3
+01:11:27 [0m[33m[WARN] [0m# of splitters: 1
+01:11:27 [0m[33m[WARN] [0m# of splitters: 5
+01:11:27 [0m[33m[WARN] [0m# of splitters: 1
+01:11:27 [0m[33m[WARN] [0m# of splitters: 6
+01:11:27 [0m[33m[WARN] [0m# of splitters: 2
+01:11:27 [0m[33m[WARN] [0m# of splitters: 1
+01:11:27 [0m[33m[WARN] [0m# of splitters: 5
+01:11:27 [0m[33m[WARN] [0m# of splitters: 5
+01:11:27 [0m[33m[WARN] [0m# of splitters: 5
+01:11:27 [0m[33m[WARN] [0m# of splitters: 3
+01:11:27 [0m[33m[WARN] [0m# of splitters: 14
+01:11:27 [0m[33m[WARN] [0m# of splitters: 2
+proved: (rotate (len ?ts_ph_Lst_0) ?ts_ph_Lst_0) => ?ts_ph_Lst_0
+01:11:27 [0m[33m[WARN] [0mFound all lemmas
+done in 92
