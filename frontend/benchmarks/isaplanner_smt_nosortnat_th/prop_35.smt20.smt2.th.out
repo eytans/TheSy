@@ -1,0 +1,11 @@
+Collecting statistics
+(dropWhile ?x nil) => nil
+(dropWhile ?x (cons ?z ?xs)) => (dropWhile ?x ?xs)
+(dropWhile ?x (cons ?z ?xs)) => (cons ?z ?xs)
+ ex is: nil
+ ex is: (cons autovar_sk_0 nil)
+ ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
+Running TheSy on datatypes: list dict: dropWhile apply13 nil cons
+Starting depth 1
+Starting depth 2
+done in 2

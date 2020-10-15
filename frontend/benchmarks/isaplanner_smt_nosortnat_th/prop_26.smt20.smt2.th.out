@@ -1,0 +1,67 @@
+Collecting statistics
+(== Z Z) => true
+(== Z (S ?z)) => false
+(== (S ?x2) Z) => false
+(== (S ?x2) (S ?y2)) => (== ?x2 ?y2)
+(== ?x2 ?y2) => (== (S ?x2) (S ?y2))
+(elem ?x nil) => false
+(elem ?x (cons ?z ?xs)) => (elem ?x ?xs)
+(elem ?x (cons ?z ?xs)) => true
+(++ nil2 ?y) => ?y
+(++ (cons2 ?z0 ?xs1) ?y) => (cons2 ?z0 (++ ?xs1 ?y))
+(cons2 ?z0 (++ ?xs1 ?y)) => (++ (cons2 ?z0 ?xs1) ?y)
+(== ?autovar7 Z) => (potential_split ?autovar7 Z (S (param_Nat_0 ?autovar7))) if Cond(var: ?autovar7, pat: Z) Cond(var: ?autovar7, pat: (S ?param_0))
+(== ?autovar7 (S ?autovar1)) => (potential_split ?autovar7 Z (S (param_Nat_0 ?autovar7))) if Cond(var: ?autovar7, pat: Z) Cond(var: ?autovar7, pat: (S ?param_0))
+(== ?autovar7 Z) => (potential_split ?autovar7 Z (S (param_Nat_0 ?autovar7))) if Cond(var: ?autovar7, pat: Z) Cond(var: ?autovar7, pat: (S ?param_0))
+(== ?autovar7 (S ?autovar4)) => (potential_split ?autovar7 Z (S (param_Nat_0 ?autovar7))) if Cond(var: ?autovar7, pat: Z) Cond(var: ?autovar7, pat: (S ?param_0))
+(== Z ?autovar8) => (potential_split ?autovar8 Z (S (param_Nat_0 ?autovar8))) if Cond(var: ?autovar8, pat: Z) Cond(var: ?autovar8, pat: (S ?param_0))
+(== Z ?autovar8) => (potential_split ?autovar8 Z (S (param_Nat_0 ?autovar8))) if Cond(var: ?autovar8, pat: Z) Cond(var: ?autovar8, pat: (S ?param_0))
+(== (S ?autovar5) ?autovar8) => (potential_split ?autovar8 Z (S (param_Nat_0 ?autovar8))) if Cond(var: ?autovar8, pat: Z) Cond(var: ?autovar8, pat: (S ?param_0))
+(== (S ?autovar6) ?autovar8) => (potential_split ?autovar8 Z (S (param_Nat_0 ?autovar8))) if Cond(var: ?autovar8, pat: Z) Cond(var: ?autovar8, pat: (S ?param_0))
+ ex is: nil2
+ ex is: (cons2 autovar_sk_0 nil2)
+ ex is: (cons2 autovar_sk_1 (cons2 autovar_sk_0 nil2))
+ ex is: Z
+ ex is: (S Z)
+ ex is: (S (S Z))
+ ex is: nil
+ ex is: (cons autovar_Nat_0 nil)
+ ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+Running TheSy on datatypes: list2 list Nat dict: == elem ++ nil2 cons2 Z S nil cons
+Starting depth 1
+08:23:53 [0m[33m[WARN] [0m# of splitters: 2
+08:23:53 [0m[33m[WARN] [0m# of splitters: 1
+08:23:53 [0m[33m[WARN] [0m# of splitters: 1
+08:23:54 [0m[33m[WARN] [0m# of splitters: 1
+08:23:54 [0m[33m[WARN] [0mproved: (++ ?ts_ph_list2_0 nil2) => ?ts_ph_list2_0
+08:23:54 [0m[33m[WARN] [0mproved: (== Z ?ts_ph_Nat_0) => (== ?ts_ph_Nat_0 Z)
+08:23:54 [0m[33m[WARN] [0mproved: (== ?ts_ph_Nat_0 Z) => (== Z ?ts_ph_Nat_0)
+08:23:54 [0m[33m[WARN] [0mproved: (== ?ts_ph_Nat_0 ?ts_ph_Nat_0) => true
+
+Starting depth 2
+08:23:54 [0m[33m[WARN] [0m# of splitters: 2
+08:23:54 [0m[33m[WARN] [0m# of splitters: 1
+08:23:54 [0m[33m[WARN] [0m# of splitters: 2
+08:23:54 [0m[33m[WARN] [0m# of splitters: 1
+08:23:54 [0m[33m[WARN] [0m# of splitters: 1
+08:23:54 [0m[33m[WARN] [0mproved: (== (S Z) ?ts_ph_Nat_0) => (== ?ts_ph_Nat_0 (S Z))
+08:23:54 [0m[33m[WARN] [0mproved: (== ?ts_ph_Nat_0 (S Z)) => (== (S Z) ?ts_ph_Nat_0)
+08:23:54 [0m[33m[WARN] [0m# of splitters: 1
+08:23:54 [0m[33m[WARN] [0m# of splitters: 1
+08:23:54 [0m[33m[WARN] [0mproved: (== (S ?ts_ph_Nat_0) ?ts_ph_Nat_0) => false
+08:23:54 [0m[33m[WARN] [0m# of splitters: 1
+08:23:54 [0m[33m[WARN] [0m# of splitters: 1
+08:23:54 [0m[33m[WARN] [0mproved: (== (S ?ts_ph_Nat_0) ?ts_ph_Nat_0) => (== ?ts_ph_Nat_0 (S ?ts_ph_Nat_0))
+08:23:54 [0m[33m[WARN] [0mproved: (== ?ts_ph_Nat_0 (S ?ts_ph_Nat_0)) => (== (S ?ts_ph_Nat_0) ?ts_ph_Nat_0)
+08:23:54 [0m[33m[WARN] [0m# of splitters: 1
+08:23:54 [0m[33m[WARN] [0m# of splitters: 1
+08:23:54 [0m[33m[WARN] [0m# of splitters: 1
+08:23:54 [0m[33m[WARN] [0m# of splitters: 1
+08:23:54 [0m[33m[WARN] [0m# of splitters: 1
+08:23:54 [0m[33m[WARN] [0m# of splitters: 1
+generalizing (++ ts_ph_list2_0 (++ ts_ph_list2_1 ts_ph_list2_1)) = (++ (++ ts_ph_list2_0 ts_ph_list2_1) ts_ph_list2_1)
+generalized as case_split
+08:23:54 [0m[33m[WARN] [0mproved: (++ ?ts_ph_list2_0 (++ ?ts_ph_list2_1 ?ts_ph_list2_2)) => (++ (++ ?ts_ph_list2_0 ?ts_ph_list2_1) ?ts_ph_list2_2)
+08:23:54 [0m[33m[WARN] [0mproved: (++ (++ ?ts_ph_list2_0 ?ts_ph_list2_1) ?ts_ph_list2_2) => (++ ?ts_ph_list2_0 (++ ?ts_ph_list2_1 ?ts_ph_list2_2))
+
+done in 380

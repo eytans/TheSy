@@ -1,0 +1,69 @@
+Collecting statistics
+(rev nil) => nil
+nil => (rev nil)
+(filter ?x nil) => nil
+(filter ?x (cons ?z ?xs)) => (cons ?z (filter ?x ?xs))
+(filter ?x (cons ?z ?xs)) => (cons ?z (filter ?x ?xs))
+(filter ?x (cons ?z ?xs)) => (filter ?x ?xs)
+(++ nil ?y) => ?y
+(++ (cons ?z ?xs) ?y) => (cons ?z (++ ?xs ?y))
+(cons ?z (++ ?xs ?y)) => (++ (cons ?z ?xs) ?y)
+(rev (cons ?y0 ?xs)) => (++ (rev ?xs) (cons ?y0 nil))
+(++ (rev ?xs) (cons ?y0 nil)) => (rev (cons ?y0 ?xs))
+(++ ?autovar3 (cons ?autovar2 nil)) => (potential_split ?autovar3 nil (cons (param_list_0 ?autovar3) (param_list_1 ?autovar3))) if Cond(var: ?autovar3, pat: nil) Cond(var: ?autovar3, pat: (cons ?param_0 ?param_1))
+ ex is: nil
+ ex is: (cons autovar_sk_0 nil)
+ ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
+Running TheSy on datatypes: list dict: filter ++ rev apply13 nil cons
+Starting depth 1
+08:23:57 [0m[33m[WARN] [0m# of splitters: 1
+08:23:57 [0m[33m[WARN] [0m# of splitters: 2
+08:23:57 [0m[33m[WARN] [0mproved: (++ ?ts_ph_list_0 nil) => ?ts_ph_list_0
+Starting depth 2
+08:23:57 [0m[33m[WARN] [0m# of splitters: 19
+08:23:57 [0m[33m[WARN] [0m# of splitters: 11
+08:23:57 [0m[33m[WARN] [0m# of splitters: 24
+08:23:58 [0m[33m[WARN] [0m# of splitters: 17
+08:23:58 [0m[33m[WARN] [0m# of splitters: 19
+08:23:58 [0m[33m[WARN] [0m# of splitters: 16
+08:23:59 [0m[33m[WARN] [0m# of splitters: 18
+08:23:59 [0m[33m[WARN] [0m# of splitters: 15
+08:23:59 [0m[33m[WARN] [0m# of splitters: 17
+08:23:59 [0m[33m[WARN] [0m# of splitters: 14
+08:23:59 [0m[33m[WARN] [0m# of splitters: 16
+08:23:59 [0m[33m[WARN] [0m# of splitters: 13
+08:24:00 [0m[33m[WARN] [0m# of splitters: 15
+08:24:00 [0m[33m[WARN] [0m# of splitters: 12
+08:24:00 [0m[33m[WARN] [0m# of splitters: 14
+08:24:00 [0m[33m[WARN] [0m# of splitters: 11
+08:24:00 [0m[33m[WARN] [0m# of splitters: 13
+08:24:01 [0m[33m[WARN] [0m# of splitters: 6
+08:24:01 [0m[33m[WARN] [0m# of splitters: 14
+08:24:01 [0m[33m[WARN] [0m# of splitters: 9
+08:24:01 [0m[33m[WARN] [0m# of splitters: 11
+08:24:01 [0m[33m[WARN] [0m# of splitters: 8
+08:24:01 [0m[33m[WARN] [0m# of splitters: 10
+08:24:01 [0m[33m[WARN] [0m# of splitters: 7
+08:24:02 [0m[33m[WARN] [0m# of splitters: 9
+08:24:02 [0m[33m[WARN] [0m# of splitters: 1
+08:24:02 [0m[33m[WARN] [0m# of splitters: 2
+08:24:02 [0m[33m[WARN] [0m# of splitters: 1
+08:24:02 [0m[33m[WARN] [0m# of splitters: 2
+generalizing (++ ts_ph_list_0 (++ ts_ph_list_1 ts_ph_list_1)) = (++ (++ ts_ph_list_0 ts_ph_list_1) ts_ph_list_1)
+generalized as case_split
+08:24:02 [0m[33m[WARN] [0mproved: (++ ?ts_ph_list_0 (++ ?ts_ph_list_1 ?ts_ph_list_2)) => (++ (++ ?ts_ph_list_0 ?ts_ph_list_1) ?ts_ph_list_2)
+08:24:02 [0m[33m[WARN] [0mproved: (++ (++ ?ts_ph_list_0 ?ts_ph_list_1) ?ts_ph_list_2) => (++ ?ts_ph_list_0 (++ ?ts_ph_list_1 ?ts_ph_list_2))
+
+08:24:02 [0m[33m[WARN] [0m# of splitters: 1
+08:24:02 [0m[33m[WARN] [0m# of splitters: 2
+08:24:02 [0m[33m[WARN] [0m# of splitters: 2
+08:24:02 [0m[33m[WARN] [0m# of splitters: 1
+08:24:02 [0m[33m[WARN] [0m# of splitters: 2
+08:24:02 [0m[33m[WARN] [0mproved: (++ (rev ?ts_ph_list_1) (rev ?ts_ph_list_0)) => (rev (++ ?ts_ph_list_0 ?ts_ph_list_1))
+08:24:02 [0m[33m[WARN] [0mproved: (rev (++ ?ts_ph_list_0 ?ts_ph_list_1)) => (++ (rev ?ts_ph_list_1) (rev ?ts_ph_list_0))
+
+08:24:02 [0m[33m[WARN] [0m# of splitters: 1
+08:24:02 [0m[33m[WARN] [0m# of splitters: 4
+08:24:02 [0m[33m[WARN] [0mproved: (rev (rev ?ts_ph_list_0)) => ?ts_ph_list_0
+
+done in 4594

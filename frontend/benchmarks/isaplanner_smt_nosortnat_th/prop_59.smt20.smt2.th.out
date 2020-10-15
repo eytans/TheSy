@@ -1,0 +1,30 @@
+Collecting statistics
+(last nil) => Z
+Z => (last nil)
+(last (cons ?y nil)) => ?y
+(last (cons ?y (cons ?x2 ?x3))) => (last (cons ?x2 ?x3))
+(++ nil2 ?y0) => ?y0
+(++ (cons2 ?z ?xs) ?y1) => (cons2 ?z (++ ?xs ?y1))
+(cons2 ?z (++ ?xs ?y1)) => (++ (cons2 ?z ?xs) ?y1)
+ ex is: nil2
+ ex is: (cons2 autovar_sk_0 nil2)
+ ex is: (cons2 autovar_sk_1 (cons2 autovar_sk_0 nil2))
+ ex is: Z
+ ex is: (S Z)
+ ex is: (S (S Z))
+ ex is: nil
+ ex is: (cons autovar_Nat_0 nil)
+ ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+Running TheSy on datatypes: list Nat list2 dict: last ++ nil2 cons2 Z S nil cons
+Starting depth 1
+08:23:51 [0m[33m[WARN] [0mproved: (++ ?ts_ph_list2_0 nil2) => ?ts_ph_list2_0
+
+Starting depth 2
+08:23:51 [0m[33m[WARN] [0mproved: (last (cons Z ?ts_ph_list_0)) => (last ?ts_ph_list_0)
+08:23:51 [0m[33m[WARN] [0mproved: (last ?ts_ph_list_0) => (last (cons Z ?ts_ph_list_0))
+generalizing (++ (++ ts_ph_list2_0 ts_ph_list2_1) ts_ph_list2_1) = (++ ts_ph_list2_0 (++ ts_ph_list2_1 ts_ph_list2_1))
+generalized as case_split
+08:23:51 [0m[33m[WARN] [0mproved: (++ (++ ?ts_ph_list2_0 ?ts_ph_list2_1) ?ts_ph_list2_2) => (++ ?ts_ph_list2_0 (++ ?ts_ph_list2_1 ?ts_ph_list2_2))
+08:23:51 [0m[33m[WARN] [0mproved: (++ ?ts_ph_list2_0 (++ ?ts_ph_list2_1 ?ts_ph_list2_2)) => (++ (++ ?ts_ph_list2_0 ?ts_ph_list2_1) ?ts_ph_list2_2)
+
+done in 66

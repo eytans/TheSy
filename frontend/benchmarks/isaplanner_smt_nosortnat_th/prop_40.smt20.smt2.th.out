@@ -1,0 +1,56 @@
+Collecting statistics
+(take Z ?y) => nil
+(take (S ?z) nil) => nil
+(take (S ?z) (cons ?x2 ?x3)) => (cons ?x2 (take ?z ?x3))
+(cons ?x2 (take ?z ?x3)) => (take (S ?z) (cons ?x2 ?x3))
+(take ?autovar7 nil) => (potential_split ?autovar7 Z (S (param_Nat_0 ?autovar7))) if Cond(var: ?autovar7, pat: Z) Cond(var: ?autovar7, pat: (S ?param_0))
+(take ?autovar7 (cons ?autovar3 ?autovar4)) => (potential_split ?autovar7 Z (S (param_Nat_0 ?autovar7))) if Cond(var: ?autovar7, pat: Z) Cond(var: ?autovar7, pat: (S ?param_0))
+(take (S ?autovar5) ?autovar8) => (potential_split ?autovar8 nil (cons (param_list_0 ?autovar8) (param_list_1 ?autovar8))) if Cond(var: ?autovar8, pat: nil) Cond(var: ?autovar8, pat: (cons ?param_0 ?param_1))
+(take (S ?autovar6) ?autovar8) => (potential_split ?autovar8 nil (cons (param_list_0 ?autovar8) (param_list_1 ?autovar8))) if Cond(var: ?autovar8, pat: nil) Cond(var: ?autovar8, pat: (cons ?param_0 ?param_1))
+ ex is: nil
+ ex is: (cons autovar_sk_0 nil)
+ ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
+ ex is: Z
+ ex is: (S Z)
+ ex is: (S (S Z))
+Running TheSy on datatypes: Nat list dict: take nil cons Z S
+Starting depth 1
+08:23:50 [0m[33m[WARN] [0m# of splitters: 4
+08:23:50 [0m[33m[WARN] [0m# of splitters: 3
+08:23:50 [0m[33m[WARN] [0m# of splitters: 4
+08:23:50 [0m[33m[WARN] [0m# of splitters: 2
+08:23:51 [0m[33m[WARN] [0m# of splitters: 3
+08:23:51 [0m[33m[WARN] [0m# of splitters: 1
+08:23:51 [0m[33m[WARN] [0m# of splitters: 1
+08:23:51 [0m[33m[WARN] [0mproved: (take ?ts_ph_Nat_0 nil) => nil
+Starting depth 2
+08:23:51 [0m[33m[WARN] [0m# of splitters: 16
+08:23:51 [0m[33m[WARN] [0m# of splitters: 12
+08:24:03 [0m[33m[WARN] [0m# of splitters: 16
+08:24:15 [0m[33m[WARN] [0m# of splitters: 11
+08:24:25 [0m[33m[WARN] [0m# of splitters: 15
+08:24:36 [0m[33m[WARN] [0m# of splitters: 9
+08:24:39 [0m[33m[WARN] [0m# of splitters: 13
+08:24:44 [0m[33m[WARN] [0m# of splitters: 8
+08:24:46 [0m[33m[WARN] [0m# of splitters: 12
+08:24:49 [0m[33m[WARN] [0m# of splitters: 11
+08:24:52 [0m[33m[WARN] [0m# of splitters: 11
+08:24:52 [0m[33m[WARN] [0m# of splitters: 10
+08:24:55 [0m[33m[WARN] [0m# of splitters: 10
+08:24:55 [0m[33m[WARN] [0m# of splitters: 9
+08:24:56 [0m[33m[WARN] [0m# of splitters: 9
+08:25:02 [0m[33m[WARN] [0m# of splitters: 8
+08:25:05 [0m[33m[WARN] [0m# of splitters: 8
+08:25:05 [0m[33m[WARN] [0m# of splitters: 7
+08:25:07 [0m[33m[WARN] [0m# of splitters: 7
+08:25:08 [0m[33m[WARN] [0m# of splitters: 1
+08:25:08 [0m[33m[WARN] [0mproved: (take ?ts_ph_Nat_0 (take ?ts_ph_Nat_0 ?ts_ph_list_0)) => (take ?ts_ph_Nat_0 ?ts_ph_list_0)
+08:25:08 [0m[33m[WARN] [0mproved: (take ?ts_ph_Nat_0 ?ts_ph_list_0) => (take ?ts_ph_Nat_0 (take ?ts_ph_Nat_0 ?ts_ph_list_0))
+
+08:25:08 [0m[33m[WARN] [0m# of splitters: 3
+08:25:08 [0m[33m[WARN] [0m# of splitters: 1
+08:25:08 [0m[33m[WARN] [0m# of splitters: 2
+08:25:08 [0m[33m[WARN] [0mproved: (take (S ?ts_ph_Nat_0) (take ?ts_ph_Nat_0 ?ts_ph_list_0)) => (take ?ts_ph_Nat_0 ?ts_ph_list_0)
+08:25:08 [0m[33m[WARN] [0mproved: (take ?ts_ph_Nat_0 ?ts_ph_list_0) => (take (S ?ts_ph_Nat_0) (take ?ts_ph_Nat_0 ?ts_ph_list_0))
+
+done in 79571

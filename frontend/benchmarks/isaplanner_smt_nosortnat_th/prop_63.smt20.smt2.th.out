@@ -1,0 +1,130 @@
+Collecting statistics
+(last nil) => Z
+Z => (last nil)
+(last (cons ?y nil)) => ?y
+(last (cons ?y (cons ?x2 ?x3))) => (last (cons ?x2 ?x3))
+(<2 ?x Z) => false
+(<2 Z (S ?z)) => true
+(<2 (S ?x2) (S ?z)) => (<2 ?x2 ?z)
+(<2 ?x2 ?z) => (<2 (S ?x2) (S ?z))
+(len nil2) => Z
+Z => (len nil2)
+(len (cons2 ?y0 ?xs)) => (S (len ?xs))
+(drop Z ?y1) => ?y1
+(drop (S ?z) nil2) => nil2
+(drop (S ?z) (cons2 ?x22 ?x33)) => (drop ?z ?x33)
+(drop ?autovar7 nil2) => (potential_split ?autovar7 Z (S (param_Nat_0 ?autovar7))) if Cond(var: ?autovar7, pat: Z) Cond(var: ?autovar7, pat: (S ?param_0))
+(drop ?autovar7 (cons2 ?autovar3 ?autovar4)) => (potential_split ?autovar7 Z (S (param_Nat_0 ?autovar7))) if Cond(var: ?autovar7, pat: Z) Cond(var: ?autovar7, pat: (S ?param_0))
+(drop (S ?autovar5) ?autovar8) => (potential_split ?autovar8 nil2 (cons2 (param_list2_0 ?autovar8) (param_list2_1 ?autovar8))) if Cond(var: ?autovar8, pat: nil2) Cond(var: ?autovar8, pat: (cons2 ?param_0 ?param_1))
+(drop (S ?autovar6) ?autovar8) => (potential_split ?autovar8 nil2 (cons2 (param_list2_0 ?autovar8) (param_list2_1 ?autovar8))) if Cond(var: ?autovar8, pat: nil2) Cond(var: ?autovar8, pat: (cons2 ?param_0 ?param_1))
+(<2 ?autovar5 (S ?autovar1)) => (potential_split ?autovar5 Z (S (param_Nat_0 ?autovar5))) if Cond(var: ?autovar5, pat: Z) Cond(var: ?autovar5, pat: (S ?param_0))
+(<2 ?autovar5 (S ?autovar3)) => (potential_split ?autovar5 Z (S (param_Nat_0 ?autovar5))) if Cond(var: ?autovar5, pat: Z) Cond(var: ?autovar5, pat: (S ?param_0))
+(<2 Z ?autovar6) => (potential_split ?autovar6 Z (S (param_Nat_0 ?autovar6))) if Cond(var: ?autovar6, pat: Z) Cond(var: ?autovar6, pat: (S ?param_0))
+(<2 (S ?autovar4) ?autovar6) => (potential_split ?autovar6 Z (S (param_Nat_0 ?autovar6))) if Cond(var: ?autovar6, pat: Z) Cond(var: ?autovar6, pat: (S ?param_0))
+ ex is: nil2
+ ex is: (cons2 autovar_sk_0 nil2)
+ ex is: (cons2 autovar_sk_1 (cons2 autovar_sk_0 nil2))
+ ex is: Z
+ ex is: (S Z)
+ ex is: (S (S Z))
+ ex is: nil
+ ex is: (cons autovar_Nat_0 nil)
+ ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+Running TheSy on datatypes: Nat list list2 dict: len last drop <2 nil2 cons2 Z S nil cons
+Starting depth 1
+08:23:50 [0m[33m[WARN] [0m# of splitters: 4
+08:23:50 [0m[33m[WARN] [0m# of splitters: 3
+08:23:50 [0m[33m[WARN] [0m# of splitters: 4
+08:23:50 [0m[33m[WARN] [0m# of splitters: 2
+08:23:50 [0m[33m[WARN] [0m# of splitters: 3
+08:23:50 [0m[33m[WARN] [0m# of splitters: 1
+08:23:50 [0m[33m[WARN] [0m# of splitters: 2
+08:23:50 [0m[33m[WARN] [0m# of splitters: 1
+08:23:50 [0m[33m[WARN] [0mproved: (drop ?ts_ph_Nat_0 nil2) => nil2
+08:23:50 [0m[33m[WARN] [0mproved: (<2 ?ts_ph_Nat_0 ?ts_ph_Nat_0) => false
+Starting depth 2
+08:23:50 [0m[33m[WARN] [0m# of splitters: 21
+08:23:50 [0m[33m[WARN] [0m# of splitters: 18
+08:23:50 [0m[33m[WARN] [0m# of splitters: 21
+08:23:51 [0m[33m[WARN] [0m# of splitters: 17
+08:23:51 [0m[33m[WARN] [0m# of splitters: 20
+08:23:51 [0m[33m[WARN] [0m# of splitters: 14
+08:23:52 [0m[33m[WARN] [0m# of splitters: 19
+08:23:52 [0m[33m[WARN] [0m# of splitters: 13
+08:23:52 [0m[33m[WARN] [0m# of splitters: 18
+08:23:52 [0m[33m[WARN] [0m# of splitters: 16
+08:23:53 [0m[33m[WARN] [0m# of splitters: 17
+08:23:53 [0m[33m[WARN] [0m# of splitters: 15
+08:23:53 [0m[33m[WARN] [0m# of splitters: 16
+08:23:53 [0m[33m[WARN] [0m# of splitters: 14
+08:23:53 [0m[33m[WARN] [0m# of splitters: 15
+08:23:53 [0m[33m[WARN] [0m# of splitters: 13
+08:23:53 [0m[33m[WARN] [0m# of splitters: 14
+08:23:53 [0m[33m[WARN] [0m# of splitters: 12
+08:23:53 [0m[33m[WARN] [0m# of splitters: 13
+08:23:53 [0m[33m[WARN] [0m# of splitters: 11
+08:23:53 [0m[33m[WARN] [0m# of splitters: 12
+08:23:53 [0m[33m[WARN] [0m# of splitters: 10
+08:23:54 [0m[33m[WARN] [0m# of splitters: 11
+08:23:54 [0m[33m[WARN] [0m# of splitters: 8
+08:23:54 [0m[33m[WARN] [0m# of splitters: 9
+08:23:54 [0m[33m[WARN] [0m# of splitters: 8
+08:23:54 [0m[33m[WARN] [0m# of splitters: 9
+08:23:54 [0m[33m[WARN] [0m# of splitters: 7
+08:23:54 [0m[33m[WARN] [0m# of splitters: 7
+08:23:54 [0m[33m[WARN] [0m# of splitters: 1
+08:23:54 [0m[33m[WARN] [0m# of splitters: 1
+08:23:54 [0m[33m[WARN] [0mproved: (<2 ?ts_ph_Nat_0 (S ?ts_ph_Nat_0)) => true
+08:23:54 [0m[33m[WARN] [0m# of splitters: 1
+08:23:54 [0m[33m[WARN] [0m# of splitters: 1
+08:23:54 [0m[33m[WARN] [0mproved: (<2 (S ?ts_ph_Nat_0) ?ts_ph_Nat_0) => false
+08:23:54 [0m[33m[WARN] [0mproved: (drop (len ?ts_ph_list2_0) ?ts_ph_list2_0) => nil2
+08:23:54 [0m[33m[WARN] [0m# of splitters: 1
+08:23:54 [0m[33m[WARN] [0m# of splitters: 1
+08:23:54 [0m[33m[WARN] [0m# of splitters: 1
+08:23:54 [0m[33m[WARN] [0m# of splitters: 1
+08:23:54 [0m[33m[WARN] [0mproved: (last (cons Z ?ts_ph_list_0)) => (last ?ts_ph_list_0)
+08:23:54 [0m[33m[WARN] [0mproved: (last ?ts_ph_list_0) => (last (cons Z ?ts_ph_list_0))
+
+08:23:54 [0m[33m[WARN] [0m# of splitters: 4
+08:23:54 [0m[33m[WARN] [0m# of splitters: 3
+08:23:54 [0m[33m[WARN] [0m# of splitters: 4
+08:23:54 [0m[33m[WARN] [0m# of splitters: 2
+08:23:54 [0m[33m[WARN] [0m# of splitters: 3
+08:23:54 [0m[33m[WARN] [0m# of splitters: 1
+08:23:54 [0m[33m[WARN] [0m# of splitters: 1
+08:23:54 [0m[33m[WARN] [0m# of splitters: 2
+08:23:54 [0m[33m[WARN] [0m# of splitters: 1
+08:23:54 [0m[33m[WARN] [0m# of splitters: 2
+08:23:54 [0m[33m[WARN] [0m# of splitters: 3
+08:23:54 [0m[33m[WARN] [0m# of splitters: 1
+08:23:54 [0m[33m[WARN] [0m# of splitters: 4
+08:23:54 [0m[33m[WARN] [0m# of splitters: 1
+08:23:54 [0m[33m[WARN] [0m# of splitters: 1
+08:23:54 [0m[33m[WARN] [0mproved: (drop (S ?ts_ph_Nat_0) ?ts_ph_list2_1) => (drop (S Z) (drop ?ts_ph_Nat_0 ?ts_ph_list2_1))
+08:23:54 [0m[33m[WARN] [0mproved: (drop (S Z) (drop ?ts_ph_Nat_0 ?ts_ph_list2_1)) => (drop (S ?ts_ph_Nat_0) ?ts_ph_list2_1)
+
+08:23:54 [0m[33m[WARN] [0m# of splitters: 4
+08:23:54 [0m[33m[WARN] [0m# of splitters: 5
+08:23:54 [0m[33m[WARN] [0m# of splitters: 4
+08:23:54 [0m[33m[WARN] [0m# of splitters: 2
+08:23:54 [0m[33m[WARN] [0m# of splitters: 4
+08:23:54 [0m[33m[WARN] [0m# of splitters: 5
+08:23:54 [0m[33m[WARN] [0m# of splitters: 1
+08:23:54 [0m[33m[WARN] [0m# of splitters: 9
+08:23:55 [0m[33m[WARN] [0m# of splitters: 1
+08:23:55 [0m[33m[WARN] [0mproved: (drop ?ts_ph_Nat_0 (drop ?ts_ph_Nat_1 ?ts_ph_list2_1)) => (drop ?ts_ph_Nat_1 (drop ?ts_ph_Nat_0 ?ts_ph_list2_1))
+08:23:55 [0m[33m[WARN] [0mproved: (drop ?ts_ph_Nat_1 (drop ?ts_ph_Nat_0 ?ts_ph_list2_1)) => (drop ?ts_ph_Nat_0 (drop ?ts_ph_Nat_1 ?ts_ph_list2_1))
+
+08:23:55 [0m[33m[WARN] [0m# of splitters: 3
+08:23:55 [0m[33m[WARN] [0m# of splitters: 1
+08:23:55 [0m[33m[WARN] [0m# of splitters: 10
+08:23:55 [0m[33m[WARN] [0m# of splitters: 3
+08:23:55 [0m[33m[WARN] [0m# of splitters: 1
+08:23:55 [0m[33m[WARN] [0m# of splitters: 2
+08:23:55 [0m[33m[WARN] [0m# of splitters: 3
+08:23:55 [0m[33m[WARN] [0m# of splitters: 1
+08:23:55 [0m[33m[WARN] [0m# of splitters: 10
+08:23:55 [0m[33m[WARN] [0m# of splitters: 3
+08:23:55 [0m[33m[WARN] [0m# of splitters: 1
+done in 4922

@@ -1,0 +1,40 @@
+Collecting statistics
+(-2 Z ?y) => Z
+(-2 (S ?z) Z) => (S ?z)
+(S ?z) => (-2 (S ?z) Z)
+(-2 (S ?z) (S ?x2)) => (-2 ?z ?x2)
+(-2 ?z ?x2) => (-2 (S ?z) (S ?x2))
+(-2 ?autovar6 Z) => (potential_split ?autovar6 Z (S (param_Nat_0 ?autovar6))) if Cond(var: ?autovar6, pat: Z) Cond(var: ?autovar6, pat: (S ?param_0))
+(-2 ?autovar6 (S ?autovar3)) => (potential_split ?autovar6 Z (S (param_Nat_0 ?autovar6))) if Cond(var: ?autovar6, pat: Z) Cond(var: ?autovar6, pat: (S ?param_0))
+(-2 (S ?autovar4) ?autovar7) => (potential_split ?autovar7 Z (S (param_Nat_0 ?autovar7))) if Cond(var: ?autovar7, pat: Z) Cond(var: ?autovar7, pat: (S ?param_0))
+(-2 (S ?autovar5) ?autovar7) => (potential_split ?autovar7 Z (S (param_Nat_0 ?autovar7))) if Cond(var: ?autovar7, pat: Z) Cond(var: ?autovar7, pat: (S ?param_0))
+ ex is: Z
+ ex is: (S Z)
+ ex is: (S (S Z))
+Running TheSy on datatypes: Nat dict: -2 Z S
+Starting depth 1
+08:23:50 [0m[33m[WARN] [0m# of splitters: 2
+08:23:50 [0m[33m[WARN] [0m# of splitters: 1
+08:23:50 [0m[33m[WARN] [0m# of splitters: 2
+08:23:50 [0m[33m[WARN] [0mproved: (-2 ?ts_ph_Nat_0 Z) => ?ts_ph_Nat_0
+08:23:50 [0m[33m[WARN] [0mproved: (-2 ?ts_ph_Nat_0 ?ts_ph_Nat_0) => Z
+Starting depth 2
+08:23:50 [0m[33m[WARN] [0m# of splitters: 8
+08:23:50 [0m[33m[WARN] [0m# of splitters: 3
+08:23:50 [0m[33m[WARN] [0m# of splitters: 7
+08:23:50 [0m[33m[WARN] [0m# of splitters: 4
+08:23:50 [0m[33m[WARN] [0m# of splitters: 7
+08:23:50 [0m[33m[WARN] [0m# of splitters: 5
+08:23:50 [0m[33m[WARN] [0m# of splitters: 6
+08:23:50 [0m[33m[WARN] [0m# of splitters: 4
+08:23:50 [0m[33m[WARN] [0m# of splitters: 5
+08:23:50 [0m[33m[WARN] [0m# of splitters: 3
+08:23:50 [0m[33m[WARN] [0m# of splitters: 4
+08:23:51 [0m[33m[WARN] [0m# of splitters: 1
+08:23:51 [0m[33m[WARN] [0m# of splitters: 1
+08:23:51 [0m[33m[WARN] [0mproved: (-2 (S ?ts_ph_Nat_0) ?ts_ph_Nat_0) => (S Z)
+08:23:51 [0m[33m[WARN] [0m# of splitters: 1
+08:23:51 [0m[33m[WARN] [0m# of splitters: 1
+08:23:51 [0m[33m[WARN] [0mproved: (-2 ?ts_ph_Nat_0 (S ?ts_ph_Nat_0)) => Z
+
+done in 896
