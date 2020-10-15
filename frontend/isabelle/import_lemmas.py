@@ -89,6 +89,12 @@ class TheoryDocument:
         else:
             return eq
 
+    def export_rules(self, lemma):
+        eq = self.export_lemma(lemma, as_goal=False)
+        S = SExpression
+        yield S(['=>', f'"{" => ".join(str(x) for x in lemma)}"'] + eq.elements[1:])
+        yield S(['=>', f'"{" <= ".join(str(x) for x in lemma)}"'] + list(reversed(eq.elements[1:])))
+
     def find_vars(self, sexpr):
         fv = set()
         if isinstance(sexpr, SExpression):

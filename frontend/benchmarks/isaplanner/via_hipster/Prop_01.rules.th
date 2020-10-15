@@ -1,0 +1,4 @@
+(=> "(Prop_01.take z (Prop_01.take z x2)) => (Prop_01.take z x2)" (take ?z (take ?z ?x2)) (take ?z ?x2))
+(=> "(Prop_01.take z (Prop_01.take z x2)) <= (Prop_01.take z x2)" (take ?z ?x2) (take ?z (take ?z ?x2)))
+(=> "(x (x z x2) x3) => (x z (x x2 x3))" (++ (++ ?z ?x2) ?x3) (++ ?z (++ ?x2 ?x3)))
+(=> "(x (x z x2) x3) <= (x z (x x2 x3))" (++ ?z (++ ?x2 ?x3)) (++ (++ ?z ?x2) ?x3))

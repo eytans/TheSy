@@ -53,7 +53,13 @@ def main():
                             print(goal, file=outf)
                             #print(f" - {t} {lem}")
                             #print(f"   {doc.find_vars(lem[0])} {doc.export_lemma(lem)}")
-                    
+
+                    with open(os.path.join(d, fn.replace('.thy', '.rules.th')), 'w') as outf:
+                        for t, lem in doc.lemmas:
+                            for rule in doc.export_rules(lem):
+                                print(f" + {rule}")
+                                print(rule, file=outf)
+
                     if doc.lemmas:
                         stats['theories'] += 1
                         stats['lemmas'] += len(doc.lemmas)
