@@ -1,3 +1,3 @@
-(prove (forall ((ts_ph_list2_0 U)) (= (zip ts_ph_list2_0 nil2) ())))
+(prove (forall ((ts_ph_list2_0 U)) (= (zip ts_ph_list2_0 nil2) nil)))
 (prove (forall ((ts_ph_list2_0 U) (ts_ph_list2_1 U) (ts_ph_sk_1 U)) (= (zipConcat ts_ph_sk_1 ts_ph_list2_1 ts_ph_list2_0) (zip (cons2 ts_ph_sk_1 ts_ph_list2_1) ts_ph_list2_0))))
 (prove (forall ((ts_ph_list2_0 U) (ts_ph_list2_1 U) (ts_ph_sk_1 U)) (= (zip (cons2 ts_ph_sk_1 ts_ph_list2_1) ts_ph_list2_0) (zipConcat ts_ph_sk_1 ts_ph_list2_1 ts_ph_list2_0))))

@@ -1,7 +1,7 @@
 (prove (forall ((ts_ph_Nat_0 U)) (= (drop ts_ph_Nat_0 nil2) nil2)))
 (prove (forall ((ts_ph_Nat_0 U)) (= (take ts_ph_Nat_0 nil2) nil2)))
 (prove (forall ((ts_ph_list2_0 U)) (= (++ ts_ph_list2_0 nil2) ts_ph_list2_0)))
-(prove (forall ((ts_ph_list2_0 U)) (= (zip ts_ph_list2_0 nil2) ())))
+(prove (forall ((ts_ph_list2_0 U)) (= (zip ts_ph_list2_0 nil2) nil)))
 (prove (forall ((ts_ph_list2_0 U)) (= (drop (len ts_ph_list2_0) ts_ph_list2_0) nil2)))
 (prove (forall ((ts_ph_list2_0 U) (ts_ph_list2_1 U)) (= (zip ts_ph_list2_0 (++ ts_ph_list2_0 ts_ph_list2_1)) (zip ts_ph_list2_0 ts_ph_list2_0))))
 (prove (forall ((ts_ph_list2_0 U) (ts_ph_list2_1 U)) (= (zip (++ ts_ph_list2_0 ts_ph_list2_1) ts_ph_list2_0) (zip ts_ph_list2_0 (++ ts_ph_list2_0 ts_ph_list2_1)))))
