@@ -1,5 +1,2 @@
-(prove (forall ((x2 U) (y U) (z U)) (= (=> (<=2 x2 y) (&& z z)) (x2))))
-(prove (forall ((x2 U) (y U) (z U)) (= (=> (<=2 x2 y) (&& z (S z))) (x2))))
 (prove (forall ((y U)) (= (not (&& (S y) y)) true)))
-(prove (forall ((y U) (z U)) (= (=> (&& z y) (not (&& (S y) z))) true)))
 (prove (forall ((y U)) (= (not (&& (S (S y)) y)) true)))

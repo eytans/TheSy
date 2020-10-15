@@ -80,10 +80,15 @@ class TheoryDocument:
         sig.update(self.aliases)
         phi = [self.subst(e, sig) for e in lemma]
         if len(phi) == 1: phi.append('true')
+        if phi[0].elements[0] == '=>':
+            precond, phi[0] = phi[0].elements[1:]
+        else:
+            precond = None
 
         S = SExpression
         eq = S(['='] + phi)
         if as_goal:
+            if precond: return None  #  no chance :(    # eq = S(['=>', precond, eq])
             qv = S([S([v, 'U']) for v in sorted(fv)])  # sorting just to keep order stable
             return S(['prove', S(['forall', qv, eq])])
         else:
