@@ -217,9 +217,9 @@ pub mod parser {
             let opt_pats = function_patterns.get_vec(f);
             let rws = opt_pats.map(|pats| {
                 let relevant_params = f.params.iter().enumerate().filter_map(|(i, t)| {
-                    let datatype = res.datatypes.iter().find(|d|
+a                    let param_datatype = res.datatypes.iter().find(|d|
                         d.name == t.into_tree().root().op.to_string());
-                    let res = datatype.map(|d| (i, t, d));
+                    let res = param_datatype.map(|d| (i, t, d));
                     // TODO: also filter by whether the other params are always the same or var and one pattern.
                     // TODO: if there is a pattern use it for screening
                     res.filter(|(i, t, d)|
@@ -250,7 +250,7 @@ pub mod parser {
                     for p in pats.iter().filter(|p|
                         // Take only patterns where the i param is being matched
                         match p.into_tree().children()[i].root() {
-                            ENodeOrVar::ENode(_) => { true }
+                            ENodeOrVar::ENode(s) => { d.constructors.iter().any(|c| c.name == s.op.to_string()) }
                             ENodeOrVar::Var(_) => { false }
                         }) {
                         let mut vars = HashMap::new();

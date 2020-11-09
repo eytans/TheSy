@@ -678,8 +678,8 @@ impl TheSy {
             let mut new_graph = egraph.clone();
             new_graph.union(root, *child);
             // TODO: graph limit enhancing runner, with rules sorting
-            let mut runner = Runner::default().with_time_limit(Duration::from_secs(60 * 10)).with_node_limit(new_graph.total_number_of_nodes() + 400000).with_egraph(new_graph).with_iter_limit(run_depth);
-            runner = runner.run(rules);
+            let mut runner = Runner::default().with_time_limit(Duration::from_secs(60 * 10)).with_node_limit(new_graph.total_number_of_nodes() + 50000).with_egraph(new_graph).with_iter_limit(run_depth);
+            runner = runner.run(rules );
             match runner.stop_reason.as_ref().unwrap() {
                 Saturated => {}
                 StopReason::IterationLimit(_) => {}
@@ -896,6 +896,7 @@ mod test {
     fn no_double_translation() {
         // from previous test assume each class has one edge
         let mut syg = create_nat_sygue();
+        let rules = create_pl_rewrites();
         syg.increase_depth();
         syg.increase_depth();
         let level0 = syg.egraph.classes()
