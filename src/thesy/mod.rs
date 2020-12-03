@@ -3,6 +3,7 @@ pub mod example_creator;
 pub mod thesy_parser;
 mod prover;
 pub mod statistics;
+mod parallel;
 
 pub use thesy::TheSy;
 pub use example_creator::examples;
