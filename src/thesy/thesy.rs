@@ -203,10 +203,9 @@ impl TheSy {
         for fun in dict.iter()
             .chain(TheSy::collect_phs(&dict, ph_count).iter())
             // Hack for supporting bool constant, important for preconditions or and and such.
-            .chain(vec![Function::new("true".parse().unwrap(), vec![], "bool".parse().unwrap()),
-                        Function::new("false".parse().unwrap(), vec![], "bool".parse().unwrap()),
-                        Function::new("true".parse().unwrap(), vec![], "Bool".parse().unwrap()),
-                        Function::new("false".parse().unwrap(), vec![], "Bool".parse().unwrap())].iter()) {
+            .chain(vec![Function::new("true".parse().unwrap(), vec![], "Bool".parse().unwrap()),
+                        Function::new("false".parse().unwrap(), vec![], "Bool".parse().unwrap())].iter())
+            .chain(datatypes.iter().flat_map(|d| d.constructors.iter())){
             let id = egraph.add_expr(&fun.name.parse().unwrap());
             let type_id = egraph.add_expr(&fun.get_type());
             egraph.add(SymbolLang::new("typed", vec![id, type_id]));
@@ -468,21 +467,17 @@ impl TheSy {
             let stop_reason = self.equiv_reduc(&rules[..]);
             self.update_node_limit(stop_reason);
 
-            let splitter_count = if cfg!(feature = "stats") {
-                Self::split_patterns().iter().map(|p| p.search(&self.egraph).iter().map(|m| m.substs.len()).sum::<usize>()).sum()
-            } else { 0 };
             let start = TheSy::stats_get_time();
-
-            // let matches = Self::split_patterns()[0].search(&self.egraph);
-            // assert!(matches.iter().all(|m| self.egraph.classes().find(|c| c.id == m.eclass).unwrap().nodes.len() == 1));
-            // for m in matches {
-            //     println!("{}", reconstruct(&self.egraph, m.eclass, 8).map(|exp| exp.pretty(500)).unwrap_or("".to_string()));
-            // }
-
             let conjs_before_cases = self.get_conjectures();
             // TODO: case split + check all conjectures should be a function.
             // TODO: After finishing checking all conjectures in final depth (if a lemma was found) try case split again then finish.
             // TODO: can be a single loop with max depth
+
+            // Case Splitting
+            let splitter_count = if cfg!(feature = "stats") {
+                Self::split_patterns().iter().map(|p| p.search(&self.egraph).iter().map(|m| m.substs.len()).sum::<usize>()).sum()
+            } else { 0 };
+
             Self::case_split_all(rules, &mut self.egraph, 2, 4);
             if cfg!(feature = "stats") {
                 self.stats.as_mut().unwrap().case_split.push((splitter_count, SystemTime::now().duration_since(start.unwrap()).unwrap()));
