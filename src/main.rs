@@ -31,6 +31,7 @@ mod tools;
 mod thesy;
 mod lang;
 mod tree;
+mod utils;
 // mod smtlib_translator;
 
 /// Arguments to use to run thesy
