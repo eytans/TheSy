@@ -85,7 +85,7 @@ impl TheSy {
     pub fn new_with_ph(datatypes: Vec<DataType>, examples: HashMap<DataType, Vec<RecExpr<SymbolLang>>>, known_functions: Vec<Function>, ph_count: usize, goals: Option<Vec<(HashMap<RecExpr<SymbolLang>, RecExpr<SymbolLang>>, Option<RecExpr<SymbolLang>>, RecExpr<SymbolLang>, RecExpr<SymbolLang>)>>) -> TheSy {
         let datatype_to_prover: HashMap<DataType, Prover> = datatypes.iter()
             .map(|d| (d.clone(), Prover::new(d.clone()))).collect();
-        let (mut egraph, mut example_ids) = TheSy::create_graph_example_ids(&datatypes, &examples, &dict, ph_count);
+        let (mut egraph, mut example_ids) = TheSy::create_graph_example_ids(&datatypes, &examples, &known_functions, ph_count);
 
 
         let apply_rws = TheSy::create_apply_rws(&known_functions, ph_count);
@@ -139,10 +139,11 @@ impl TheSy {
             .chain(is_rws.into_iter())
             .collect_vec();
 
-        let conjectures = lemmas.map(|v| v.into_iter()
+        let conjectures = goals.map(|v| v.into_iter()
             .map(|(vars, precond, ex1, ex2)| {
                 let mut types_to_vars: HashMap<RecExpr<SymbolLang>, HashMap<Symbol, Function>> = HashMap::new();
                 for v in vars {
+                    //adding all types which do not exist in the mapping yet
                     if !types_to_vars.contains_key(&v.1) {
                         types_to_vars.insert(v.1.clone(), HashMap::new());
                     }
@@ -174,7 +175,7 @@ impl TheSy {
 
         let mut res = TheSy {
             datatypes: datatype_to_prover,
-            dict,
+            dict: known_functions,
             egraph,
             // sygue_rules: vec![],
             searchers: HashMap::new(),
@@ -198,6 +199,7 @@ impl TheSy {
             example_ids.insert(d.clone(), HashMap::new());
         }
 
+        //here we add all functions to the e-graph
         for fun in dict.iter()
             .chain(TheSy::collect_phs(&dict, ph_count).iter())
             // Hack for supporting bool constant, important for preconditions or and and such.
@@ -760,11 +762,12 @@ impl TheSy {
         let root_var: Var = "?root".parse().unwrap();
         let children_vars: Vec<Var> = (0..5).map(|i| format!("?c{}", i).parse().unwrap()).collect_vec();
         let mut splitters: Vec<(Id, Vec<Id>)> = Self::split_patterns().iter().enumerate()
-            .flat_map(|(i, p)| {
-                let results = p.search(egraph).into_iter().flat_map(|x| x.substs);
-                results.map(|s| (
-                    *s.get(root_var).unwrap(), // Root
-                    (0..i + 2).map(|i| *s.get(children_vars[i]).unwrap()).collect_vec() // Params
+            .flat_map(|(i, pattern)| {
+                // results holds all possible substitutes that are from the same form as the pattern
+                let results = pattern.search(egraph).into_iter().flat_map(|x| x.substs);
+                results.map(|sub| (
+                    *sub.get(root_var).unwrap(),
+                    (0..i + 2).map(|j| *sub.get(children_vars[j]).unwrap()).collect_vec()
                 )).filter(|x| !new_dont_use.contains(x))
                     .collect_vec()
             })
