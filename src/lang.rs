@@ -3,6 +3,10 @@ use itertools::Itertools;
 
 use crate::eggstentions::expression_ops::{IntoTree, Tree};
 
+/// Datatype
+/// name:           name of DataType, e.g Nat, Bool, etc.
+/// type_params:    vector containing known parameters when system is initialized, e.g Z when DataType=Nat, (True,False) when Datatype=Bool
+/// constructors:   vector of functions that construct expressions of this type, e.g S when DataType=Nat
 #[derive(Clone, Hash, PartialEq, Eq, Debug)]
 pub struct DataType {
     pub name: String,
@@ -11,7 +15,12 @@ pub struct DataType {
     /// Constructor name applied on types
     pub constructors: Vec<Function>,
 }
-
+/// name:       name of function
+/// params:     vector representing what the function is expected to get as arguments
+///             represented as expressions over the graph
+/// ret_type:   an expression representing the return type of the function
+/// e.g assuming the function S: Nat -> Nat is in the graph, then
+/// the expression: (typed S (-> Nat Nat)) is expected to be in the graph
 #[derive(Clone, Hash, PartialEq, Eq, Debug)]
 pub struct Function {
     pub name: String,

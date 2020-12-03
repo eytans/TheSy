@@ -27,9 +27,9 @@ use crate::eggstentions::pretty_string::PrettyString;
 
 /// Theory Synthesizer - Explores a given theory finding and proving new lemmas.
 pub struct TheSy {
-    /// known datatypes to wfo rewrites for induction
+    /// known datatypes to prover
     datatypes: HashMap<DataType, Prover>,
-    /// known function declerations and their types
+    /// known function declarations and includes all c'tors from known datatypes
     dict: Vec<Function>,
     /// egraph which is expanded as part of the exploration
     pub egraph: EGraph<SymbolLang, ()>,
@@ -57,6 +57,10 @@ pub struct TheSy {
 
 /// *** Thesy ***
 impl TheSy {
+    /// datatype: a DataType variable as used in eggstentions
+    /// examples: a vector of expressions to initialize the expression tree with,
+    /// each example contains an instantiation of some type in the e-graph
+    /// dict: a vector of known functions
     pub fn new(datatype: DataType, examples: Vec<RecExpr<SymbolLang>>, dict: Vec<Function>) -> TheSy {
         Self::new_with_ph(vec![datatype.clone()], HashMap::from_iter(iter::once((datatype, examples))), dict, 2, None)
     }
@@ -70,12 +74,21 @@ impl TheSy {
         Self::replace_ops(exp, &HashMap::from_iter(iter::once((orig, replacment))))
     }
 
-    pub fn new_with_ph(datatypes: Vec<DataType>, examples: HashMap<DataType, Vec<RecExpr<SymbolLang>>>, dict: Vec<Function>, ph_count: usize, lemmas: Option<Vec<(HashMap<RecExpr<SymbolLang>, RecExpr<SymbolLang>>, Option<RecExpr<SymbolLang>>, RecExpr<SymbolLang>, RecExpr<SymbolLang>)>>) -> TheSy {
+    /// datatypes: known datatypes to be used during exploration
+    /// examples: symbolic examples used to discriminate between symbolic terms
+    /// known_functions: known function declarations used to create terms during exploration
+    /// ph_count: amount of place holders to create for each type needed during exploration
+    /// goals: if value is not None, TheSy will work in proof mode until all goals are proven or
+    /// exploration ended.
+    /// TheSy will be initialized with dict containing all known functions, all created place
+    /// holders, and all constructors, which are extracted from known datatypes.
+    pub fn new_with_ph(datatypes: Vec<DataType>, examples: HashMap<DataType, Vec<RecExpr<SymbolLang>>>, known_functions: Vec<Function>, ph_count: usize, goals: Option<Vec<(HashMap<RecExpr<SymbolLang>, RecExpr<SymbolLang>>, Option<RecExpr<SymbolLang>>, RecExpr<SymbolLang>, RecExpr<SymbolLang>)>>) -> TheSy {
         let datatype_to_prover: HashMap<DataType, Prover> = datatypes.iter()
             .map(|d| (d.clone(), Prover::new(d.clone()))).collect();
         let (mut egraph, mut example_ids) = TheSy::create_graph_example_ids(&datatypes, &examples, &dict, ph_count);
 
-        let apply_rws = TheSy::create_apply_rws(&dict, ph_count);
+
+        let apply_rws = TheSy::create_apply_rws(&known_functions, ph_count);
 
         let ite_rws: Vec<Rewrite<SymbolLang, ()>> = TheSy::create_ite_rws();
 
@@ -133,9 +146,11 @@ impl TheSy {
                     if !types_to_vars.contains_key(&v.1) {
                         types_to_vars.insert(v.1.clone(), HashMap::new());
                     }
+                    //types to vars is a hashset from all datatypes to the variables of this datatype.
                     let current_ph = types_to_vars[&v.1].len() + 1;
                     types_to_vars.get_mut(&v.1).unwrap().insert(v.0.as_ref().last().unwrap().op, TheSy::get_ph(&v.1, current_ph));
                 }
+                //replacements is a hash map from placeholder to symbol
                 let replacments: HashMap<Symbol, Symbol> = types_to_vars.values().flat_map(|v| {
                     v.iter().map(|(k, f)| (*k, Symbol::from(&f.name)))
                 }).collect();
@@ -175,7 +190,7 @@ impl TheSy {
         res.egraph.rebuild();
         res
     }
-
+    ///create an egraph with examples in it
     fn create_graph_example_ids(datatypes: &Vec<DataType>, examples: &HashMap<DataType, Vec<RecExpr<SymbolLang>>>, dict: &Vec<Function>, ph_count: usize) -> (EGraph<SymbolLang, ()>, HashMap<DataType, HashMap<Id, Vec<Id>, RandomState>, RandomState>) {
         let mut egraph = EGraph::default();
         let mut example_ids = HashMap::new();
@@ -202,6 +217,7 @@ impl TheSy {
             let ind_id = egraph.add_expr(&Self::get_ind_var(d).name.parse().unwrap());
             let initial_example_ids = examples[d].iter()
                 .map(|e| egraph.add_expr(e)).collect_vec();
+            //in this mapping we also add the expression to the egraph, but notice it adds Z but not typed Z Nat
             let chained = initial_example_ids.into_iter().collect_vec();
             example_ids.get_mut(d).unwrap().insert(ind_id, chained);
         }
@@ -254,6 +270,7 @@ impl TheSy {
         self.example_ids = new_ex_ids;
     }
 
+
     /// How to efficiently find who merged? Extract one from each ph class then check for its
     /// id the sets of ids the examples are in.
     /// Meaning need to hold all ids for ph and reference it to relevant example ids
@@ -268,8 +285,11 @@ impl TheSy {
         }
         // First we need to update our keys as they might not be relevant anymore
         self.fix_example_ids();
+
         // Now apply for all matches
         // let anchor = Self::create_sygue_anchor();
+
+
         fn create_edge(op: &String, params: &Vec<(Var, RecExpr<SymbolLang>)>, sub: &Subst) -> SymbolLang {
             SymbolLang::new(op.clone(), params.iter().map(|(v, typ)| sub.get(v.clone()).unwrap()).copied().collect())
         }
@@ -285,6 +305,7 @@ impl TheSy {
             .map(|(op, (searcher, params))| {
                 (op, params, searcher.search(&self.egraph).iter_mut().flat_map(|mut sm| std::mem::take(&mut sm.substs)).collect_vec())
             }).collect_vec();
+        //here we loop over the matches in the e-graph
         for (op, params, subs) in op_matches {
             let typ = {
                 let fun = &self.dict.iter()
@@ -321,6 +342,7 @@ impl TheSy {
     }
 
     fn equiv_reduc_depth(&mut self, rules: &[Rewrite<SymbolLang, ()>], depth: usize) -> StopReason {
+        // TODO: for parallel running, add .with_hook() to runner instantiation, and make it get and send all new rules
         let mut runner = Runner::default().with_time_limit(Duration::from_secs(60 * 10)).with_node_limit(self.node_limit).with_egraph(std::mem::take(&mut self.egraph)).with_iter_limit(depth);
         runner = runner.run(rules);
         if cfg!(feature = "stats") {
@@ -464,6 +486,7 @@ impl TheSy {
                 self.stats.as_mut().unwrap().case_split.push((splitter_count, SystemTime::now().duration_since(start.unwrap()).unwrap()));
             }
 
+            // Conjectures with/without case split and conclusions
             let mut conjectures = self.get_conjectures();
             let mut changed = false;
             for (o, mut ex1, mut ex2, d) in conjs_before_cases.into_iter().rev() {
@@ -636,7 +659,6 @@ impl TheSy {
             Pattern::from_str(&*format!("({} ?root ?c0 ?c1 ?c2 ?c3 ?c4)", Self::SPLITTER)).unwrap(),
         ]
     }
-
     fn create_ite_rws() -> Vec<Rewrite<SymbolLang, ()>> {
         let potential_split_conc = format!("({} ?z true false)", Self::SPLITTER);
         let applier: Pattern<SymbolLang> = potential_split_conc.parse().unwrap();
@@ -670,7 +692,7 @@ impl TheSy {
     }
 
     /// Case splitting works by cloning the graph and merging the different possibilities.
-    /// Enabling recursivly splitting all
+    /// Enabling recursively splitting all
     fn case_split(rules: &[Rewrite<SymbolLang, ()>], egraph: &mut EGraph<SymbolLang, ()>, root: Id, splits: Vec<Id>, split_depth: usize, run_depth: usize, dont_use: &HashSet<(Id, Vec<Id>)>) {
         let classes = egraph.classes().collect_vec();
         // TODO: parallel
@@ -688,6 +710,7 @@ impl TheSy {
                 StopReason::Other(_) => {}
             };
             runner.egraph.rebuild();
+            // TODO: OMER check if this is not a problem that _case_split_all
             Self::_case_split_all(rules, &mut runner.egraph, split_depth - 1, run_depth, dont_use);
             classes.iter().map(|c| (c.id, runner.egraph.find(c.id))).collect::<HashMap<Id, Id>>()
         }).collect_vec();
@@ -708,6 +731,11 @@ impl TheSy {
         egraph.rebuild();
     }
 
+    /// splits all multi-variable expressions to single-variable expressions in the e-graph
+    /// rules: rewrite rules to follow to simplify existing expressions
+    /// egrph: the egraph to rewrite its expressions
+    /// split_depth: depth of expression expansion. Check thesis for further explanation
+    /// (explanation in chapter 2.1-Term Generation & Conjecture Inference
     pub(crate) fn case_split_all(rules: &[Rewrite<SymbolLang, ()>],
                                  egraph: &mut EGraph<SymbolLang, ()>,
                                  split_depth: usize, run_depth: usize) {
@@ -721,6 +749,7 @@ impl TheSy {
         if split_depth == 0 {
             return;
         }
+        // expressions we don't want to use in the rewriting of the expressions
         let new_dont_use = dont_use.iter()
             .map(|(root, children)|
                 (
@@ -743,6 +772,8 @@ impl TheSy {
         if splitters.is_empty() {
             return;
         }
+
+        // now splitters should have all possible expressions that we can substitute
         let classes: HashMap<Id, &EClass<SymbolLang, ()>> = egraph.classes().map(|c| (c.id, c)).collect();
         let mut needed: HashSet<Id> = splitters.iter().map(|x| x.0).collect();
         let mut translatable = HashSet::new();
@@ -771,9 +802,14 @@ impl TheSy {
         });
     }
 
-    /// Create all needed phs from
+    /// given a dictionary of functions, and place holder count, returns a vector of
+    /// the phs that might appear in an expression containing the functions
+    /// For example, given the vector [(typed random_int (-> () Nat))]
+    /// will return [ph_nat_0, ph_nat_1] (which can replace Nat in this expression)
     fn collect_phs(dict: &Vec<Function>, ph_count: usize) -> Vec<Function> {
         let mut res = HashSet::new();
+        // res is a set of all expressions that are parameters of some function
+        // so we need to insert every such expression to the set
         for f in dict {
             for e in f.params.iter() {
                 res.insert(e.clone());
@@ -788,6 +824,8 @@ impl TheSy {
         phs
     }
 
+    /// Given an expression and a ph number, returns a ph representing this function
+    /// TODO: OMER change documentation here
     pub(crate) fn get_ph(d: &RecExpr<SymbolLang>, i: usize) -> Function {
         let s = d.into_tree().to_spaceless_string();
         let name = format!("{}_{}_{}", Self::PH_START, s, i);
@@ -800,7 +838,7 @@ impl TheSy {
             Function::new(name, vec![], d.clone())
         }
     }
-
+    /// returns a Function with the induction variable in it (default ph for induction is 0)
     pub(crate) fn get_ind_var(d: &DataType) -> Function {
         Self::get_ph(&d.as_exp(), 0)
     }
@@ -1129,6 +1167,7 @@ mod test {
         let ex1 = egraph.add_expr(&"(append (take i (cons x nil)) (drop i (cons x nil)))".parse().unwrap());
         let ex2 = egraph.add_expr(&"(append (take i (cons y (cons x nil))) (drop i (cons y (cons x nil))))".parse().unwrap());
         let mut runner = Runner::default().with_egraph(egraph).with_iter_limit(8).run(&rules);
+
         egraph = std::mem::take(&mut runner.egraph);
         egraph.rebuild();
         // assert_ne!(egraph.find(nil), egraph.find(ex0));
