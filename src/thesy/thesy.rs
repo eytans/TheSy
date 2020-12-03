@@ -24,6 +24,15 @@ use crate::eggstentions::conditions::{NonPatternCondition, AndCondition, Pattern
 use std::process::exit;
 use std::cmp::Ordering;
 use crate::eggstentions::pretty_string::PrettyString;
+// for parallel run of TheSy
+use std::sync::mpsc::{Sender, Receiver};
+use std::sync::mpsc;
+use std::thread;
+use closure::closure;
+use std::thread::JoinHandle;
+use crate::thesy::thesy::Message::IdRulePair;
+use crate::utils;
+use crate::thesy::parallel::Message;
 
 /// Theory Synthesizer - Explores a given theory finding and proving new lemmas.
 pub struct TheSy {
