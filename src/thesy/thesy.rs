@@ -849,6 +849,636 @@ impl TheSy {
     pub(crate) fn get_ind_var(d: &DataType) -> Function {
         Self::get_ph(&d.as_exp(), 0)
     }
+    /*
+    pub fn run_rules_concurrently(&mut self, rules: &mut Vec<Rewrite<SymbolLang, ()>>, max_depth: usize, num_processes: usize) -> Vec<(Option<Pattern<SymbolLang>>,
+                                                                                                                 Pattern<SymbolLang>, Pattern<SymbolLang>,
+                                                                                                                 Rewrite<SymbolLang, ()>)>{
+        let system_rws_start = rules.len();
+        let mut found_rules = vec![];                               // unlike original implementation, here we have a vector of vectors of found rules
+        let mut thread_rules = vec![];                      // might want to change this to array, currently not possible due to num_processes being a variable
+
+        // for r in self.system_rws.iter() {
+        //     rules.push(r.clone());
+        // }
+
+        // first we are going to pass all system_rws rules to each ruleset
+        for i in 0..num_processes {
+            thread_rules.push(self.system_rws.iter().collect_vec().clone());
+        }
+        // now split the given rules over the threads
+        for (idx, r) in self.system_rws.iter(){
+            thread_rules[idx % num_processes].push(r.clone());
+        }
+        for i in 0..num_processes{
+
+        }
+        for i in 0..num_processes{
+
+            found_rules.push(vec![]);
+            // TODO: Omer add here a call to a runner of Thesy to use all this
+        }
+        /*
+            OMER TODO: see comment in block above. Plus, I need to update the code below to run concurrently and not the same way as before
+         */
+        /*
+        if self.prove_goals(rules, &mut found_rules, new_rules_index, start_total) {
+            return found_rules;
+        }
+        */
+        if goals_proven{
+            return found_rules.flatten().collect();
+        }
+
+        for depth in 0..max_depth {
+            println!("Starting depth {}", depth + 1);
+            self.increase_depth();
+            let stop_reason = self.equiv_reduc(&rules[..]);
+            self.update_node_limit(stop_reason);
+
+            let start = TheSy::stats_get_time();
+            let conjs_before_cases = self.get_conjectures();
+            // TODO: case split + check all conjectures should be a function.
+            // TODO: After finishing checking all conjectures in final depth (if a lemma was found) try case split again then finish.
+            // TODO: can be a single loop with max depth
+
+            // Case Splitting
+            let splitter_count = if cfg!(feature = "stats") {
+                Self::split_patterns().iter().map(|p| p.search(&self.egraph).iter().map(|m| m.substs.len()).sum::<usize>()).sum()
+            } else { 0 };
+
+            Self::case_split_all(rules, &mut self.egraph, 2, 4);
+            if cfg!(feature = "stats") {
+                self.stats.as_mut().unwrap().case_split.push((splitter_count, SystemTime::now().duration_since(start.unwrap()).unwrap()));
+            }
+
+            // Conjectures with/without case split and conclusions
+            let mut conjectures = self.get_conjectures();
+            let mut changed = false;
+            for (o, mut ex1, mut ex2, d) in conjs_before_cases.into_iter().rev() {
+                if conjectures.iter().any(|(_, other_ex1, other_ex2, _)|
+                    other_ex1 == &ex1 && &ex2 == other_ex2) {
+                    continue
+                }
+                if Self::check_equality(&rules[..], &None, &ex1, &ex2) {
+                    self.stats_update_filtered_conjecture(&ex1, &ex2);
+                    continue;
+                }
+                // Might be a false conjecture that just doesnt get picked anymore in reconstruct.
+                let mut new_rules = self.datatypes[&d].prove_all(rules, &ex1, &ex2);
+                if new_rules.is_none() {
+                    continue;
+                } else {
+                    let temp = new_rules;
+                    new_rules = self.datatypes[&d].generalize_prove(&rules, &ex1, &ex2);
+                    if new_rules.is_none() {
+                        new_rules = temp;
+                    } else {
+                        ex1 = new_rules.as_ref().unwrap()[0].1.pretty_string().parse().unwrap();
+                        ex2 = new_rules.as_ref().unwrap()[0].2.pretty_string().parse().unwrap();
+                        println!("generalized as case_split");
+                    }
+                }
+                changed = true;
+                self.stats_update_proved(&ex1, &ex2, start);
+                found_rules.extend_from_slice(new_rules.as_ref().unwrap());
+                for r in new_rules.unwrap() {
+                    warn!("proved: {}", r.3.long_name());
+                    // inserting like this so new rule will apply before running into node limit.
+                    rules.insert(new_rules_index, r.3);
+                }
+                if self.prove_goals(rules, &mut found_rules, new_rules_index, start_total) {
+                    return found_rules;
+                }
+            }
+
+            if changed {
+                let reduc_depth = 3;
+                let stop_reason = self.equiv_reduc_depth(&rules[..], reduc_depth);
+                self.update_node_limit(stop_reason);
+            }
+
+            'outer: while !conjectures.is_empty() {
+                let (_, mut ex1, mut ex2, d) = conjectures.pop().unwrap();
+                let start = Self::stats_get_time();
+                let mut new_rules = self.datatypes[&d].prove_ind(&rules, &ex1, &ex2);
+                if new_rules.is_some() {
+                    let temp = new_rules;
+                    new_rules = self.datatypes[&d].generalize_prove(&rules, &ex1, &ex2);
+                    if new_rules.is_none() {
+                        new_rules = temp;
+                    } else {
+                        ex1 = new_rules.as_ref().unwrap()[0].1.pretty_string().parse().unwrap();
+                        ex2 = new_rules.as_ref().unwrap()[0].2.pretty_string().parse().unwrap();
+                        println!("generalized as case_split");
+                    }
+                    if Self::check_equality(&rules[..], &None, &ex1, &ex2) {
+                        info!("bad conjecture {} = {}", &ex1.pretty(500), &ex2.pretty(500));
+                        self.stats_update_filtered_conjecture(&ex1, &ex2);
+                        continue 'outer;
+                    }
+                    self.stats_update_proved(&ex1, &ex2, start);
+
+                    found_rules.extend_from_slice(&new_rules.as_ref().unwrap());
+                    for r in new_rules.unwrap() {
+                        warn!("proved: {}", r.3.long_name());
+                        // inserting like this so new rule will apply before running into node limit.
+                        rules.insert(new_rules_index, r.3);
+                    }
+
+                    if self.prove_goals(rules, &mut found_rules, new_rules_index, start_total) {
+                        return found_rules;
+                    }
+
+                    let reduc_depth = 3;
+                    let stop_reason = self.equiv_reduc_depth(&rules[..], reduc_depth);
+                    self.update_node_limit(stop_reason);
+                    conjectures = self.get_conjectures();
+                    println!();
+                } else {
+                    self.stats_update_failed_proof(ex1, ex2, start)
+                }
+            }
+        }
+        for _ in 0..self.system_rws.len() {
+            rules.remove(system_rws_start);
+        }
+        self.stats_update_total(start_total);
+        found_rules
+    }
+    */
+
+    /// input: rules vector
+    /// output: rules vector is appended by all system rewrites
+    ///         return value is the length of the appended vector
+    fn add_system_rws(&self, rules: &mut Vec<Rewrite<SymbolLang, ()>>) -> usize{
+        for r in self.system_rws.iter() {
+            rules.push(r.clone());
+        }
+        return rules.len();
+    }
+
+
+    fn run_instance_parallel(&mut self, rules: &Vec<Rewrite<SymbolLang, ()>>, rc: Receiver<Box<Message>>, tx: Sender<Box<Message>>, id: usize) -> Vec<Rewrite<SymbolLang,()>>{
+        fn try_recv_rules(rc: &Receiver<Box<Message>>) -> Vec<Box<Rewrite<SymbolLang, ()>>>{                      // TODO: if not working with borrowed rc, then pass ownership and then return it here
+            let mut rule_vec = vec![];
+            loop{
+                match rc.try_recv(){
+                    Err(_) => {
+                        break;
+                    },
+                    Ok(Message::Rule(rule)) => {rule_vec.push(rule);},
+                    _ => {}
+                }
+            }
+            rule_vec
+        }
+        fn send_new_rules(found_rules: &Vec<Rewrite<SymbolLang,()>>, tx: &Sender<Box<Message>>){
+            found_rules.iter().for_each(|rule|{
+                tx.send(Box::new(Message::IdRulePair(id, Box::new(rule.clone()))));
+            });
+        }
+        // TODO: rewrite all additions to code as functions and prevent as much code duplication as possible.
+        // TODO: OMER after finishing here check with Eytan if it is OK to change run to prevent code duplication
+
+        // TODO: OMER Read on the way enums and Send types are passed, not sure Message should be boxed and will make the code more readable
+
+        let mut rules = rules.clone();
+        let start_total = Self::stats_get_time();
+
+        let system_rws_start = rules.len();
+        let mut found_rules = vec![];
+        // let mut rules_to_send;
+        let new_rules_index = self.add_system_rws(&mut rules);
+        if self.prove_goals(& mut rules, &mut found_rules, new_rules_index, start_total) {
+            found_rules.iter().for_each(|rule|{                                                // TODO: maybe use the send_new_rules function instead
+                tx.send(Box::new(Message::IdRulePair(id, Box::new(rule.3.clone()))));
+            });
+            return found_rules.map(|r|{r.3}).collect_vec();
+        }
+
+        for depth in 0..max_depth {
+            // println!("Starting depth {}", depth + 1);
+            self.increase_depth();
+            let stop_reason = self.equiv_reduc(&rules[..]);
+            self.update_node_limit(stop_reason);
+
+            let start = TheSy::stats_get_time();
+            let conjs_before_cases = self.get_conjectures();
+            // TODO: case split + check all conjectures should be a function.
+            // TODO: After finishing checking all conjectures in final depth (if a lemma was found) try case split again then finish.
+            // TODO: can be a single loop with max depth
+
+            // Case Splitting
+            let splitter_count = if cfg!(feature = "stats") {
+                Self::split_patterns().iter().map(|p| p.search(&self.egraph).iter().map(|m| m.substs.len()).sum::<usize>()).sum()
+            } else { 0 };
+            let mut changed = false;
+            // parallel support
+            let received_rules = try_recv_rules(&rc);
+            if !received_rules.is_empty() {
+                let new_received = received_rules.iter().fold(vec![], |mut v, rule|{       // TODO: there is a way to make this inner loop functional, ask Eytan if should change implementation
+                                                                                                                                                            // even though in this case it won't necessarily stop when result is already known
+                                                                                                                                                            // and will probably keep iterating over all rules
+                    let mut already_present = false;
+                    for r in rules{
+                       if r == *rule {already_present = true; break;}                             //TODO: should check equality in a different way
+                    }
+                    if !already_present{v.push(rule)}
+                    v
+                });
+                if !new_received.is_empty(){
+                    changed = true;
+                    let mut v:Vec<Rewrite<SymbolLang,()>> = Vec::new();
+                    rules.append(new_received.iter().fold(&mut v, |v, boxed_rule|{
+                        let rule = **(boxed_rule).clone();
+                        v.push(rule);
+                        v
+                    }))
+                }
+                ;
+            }
+            // original code
+            Self::case_split_all(& mut rules, &mut self.egraph, 2, 4);
+            if cfg!(feature = "stats") {
+                self.stats.as_mut().unwrap().case_split.push((splitter_count, SystemTime::now().duration_since(start.unwrap()).unwrap()));
+            }
+
+            // Conjectures with/without case split and conclusions
+            let mut conjectures = self.get_conjectures();
+            for (o, mut ex1, mut ex2, d) in conjs_before_cases.into_iter().rev() {
+                if conjectures.iter().any(|(_, other_ex1, other_ex2, _)|
+                    other_ex1 == &ex1 && &ex2 == other_ex2) {
+                    continue
+                }
+                if Self::check_equality(&rules[..], &None, &ex1, &ex2) {
+                    self.stats_update_filtered_conjecture(&ex1, &ex2);
+                    continue;
+                }
+                // Might be a false conjecture that just doesnt get picked anymore in reconstruct.
+                let mut new_rules = self.datatypes[&d].prove_all(&rules, &ex1, &ex2);
+                if new_rules.is_none() {
+                    continue;
+                } else {
+                    let temp = new_rules;
+                    new_rules = self.datatypes[&d].generalize_prove(&rules, &ex1, &ex2);
+                    if new_rules.is_none() {
+                        new_rules = temp;
+                    } else {
+                        ex1 = new_rules.as_ref().unwrap()[0].1.pretty_string().parse().unwrap();
+                        ex2 = new_rules.as_ref().unwrap()[0].2.pretty_string().parse().unwrap();
+                        // println!("generalized as case_split");
+                    }
+                }
+                // parallel support
+                for rule in new_rules.unwrap(){
+                    tx.send(Box::new(IdRulePair(id, Box::new(rule.3.clone()))));
+                }
+                // original code
+                changed = true;
+                self.stats_update_proved(&ex1, &ex2, start);
+                found_rules.extend_from_slice(new_rules.as_ref().unwrap());
+
+                for r in new_rules.unwrap() {
+                    warn!("proved: {}", r.3.long_name());
+                    // inserting like this so new rule will apply before running into node limit.
+                    rules.insert(new_rules_index, r.3);
+                }
+                if self.prove_goals(&mut rules, &mut found_rules, new_rules_index, start_total) {
+                    return rules;
+                }
+            }
+
+            if changed {
+                let reduc_depth = 3;
+                let stop_reason = self.equiv_reduc_depth(&rules[..], reduc_depth);
+                self.update_node_limit(stop_reason);
+            }
+
+            // induction starts here
+            'outer: while !conjectures.is_empty() {
+                let (_, mut ex1, mut ex2, d) = conjectures.pop().unwrap();
+                let start = Self::stats_get_time();
+                let mut new_rules = self.datatypes[&d].prove_ind(&rules, &ex1, &ex2);
+                if new_rules.is_some() {
+                    let temp = new_rules;
+                    new_rules = self.datatypes[&d].generalize_prove(&rules, &ex1, &ex2);
+                    if new_rules.is_none() {
+                        new_rules = temp;
+                    } else {
+                        ex1 = new_rules.as_ref().unwrap()[0].1.pretty_string().parse().unwrap();
+                        ex2 = new_rules.as_ref().unwrap()[0].2.pretty_string().parse().unwrap();
+                        println!("generalized as case_split");
+                    }
+                    if Self::check_equality(&rules[..], &None, &ex1, &ex2) {
+                        info!("bad conjecture {} = {}", &ex1.pretty(500), &ex2.pretty(500));
+                        self.stats_update_filtered_conjecture(&ex1, &ex2);
+                        continue 'outer;
+                    }
+                    self.stats_update_proved(&ex1, &ex2, start);
+
+                    found_rules.extend_from_slice(&new_rules.as_ref().unwrap());
+                    // parallel running
+                    for rule in new_rules.unwrap(){
+                        tx.send(Box::new(IdRulePair(id, Box::new(rule.3.clone()))));
+                    }
+                    // original code
+                    for r in new_rules.unwrap() {
+                        warn!("proved: {}", r.3.long_name());
+                        // inserting like this so new rule will apply before running into node limit.
+                        rules.insert(new_rules_index, r.3);
+                    }
+
+                    if self.prove_goals(&mut rules, &mut found_rules, new_rules_index, start_total) {
+                        // TODO: send new rules and exit
+                        return rules;
+                    }
+
+                    let reduc_depth = 3;
+                    let stop_reason = self.equiv_reduc_depth(&rules[..], reduc_depth);
+                    self.update_node_limit(stop_reason);
+                    conjectures = self.get_conjectures();
+                    println!();
+                } else {
+                    self.stats_update_failed_proof(ex1, ex2, start)
+                }
+            }
+        }
+        for _ in 0..self.system_rws.len() {
+            rules.remove(system_rws_start);
+        }
+        self.stats_update_total(start_total);
+
+        // this is a better solution in this case, from my point of view
+        rules
+    }
+
+    pub fn equiv_reduc_instance(&mut self, rules: &[Rewrite<SymbolLang, ()>]) -> StopReason {
+        self.equiv_reduc_depth_instance(rules, self.iter_limit)
+    }
+
+    fn equiv_reduc_depth_instance(&mut self, rules: &[Rewrite<SymbolLang, ()>], depth: usize) -> StopReason {
+        // TODO: for parallel running, add .with_hook() to runner instantiation, and make it get and send all new rules
+        let mut runner = Runner::default().with_time_limit(Duration::from_secs(60 * 10))
+            .with_node_limit(self.node_limit)
+            .with_egraph(std::mem::take(&mut self.egraph))
+            .with_iter_limit(depth)
+            .with_hook(|runner|{
+                // TODO: make the code here send and receive new rules, maybe save previous length of thread rules and when reaching here then send the rest
+                // TODO: find a way to compare expressions
+                runner.rules = runner.rules;
+                Ok(())
+            });
+        runner = runner.run(rules);
+        if cfg!(feature = "stats") {
+            self.stats.as_mut().unwrap().equiv_red_iterations.push(std::mem::take(&mut runner.iterations));
+        }
+        self.egraph = runner.egraph;
+        self.egraph.rebuild();
+        let true_pat: Pattern<SymbolLang> = "true".parse().unwrap();
+        let false_pat: Pattern<SymbolLang> = "false".parse().unwrap();
+        if true_pat.search(&self.egraph)[0].eclass == false_pat.search(&self.egraph)[0].eclass {
+            let class = self.egraph.classes().find(|c| c.id == true_pat.search(&self.egraph)[0].eclass);
+            for edge in class.unwrap().nodes.iter() {
+                println!("{}", edge.display_op());
+            }
+            panic!("Bad bad bad: true = false");
+        }
+        runner.stop_reason.unwrap()
+    }
+
+    pub fn run_parallel(&mut self, rules: &mut Vec<Rewrite<SymbolLang, ()>>, max_depth: usize, num_processes: usize) -> Vec<(Option<Pattern<SymbolLang>>,
+                                                                                                                             Pattern<SymbolLang>, Pattern<SymbolLang>,
+                                                                                                                             Rewrite<SymbolLang, ()>)>{
+        enum BiUnion<T,F>{
+            Type1(T),
+            Type2(F)
+        }
+        enum IsActive<T>{
+            Active(T),
+            Inactive(T)
+        }
+        struct ThreadManager<ST, RT, HT>{
+            id: Option<usize>,
+            // receiver: Receiver<RT>,
+            sender: Sender<ST>,
+            handler: JoinHandle<HT>,
+        }
+
+        fn get_rules_slice(rules: &Vec<Rewrite<SymbolLang, ()>>, sub_graphs_count: usize) -> impl Iterator<Item = &[Rewrite<SymbolLang, ()>]> {
+            let rules_count = rules.len();
+            let rules_per_instance : usize = rules_count / sub_graphs_count;
+            rules.windows(rules_per_instance + 1)
+        }
+
+        let mut thread_managers = vec![];
+        let mut found_rules = vec![];
+        let mut active_ids = HashSet::new();
+        let mut inactive_ids = HashSet::new();
+        let mut active_threads = num_processes;
+        let rules_count = rules.len();
+        let main_run_rules;
+        //let stop_reason;
+        let (thread_tx, main_rc) = mscp: channel();
+        // id=0 is the main run of TheSy
+        let windows = get_rules_slice(rules, num_processes-1);
+        debug_assert_eq!(windows.len(), num_processes);
+        for (window, i) in windows.zip(0..num_processes) {
+            let (main_tx, thread_rc) = mspc::channel();
+            let thread_tx_clone = thread_tx.clone();
+            thread_managers.push(Some(ThreadManager{
+                        id: Some(i),
+                        // receiver: main_rc,
+                        sender: main_tx,
+                        handler: std::thread::spawn(closure!(move thread_rc, move thread_tx_clone, ref self, ref ,max_depth, ref i)||{
+                            // TODO: maybe the use of threads here is not good, because all runs share the same memory, which means the main run might suffer from this
+                            // Ask Eytan if a fork is a better solution in this case
+                            let thesy_sub_graph = self.clone();
+                            // let rules_per_instance : usize = rules_count / num_processes;
+                            // let start_idx = i*rules_per_instance;
+                            // let end_idx = std::cmp::min((i+1)*rules_per_instance, rules_count);
+                            thesy_sub_graph.run_instance_parallel(window, thread_rc, thread_tx);
+                        })
+                    }));
+            active_ids.insert(i);
+        }
+
+        {
+            let dropper = thread_tx;          // only for dropping thread_tx, so we will have the right number of writers
+        }
+        // we'll use the main thread as a control center to pass found rules between instances of Thesy
+        // TODO: currently we are busy waiting on handles, a better solution would be to let process sleep until some receiver is not empty
+        loop{
+            // let received = thread_managers.iter().map(|tm|{
+            //     match tm{
+            //         Some(tm_val) => {
+            //             match tm_val.receiver.try_recv(){
+            //                 Err(e) => {
+            //                     match e{
+            //                         mpsc::Disconnected => {Some(Type1(Inactive(tm_val.id.unwrap())))},              // add thread to the threads that need to be cleared
+            //                         mpsc::Empty => {Some(Type1(Active(tm_val.id.unwrap())))}                     // we want to keep those indexes because the threads are still active
+            //                     }
+            //                 },
+            //                 Ok(given_rule) => { Some(Type2((tm.id.unwrap(),given_rule))) },
+            //             }
+            //         },
+            //         None => { None },
+            //     }
+            // }).collect_vec();
+            let mut received_rules = vec![];
+            let last_received = main_rc.recv();
+            let mut new_inactive_ids = HashSet::new();
+            loop{
+                match last_received{
+                    Err(e) => {
+                        match e{
+                            mpsc::Disconnected => {
+                                // TODO: get rules from main run and exit
+                                test_print(&"Shouldn't reach here".to_string());
+                                main_run_rules = found_rules.iter().map_into(|boxed_rule|{*boxed_rule}).collect_vec();;
+                                return main_run_rules;
+                            },
+                            mpsc::Empty => {break;},
+                        }
+                    }
+                    Ok(msg) =>{
+                        match msg{
+                            Message::IdRulePair(id, rule) => {received_rules.push((id, rule));},
+                            Message::Done(id) => {new_inactive_ids.insert(id);},         // TODO: if id=0 (main TheSy run) then get rules from main run and exit
+                        }
+                    }
+                }
+                let last_message = main_rc.try_recv();                      // if there are multiple rules sent then we want to get them together
+            }
+            // let (active_idxs, inactive_idxs, mut new_rules) = received.iter()
+            //     .fold((vec![],vec![],vec![]), |(mut a_idxs, mut ia_idxs, mut nr), r|{
+            //     match r{
+            //         Some(Type1(is_active_idx)) => {
+            //             match is_active_idx{
+            //                 Active(idx) => {
+            //                     a_idxs.push(idx);
+            //                 },
+            //                 Inactive(idx) => {
+            //                     ia_idxs.push(idx);
+            //                 },
+            //             }
+            //         },
+            //         Some(Type2(id_rule_pair)) => {
+            //             nr.push(id_rule_pair);
+            //         },
+            //         None => {}
+            //     };
+            //     (a_idxs,ia_idxs,nr)
+            // });
+            active_ids = active_ids.difference(&new_inactive_ids).collect();
+            inactive_ids = inactive_ids.union(&new_inactive_ids).collect();
+            new_rules.iter().for_each(|(i,boxed_rule)|{
+                active_ids.iter().filter(|j|{i!=j}).for_each(|i|{
+                    thread_managers[i].unwrap().sender.send(&boxed_rule);
+                });
+            });
+            found_rules.append(&mut new_rules);
+            for i in new_inactive_ids{
+                // TODO: what to do when one instance of TheSy fails?
+                //      gather all found rules by all instances of Thesy and return them
+                //      main thread should probably support getting and passing found rules from each thread to all threads
+
+                let return_value = thread_managers[i].unwrap().handler.join();
+                thread_managers[i] = None;                                                          // should drop everything
+                active_threads = active_threads - 1;
+                if i==0 {main_run_rules = return_value.iter().map_into(|boxed_rule|{*boxed_rule}).collect_vec();}
+            }
+
+            if active_threads == 0{break;};
+
+        }
+        //let found_rules = found_rules.iter().map_into(|boxed_rule|{*boxed_rule}).collect_vec();
+        //found_rules
+        main_run_rules.iter().map_into(|boxed_rule|{*boxed_rule}).collect_vec()
+    }
+    /// concurrency
+    /// Omer's edit
+    // pub fn run_on_all_processors(&mut self, rules: &mut Vec<Rewrite<SymbolLang, ()>>, max_depth: usize){
+    //     // TODO: should use crate for this one, I don't want to touch dependencies without Eytan knowing of it
+    //     // basically we should just use num_cpus::get()
+    //     // currently, passing a constant
+    //     self.run_concurrently(4);
+    // }
+    // pub fn run_concurrently(&mut self, process_num: usize){
+    //     fn order_ids_and_unpack(id1: Id, id2: Id) -> (u32, u32){
+    //         match (id1, id2){
+    //             (Id(x), Id(y)) => {
+    //                 if x < y {(x,y)}
+    //                 else {(y,x)}
+    //             },
+    //         }
+    //     }
+    //     let mut runners = vec![];
+    //     let mut rws_vec = vec![];
+    //     let mut handlers = vec![];
+    //     let mut union_set = std::collections::HashSet::new();
+    //     let rws_per_process: usize = self.system_rws.len() / process_num;
+    //     let system_rws_size = self.system_rws.len();
+    //     for i in 0..process_num {
+    //         // build egraphs
+    //         let mut egraph_clone = self.egraph.clone();
+    //         runners.push(Runner::default().with_egraph(egraph_clone).with_iter_limit(2));
+    //         rws_vec.push(&self.system_rws[i*rws_per_process..std::cmp::min((i+1)*rws_per_process, system_rws_size)]);       // getting the rws slice we need for the current runner
+    //     }
+    //     loop{
+    //         for i in 0..process_num{
+    //             handlers[i] = std::thread::spawn(|| -> (){
+    //                 // first, we need to union all equivalent classes in the egraph from previous run
+    //                 // TODO: a better solution for this might be to make a barrier instead of making threads in each iteration
+    //                 for (id1,id2) in union_set {
+    //                     runners[i].egraph.union(Id(id1), Id(id2));
+    //                 }
+    //                 runners[i].egraph.rebuild();                // update egraph before next run
+    //                 // now, we run it again to check if reaching anything interesting
+    //                 runners[i].run(&rws_vec[i]);
+    //             });
+    //         }
+    //         // wait for all runs to end
+    //         for handler in handlers{
+    //             handler.join().unwrap();
+    //         }
+    //         union_set.clear();                                          // clear unions from previous run
+    //         // merge the egraphs
+    //         let mut egraph_has_changed = false;
+    //         let prev_egraph_size = self.egraph.number_of_classes();
+    //         for runner in runners{
+    //             if prev_egraph_size == runner.egraph.number_of_classes() {continue;}
+    //             // if got here then there is a change in the egraph
+    //             egraph_has_changed = true;
+    //             // in this case we want to merge the changes into the main egraph
+    //             // the idea here is to iterate over the main egraph eclasses. If the egraph eclass
+    //             // ID is different than the runner egraph class ID it means they have been merged
+    //             for eclass in self.egraph.classes(){
+    //                 let runner_id = runner.egraph.find(eclass.id);
+    //                 let runner_in_main_egraph_id = self.egraph.find(runner_id);
+    //
+    //                 // this condition is meant for us to not insert unnecessary unions into the change set
+    //                 // the reason we need to check this (performance reasons) is that
+    //                 // given two eclasses which we united id1, id2, then the result of the union can be id1 or id2
+    //                 // not really necessary, if causes problems might want to delete this and only leave runner_id != eclass.id
+    //                 // TODO: Omer, currently removed the second condition, add it if Eytan says it helps with runtime
+    //                 // because of the short execution of union function, might not be so important, even though this union is executed n times, as the number of processes.
+    //                 if runner_id != eclass.id /* && runner_in_main_egraph_id != eclass.id */ {
+    //                     //self.egraph.union(runner_id, eclass.id);                    // we will save the unions for later
+    //                     union_set.insert( order_ids_and_unpack(runner_id, eclass.id));      //adding to set of pairs to update on all egraphs
+    //                 }
+    //                 // notice that we do not rebuild the egraph in every iteration.
+    //                 // this is okay because union function support union of two equivalent classes
+    //                 // the reason we don't rebuild every time is that rebuild is expensive, so might be better to just let it union even though sometimes unnecessary
+    //                 // in current implementation, we add the union to a set of unions and let each thread to do it by itself
+    //             }
+    //         }
+    //         // if similar then we can finish run
+    //         if !has_changed {break;}
+    //         self.egraph.rebuild();                  //update the egraph before next iteration
+    //
+    //     }
+    //
+    // }
 }
 
 #[cfg(test)]
