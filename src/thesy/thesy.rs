@@ -32,7 +32,7 @@ use closure::closure;
 use std::thread::JoinHandle;
 use crate::thesy::thesy::Message::IdRulePair;
 use crate::utils;
-use crate::thesy::parallel::Message;
+use crate::thesy::parallel::{Message, HookData, SenderReceiverWrapper, MsgSenderReceiverWrapper};
 
 /// Theory Synthesizer - Explores a given theory finding and proving new lemmas.
 pub struct TheSy {
@@ -62,8 +62,23 @@ pub struct TheSy {
     goals: Option<Vec<Vec<(Option<RecExpr<SymbolLang>>, RecExpr<SymbolLang>, RecExpr<SymbolLang>)>>>,
     /// If stats enable contains object collecting runtime data on thesy otherwise None.
     pub stats: Option<Stats>,
-}
+    /// the hooks are used after every step of TheSy which could expand the rules set
+    /// currently used to support parallel running
+    after_inference_hooks: Vec<Box<dyn FnMut(&mut Self, &HookData, &mut MsgSenderReceiverWrapper) -> Result<(), String>>>,
+    //after_inference_hooks: Vec<Box<dyn FnMut(&mut Self, &Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, Rewrite<SymbolLang, ()>)>) -> Result<(), String>>>,
 
+    /// the hooks are used before every step of TheSy which could expand the rules set
+    /// currently used to support parallel running
+    before_inference_hooks: Vec<Box<dyn FnMut(&mut Self, &mut Vec<Rewrite<SymbolLang, ()>>, &mut MsgSenderReceiverWrapper) -> Result<(), String>>>,
+    /// hooks passed to [runner]
+    /// for more info check: [EGG] documentation
+    equiv_reduc_hooks: Vec<Box<dyn FnMut(&mut Runner<SymbolLang,()>) -> Result<(), String>>>,
+}
+// TODO:
+//      1. Finish writing hooks at [set_parallel_run_hooks]
+//      2. Find a way to compare equality of expressions
+//      3. Find a solution for the equivalence reduction hooks, which are borrowing the mut permission for tx (and overall for run_communicator)
+//      4. Finish writing everything else (if there is something I'm missing) and test!
 /// *** Thesy ***
 impl TheSy {
     /// datatype: a DataType variable as used in eggstentions
@@ -194,6 +209,9 @@ impl TheSy {
             iter_limit: 12,
             goals: conjectures,
             stats,
+            before_inference_hooks: vec![],
+            after_inference_hooks: vec![],
+            equiv_reduc_hooks: vec![]
         };
 
         res.searchers = res.create_sygue_serchers();
@@ -860,26 +878,40 @@ impl TheSy {
         return rules.len();
     }
 
+    // TODO: check if we need to get here found_rules or rules is enough (which one of them should we update when getting new rules?)
+    /// calls every hook in [before_inference_hooks]
+    fn call_before_inference_hooks(&mut self, rules: &mut Vec<Rewrite<SymbolLang,()>>){
+        // TODO: maybe the use of HookData makes sense here
+        self.before_inference_hooks.iter().for_each(|hook| {hook(self, rules);});
+    }
 
-    fn run_instance_parallel(&mut self, rules: &Vec<Rewrite<SymbolLang, ()>>, rc: Receiver<Box<Message>>, tx: Sender<Box<Message>>, id: usize) -> Vec<Rewrite<SymbolLang,()>>{
-        fn try_recv_rules(rc: &Receiver<Box<Message>>) -> Vec<Box<Rewrite<SymbolLang, ()>>>{                      // TODO: if not working with borrowed rc, then pass ownership and then return it here
-            let mut rule_vec = vec![];
-            loop{
-                match rc.try_recv(){
-                    Err(_) => {
-                        break;
-                    },
-                    Ok(Message::Rule(rule)) => {rule_vec.push(rule);},
-                    _ => {}
-                }
-            }
-            rule_vec
-        }
-        fn send_new_rules(found_rules: &Vec<Rewrite<SymbolLang,()>>, tx: &Sender<Box<Message>>){
-            found_rules.iter().for_each(|rule|{
-                tx.send(Box::new(Message::IdRulePair(id, Box::new(rule.clone()))));
-            });
-        }
+    // TODO: check if we want to send the rules in their form in found_rules or in rules
+    /// calls every hook in [after_inference_hooks]
+    fn call_after_inference_hooks(&mut self, new_rules: &[Rewrite<SymbolLang, ()>]) {
+        let hook_data = HookData{new_rules};                        // TODO: maybe use a constant reference to hook_data, so we don't need to make it every time we call this function
+        self.after_inference_hooks.iter().for_each(|hook| {hook(self, &hook_data);});
+    }
+
+    fn run_instance_parallel(&mut self, rules: &Vec<Rewrite<SymbolLang, ()>>, communicator: Option<MsgSenderReceiverWrapper>, id: usize) -> Vec<Rewrite<SymbolLang,()>>{
+        // fn try_recv_rules(rc: &Receiver<Box<Message>>) -> Vec<Box<Rewrite<SymbolLang, ()>>>{                      // TODO: if not working with borrowed rc, then pass ownership and then return it here
+        //     let mut rule_vec = vec![];
+        //     loop{
+        //         match rc.try_recv(){
+        //             Err(_) => {
+        //                 break;
+        //             },
+        //             Ok(Message::Rule(rule)) => {rule_vec.push(rule);},
+        //             _ => {}
+        //         }
+        //     }
+        //     rule_vec
+        // }
+        // fn send_new_rules(found_rules: &Vec<Rewrite<SymbolLang,()>>, tx: &Sender<Box<Message>>){
+        //     found_rules.iter().for_each(|rule|{
+        //         tx.send(Box::new(Message::IdRulePair(id, Box::new(rule.clone()))));
+        //     });
+        // }
+
         // TODO: rewrite all additions to code as functions and prevent as much code duplication as possible.
         // TODO: OMER after finishing here check with Eytan if it is OK to change run to prevent code duplication
 
@@ -892,15 +924,30 @@ impl TheSy {
         let mut found_rules = vec![];
         // let mut rules_to_send;
         let new_rules_index = self.add_system_rws(&mut rules);
+
+        let mut rules_count_before_hooks: usize;
+        let mut rules_count_after_hooks: usize;
+
         if self.prove_goals(& mut rules, &mut found_rules, new_rules_index, start_total) {
-            found_rules.iter().for_each(|rule|{                                                // TODO: maybe use the send_new_rules function instead
-                tx.send(Box::new(Message::IdRulePair(id, Box::new(rule.3.clone()))));
-            });
+            // found_rules.iter().for_each(|rule|{                                                // TODO: maybe use the send_new_rules function instead
+            //     tx.send(Box::new(Message::IdRulePair(id, Box::new(rule.3.clone()))));
+            // });
+
+            // sending all new rules to other threads
+            self.call_after_inference_hooks(&rules[new_rules_index..]);
             return found_rules.map(|r|{r.3}).collect_vec();
         }
+        // prove goals might have found some rules, so send them
+        self.call_after_inference_hooks(&rules[new_rules_index..]);
 
         for depth in 0..max_depth {
             // println!("Starting depth {}", depth + 1);
+
+            // trying to get new rules from other threads before increasing depth and case splitting
+            rules_count_before_hooks = rules.len();
+            self.call_before_inference_hooks(&mut rules);
+            rules_count_after_hooks = rules.len();
+
             self.increase_depth();
             let stop_reason = self.equiv_reduc(&rules[..]);
             self.update_node_limit(stop_reason);
@@ -916,35 +963,47 @@ impl TheSy {
                 Self::split_patterns().iter().map(|p| p.search(&self.egraph).iter().map(|m| m.substs.len()).sum::<usize>()).sum()
             } else { 0 };
             let mut changed = false;
-            // parallel support
-            let received_rules = try_recv_rules(&rc);
-            if !received_rules.is_empty() {
-                let new_received = received_rules.iter().fold(vec![], |mut v, rule|{       // TODO: there is a way to make this inner loop functional, ask Eytan if should change implementation
-                                                                                                                                                            // even though in this case it won't necessarily stop when result is already known
-                                                                                                                                                            // and will probably keep iterating over all rules
-                    let mut already_present = false;
-                    for r in rules{
-                       if r == *rule {already_present = true; break;}                             //TODO: should check equality in a different way
-                    }
-                    if !already_present{v.push(rule)}
-                    v
-                });
-                if !new_received.is_empty(){
-                    changed = true;
-                    let mut v:Vec<Rewrite<SymbolLang,()>> = Vec::new();
-                    rules.append(new_received.iter().fold(&mut v, |v, boxed_rule|{
-                        let rule = **(boxed_rule).clone();
-                        v.push(rule);
-                        v
-                    }))
-                }
-                ;
-            }
+            /*
+             parallel support
+             let received_rules = try_recv_rules(&rc);
+             if !received_rules.is_empty() {
+                 let new_received = received_rules.iter().fold(vec![], |mut v, rule|{       // TODO: there is a way to make this inner loop functional, ask Eytan if should change implementation
+                                                                                                                                                             // even though in this case it won't necessarily stop when result is already known
+                                                                                                                                                             // and will probably keep iterating over all rules
+                     let mut already_present = false;
+                     for r in rules{
+                        if r == *rule {already_present = true; break;}                             //TODO: should check equality in a different way
+                     }
+                     if !already_present{v.push(rule)}
+                     v
+                 });
+                 if !new_received.is_empty(){
+                     changed = true;
+                     let mut v:Vec<Rewrite<SymbolLang,()>> = Vec::new();
+                     rules.append(new_received.iter().fold(&mut v, |v, boxed_rule|{
+                         let rule = **(boxed_rule).clone();
+                         v.push(rule);
+                         v
+                     }))
+                 }
+                 ;
+             }
+             */
+
+            // TODO: add check here that if a hook changed the rules then changed=true
+            // TODO: maybe pass the new found rules index as a parameter, so we know from the hook which rules are interesting for us
             // original code
+
             Self::case_split_all(& mut rules, &mut self.egraph, 2, 4);
             if cfg!(feature = "stats") {
                 self.stats.as_mut().unwrap().case_split.push((splitter_count, SystemTime::now().duration_since(start.unwrap()).unwrap()));
             }
+
+            // TODO: check if makes sense to put here
+            // self.call_after_inference_hooks(&rules[rules_count_before_hooks..]);
+            // rules_count_before_hooks = rules.len();
+            // self.call_before_inference_hooks(&mut rules);
+            // rules_count_after_hooks = rules.len();
 
             // Conjectures with/without case split and conclusions
             let mut conjectures = self.get_conjectures();
@@ -957,6 +1016,11 @@ impl TheSy {
                     self.stats_update_filtered_conjecture(&ex1, &ex2);
                     continue;
                 }
+                // want to try get new rules from other threads before trying to prove
+                rules_count_before_hooks = rules.len();
+                self.call_before_inference_hooks(&mut rules);
+                rules_count_after_hooks = rules.len();
+                changed = changed || (rules_count_before_hooks != rules_count_after_hooks);
                 // Might be a false conjecture that just doesnt get picked anymore in reconstruct.
                 let mut new_rules = self.datatypes[&d].prove_all(&rules, &ex1, &ex2);
                 if new_rules.is_none() {
@@ -973,9 +1037,11 @@ impl TheSy {
                     }
                 }
                 // parallel support
-                for rule in new_rules.unwrap(){
-                    tx.send(Box::new(IdRulePair(id, Box::new(rule.3.clone()))));
-                }
+                // for rule in new_rules.unwrap(){
+                //     tx.send(Box::new(IdRulePair(id, Box::new(rule.3.clone()))));
+                // }
+
+                self.call_after_inference_hooks(new_rules.map(|r|r.3).collect_slice());
                 // original code
                 changed = true;
                 self.stats_update_proved(&ex1, &ex2, start);
@@ -986,6 +1052,12 @@ impl TheSy {
                     // inserting like this so new rule will apply before running into node limit.
                     rules.insert(new_rules_index, r.3);
                 }
+
+                rules_count_before_hooks = rules.len();
+                self.call_before_inference_hooks(&mut rules);
+                rules_count_after_hooks = rules.len();
+                changed = changed || (rules_count_before_hooks != rules_count_after_hooks);
+
                 if self.prove_goals(&mut rules, &mut found_rules, new_rules_index, start_total) {
                     return rules;
                 }
@@ -1001,6 +1073,12 @@ impl TheSy {
             'outer: while !conjectures.is_empty() {
                 let (_, mut ex1, mut ex2, d) = conjectures.pop().unwrap();
                 let start = Self::stats_get_time();
+
+                rules_count_before_hooks = rules.len();
+                self.call_before_inference_hooks(&mut rules);
+                rules_count_after_hooks = rules.len();
+                changed = changed || (rules_count_before_hooks != rules_count_after_hooks);
+
                 let mut new_rules = self.datatypes[&d].prove_ind(&rules, &ex1, &ex2);
                 if new_rules.is_some() {
                     let temp = new_rules;
@@ -1021,21 +1099,26 @@ impl TheSy {
 
                     found_rules.extend_from_slice(&new_rules.as_ref().unwrap());
                     // parallel running
-                    for rule in new_rules.unwrap(){
-                        tx.send(Box::new(IdRulePair(id, Box::new(rule.3.clone()))));
-                    }
+                    // for rule in new_rules.unwrap(){
+                    //     tx.send(Box::new(IdRulePair(id, Box::new(rule.3.clone()))));
+                    // }
+                    self.call_after_inference_hooks(new_rules.map(|r|r.3).collect_slice());
+
                     // original code
                     for r in new_rules.unwrap() {
                         warn!("proved: {}", r.3.long_name());
                         // inserting like this so new rule will apply before running into node limit.
                         rules.insert(new_rules_index, r.3);
                     }
-
+                    rules_count_before_hooks = rules.len();
+                    self.call_before_inference_hooks(&mut rules);
+                    rules_count_after_hooks = rules.len();
                     if self.prove_goals(&mut rules, &mut found_rules, new_rules_index, start_total) {
                         // TODO: send new rules and exit
+                        self.call_after_inference_hooks(&rules[rules_count_before_hooks..]);
                         return rules;
                     }
-
+                    self.call_after_inference_hooks(&rules[rules_count_before_hooks..]);
                     let reduc_depth = 3;
                     let stop_reason = self.equiv_reduc_depth(&rules[..], reduc_depth);
                     self.update_node_limit(stop_reason);
@@ -1089,6 +1172,23 @@ impl TheSy {
         runner.stop_reason.unwrap()
     }
 
+    /// inserts relevant hooks to TheSy instance
+    /// currently, three hooks are inserted:
+    ///     1. receive new rules from main thread hook
+    ///     2. send new rules to main thread hook
+    ///     3. send and receive new rules during equivalence reduction
+    // TODO: currently communication_wrapper is deleted when returning from this function, find a way to keep it "alive" during all run
+    fn set_parallel_run_hooks(&mut self, tx_thread: Sender<Box<Message>>, rc_thread: Receiver<Box<Message>>) -> MsgSenderReceiverWrapper{
+        communication_wrapper = MsgSenderReceiverWrapper{tx: tx_thread, rc: rc_thread};
+        self.before_inference_hooks.push(Box::new(|thesy, rules|{
+
+        }));
+
+        self.after_inference_hooks.push(Box::new(|thesy, new_rules|{}));
+
+        self.equiv_reduc_hooks.push(Box::new(|runner|{}));
+    }
+
     pub fn run_parallel(&mut self, rules: &mut Vec<Rewrite<SymbolLang, ()>>, max_depth: usize, num_processes: usize) -> Vec<(Option<Pattern<SymbolLang>>,
                                                                                                                              Pattern<SymbolLang>, Pattern<SymbolLang>,
                                                                                                                              Rewrite<SymbolLang, ()>)>{
@@ -1135,11 +1235,14 @@ impl TheSy {
                         handler: std::thread::spawn(closure!(move thread_rc, move thread_tx_clone, ref self, ref ,max_depth, ref i)||{
                             // TODO: maybe the use of threads here is not good, because all runs share the same memory, which means the main run might suffer from this
                             // Ask Eytan if a fork is a better solution in this case
-                            let thesy_sub_graph = self.clone();
+                            let mut thesy_sub_graph:TheSy = self.clone();
                             // let rules_per_instance : usize = rules_count / num_processes;
                             // let start_idx = i*rules_per_instance;
                             // let end_idx = std::cmp::min((i+1)*rules_per_instance, rules_count);
-                            thesy_sub_graph.run_instance_parallel(window, thread_rc, thread_tx);
+                            let run_communicator = MsgSenderReceiverWrapper{tx: thread_tx_clone, rc: thread_rc};
+                            let mut rules_vec = window.to_vec();
+                            thesy_sub_graph.run_instance_parallel(&rules_vec, Some(run_communicator), i);
+
                         })
                     }));
             active_ids.insert(i);
