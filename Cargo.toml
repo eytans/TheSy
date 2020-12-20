@@ -7,7 +7,7 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-egg = { git = "https://github.com/eytans/egg" }
+egg = { path = "../egg" }
 cached = "0.18.0"
 itertools= "0.9.0"
 symbolic_expressions = "5.0.3"
@@ -19,6 +19,9 @@ simplelog = "0.8.0"
 structopt = "0.3.17"
 z3-sys = "0.6.2"
 permutohedron = "0.2.4"
+lazy_static = "1.4.0"
+global_counter = "0.2.1"
+
 serde = {version = "1.0.116", features = ["derive"], optional = true}
 serde_json = {version = "1.0.58", optional = true}
 

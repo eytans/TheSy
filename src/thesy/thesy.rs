@@ -49,7 +49,7 @@ pub struct TheSy {
     /// If empty then TheSy will fully explore the space. (precondition, ex1, ex2)
     goals: Option<Vec<Vec<(Option<RecExpr<SymbolLang>>, RecExpr<SymbolLang>, RecExpr<SymbolLang>)>>>,
     /// If stats enable contains object collecting runtime data on thesy otherwise None.
-    pub stats: Option<Stats>,
+    pub stats: Stats,
 }
 
 /// *** Thesy ***
@@ -150,9 +150,7 @@ impl TheSy {
                     }).collect_vec()
             }).collect_vec());
 
-        let stats = if cfg!(feature = "stats") {
-            Some(Stats::default())
-        } else { None };
+        let stats = Default::default();
 
         let mut res = TheSy {
             datatypes: datatype_to_prover,
@@ -257,12 +255,10 @@ impl TheSy {
     /// You have base case. Create all new ids, for each example lookup params, create edge find all ids from edge
     /// Add anchor only to ind_ph term
     pub fn increase_depth(&mut self) {
-        let mut start = None;
-        let mut nodes = None;
-        if cfg!(feature = "stats") {
-            start = Some(SystemTime::now());
-            nodes = Some(self.egraph.total_number_of_nodes());
-        }
+        let key = {
+            let n = self.egraph.total_number_of_nodes();
+            self.stats.init_measure(|| n)
+        };
         // First we need to update our keys as they might not be relevant anymore
         self.fix_example_ids();
         // Now apply for all matches
@@ -307,10 +303,7 @@ impl TheSy {
             }
         }
         self.egraph.rebuild();
-        if cfg!(feature = "stats") {
-            self.stats.as_mut().unwrap().term_creation.push((self.egraph.total_number_of_nodes() - nodes.unwrap(),
-                                                             SystemTime::now().duration_since(start.unwrap()).unwrap()));
-        }
+        self.stats.update_term_creation(key, self.egraph.total_number_of_nodes());
     }
 
     pub fn equiv_reduc(&mut self, rules: &[Rewrite<SymbolLang, ()>]) -> StopReason {
@@ -320,9 +313,7 @@ impl TheSy {
     fn equiv_reduc_depth(&mut self, rules: &[Rewrite<SymbolLang, ()>], depth: usize) -> StopReason {
         let mut runner = Runner::default().with_time_limit(Duration::from_secs(60 * 10)).with_node_limit(self.node_limit).with_egraph(std::mem::take(&mut self.egraph)).with_iter_limit(depth);
         runner = runner.run(rules);
-        if cfg!(feature = "stats") {
-            self.stats.as_mut().unwrap().equiv_red_iterations.push(std::mem::take(&mut runner.iterations));
-        }
+        self.stats.update_rewrite_iters(std::mem::take(&mut runner.iterations));
         self.egraph = runner.egraph;
         self.egraph.rebuild();
         let true_pat: Pattern<SymbolLang> = "true".parse().unwrap();
@@ -344,10 +335,7 @@ impl TheSy {
     /// return the conjectures ordered by representative size.
     pub fn get_conjectures(&mut self) -> Vec<((RepOrder, RepOrder), RecExpr<SymbolLang>, RecExpr<SymbolLang>, DataType)> {
         // TODO: make this an iterator to save alot of time during recreating conjectures
-        let mut start = None;
-        if cfg!(feature = "stats") {
-            start = Some(SystemTime::now());
-        }
+        let m_key = self.stats.init_measure(|| 0);
         self.fix_example_ids();
         let finer_classes: HashMap<DataType, HashMap<Vec<Id>, HashSet<Id>>> = self.example_ids.iter().map(|(d, m)| {
             let mut finer_equality_classes: HashMap<Vec<Id>, HashSet<Id>> = HashMap::new();
@@ -371,9 +359,7 @@ impl TheSy {
             }
         }
         res.sort_by_key(|x| x.0.clone());
-        if cfg!(feature = "stats") {
-            self.stats.as_mut().unwrap().get_conjectures.push(SystemTime::now().duration_since(start.unwrap()).unwrap());
-        }
+        self.stats.update_conjectures(m_key);
         res.into_iter().rev().collect_vec()
     }
 
@@ -401,12 +387,12 @@ impl TheSy {
                     index = i;
                     if res.is_some() {
                         if cfg!(feature = "stats") {
-                            self.stats.as_mut().unwrap().goals_proved.push((ex1.pretty(500), ex2.pretty(500), SystemTime::now().duration_since(start.unwrap()).unwrap()));
+                            self.stats.goals_proved.push((ex1.pretty(500), ex2.pretty(500), SystemTime::now().duration_since(start.unwrap()).unwrap()));
                         }
                         break 'outer;
                     } else {
                         if cfg!(feature = "stats") {
-                            self.stats.as_mut().unwrap().failed_proofs_goals.push((ex1.pretty(500), ex2.pretty(500), SystemTime::now().duration_since(start.unwrap()).unwrap()));
+                            self.stats.failed_proofs_goals.push((ex1.pretty(500), ex2.pretty(500), SystemTime::now().duration_since(start.unwrap()).unwrap()));
                         }
                     }
                 }
@@ -422,7 +408,7 @@ impl TheSy {
         // TODO: run full tests
         // TODO: dont allow rules like (take ?x ?y) => (take ?x (append ?y ?y))
         println!("Running TheSy on datatypes: {} dict: {}", self.datatypes.keys().map(|x| &x.name).join(" "), self.dict.iter().map(|x| &x.name).join(" "));
-        let start_total = Self::stats_get_time();
+        self.stats.init_run();
 
         let system_rws_start = rules.len();
         let mut found_rules = vec![];
@@ -431,7 +417,7 @@ impl TheSy {
         }
         let new_rules_index = rules.len();
 
-        if self.prove_goals(rules, &mut found_rules, new_rules_index, start_total) {
+        if self.prove_goals(rules, &mut found_rules, new_rules_index) {
             return found_rules;
         }
 
@@ -441,25 +427,24 @@ impl TheSy {
             let stop_reason = self.equiv_reduc(&rules[..]);
             self.update_node_limit(stop_reason);
 
-            let splitter_count = if cfg!(feature = "stats") {
-                Self::split_patterns().iter().map(|p| p.search(&self.egraph).iter().map(|m| m.substs.len()).sum::<usize>()).sum()
-            } else { 0 };
-            let start = TheSy::stats_get_time();
+            let measure_splits = if cfg!(feature = "stats") {
+                let n = Self::split_patterns().iter().map(|p|
+                    p.search(&self.egraph)
+                        .iter().map(|m| m.substs.len()).sum::<usize>()
+                ).sum();
+                self.stats.init_measure(|| n)
+            } else {
+                0
+            };
 
-            // let matches = Self::split_patterns()[0].search(&self.egraph);
-            // assert!(matches.iter().all(|m| self.egraph.classes().find(|c| c.id == m.eclass).unwrap().nodes.len() == 1));
-            // for m in matches {
-            //     println!("{}", reconstruct(&self.egraph, m.eclass, 8).map(|exp| exp.pretty(500)).unwrap_or("".to_string()));
-            // }
+            let measure_proved = self.stats.init_measure(|| 0);
 
             let conjs_before_cases = self.get_conjectures();
             // TODO: case split + check all conjectures should be a function.
             // TODO: After finishing checking all conjectures in final depth (if a lemma was found) try case split again then finish.
             // TODO: can be a single loop with max depth
             Self::case_split_all(rules, &mut self.egraph, 2, 4);
-            if cfg!(feature = "stats") {
-                self.stats.as_mut().unwrap().case_split.push((splitter_count, SystemTime::now().duration_since(start.unwrap()).unwrap()));
-            }
+            self.stats.update_splits(measure_splits);
 
             let mut conjectures = self.get_conjectures();
             let mut changed = false;
@@ -469,7 +454,7 @@ impl TheSy {
                     continue
                 }
                 if Self::check_equality(&rules[..], &None, &ex1, &ex2) {
-                    self.stats_update_filtered_conjecture(&ex1, &ex2);
+                    self.stats.update_filtered_conjecture(&ex1, &ex2);
                     continue;
                 }
                 // Might be a false conjecture that just doesnt get picked anymore in reconstruct.
@@ -488,14 +473,14 @@ impl TheSy {
                     }
                 }
                 changed = true;
-                self.stats_update_proved(&ex1, &ex2, start);
+                self.stats.update_proved(&ex1, &ex2, measure_proved);
                 found_rules.extend_from_slice(new_rules.as_ref().unwrap());
                 for r in new_rules.unwrap() {
                     warn!("proved: {}", r.3.name());
                     // inserting like this so new rule will apply before running into node limit.
                     rules.insert(new_rules_index, r.3);
                 }
-                if self.prove_goals(rules, &mut found_rules, new_rules_index, start_total) {
+                if self.prove_goals(rules, &mut found_rules, new_rules_index) {
                     return found_rules;
                 }
             }
@@ -508,7 +493,7 @@ impl TheSy {
 
             'outer: while !conjectures.is_empty() {
                 let (_, mut ex1, mut ex2, d) = conjectures.pop().unwrap();
-                let start = Self::stats_get_time();
+                let measure_key = self.stats.init_measure(|| 0);
                 let mut new_rules = self.datatypes[&d].prove_ind(&rules, &ex1, &ex2);
                 if new_rules.is_some() {
                     let temp = new_rules;
@@ -522,10 +507,10 @@ impl TheSy {
                     }
                     if Self::check_equality(&rules[..], &None, &ex1, &ex2) {
                         info!("bad conjecture {} = {}", &ex1.pretty(500), &ex2.pretty(500));
-                        self.stats_update_filtered_conjecture(&ex1, &ex2);
+                        self.stats.update_filtered_conjecture(&ex1, &ex2);
                         continue 'outer;
                     }
-                    self.stats_update_proved(&ex1, &ex2, start);
+                    self.stats.update_proved(&ex1, &ex2, measure_key);
 
                     found_rules.extend_from_slice(&new_rules.as_ref().unwrap());
                     for r in new_rules.unwrap() {
@@ -534,7 +519,7 @@ impl TheSy {
                         rules.insert(new_rules_index, r.3);
                     }
 
-                    if self.prove_goals(rules, &mut found_rules, new_rules_index, start_total) {
+                    if self.prove_goals(rules, &mut found_rules, new_rules_index) {
                         return found_rules;
                     }
 
@@ -544,14 +529,15 @@ impl TheSy {
                     conjectures = self.get_conjectures();
                     println!();
                 } else {
-                    self.stats_update_failed_proof(ex1, ex2, start)
+                    self.stats.update_failed_proof(ex1, ex2, measure_key);
                 }
+                self.stats.measures.remove(&measure_key);
             }
         }
         for _ in 0..self.system_rws.len() {
             rules.remove(system_rws_start);
         }
-        self.stats_update_total(start_total);
+        self.stats.update_total();
         found_rules
     }
 
@@ -567,7 +553,7 @@ impl TheSy {
     }
 
     /// Attempt to prove all lemmas with retry. Return true if finished all goals.
-    fn prove_goals(&mut self, rules: &mut Vec<Rewrite<SymbolLang, ()>>, found_rules: &mut Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, Rewrite<SymbolLang, ()>)>, new_rules_index: usize, start_total: Option<SystemTime>) -> bool {
+    fn prove_goals(&mut self, rules: &mut Vec<Rewrite<SymbolLang, ()>>, found_rules: &mut Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, Rewrite<SymbolLang, ()>)>, new_rules_index: usize) -> bool {
         loop {
             let lemma = self.check_goals(rules);
             if lemma.is_none() {
@@ -582,40 +568,10 @@ impl TheSy {
         }
         if self.goals.is_some() && self.goals.as_ref().unwrap().is_empty() {
             warn!("Found all lemmas");
-            self.stats_update_total(start_total);
+            self.stats.update_total();
             return true;
         }
         false
-    }
-
-    fn stats_update_proved(&mut self, ex1: &RecExpr<SymbolLang>, ex2: &RecExpr<SymbolLang>, start: Option<SystemTime>) {
-        if cfg!(feature = "stats") {
-            self.stats.as_mut().unwrap().conjectures_proved.push((ex1.pretty(500), ex2.pretty(500), SystemTime::now().duration_since(start.unwrap()).unwrap()));
-        }
-    }
-
-    fn stats_update_filtered_conjecture(&mut self, ex1: &RecExpr<SymbolLang>, ex2: &RecExpr<SymbolLang>) {
-        if cfg!(feature = "stats") {
-            self.stats.as_mut().unwrap().filtered_lemmas.push((ex1.pretty(500), ex2.pretty(500)));
-        }
-    }
-
-    fn stats_update_failed_proof(&mut self, ex1: RecExpr<SymbolLang>, ex2: RecExpr<SymbolLang>, start: Option<SystemTime>) {
-        if cfg!(feature = "stats") {
-            self.stats.as_mut().unwrap().failed_proofs.push((ex1.pretty(500), ex2.pretty(500), SystemTime::now().duration_since(start.unwrap()).unwrap()));
-        }
-    }
-
-    fn stats_update_total(&mut self, start_total: Option<SystemTime>) {
-        if cfg!(feature = "stats") {
-            self.stats.as_mut().unwrap().total_time = SystemTime::now().duration_since(start_total.unwrap()).unwrap();
-        }
-    }
-
-    fn stats_get_time() -> Option<SystemTime> {
-        if cfg!(feature = "stats") {
-            Some(SystemTime::now())
-        } else { None }
     }
 
     // *************** Thesy statics *****************

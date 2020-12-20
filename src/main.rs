@@ -4,6 +4,9 @@ extern crate egg;
 #[macro_use] extern crate log;
 extern crate simplelog;
 
+#[macro_use]
+extern crate global_counter;
+
 use std::borrow::Borrow;
 use std::fs::File;
 use std::io::{Write};

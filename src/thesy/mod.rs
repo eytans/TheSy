@@ -4,6 +4,8 @@ pub mod thesy_parser;
 mod prover;
 pub mod statistics;
 
-pub use thesy::TheSy;
-pub use example_creator::examples;
-pub use thesy_parser::parser;
+pub use {
+    thesy::TheSy,
+    example_creator::examples,
+    thesy_parser::parser,
+};
