@@ -83,9 +83,9 @@ pub mod parser {
     fn collected_to_rw(name: String, searcher: impl Searcher<SymbolLang, ()> + Debug + 'static, applier: impl Applier<SymbolLang, ()> + 'static, dif_app: bool) -> Result<Rewrite<SymbolLang, ()>, String> {
         if dif_app {
             let diff_applier = DiffApplier::new(applier);
-            return Rewrite::new(name.clone(), name, searcher, diff_applier);
+            return Rewrite::new(name, searcher, diff_applier);
         }
-        Rewrite::new(name.clone(), name, searcher, applier)
+        Rewrite::new(name, searcher, applier)
     }
 
     pub fn parse(lines: &[String]) -> Definitions {
@@ -217,7 +217,7 @@ pub mod parser {
             let opt_pats = function_patterns.get_vec(f);
             let rws = opt_pats.map(|pats| {
                 let relevant_params = f.params.iter().enumerate().filter_map(|(i, t)| {
-a                    let param_datatype = res.datatypes.iter().find(|d|
+                    let param_datatype = res.datatypes.iter().find(|d|
                         d.name == t.into_tree().root().op.to_string());
                     let res = param_datatype.map(|d| (i, t, d));
                     // TODO: also filter by whether the other params are always the same or var and one pattern.
@@ -312,7 +312,7 @@ a                    let param_datatype = res.datatypes.iter().find(|d|
                         let rule_name = format!("{}_split_{}_{}", f.name, index, res.len());
                         println!("{} => {} if {}", searcher.pretty_string(), applier_text, cond_texts.join(" "));
                         let cond = AndCondition::new(conds);
-                        res.push(Rewrite::new(rule_name.clone(), rule_name, searcher, DiffApplier::new(ConditionalApplier { applier, condition: cond })).unwrap());
+                        res.push(Rewrite::new(rule_name, searcher, DiffApplier::new(ConditionalApplier { applier, condition: cond })).unwrap());
                         // rewrite!(rule_name; searcher => applier if cond)
                     }
                     res

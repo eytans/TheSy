@@ -5,25 +5,22 @@ use std::iter::FromIterator;
 use std::str::FromStr;
 use std::time::{Duration, SystemTime};
 
+use itertools::Itertools;
+use log::{info, warn};
+
 use egg::*;
 use egg::StopReason::Saturated;
-use itertools::Itertools;
-use log::{debug, info, trace, warn};
 
 use crate::eggstentions::appliers::{DiffApplier, UnionApplier};
+use crate::eggstentions::conditions::{AndCondition, NonPatternCondition, PatternCondition};
 use crate::eggstentions::costs::{MinRep, RepOrder};
-use crate::eggstentions::expression_ops::{IntoTree, RecExpSlice, Tree};
+use crate::eggstentions::expression_ops::{IntoTree, Tree};
 use crate::eggstentions::multisearcher::multisearcher::{MultiDiffSearcher, MultiEqSearcher};
-use crate::lang::*;
-use crate::tools::tools::choose;
-use crate::thesy::prover::Prover;
-use multimap::MultiMap;
-use crate::eggstentions::reconstruct::reconstruct;
-use crate::thesy::statistics::Stats;
-use crate::eggstentions::conditions::{NonPatternCondition, AndCondition, PatternCondition};
-use std::process::exit;
-use std::cmp::Ordering;
 use crate::eggstentions::pretty_string::PrettyString;
+use crate::lang::*;
+use crate::thesy::prover::Prover;
+use crate::thesy::statistics::Stats;
+use crate::tools::tools::choose;
 
 /// Theory Synthesizer - Explores a given theory finding and proving new lemmas.
 pub struct TheSy {
@@ -494,7 +491,7 @@ impl TheSy {
                 self.stats_update_proved(&ex1, &ex2, start);
                 found_rules.extend_from_slice(new_rules.as_ref().unwrap());
                 for r in new_rules.unwrap() {
-                    warn!("proved: {}", r.3.long_name());
+                    warn!("proved: {}", r.3.name());
                     // inserting like this so new rule will apply before running into node limit.
                     rules.insert(new_rules_index, r.3);
                 }
@@ -532,7 +529,7 @@ impl TheSy {
 
                     found_rules.extend_from_slice(&new_rules.as_ref().unwrap());
                     for r in new_rules.unwrap() {
-                        warn!("proved: {}", r.3.long_name());
+                        warn!("proved: {}", r.3.name());
                         // inserting like this so new rule will apply before running into node limit.
                         rules.insert(new_rules_index, r.3);
                     }
@@ -578,7 +575,7 @@ impl TheSy {
             }
             found_rules.extend_from_slice(&lemma.as_ref().unwrap());
             for r in lemma.unwrap() {
-                println!("proved: {}", r.3.long_name());
+                println!("proved: {}", r.3.name());
                 // inserting like this so new rule will apply before running into node limit.
                 rules.insert(new_rules_index, r.3);
             }
@@ -643,7 +640,7 @@ impl TheSy {
         let true_cond = NonPatternCondition::new(Pattern::from_str("true").unwrap(), Var::from_str("?z").unwrap());
         let false_cond = NonPatternCondition::new(Pattern::from_str("false").unwrap(), Var::from_str("?z").unwrap());
         let cond_applier = ConditionalApplier { applier, condition: AndCondition::new(vec![Box::new(true_cond), Box::new(false_cond)]) };
-        let split = Rewrite::new("ite_split", "ite_split",
+        let split = Rewrite::new("ite_split",
                                  Pattern::from_str("(ite ?z ?x ?y)").unwrap(),
                                  DiffApplier::new(cond_applier)).unwrap();
         vec![
@@ -814,17 +811,17 @@ mod test {
     use std::str::FromStr;
     use std::time::SystemTime;
 
-    use egg::{EGraph, Pattern, RecExpr, Rewrite, Runner, Searcher, SymbolLang};
     use itertools::Itertools;
 
-    use crate::thesy::example_creator::examples;
-    use crate::thesy::thesy::{TheSy};
-    use crate::lang::{DataType, Function};
+    use egg::{EGraph, Pattern, RecExpr, Rewrite, Runner, Searcher, SymbolLang};
+
     use crate::eggstentions::appliers::DiffApplier;
-    use crate::eggstentions::expression_ops::{Tree, IntoTree};
-    use crate::TheSyConfig;
-    use egg::test::run;
+    use crate::eggstentions::expression_ops::Tree;
+    use crate::lang::{DataType, Function};
+    use crate::thesy::example_creator::examples;
     use crate::thesy::prover::Prover;
+    use crate::thesy::thesy::TheSy;
+    use crate::TheSyConfig;
 
     fn create_nat_type() -> DataType {
         DataType::new("nat".to_string(), vec![
@@ -1062,7 +1059,7 @@ mod test {
     }
 
     fn create_filter_rules() -> Vec<Rewrite<SymbolLang, ()>> {
-        let split_rule: Rewrite<SymbolLang, ()> = Rewrite::new("filter_split", "filter_split",
+        let split_rule: Rewrite<SymbolLang, ()> = Rewrite::new("filter_split",
                                                                Pattern::from_str("(filter ?p (Cons ?x ?xs))").unwrap(),
                                                                DiffApplier::new(Pattern::from_str("(potential_split (apply ?p ?x) true false)").unwrap())).unwrap();
         let mut filter_rules = vec![

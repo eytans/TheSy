@@ -39,7 +39,7 @@ impl Prover {
             Pattern::from_str(&vec!["(", Self::wfo_op(), "?x ?y)"].join(" ")).unwrap(),
             Pattern::from_str(&vec!["(", Self::wfo_op(), "?z ?x)"].join(" ")).unwrap()]);
         let applier = Pattern::from_str(&vec!["(", Self::wfo_op(), "?z ?y)"].join(" ")).unwrap();
-        Rewrite::new("wfo transitivity", "well founded order transitivity", searcher, applier).unwrap()
+        Rewrite::new("wfo transitivity", searcher, applier).unwrap()
     }
 
     /// create well founded order rewrites for constructors of Datatype `datatype`.
@@ -66,7 +66,7 @@ impl Prover {
 
                 // rules
                 appliers.map(|a| {
-                    Rewrite::new(format!("{}_{}", c.name, a.0), format!("{}_{}", c.name, a.0), searcher.clone(), a.1).unwrap()
+                    Rewrite::new(format!("{}_{}", c.name, a.0), searcher.clone(), a.1).unwrap()
                 }).collect_vec()
             });
         let mut res = contructor_rules.collect_vec();
@@ -255,9 +255,9 @@ impl Prover {
     fn push_rw(precond: Option<Pattern<SymbolLang>>, fixed_ex1: &Pattern<SymbolLang>, fixed_ex2: &Pattern<SymbolLang>, text1: String, new_rules: &mut Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, Rewrite<SymbolLang, ()>)>) {
         if !fixed_ex1.ast.as_ref().last().unwrap().is_leaf() {
             let rw = if precond.is_some() {
-                Rewrite::new(text1.clone(), text1.clone(), MultiDiffSearcher::new(vec![precond.clone().unwrap(), fixed_ex1.clone()]), fixed_ex2.clone())
+                Rewrite::new(text1.clone(), MultiDiffSearcher::new(vec![precond.clone().unwrap(), fixed_ex1.clone()]), fixed_ex2.clone())
             } else {
-                Rewrite::new(text1.clone(), text1.clone(), fixed_ex1.clone(), fixed_ex2.clone())
+                Rewrite::new(text1.clone(), fixed_ex1.clone(), fixed_ex2.clone())
             };
             if rw.is_ok() {
                 new_rules.push((precond, fixed_ex1.clone(), fixed_ex2.clone(), rw.unwrap()));
@@ -283,7 +283,7 @@ impl Prover {
         let mut res = vec![];
         // Precondition on each direction of the hypothesis
         if pret.starts_with("(") {
-            let rw = Rewrite::new("IH1", "IH1", MultiDiffSearcher::new(vec![EitherSearcher::left(clean_term1.clone()), EitherSearcher::right(precondition.clone())]), clean_term2.clone());
+            let rw = Rewrite::new("IH1", MultiDiffSearcher::new(vec![EitherSearcher::left(clean_term1.clone()), EitherSearcher::right(precondition.clone())]), clean_term2.clone());
             if rw.is_ok() {
                 res.push(rw.unwrap())
             } else {
@@ -292,7 +292,7 @@ impl Prover {
             }
         }
         if pret2.starts_with("(") {
-            let rw = Rewrite::new("IH2", "IH2", MultiDiffSearcher::new(vec![EitherSearcher::left(clean_term2.clone()), EitherSearcher::right(precondition.clone())]), clean_term1.clone());
+            let rw = Rewrite::new("IH2", MultiDiffSearcher::new(vec![EitherSearcher::left(clean_term2.clone()), EitherSearcher::right(precondition.clone())]), clean_term1.clone());
             if rw.is_ok() {
                 res.push(rw.unwrap())
             } else {

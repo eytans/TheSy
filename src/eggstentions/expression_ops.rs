@@ -1,7 +1,6 @@
 use std::collections::{HashMap, HashSet};
 use std::fmt::Formatter;
 use std::hash::{Hash, Hasher};
-use std::process::exit;
 
 use egg::{EGraph, Id, Language, RecExpr};
 use itertools::Itertools;

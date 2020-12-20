@@ -1,7 +1,6 @@
 use std::collections::{HashMap, HashSet};
 use std::iter;
 use std::rc::Rc;
-use std::time::SystemTime;
 
 use egg::{EGraph, Id, Language, SymbolLang, RecExpr, EClass};
 use itertools::Itertools;

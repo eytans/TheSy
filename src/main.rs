@@ -1,4 +1,3 @@
-// #![feature(iterator_fold_self)]
 #[macro_use(rewrite)]
 extern crate egg;
 
@@ -20,7 +19,6 @@ use crate::thesy::thesy::TheSy;
 use crate::thesy::thesy_parser::parser::Definitions;
 use crate::tools::tools::choose;
 use crate::thesy::{thesy_parser, example_creator};
-use log::LevelFilter;
 use crate::eggstentions::pretty_string::PrettyString;
 
 #[cfg(feature = "stats")]
