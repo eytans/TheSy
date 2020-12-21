@@ -51,12 +51,8 @@ pub struct TheSy {
     pub stats: Stats,
 }
 
-/// *** Thesy ***
+/// *** TheSy Statics ***
 impl TheSy {
-    pub fn new(datatype: DataType, examples: Vec<RecExpr<SymbolLang>>, dict: Vec<Function>) -> TheSy {
-        Self::new_with_ph(vec![datatype.clone()], HashMap::from_iter(iter::once((datatype, examples))), dict, 2, None)
-    }
-
     fn replace_ops(exp: &RecExpr<SymbolLang>, replacments: &HashMap<Symbol, Symbol>) -> RecExpr<SymbolLang> {
         RecExpr::from(exp.as_ref().iter().map(|s| replacments.get(&s.op)
             .map(|x| SymbolLang::new(x.as_str(), s.children.clone())).unwrap_or(s.clone())).collect_vec())
@@ -64,6 +60,29 @@ impl TheSy {
 
     fn replace_op(exp: &RecExpr<SymbolLang>, orig: Symbol, replacment: Symbol) -> RecExpr<SymbolLang> {
         Self::replace_ops(exp, &HashMap::from_iter(iter::once((orig, replacment))))
+    }
+
+    fn create_sygue_serchers(dict: &[Function]) -> HashMap<String, (MultiDiffSearcher<Pattern<SymbolLang>>, Vec<(Var, RecExpr<SymbolLang>)>)> {
+        let mut res = HashMap::new();
+        dict.iter().for_each(|fun| {
+            if !fun.params.is_empty() {
+                let params: Vec<(Var, RecExpr<SymbolLang>)> = fun.params.iter().enumerate().map(|(i, t)| {
+                    (Var::from_str(&*format!("?param_{}", i)).unwrap(), t.clone())
+                }).collect_vec();
+                let patterns = params.iter()
+                    .flat_map(|(v, typ)| {
+                        vec![
+                            Pattern::from_str(&*format!("(typed {} {})", v.to_string(), typ.pretty(500))).unwrap(),
+                        ]
+                    }).collect::<Vec<Pattern<SymbolLang>>>();
+                res.insert(fun.name.clone(), (MultiDiffSearcher::new(patterns), params));
+            }
+        });
+        res
+    }
+
+    pub fn new(datatype: DataType, examples: Vec<RecExpr<SymbolLang>>, dict: Vec<Function>) -> TheSy {
+        Self::new_with_ph(vec![datatype.clone()], HashMap::from_iter(iter::once((datatype, examples))), dict, 2, None)
     }
 
     pub fn new_with_ph(datatypes: Vec<DataType>, examples: HashMap<DataType, Vec<RecExpr<SymbolLang>>>, dict: Vec<Function>, ph_count: usize, lemmas: Option<Vec<(HashMap<RecExpr<SymbolLang>, RecExpr<SymbolLang>>, Option<RecExpr<SymbolLang>>, RecExpr<SymbolLang>, RecExpr<SymbolLang>)>>) -> TheSy {
@@ -108,24 +127,20 @@ impl TheSy {
             }).collect_vec());
 
         let stats = Default::default();
+        let searchers = Self::create_sygue_serchers(&dict);
 
-        let mut res = TheSy {
+        TheSy {
             datatypes: datatype_to_prover,
             dict,
             egraph,
-            // sygue_rules: vec![],
-            searchers: HashMap::new(),
+            searchers,
             example_ids,
             system_rws,
             node_limit: 400000,
             iter_limit: 12,
             goals: conjectures,
             stats,
-        };
-
-        res.searchers = res.create_sygue_serchers();
-        res.egraph.rebuild();
-        res
+        }
     }
 
     fn create_graph_example_ids(datatypes: &Vec<DataType>, examples: &HashMap<DataType, Vec<RecExpr<SymbolLang>>>, dict: &Vec<Function>, ph_count: usize) -> (EGraph<SymbolLang, ()>, HashMap<DataType, HashMap<Id, Vec<Id>, RandomState>, RandomState>) {
@@ -157,9 +172,70 @@ impl TheSy {
             let chained = initial_example_ids.into_iter().collect_vec();
             example_ids.get_mut(d).unwrap().insert(ind_id, chained);
         }
+        egraph.rebuild();
         (egraph, example_ids)
     }
 
+    fn create_sygue_anchor() -> String {
+        format!("sygueanchor")
+    }
+
+    /// Appears at the start of every placeholder var
+    pub(crate) const PH_START: &'static str = "ts_ph";
+
+    fn create_apply_rws(dict: &Vec<Function>, ph_count: usize) -> Vec<Rewrite<SymbolLang, ()>> {
+        let apply_rws = dict.iter()
+            .chain(TheSy::collect_phs(&dict, ph_count).iter())
+            .filter(|fun| !fun.params.is_empty())
+            .map(|fun| {
+                let params = &fun.params.iter().enumerate()
+                    .map(|(i, x)| format!("?param_{}", i))
+                    .collect_vec();
+                let name = &fun.name;
+                let searcher: Pattern<SymbolLang> = format!("(apply {} {})", name, params.iter().intersperse(&" ".to_string()).cloned().collect::<String>()).parse().unwrap();
+                let applier: Pattern<SymbolLang> = format!("({} {})", name, params.iter().intersperse(&" ".to_string()).cloned().collect::<String>()).parse().unwrap();
+                rewrite!(format!("apply {}", name); searcher => applier)
+            }).collect_vec();
+        apply_rws
+    }
+
+    /// Create all needed phs from
+    fn collect_phs(dict: &Vec<Function>, ph_count: usize) -> Vec<Function> {
+        let mut res = HashSet::new();
+        for f in dict {
+            for e in f.params.iter() {
+                res.insert(e.clone());
+            }
+        }
+        let mut phs = vec![];
+        for d in res {
+            for i in 0..ph_count {
+                phs.push(Self::get_ph(&d, i));
+            }
+        }
+        phs
+    }
+
+    pub(crate) fn get_ph(d: &RecExpr<SymbolLang>, i: usize) -> Function {
+        let s = d.into_tree().to_spaceless_string();
+        let name = format!("{}_{}_{}", Self::PH_START, s, i);
+        if d.into_tree().root().op.as_str() == "->" {
+            let params = d.into_tree().children().iter().dropping_back(1)
+                .map(|t| RecExpr::from(t)).collect_vec();
+            let ret_type = RecExpr::from(d.into_tree().children().last().unwrap());
+            Function::new(name, params, ret_type)
+        } else {
+            Function::new(name, vec![], d.clone())
+        }
+    }
+
+    pub(crate) fn get_ind_var(d: &DataType) -> Function {
+        Self::get_ph(&d.as_exp(), 0)
+    }
+}
+
+/// *** Thesy ***
+impl TheSy {
     fn extract_classes(&self) -> HashMap<Id, (RepOrder, RecExpr<SymbolLang>)> {
         let mut ext = Extractor::new(&self.egraph, MinRep);
         // each datatype should have the same keys
@@ -168,29 +244,6 @@ impl TheSy {
             let updated_key = &self.egraph.find(*key);
             (*updated_key, ext.find_best(*updated_key))
         }).collect()
-    }
-
-    fn create_sygue_anchor() -> String {
-        format!("sygueanchor")
-    }
-
-    fn create_sygue_serchers(&self) -> HashMap<String, (MultiDiffSearcher<Pattern<SymbolLang>>, Vec<(Var, RecExpr<SymbolLang>)>)> {
-        let mut res = HashMap::new();
-        self.dict.iter().for_each(|fun| {
-            if !fun.params.is_empty() {
-                let params: Vec<(Var, RecExpr<SymbolLang>)> = fun.params.iter().enumerate().map(|(i, t)| {
-                    (Var::from_str(&*format!("?param_{}", i)).unwrap(), t.clone())
-                }).collect_vec();
-                let patterns = params.iter()
-                    .flat_map(|(v, typ)| {
-                        vec![
-                            Pattern::from_str(&*format!("(typed {} {})", v.to_string(), typ.pretty(500))).unwrap(),
-                        ]
-                    }).collect::<Vec<Pattern<SymbolLang>>>();
-                res.insert(fun.name.clone(), (MultiDiffSearcher::new(patterns), params));
-            }
-        });
-        res
     }
 
     fn fix_example_ids(&mut self) {
@@ -534,61 +587,6 @@ impl TheSy {
             return true;
         }
         false
-    }
-
-    // *************** Thesy statics *****************
-
-    /// Appears at the start of every placeholder var
-    pub(crate) const PH_START: &'static str = "ts_ph";
-
-    fn create_apply_rws(dict: &Vec<Function>, ph_count: usize) -> Vec<Rewrite<SymbolLang, ()>> {
-        let apply_rws = dict.iter()
-            .chain(TheSy::collect_phs(&dict, ph_count).iter())
-            .filter(|fun| !fun.params.is_empty())
-            .map(|fun| {
-                let params = &fun.params.iter().enumerate()
-                    .map(|(i, x)| format!("?param_{}", i))
-                    .collect_vec();
-                let name = &fun.name;
-                let searcher: Pattern<SymbolLang> = format!("(apply {} {})", name, params.iter().intersperse(&" ".to_string()).cloned().collect::<String>()).parse().unwrap();
-                let applier: Pattern<SymbolLang> = format!("({} {})", name, params.iter().intersperse(&" ".to_string()).cloned().collect::<String>()).parse().unwrap();
-                rewrite!(format!("apply {}", name); searcher => applier)
-            }).collect_vec();
-        apply_rws
-    }
-
-    /// Create all needed phs from
-    fn collect_phs(dict: &Vec<Function>, ph_count: usize) -> Vec<Function> {
-        let mut res = HashSet::new();
-        for f in dict {
-            for e in f.params.iter() {
-                res.insert(e.clone());
-            }
-        }
-        let mut phs = vec![];
-        for d in res {
-            for i in 0..ph_count {
-                phs.push(Self::get_ph(&d, i));
-            }
-        }
-        phs
-    }
-
-    pub(crate) fn get_ph(d: &RecExpr<SymbolLang>, i: usize) -> Function {
-        let s = d.into_tree().to_spaceless_string();
-        let name = format!("{}_{}_{}", Self::PH_START, s, i);
-        if d.into_tree().root().op.as_str() == "->" {
-            let params = d.into_tree().children().iter().dropping_back(1)
-                .map(|t| RecExpr::from(t)).collect_vec();
-            let ret_type = RecExpr::from(d.into_tree().children().last().unwrap());
-            Function::new(name, params, ret_type)
-        } else {
-            Function::new(name, vec![], d.clone())
-        }
-    }
-
-    pub(crate) fn get_ind_var(d: &DataType) -> Function {
-        Self::get_ph(&d.as_exp(), 0)
     }
 }
 
