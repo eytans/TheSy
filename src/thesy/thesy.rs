@@ -325,7 +325,17 @@ impl TheSy {
             }
             panic!("Bad bad bad: true = false");
         }
-        runner.stop_reason.unwrap()
+
+        let reason = runner.stop_reason.unwrap();
+        self.node_limit = match reason {
+            StopReason::NodeLimit(x) => {
+                info!("Reached node limit. Increasing maximum graph size.");
+                // TODO: decide dynamically
+                x + 50000
+            }
+            _ => { self.node_limit }
+        };
+        reason
     }
 
     /// For all created terms, get possible equality conjectures.
@@ -405,7 +415,6 @@ impl TheSy {
     }
 
     pub fn run(&mut self, rules: &mut Vec<Rewrite<SymbolLang, ()>>, max_depth: usize) -> Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, Rewrite<SymbolLang, ()>)> {
-        // TODO: run full tests
         // TODO: dont allow rules like (take ?x ?y) => (take ?x (append ?y ?y))
         println!("Running TheSy on datatypes: {} dict: {}", self.datatypes.keys().map(|x| &x.name).join(" "), self.dict.iter().map(|x| &x.name).join(" "));
         self.stats.init_run();
@@ -425,73 +434,15 @@ impl TheSy {
             println!("Starting depth {}", depth + 1);
             self.increase_depth();
             let stop_reason = self.equiv_reduc(&rules[..]);
-            self.update_node_limit(stop_reason);
 
-            let measure_splits = if cfg!(feature = "stats") {
-                let n = Self::split_patterns().iter().map(|p|
-                    p.search(&self.egraph)
-                        .iter().map(|m| m.substs.len()).sum::<usize>()
-                ).sum();
-                self.stats.init_measure(|| n)
-            } else {
-                0
-            };
-
-            let measure_proved = self.stats.init_measure(|| 0);
-
-            let conjs_before_cases = self.get_conjectures();
-            // TODO: case split + check all conjectures should be a function.
-            // TODO: After finishing checking all conjectures in final depth (if a lemma was found) try case split again then finish.
-            // TODO: can be a single loop with max depth
-            Self::case_split_all(rules, &mut self.egraph, 2, 4);
-            self.stats.update_splits(measure_splits);
+            // True if goals were proven
+            if self.prove_case_split_rules(rules, &mut found_rules, new_rules_index) {
+                return found_rules;
+            }
 
             let mut conjectures = self.get_conjectures();
-            let mut changed = false;
-            for (o, mut ex1, mut ex2, d) in conjs_before_cases.into_iter().rev() {
-                if conjectures.iter().any(|(_, other_ex1, other_ex2, _)|
-                    other_ex1 == &ex1 && &ex2 == other_ex2) {
-                    continue
-                }
-                if Self::check_equality(&rules[..], &None, &ex1, &ex2) {
-                    self.stats.update_filtered_conjecture(&ex1, &ex2);
-                    continue;
-                }
-                // Might be a false conjecture that just doesnt get picked anymore in reconstruct.
-                let mut new_rules = self.datatypes[&d].prove_all(rules, &ex1, &ex2);
-                if new_rules.is_none() {
-                    continue;
-                } else {
-                    let temp = new_rules;
-                    new_rules = self.datatypes[&d].generalize_prove(&rules, &ex1, &ex2);
-                    if new_rules.is_none() {
-                        new_rules = temp;
-                    } else {
-                        ex1 = new_rules.as_ref().unwrap()[0].1.pretty_string().parse().unwrap();
-                        ex2 = new_rules.as_ref().unwrap()[0].2.pretty_string().parse().unwrap();
-                        println!("generalized as case_split");
-                    }
-                }
-                changed = true;
-                self.stats.update_proved(&ex1, &ex2, measure_proved);
-                found_rules.extend_from_slice(new_rules.as_ref().unwrap());
-                for r in new_rules.unwrap() {
-                    warn!("proved: {}", r.3.name());
-                    // inserting like this so new rule will apply before running into node limit.
-                    rules.insert(new_rules_index, r.3);
-                }
-                if self.prove_goals(rules, &mut found_rules, new_rules_index) {
-                    return found_rules;
-                }
-            }
 
-            if changed {
-                let reduc_depth = 3;
-                let stop_reason = self.equiv_reduc_depth(&rules[..], reduc_depth);
-                self.update_node_limit(stop_reason);
-            }
-
-            'outer: while !conjectures.is_empty() {
+                'outer: while !conjectures.is_empty() {
                 let (_, mut ex1, mut ex2, d) = conjectures.pop().unwrap();
                 let measure_key = self.stats.init_measure(|| 0);
                 let mut new_rules = self.datatypes[&d].prove_ind(&rules, &ex1, &ex2);
@@ -525,7 +476,6 @@ impl TheSy {
 
                     let reduc_depth = 3;
                     let stop_reason = self.equiv_reduc_depth(&rules[..], reduc_depth);
-                    self.update_node_limit(stop_reason);
                     conjectures = self.get_conjectures();
                     println!();
                 } else {
@@ -541,15 +491,70 @@ impl TheSy {
         found_rules
     }
 
-    fn update_node_limit(&mut self, reason: StopReason) {
-        self.node_limit = match reason {
-            StopReason::NodeLimit(x) => {
-                info!("Reached node limit. Increasing maximum graph size.");
-                // TODO: decide dynamically
-                x + 50000
-            }
-            _ => { self.node_limit }
+    fn prove_case_split_rules(&mut self, rules: &mut Vec<Rewrite<SymbolLang, ()>>, found_rules: &mut Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, Rewrite<SymbolLang, ()>)>, new_rules_index: usize) -> bool {
+        let measure_splits = if cfg!(feature = "stats") {
+            let n = Self::split_patterns().iter().map(|p|
+                p.search(&self.egraph)
+                    .iter().map(|m| m.substs.len()).sum::<usize>()
+            ).sum();
+            self.stats.init_measure(|| n)
+        } else {
+            0
         };
+
+        let measure_proved = self.stats.init_measure(|| 0);
+
+        let conjs_before_cases = self.get_conjectures();
+        // TODO: case split + check all conjectures should be a function.
+        // TODO: After finishing checking all conjectures in final depth (if a lemma was found) try case split again then finish.
+        // TODO: can be a single loop with max depth
+        Self::case_split_all(rules, &mut self.egraph, 2, 4);
+        self.stats.update_splits(measure_splits);
+
+        let mut conjectures = self.get_conjectures();
+        let mut changed = false;
+        for (o, mut ex1, mut ex2, d) in conjs_before_cases.into_iter().rev() {
+            if conjectures.iter().any(|(_, other_ex1, other_ex2, _)|
+                other_ex1 == &ex1 && &ex2 == other_ex2) {
+                continue
+            }
+            if Self::check_equality(&rules[..], &None, &ex1, &ex2) {
+                self.stats.update_filtered_conjecture(&ex1, &ex2);
+                continue;
+            }
+            // Might be a false conjecture that just doesnt get picked anymore in reconstruct.
+            let mut new_rules = self.datatypes[&d].prove_all(rules, &ex1, &ex2);
+            if new_rules.is_none() {
+                continue;
+            } else {
+                let temp = new_rules;
+                new_rules = self.datatypes[&d].generalize_prove(&rules, &ex1, &ex2);
+                if new_rules.is_none() {
+                    new_rules = temp;
+                } else {
+                    ex1 = new_rules.as_ref().unwrap()[0].1.pretty_string().parse().unwrap();
+                    ex2 = new_rules.as_ref().unwrap()[0].2.pretty_string().parse().unwrap();
+                    println!("generalized as case_split");
+                }
+            }
+            changed = true;
+            self.stats.update_proved(&ex1, &ex2, measure_proved);
+            found_rules.extend_from_slice(new_rules.as_ref().unwrap());
+            for r in new_rules.unwrap() {
+                warn!("proved: {}", r.3.name());
+                // inserting like this so new rule will apply before running into node limit.
+                rules.insert(new_rules_index, r.3);
+            }
+            if self.prove_goals(rules, found_rules, new_rules_index) {
+                return true;
+            }
+        }
+
+        if changed {
+            let reduc_depth = 3;
+            let stop_reason = self.equiv_reduc_depth(&rules[..], reduc_depth);
+        }
+        false
     }
 
     /// Attempt to prove all lemmas with retry. Return true if finished all goals.
