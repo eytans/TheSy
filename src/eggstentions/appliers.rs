@@ -1,4 +1,4 @@
-use egg::{Applier, EGraph, Id, Pattern, SearchMatches, Subst, SymbolLang, Var, Searcher, Language, Analysis};
+use egg::{Analysis, Applier, EGraph, Id, Language, Pattern, SearchMatches, Subst, SymbolLang, Var};
 use itertools::Itertools;
 
 pub struct DiffApplier<T: Applier<SymbolLang, ()>> {

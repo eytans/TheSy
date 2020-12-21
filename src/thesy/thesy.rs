@@ -9,20 +9,17 @@ use itertools::Itertools;
 use log::{info, warn};
 
 use egg::*;
-use egg::StopReason::Saturated;
 
-use crate::eggstentions::appliers::{DiffApplier, UnionApplier};
-use crate::eggstentions::conditions::{AndCondition, NonPatternCondition, PatternCondition};
 use crate::eggstentions::costs::{MinRep, RepOrder};
 use crate::eggstentions::expression_ops::{IntoTree, Tree};
-use crate::eggstentions::multisearcher::multisearcher::{MultiDiffSearcher, MultiEqSearcher};
+use crate::eggstentions::multisearcher::multisearcher::{MultiDiffSearcher};
 use crate::eggstentions::pretty_string::PrettyString;
 use crate::lang::*;
 use crate::thesy::prover::Prover;
 use crate::thesy::statistics::Stats;
 use crate::tools::tools::choose;
 use crate::thesy::case_split::case_split_all;
-use crate::thesy::case_split;
+use crate::thesy::{case_split, consts};
 
 /// Theory Synthesizer - Explores a given theory finding and proving new lemmas.
 pub struct TheSy {
@@ -75,54 +72,12 @@ impl TheSy {
         let (mut egraph, mut example_ids) = TheSy::create_graph_example_ids(&datatypes, &examples, &dict, ph_count);
 
         let apply_rws = TheSy::create_apply_rws(&dict, ph_count);
-
-        let ite_rws: Vec<Rewrite<SymbolLang, ()>> = TheSy::create_ite_rws();
-
-        let eq_searcher = MultiEqSearcher::new(vec![Pattern::from_str("true").unwrap(), Pattern::from_str("(= ?x ?y)").unwrap()]);
-        let union_applier = UnionApplier::new(vec![Var::from_str("?x").unwrap(), Var::from_str("?y").unwrap()]);
-        let equality_rws = vec![rewrite!("equality"; "(= ?x ?x)" => "true"),
-                                rewrite!("equality-true"; eq_searcher => union_applier),
-                                // TODO: I would like to split by equality but not a possibility with current conditions.
-                                // rewrite!("equality-split"; "(= ?x ?y)" => "(potential_split (= ?x ?y) true false)" if {NonPatternCondition::new(Pattern::from_str("").unwrap(), Var::from_str("?"))})
-        ];
-
-        // Need to also add rules for or and and as they are commonly skipped.
-        let bool_rws = vec![
-            rewrite!("or-true"; "(or true ?x)" => "true"),
-            rewrite!("or-true2"; "(or ?x true)" => "true"),
-            rewrite!("or-false"; "(or false ?x)" => "?x"),
-            rewrite!("and-true"; "(and true ?x)" => "?x"),
-            rewrite!("and-false"; "(and false ?x)" => "false"),
-            rewrite!("and-false2"; "(and ?x false)" => "false"),
-            rewrite!("not-true"; "(not true)" => "false"),
-            rewrite!("not-false"; "(not false)" => "true"),
-        ];
-
-        // Also common that less is skipped
-        let less_rws = vec![
-            rewrite!("less-zero"; "(less ?x zero)" => "false"),
-            rewrite!("less-zs"; "(less zero (succ ?x))" => "true"),
-            rewrite!("less-succ"; "(less (succ ?y) (succ ?x))" => "(less ?y ?x)")
-        ];
-
-        let cons_conc_searcher: MultiEqSearcher<Pattern<SymbolLang>> = MultiEqSearcher::new(vec!["true".parse().unwrap(), "(is-cons ?x)".parse().unwrap()]);
-        let cons_conclusion: DiffApplier<Pattern<SymbolLang>> = DiffApplier::new("(cons (isconsex ?x))".parse().unwrap());
-
-        let is_rws: Vec<Rewrite<SymbolLang, ()>> = vec![
-            rewrite!("is_cons_true"; "(is-cons ?x)" => "true" if PatternCondition::new("(cons ?y)".parse().unwrap(), Var::from_str("?x").unwrap())),
-            rewrite!("is_cons_false"; "(is-cons ?x)" => "false" if PatternCondition::new("nil".parse().unwrap(), Var::from_str("?x").unwrap())),
-            rewrite!("is_cons_conclusion"; cons_conc_searcher => cons_conclusion),
-            rewrite!("is_succ_true"; "(is-succ ?x)" => "true" if PatternCondition::new("(succ ?y)".parse().unwrap(), "?x".parse().unwrap())),
-            rewrite!("is_succ_false"; "(is-succ ?x)" => "false" if PatternCondition::new("zero".parse().unwrap(), "?x".parse().unwrap())),
-            rewrite!("is_ESC_true"; "(is-ESC ?x)" => "true" if PatternCondition::new("ESC".parse().unwrap(), "?x".parse().unwrap())),
-        ];
-
-        let system_rws = apply_rws.into_iter()
-            .chain(ite_rws.into_iter())
-            .chain(equality_rws.into_iter())
-            .chain(bool_rws.into_iter())
-            .chain(less_rws.into_iter())
-            .chain(is_rws.into_iter())
+        let system_rws: Vec<Rewrite<SymbolLang, ()>> = apply_rws.into_iter()
+            .chain(consts::ite_rws().into_iter())
+            .chain(consts::equality_rws().into_iter())
+            .chain(consts::bool_rws().into_iter())
+            .chain(consts::less_rws().into_iter())
+            .chain(consts::is_rws().into_iter())
             .collect_vec();
 
         let conjectures = lemmas.map(|v| v.into_iter()
@@ -495,7 +450,7 @@ impl TheSy {
 
     fn prove_case_split_rules(&mut self, rules: &mut Vec<Rewrite<SymbolLang, ()>>, found_rules: &mut Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, Rewrite<SymbolLang, ()>)>, new_rules_index: usize) -> bool {
         let measure_splits = if cfg!(feature = "stats") {
-            let n = case_split::split_patterns().iter().map(|p|
+            let n = case_split::split_patterns.iter().map(|p|
                 p.search(&self.egraph)
                     .iter().map(|m| m.substs.len()).sum::<usize>()
             ).sum();
@@ -586,22 +541,6 @@ impl TheSy {
     /// Appears at the start of every placeholder var
     pub(crate) const PH_START: &'static str = "ts_ph";
 
-    fn create_ite_rws() -> Vec<Rewrite<SymbolLang, ()>> {
-        let potential_split_conc = format!("({} ?z true false)", case_split::SPLITTER);
-        let applier: Pattern<SymbolLang> = potential_split_conc.parse().unwrap();
-        let true_cond = NonPatternCondition::new(Pattern::from_str("true").unwrap(), Var::from_str("?z").unwrap());
-        let false_cond = NonPatternCondition::new(Pattern::from_str("false").unwrap(), Var::from_str("?z").unwrap());
-        let cond_applier = ConditionalApplier { applier, condition: AndCondition::new(vec![Box::new(true_cond), Box::new(false_cond)]) };
-        let split = Rewrite::new("ite_split",
-                                 Pattern::from_str("(ite ?z ?x ?y)").unwrap(),
-                                 DiffApplier::new(cond_applier)).unwrap();
-        vec![
-            rewrite!("ite_true"; "(ite true ?x ?y)" => "?x"),
-            rewrite!("ite_false"; "(ite false ?x ?y)" => "?y"),
-            split
-        ]
-    }
-
     fn create_apply_rws(dict: &Vec<Function>, ph_count: usize) -> Vec<Rewrite<SymbolLang, ()>> {
         let apply_rws = dict.iter()
             .chain(TheSy::collect_phs(&dict, ph_count).iter())
@@ -666,13 +605,13 @@ mod test {
     use egg::{EGraph, Pattern, RecExpr, Rewrite, Runner, Searcher, SymbolLang};
 
     use crate::eggstentions::appliers::DiffApplier;
-    use crate::eggstentions::expression_ops::Tree;
     use crate::lang::{DataType, Function};
     use crate::thesy::example_creator::examples;
-    use crate::thesy::prover::Prover;
     use crate::thesy::thesy::TheSy;
     use crate::TheSyConfig;
     use crate::thesy::case_split::case_split_all;
+    use crate::thesy::consts;
+    use crate::thesy::consts::ite_rws;
 
     fn create_nat_type() -> DataType {
         DataType::new("nat".to_string(), vec![
@@ -918,7 +857,7 @@ mod test {
             rewrite!("filter_ind"; "(filter ?p (Cons ?x ?xs))" => "(ite (apply ?p ?x) (Cons ?x (filter ?p ?xs)) (filter ?p ?xs))"),
             split_rule
         ];
-        filter_rules.extend_from_slice(&TheSy::create_ite_rws());
+        filter_rules.extend_from_slice(&ite_rws());
         filter_rules
     }
 
@@ -1013,7 +952,7 @@ mod test {
         let mut egraph: EGraph<SymbolLang, ()> = EGraph::default();
         egraph.add_expr(&RecExpr::from_str("(ite z x y)").unwrap());
         egraph.rebuild();
-        let rules = TheSy::create_ite_rws();
+        let rules = consts::ite_rws();
         assert!(!rules[2].search(&egraph).is_empty());
         let matches = &*rules[2].search(&egraph);
         rules[2].apply(&mut egraph, matches);

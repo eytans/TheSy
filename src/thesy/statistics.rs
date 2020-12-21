@@ -1,7 +1,7 @@
-use egg::{RecExpr, Pattern, SymbolLang, Iteration, IterationData, EGraph, Language, Analysis};
-use std::time::{Duration, SystemTime};
 use std::collections::HashMap;
-use global_counter::generic::Counter;
+use std::time::{Duration, SystemTime};
+
+use egg::{Iteration, RecExpr, SymbolLang};
 
 global_counter!(MEASURE_COUNTER, usize, usize::default());
 

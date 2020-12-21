@@ -2,19 +2,20 @@ use egg::{Rewrite, SymbolLang, EGraph, Id, Runner, StopReason, EClass, Var, Patt
 use itertools::Itertools;
 use std::time::Duration;
 use std::collections::{HashMap, HashSet};
-use crate::thesy::TheSy;
 use std::str::FromStr;
 
 /// To be used as the op of edges representing potential split
 pub const SPLITTER: &'static str = "potential_split";
-/// Pattern to find all available splitter edges. Limited arbitrarily to 5 possible splits.
-pub(crate) fn split_patterns() -> Vec<Pattern<SymbolLang>> {
-    vec![
-        Pattern::from_str(&*format!("({} ?root ?c0 ?c1)", SPLITTER)).unwrap(),
-        Pattern::from_str(&*format!("({} ?root ?c0 ?c1 ?c2)", SPLITTER)).unwrap(),
-        Pattern::from_str(&*format!("({} ?root ?c0 ?c1 ?c2 ?c3)", SPLITTER)).unwrap(),
-        Pattern::from_str(&*format!("({} ?root ?c0 ?c1 ?c2 ?c3 ?c4)", SPLITTER)).unwrap(),
-    ]
+lazy_static! {
+    /// Pattern to find all available splitter edges. Limited arbitrarily to 5 possible splits.
+    pub(crate) static ref split_patterns: Vec<Pattern<SymbolLang>> = {
+        vec![
+            Pattern::from_str(&*format!("({} ?root ?c0 ?c1)", SPLITTER)).unwrap(),
+            Pattern::from_str(&*format!("({} ?root ?c0 ?c1 ?c2)", SPLITTER)).unwrap(),
+            Pattern::from_str(&*format!("({} ?root ?c0 ?c1 ?c2 ?c3)", SPLITTER)).unwrap(),
+            Pattern::from_str(&*format!("({} ?root ?c0 ?c1 ?c2 ?c3 ?c4)", SPLITTER)).unwrap(),
+        ]
+    };
 }
 
 /// Case splitting works by cloning the graph and merging the different possibilities.
@@ -56,9 +57,9 @@ fn case_split(rules: &[Rewrite<SymbolLang, ()>], egraph: &mut EGraph<SymbolLang,
     egraph.rebuild();
 }
 
-pub(crate) fn case_split_all(rules: &[Rewrite<SymbolLang, ()>],
-                             egraph: &mut EGraph<SymbolLang, ()>,
-                             split_depth: usize, run_depth: usize) {
+pub fn case_split_all(rules: &[Rewrite<SymbolLang, ()>],
+                      egraph: &mut EGraph<SymbolLang, ()>,
+                      split_depth: usize, run_depth: usize) {
     _case_split_all(rules, egraph, split_depth, run_depth, &HashSet::new())
 }
 
@@ -78,7 +79,7 @@ fn _case_split_all(rules: &[Rewrite<SymbolLang, ()>],
         ).collect::<HashSet<(Id, Vec<Id>)>>();
     let root_var: Var = "?root".parse().unwrap();
     let children_vars: Vec<Var> = (0..5).map(|i| format!("?c{}", i).parse().unwrap()).collect_vec();
-    let mut splitters: Vec<(Id, Vec<Id>)> = split_patterns().iter().enumerate()
+    let mut splitters: Vec<(Id, Vec<Id>)> = split_patterns.iter().enumerate()
         .flat_map(|(i, p)| {
             let results = p.search(egraph).into_iter().flat_map(|x| x.substs);
             results.map(|s| (

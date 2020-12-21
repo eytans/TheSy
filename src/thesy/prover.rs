@@ -1,20 +1,19 @@
-use crate::lang::{DataType, Function};
-use egg::{Rewrite, SymbolLang, Pattern, EGraph, RecExpr, Runner, ENodeOrVar, Var, Id, PatternAst, Language, Symbol, Searcher, Applier};
-use crate::eggstentions::multisearcher::multisearcher::{MultiDiffSearcher, MultiEqSearcher, EitherSearcher};
-use std::str::FromStr;
-use itertools::Itertools;
-use crate::eggstentions::appliers::DiffApplier;
-use crate::thesy::TheSy;
-use crate::eggstentions::expression_ops::{RecExpSlice, IntoTree, Tree};
-use std::collections::HashMap;
-use multimap::MultiMap;
 use std::cmp::max;
-use permutohedron::heap_recursive;
+use std::str::FromStr;
+
+use egg::{EGraph, ENodeOrVar, Id, Language, Pattern, PatternAst, RecExpr, Rewrite, Runner, Symbol, SymbolLang, Var};
+use itertools::Itertools;
+use log::{debug, info};
 use permutohedron::control::Control;
-use std::iter;
-use log::{debug, info, trace, warn};
+use permutohedron::heap_recursive;
+
+use crate::eggstentions::appliers::DiffApplier;
+use crate::eggstentions::expression_ops::{IntoTree, RecExpSlice, Tree};
+use crate::eggstentions::multisearcher::multisearcher::{EitherSearcher, MultiDiffSearcher, MultiEqSearcher};
 use crate::eggstentions::pretty_string::PrettyString;
+use crate::lang::{DataType, Function};
 use crate::thesy::case_split::case_split_all;
+use crate::thesy::TheSy;
 
 pub struct Prover {
     datatype: DataType,
@@ -345,9 +344,10 @@ impl Prover {
 
 #[cfg(test)]
 mod tests {
-    use egg::{EGraph, SymbolLang, Pattern, Runner, Searcher};
-    use crate::thesy::prover::Prover;
+    use egg::{EGraph, Pattern, Runner, Searcher, SymbolLang};
+
     use crate::lang::{DataType, Function};
+    use crate::thesy::prover::Prover;
 
     fn create_nat_type() -> DataType {
         DataType::new("nat".to_string(), vec![

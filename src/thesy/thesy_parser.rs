@@ -9,15 +9,14 @@ pub mod parser {
 
     use crate::eggstentions::appliers::DiffApplier;
     use crate::lang::{DataType, Function};
-    use std::collections::{HashMap, HashSet};
+    use std::collections::{HashMap};
     use crate::eggstentions::conditions::{NonPatternCondition, AndCondition};
     use multimap::MultiMap;
-    use std::ptr::eq;
     use crate::eggstentions::multisearcher::multisearcher::{MultiDiffSearcher, EitherSearcher, MultiEqSearcher};
     use std::fmt::Debug;
     use crate::eggstentions::pretty_string::PrettyString;
     use crate::eggstentions::expression_ops::{IntoTree, Tree};
-    use crate::thesy::{TheSy, case_split};
+    use crate::thesy::{case_split};
     use crate::tools::tools::combinations;
 
     #[derive(Default, Clone, Debug)]
@@ -94,7 +93,7 @@ pub mod parser {
         // span a match expression on a second variable.
         // TODO: Ite variant might not be able to use the conditional apply optimization. Fix.
 
-        /// 'Heuristicly' Patterns used for function definitions. Will be used for auto case split.
+        // 'Heuristicly' Patterns used for function definitions. Will be used for auto case split.
         let mut function_patterns: MultiMap<Function, PatternAst<SymbolLang>> = MultiMap::new();
         let mut res = Definitions::default();
         let mut name_pats = vec![];
@@ -229,12 +228,12 @@ pub mod parser {
                 });
                 let mut x = 0;
 
-                let mut fresh_v = (|| {
+                let mut fresh_v = || {
                     x = x + 1;
                     Var::from_str(&*("?autovar".to_string() + &*x.to_string())).unwrap()
-                });
+                };
 
-                let mut fresh_vars = (|exp: RecExpr<ENodeOrVar<SymbolLang>>, vars: &mut HashMap<Var, Var>| {
+                let mut fresh_vars = |exp: RecExpr<ENodeOrVar<SymbolLang>>, vars: &mut HashMap<Var, Var>| {
                     RecExpr::from(exp.as_ref().iter().cloned().map(|e| match e {
                         ENodeOrVar::ENode(n) => { ENodeOrVar::ENode(n) }
                         ENodeOrVar::Var(v) => {
@@ -244,7 +243,7 @@ pub mod parser {
                             ENodeOrVar::Var(vars[&v])
                         }
                     }).collect_vec())
-                });
+                };
                 let param_pats = relevant_params.filter_map(|(i, t, d)| {
                     let mut par_pats = (0..f.params.len()).map(|_| vec![]).collect_vec();
                     for p in pats.iter().filter(|p|

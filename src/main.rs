@@ -7,6 +7,9 @@ extern crate simplelog;
 #[macro_use]
 extern crate global_counter;
 
+#[macro_use]
+extern crate lazy_static;
+
 use std::borrow::Borrow;
 use std::fs::File;
 use std::io::{Write};
@@ -167,7 +170,6 @@ impl From<&TheSyConfig> for TheSy {
 
 fn main() {
     use simplelog::*;
-    use std::fs::File;
 
     let args = CliOpt::from_args();
 
