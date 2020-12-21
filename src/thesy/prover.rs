@@ -14,6 +14,7 @@ use permutohedron::control::Control;
 use std::iter;
 use log::{debug, info, trace, warn};
 use crate::eggstentions::pretty_string::PrettyString;
+use crate::thesy::case_split::case_split_all;
 
 pub struct Prover {
     datatype: DataType,
@@ -93,7 +94,7 @@ impl Prover {
             let contr_id = egraph.add_expr(&c.as_exp());
             egraph.union(contr_id, ind_id);
             let mut runner: Runner<SymbolLang, ()> = Runner::new(()).with_egraph(egraph).with_iter_limit(Self::RUN_DEPTH).run(&rules[..]);
-            TheSy::case_split_all(&rules, &mut runner.egraph, split_d, Self::CASE_SPLIT_RUN);
+            case_split_all(&rules, &mut runner.egraph, split_d, Self::CASE_SPLIT_RUN);
             !runner.egraph.equivs(&ex1, &ex2).is_empty()
         })
     }
@@ -212,7 +213,7 @@ impl Prover {
             let contr_id = egraph.add_expr(&contr_exp);
             egraph.union(contr_id, ind_id);
             let mut runner: Runner<SymbolLang, ()> = Runner::new(()).with_egraph(egraph).with_iter_limit(Self::RUN_DEPTH).run(&rule_set[..]);
-            TheSy::case_split_all(&rule_set, &mut runner.egraph, split_d, Self::CASE_SPLIT_RUN);
+            case_split_all(&rule_set, &mut runner.egraph, split_d, Self::CASE_SPLIT_RUN);
             res = res && !runner.egraph.equivs(&ex1, &ex2).is_empty()
         }
         if res {

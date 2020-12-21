@@ -21,6 +21,8 @@ use crate::lang::*;
 use crate::thesy::prover::Prover;
 use crate::thesy::statistics::Stats;
 use crate::tools::tools::choose;
+use crate::thesy::case_split::case_split_all;
+use crate::thesy::case_split;
 
 /// Theory Synthesizer - Explores a given theory finding and proving new lemmas.
 pub struct TheSy {
@@ -493,7 +495,7 @@ impl TheSy {
 
     fn prove_case_split_rules(&mut self, rules: &mut Vec<Rewrite<SymbolLang, ()>>, found_rules: &mut Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, Rewrite<SymbolLang, ()>)>, new_rules_index: usize) -> bool {
         let measure_splits = if cfg!(feature = "stats") {
-            let n = Self::split_patterns().iter().map(|p|
+            let n = case_split::split_patterns().iter().map(|p|
                 p.search(&self.egraph)
                     .iter().map(|m| m.substs.len()).sum::<usize>()
             ).sum();
@@ -508,7 +510,7 @@ impl TheSy {
         // TODO: case split + check all conjectures should be a function.
         // TODO: After finishing checking all conjectures in final depth (if a lemma was found) try case split again then finish.
         // TODO: can be a single loop with max depth
-        Self::case_split_all(rules, &mut self.egraph, 2, 4);
+        case_split_all(rules, &mut self.egraph, 2, 4);
         self.stats.update_splits(measure_splits);
 
         let mut conjectures = self.get_conjectures();
@@ -583,20 +585,9 @@ impl TheSy {
 
     /// Appears at the start of every placeholder var
     pub(crate) const PH_START: &'static str = "ts_ph";
-    /// To be used as the op of edges representing potential split
-    pub const SPLITTER: &'static str = "potential_split";
-    /// Pattern to find all available splitter edges. Limited arbitrarily to 5 possible splits.
-    fn split_patterns() -> Vec<Pattern<SymbolLang>> {
-        vec![
-            Pattern::from_str(&*format!("({} ?root ?c0 ?c1)", Self::SPLITTER)).unwrap(),
-            Pattern::from_str(&*format!("({} ?root ?c0 ?c1 ?c2)", Self::SPLITTER)).unwrap(),
-            Pattern::from_str(&*format!("({} ?root ?c0 ?c1 ?c2 ?c3)", Self::SPLITTER)).unwrap(),
-            Pattern::from_str(&*format!("({} ?root ?c0 ?c1 ?c2 ?c3 ?c4)", Self::SPLITTER)).unwrap(),
-        ]
-    }
 
     fn create_ite_rws() -> Vec<Rewrite<SymbolLang, ()>> {
-        let potential_split_conc = format!("({} ?z true false)", Self::SPLITTER);
+        let potential_split_conc = format!("({} ?z true false)", case_split::SPLITTER);
         let applier: Pattern<SymbolLang> = potential_split_conc.parse().unwrap();
         let true_cond = NonPatternCondition::new(Pattern::from_str("true").unwrap(), Var::from_str("?z").unwrap());
         let false_cond = NonPatternCondition::new(Pattern::from_str("false").unwrap(), Var::from_str("?z").unwrap());
@@ -625,108 +616,6 @@ impl TheSy {
                 rewrite!(format!("apply {}", name); searcher => applier)
             }).collect_vec();
         apply_rws
-    }
-
-    /// Case splitting works by cloning the graph and merging the different possibilities.
-    /// Enabling recursivly splitting all
-    fn case_split(rules: &[Rewrite<SymbolLang, ()>], egraph: &mut EGraph<SymbolLang, ()>, root: Id, splits: Vec<Id>, split_depth: usize, run_depth: usize, dont_use: &HashSet<(Id, Vec<Id>)>) {
-        let classes = egraph.classes().collect_vec();
-        // TODO: parallel
-        let after_splits = splits.iter().map(|child| {
-            let mut new_graph = egraph.clone();
-            new_graph.union(root, *child);
-            // TODO: graph limit enhancing runner, with rules sorting
-            let mut runner = Runner::default().with_time_limit(Duration::from_secs(60 * 10)).with_node_limit(new_graph.total_number_of_nodes() + 50000).with_egraph(new_graph).with_iter_limit(run_depth);
-            runner = runner.run(rules );
-            match runner.stop_reason.as_ref().unwrap() {
-                Saturated => {}
-                StopReason::IterationLimit(_) => {}
-                StopReason::NodeLimit(_) => { warn!("Stopped case split due to node limit") }
-                StopReason::TimeLimit(_) => { warn!("Stopped case split due to time limit") }
-                StopReason::Other(_) => {}
-            };
-            runner.egraph.rebuild();
-            Self::_case_split_all(rules, &mut runner.egraph, split_depth - 1, run_depth, dont_use);
-            classes.iter().map(|c| (c.id, runner.egraph.find(c.id))).collect::<HashMap<Id, Id>>()
-        }).collect_vec();
-        let mut group_by_splits: HashMap<Vec<Id>, HashSet<Id>> = HashMap::new();
-        for c in classes {
-            let key = after_splits.iter().map(|m| m[&c.id]).collect_vec();
-            if !group_by_splits.contains_key(&key) {
-                group_by_splits.insert(key.clone(), HashSet::new());
-            }
-            group_by_splits.get_mut(&key).unwrap().insert(c.id);
-        }
-        for group in group_by_splits.values().filter(|g| g.len() > 1) {
-            let first = group.iter().next().unwrap();
-            for id in group.iter().dropping(1) {
-                egraph.union(*first, *id);
-            }
-        }
-        egraph.rebuild();
-    }
-
-    pub(crate) fn case_split_all(rules: &[Rewrite<SymbolLang, ()>],
-                                 egraph: &mut EGraph<SymbolLang, ()>,
-                                 split_depth: usize, run_depth: usize) {
-        Self::_case_split_all(rules, egraph, split_depth, run_depth, &HashSet::new())
-    }
-
-    fn _case_split_all(rules: &[Rewrite<SymbolLang, ()>],
-                       egraph: &mut EGraph<SymbolLang, ()>,
-                       split_depth: usize, run_depth: usize,
-                       dont_use: &HashSet<(Id, Vec<Id>)>) {
-        if split_depth == 0 {
-            return;
-        }
-        let new_dont_use = dont_use.iter()
-            .map(|(root, children)|
-                (
-                    egraph.find(*root),
-                    children.iter().map(|c| egraph.find(*c)).collect_vec()
-                )
-            ).collect::<HashSet<(Id, Vec<Id>)>>();
-        let root_var: Var = "?root".parse().unwrap();
-        let children_vars: Vec<Var> = (0..5).map(|i| format!("?c{}", i).parse().unwrap()).collect_vec();
-        let mut splitters: Vec<(Id, Vec<Id>)> = Self::split_patterns().iter().enumerate()
-            .flat_map(|(i, p)| {
-                let results = p.search(egraph).into_iter().flat_map(|x| x.substs);
-                results.map(|s| (
-                    *s.get(root_var).unwrap(), // Root
-                    (0..i + 2).map(|i| *s.get(children_vars[i]).unwrap()).collect_vec() // Params
-                )).filter(|x| !new_dont_use.contains(x))
-                    .collect_vec()
-            })
-            .collect_vec();
-        if splitters.is_empty() {
-            return;
-        }
-        let classes: HashMap<Id, &EClass<SymbolLang, ()>> = egraph.classes().map(|c| (c.id, c)).collect();
-        let mut needed: HashSet<Id> = splitters.iter().map(|x| x.0).collect();
-        let mut translatable = HashSet::new();
-        for _ in 0..=split_depth {
-            'outer: for id in needed.clone() {
-                let c = classes[&id];
-                if translatable.contains(&c.id) {
-                    continue;
-                }
-                for edge in c.nodes.iter() {
-                    if edge.children.iter().all(|child| translatable.contains(child)) {
-                        translatable.insert(c.id);
-                        needed.remove(&c.id);
-                        continue 'outer;
-                    } else {
-                        needed.extend(edge.children.iter().filter(|child| !translatable.contains(child)));
-                    }
-                }
-            }
-        }
-        warn!("# of splitters: {}", splitters.len());
-        splitters.iter().filter(|s| translatable.contains(&s.0)).enumerate().for_each(|(i, (root, params))| {
-            let mut updated_dont_use = new_dont_use.clone();
-            updated_dont_use.extend(splitters.iter().take(i + 1).cloned());
-            Self::case_split(rules, egraph, *root, params.clone(), split_depth, run_depth, &updated_dont_use);
-        });
     }
 
     /// Create all needed phs from
@@ -783,6 +672,7 @@ mod test {
     use crate::thesy::prover::Prover;
     use crate::thesy::thesy::TheSy;
     use crate::TheSyConfig;
+    use crate::thesy::case_split::case_split_all;
 
     fn create_nat_type() -> DataType {
         DataType::new("nat".to_string(), vec![
@@ -1015,7 +905,7 @@ mod test {
         let mut runner = Runner::default().with_egraph(egraph).with_iter_limit(1);
         runner = runner.run(&filter_rules);
         assert_ne!(runner.egraph.find(pq), runner.egraph.find(qp));
-        TheSy::case_split_all(&filter_rules, &mut runner.egraph, 4, 4);
+        case_split_all(&filter_rules, &mut runner.egraph, 4, 4);
         assert_eq!(runner.egraph.find(pq), runner.egraph.find(qp));
     }
 
@@ -1063,7 +953,7 @@ mod test {
         let mut filter_rules = create_filter_rules();
         filter_rules.extend(thesy.system_rws.iter().cloned());
         thesy.equiv_reduc(&filter_rules);
-        TheSy::case_split_all(&filter_rules, &mut thesy.egraph, 4, 4);
+        case_split_all(&filter_rules, &mut thesy.egraph, 4, 4);
         for (o, c1, c2, d) in thesy.get_conjectures() {
             // println!("{} = {}", c1.pretty(500), c2.pretty(500));
         }
@@ -1093,7 +983,7 @@ mod test {
         // assert_ne!(egraph.find(nil), egraph.find(ex0));
         assert_ne!(egraph.find(consx), egraph.find(ex1));
         assert_ne!(egraph.find(consxy), egraph.find(ex2));
-        TheSy::case_split_all(&rules, &mut egraph, 2, 4);
+        case_split_all(&rules, &mut egraph, 2, 4);
         egraph.rebuild();
         assert_eq!(egraph.find(nil), egraph.find(ex0));
         assert_eq!(egraph.find(consx), egraph.find(ex1));

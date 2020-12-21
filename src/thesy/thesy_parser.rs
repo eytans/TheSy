@@ -17,7 +17,7 @@ pub mod parser {
     use std::fmt::Debug;
     use crate::eggstentions::pretty_string::PrettyString;
     use crate::eggstentions::expression_ops::{IntoTree, Tree};
-    use crate::thesy::TheSy;
+    use crate::thesy::{TheSy, case_split};
     use crate::tools::tools::combinations;
 
     #[derive(Default, Clone, Debug)]
@@ -307,7 +307,7 @@ pub mod parser {
                             let cond: Box<dyn Condition<SymbolLang, ()>> = Box::new(NonPatternCondition::new(Pattern::from_str(&*exp.pretty(1000)).unwrap(), root_v_opt.unwrap()));
                             cond
                         }).collect_vec();
-                        let applier_text = format!("({} {} {})", TheSy::SPLITTER, root_var.display_op(), get_splitters(datatype, root_var).join(" "));
+                        let applier_text = format!("({} {} {})", case_split::SPLITTER, root_var.display_op(), get_splitters(datatype, root_var).join(" "));
                         let applier: Pattern<SymbolLang> = Pattern::from_str(&*applier_text).unwrap();
                         let rule_name = format!("{}_split_{}_{}", f.name, index, res.len());
                         println!("{} => {} if {}", searcher.pretty_string(), applier_text, cond_texts.join(" "));
