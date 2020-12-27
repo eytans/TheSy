@@ -179,6 +179,7 @@ pub mod parser {
                     let (mut precondition, mut equality) = {
                         let mut expr = forall_list[2].take_list().unwrap();
                         if expr[0].string().unwrap() == "=>" {
+                            println!("expr: {}", expr.iter().map(|x| x.to_string()).intersperse(" ".parse().unwrap()).collect::<String>());
                             let equality = expr.remove(2).take_list().unwrap();
                             let precond = expr.remove(1);
                             (Some(precond), equality)
@@ -186,7 +187,9 @@ pub mod parser {
                             (None, expr)
                         }
                     };
-                    assert!(equality[0].string().unwrap() == "=" || equality[0].string().unwrap() == "<=>");
+                    if !(equality[0].string().unwrap() == "=" || equality[0].string().unwrap() == "<=>") {
+                        equality = vec![Sexp::String("=".to_string()), Sexp::String("true".to_string()), Sexp::List(equality)];
+                    }
                     res.conjectures.push((var_map, precondition.map(|x| sexp_to_recexpr(&x)), sexp_to_recexpr(&equality[1]), sexp_to_recexpr(&equality[2])));
                 }
                 _ => {
@@ -276,7 +279,7 @@ pub mod parser {
                                 v
                             }).collect_vec();
                     let mut res: Vec<Rewrite<SymbolLang, ()>> = vec![];
-                    for combs in  combinations(patterns_and_vars.iter().cloned().map(|x| x.into_iter())) {
+                    for combs in combinations(patterns_and_vars.iter().cloned().map(|x| x.into_iter())) {
                         let mut nodes = vec![];
                         let children = combs.into_iter().map(|exp| {
                             let cur_len = nodes.len();

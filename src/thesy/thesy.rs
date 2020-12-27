@@ -20,6 +20,9 @@ use crate::thesy::statistics::Stats;
 use crate::tools::tools::choose;
 use crate::thesy::case_split::case_split_all;
 use crate::thesy::{case_split, consts};
+use egg::test::run;
+use multimap::MultiMap;
+use bimap::BiHashMap;
 
 /// Theory Synthesizer - Explores a given theory finding and proving new lemmas.
 pub struct TheSy {
@@ -49,6 +52,18 @@ pub struct TheSy {
     goals: Option<Vec<Vec<(Option<RecExpr<SymbolLang>>, RecExpr<SymbolLang>, RecExpr<SymbolLang>)>>>,
     /// If stats enable contains object collecting runtime data on thesy otherwise None.
     pub stats: Stats,
+    /// Assumptions to colors
+    assumptions: BiHashMap<Vec<Id>, ColorId>,
+    /// the hooks are used after every step of TheSy which could expand the rules set
+    /// currently used to support parallel running
+    after_inference_hooks: Vec<Box<dyn FnMut(&mut Self, &mut Vec<Rewrite<SymbolLang, ()>>) -> Result<(), String>>>,
+    //after_inference_hooks: Vec<Box<dyn FnMut(&mut Self, &Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, Rewrite<SymbolLang, ()>)>) -> Result<(), String>>>,
+    /// the hooks are used before every step of TheSy which could expand the rules set
+    /// currently used to support parallel running
+    before_inference_hooks: Vec<Box<dyn FnMut(&mut Self, &mut Vec<Rewrite<SymbolLang, ()>>) -> Result<(), String>>>,
+    /// hooks passed to [runner]
+    /// for more info check: [EGG] documentation
+    equiv_reduc_hooks: Vec<Box<dyn FnMut(&mut Runner<SymbolLang,()>, &mut Vec<Rewrite<SymbolLang, ()>>) -> Result<(), String>>>,
 }
 
 /// *** TheSy Statics ***
@@ -140,6 +155,10 @@ impl TheSy {
             iter_limit: 12,
             goals: conjectures,
             stats,
+            assumptions: Default::default(),
+            before_inference_hooks: Default::default(),
+            after_inference_hooks: Default::default(),
+            equiv_reduc_hooks: Default::default(),
         }
     }
 
@@ -316,25 +335,38 @@ impl TheSy {
         self.stats.update_term_creation(key, self.egraph.total_number_of_nodes());
     }
 
-    pub fn equiv_reduc(&mut self, rules: &[Rewrite<SymbolLang, ()>]) -> StopReason {
+    pub fn equiv_reduc(&mut self, rules: &mut Vec<Rewrite<SymbolLang, ()>>) -> StopReason {
         self.equiv_reduc_depth(rules, self.iter_limit)
     }
 
-    fn equiv_reduc_depth(&mut self, rules: &[Rewrite<SymbolLang, ()>], depth: usize) -> StopReason {
+    fn equiv_reduc_depth(&mut self, rules: &mut Vec<Rewrite<SymbolLang, ()>>, depth: usize) -> StopReason {
         let mut runner = Runner::default().with_time_limit(Duration::from_secs(60 * 10)).with_node_limit(self.node_limit).with_egraph(std::mem::take(&mut self.egraph)).with_iter_limit(depth);
-        runner = runner.run(rules);
+        if !cfg!(feature = "split_clone") {
+            runner = runner.with_hook(|runner| {
+                for pat in case_split::split_patterns.iter() {
+                    for m in pat.search(&runner.egraph) {
+                        for s in m.substs {
+                            let colors = s.colors();
+
+                        }
+                    }
+                }
+                Ok(())
+            })
+        }
+        runner = runner.run(&*rules);
         self.stats.update_rewrite_iters(std::mem::take(&mut runner.iterations));
         self.egraph = runner.egraph;
         self.egraph.rebuild();
-        let true_pat: Pattern<SymbolLang> = "true".parse().unwrap();
-        let false_pat: Pattern<SymbolLang> = "false".parse().unwrap();
-        if true_pat.search(&self.egraph)[0].eclass == false_pat.search(&self.egraph)[0].eclass {
-            let class = self.egraph.classes().find(|c| c.id == true_pat.search(&self.egraph)[0].eclass);
-            for edge in class.unwrap().nodes.iter() {
-                println!("{}", edge.display_op());
-            }
-            panic!("Bad bad bad: true = false");
-        }
+        // let true_pat: Pattern<SymbolLang> = "true".parse().unwrap();
+        // let false_pat: Pattern<SymbolLang> = "false".parse().unwrap();
+        // if true_pat.search(&self.egraph)[0].eclass == false_pat.search(&self.egraph)[0].eclass {
+        //     let class = self.egraph.classes().find(|c| c.id == true_pat.search(&self.egraph)[0].eclass);
+        //     for edge in class.unwrap().nodes.iter() {
+        //         println!("{}", edge.display_op());
+        //     }
+        //     panic!("Bad bad bad: true = false");
+        // }
 
         let reason = runner.stop_reason.unwrap();
         self.node_limit = match reason {
@@ -443,7 +475,7 @@ impl TheSy {
         for depth in 0..max_depth {
             println!("Starting depth {}", depth + 1);
             self.increase_depth();
-            let stop_reason = self.equiv_reduc(&rules[..]);
+            let stop_reason = self.equiv_reduc(rules);
 
             // True if goals were proven
             if self.prove_case_split_rules(rules, &mut found_rules, new_rules_index) {
@@ -485,7 +517,7 @@ impl TheSy {
                     }
 
                     let reduc_depth = 3;
-                    let stop_reason = self.equiv_reduc_depth(&rules[..], reduc_depth);
+                    let stop_reason = self.equiv_reduc_depth(rules, reduc_depth);
                     conjectures = self.get_conjectures();
                     println!();
                 } else {
@@ -562,7 +594,7 @@ impl TheSy {
 
         if changed {
             let reduc_depth = 3;
-            let stop_reason = self.equiv_reduc_depth(&rules[..], reduc_depth);
+            let stop_reason = self.equiv_reduc_depth(rules, reduc_depth);
         }
         false
     }
@@ -779,9 +811,9 @@ mod test {
         let mut rewrites = create_pl_rewrites();
 
         syg.increase_depth();
-        syg.equiv_reduc(&rewrites);
+        syg.equiv_reduc(&mut rewrites);
         syg.increase_depth();
-        syg.equiv_reduc(&rewrites);
+        syg.equiv_reduc(&mut rewrites);
         let classes = syg.extract_classes();
         for (_, (_, exp)) in classes {
             for n in exp.as_ref() {
@@ -799,9 +831,9 @@ mod test {
         let mut rewrites = create_pl_rewrites();
 
         syg.increase_depth();
-        syg.equiv_reduc(&rewrites);
+        syg.equiv_reduc(&mut rewrites);
         syg.increase_depth();
-        syg.equiv_reduc(&rewrites);
+        syg.equiv_reduc(&mut rewrites);
         let conjectures = syg.get_conjectures().into_iter().map(|x| (x.1, x.2)).collect_vec();
         println!("{}", conjectures.iter().map(|x| x.0.to_string() + " ?= " + &*x.1.to_string()).intersperse("\n".parse().unwrap()).collect::<String>());
         for c in conjectures.iter().map(|x| x.0.to_string() + " ?= " + &*x.1.to_string()) {
@@ -889,7 +921,7 @@ mod test {
         thesy.increase_depth();
         let mut filter_rules = create_filter_rules();
         filter_rules.extend(thesy.system_rws.iter().cloned());
-        thesy.equiv_reduc(&filter_rules);
+        thesy.equiv_reduc(&mut filter_rules);
         case_split_all(&filter_rules, &mut thesy.egraph, 4, 4);
         for (o, c1, c2, d) in thesy.get_conjectures() {
             // println!("{} = {}", c1.pretty(500), c2.pretty(500));

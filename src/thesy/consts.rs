@@ -6,13 +6,35 @@ use crate::eggstentions::conditions::{NonPatternCondition, AndCondition, Pattern
 use crate::thesy::case_split;
 
 pub(crate) fn bool_rws() -> Vec<Rewrite<SymbolLang, ()>> {
+    let or_multi_searcher = MultiEqSearcher::new(vec![
+        Pattern::from_str("true").unwrap(),
+        Pattern::from_str("(or ?x ?y)").unwrap(),
+    ]);
+    let or_implies_applier: Pattern<SymbolLang> = format!("({} true ?x ?y)", case_split::SPLITTER).parse().unwrap();
+    let or_implies = rewrite!("or_implies"; or_multi_searcher => or_implies_applier);
+
+    let and_multi_searcher = MultiEqSearcher::new(vec![
+        Pattern::from_str("true").unwrap(),
+        Pattern::from_str("(and ?x ?y)").unwrap(),
+    ]);
+
+    let and_implies = rewrite!("and_implies"; {and_multi_searcher.clone()} => "(= ?x true)");
+    let and_implies2 = rewrite!("and_implies2"; {and_multi_searcher} => "(= ?y true)");
+
     vec![
         rewrite!("or-true"; "(or true ?x)" => "true"),
         rewrite!("or-true2"; "(or ?x true)" => "true"),
         rewrite!("or-false"; "(or false ?x)" => "?x"),
+        rewrite!("or-false2"; "(or ?x false)" => "?x"),
+        or_implies,
+
         rewrite!("and-true"; "(and true ?x)" => "?x"),
+        rewrite!("and-true2"; "(and ?x true)" => "?x"),
         rewrite!("and-false"; "(and false ?x)" => "false"),
         rewrite!("and-false2"; "(and ?x false)" => "false"),
+        and_implies,
+        and_implies2,
+
         rewrite!("not-true"; "(not true)" => "false"),
         rewrite!("not-false"; "(not false)" => "true"),
     ]

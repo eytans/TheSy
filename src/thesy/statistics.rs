@@ -6,6 +6,7 @@ use egg::{Iteration, RecExpr, SymbolLang};
 global_counter!(MEASURE_COUNTER, usize, usize::default());
 
 #[derive(Clone, Copy, Debug)]
+#[cfg_attr(feature = "stats", derive(serde::Serialize, serde::Deserialize))]
 pub(crate) struct MeasureData {
     pub start: SystemTime,
     pub amount: usize,
@@ -40,7 +41,6 @@ pub struct Stats {
     start_total: SystemTime,
 }
 
-#[cfg_attr(feature = "stats", derive(serde::Serialize))]
 impl Stats {
     // TODO: Create key
     pub fn init_measure(&mut self, amount: impl Fn() -> usize) -> usize {
