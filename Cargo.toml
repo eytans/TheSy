@@ -21,6 +21,7 @@ z3-sys = "0.6.2"
 permutohedron = "0.2.4"
 lazy_static = "1.4.0"
 global_counter = "0.2.1"
+bimap = "0.5.3"
 
 serde = {version = "1.0.116", features = ["derive"], optional = true}
 serde_json = {version = "1.0.58", optional = true}
