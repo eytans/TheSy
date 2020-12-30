@@ -3,12 +3,12 @@ pub mod example_creator;
 pub mod thesy_parser;
 mod prover;
 pub mod statistics;
-mod case_split;
+pub mod case_split;
 mod consts;
 
 pub use {
     thesy::TheSy,
-    example_creator::examples,
+    example_creator::Examples,
     thesy_parser::parser,
     case_split::case_split_all,
 };

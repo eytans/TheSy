@@ -3,7 +3,7 @@ pub mod parser {
     use std::io::Read;
     use std::str::FromStr;
 
-    use egg::{Pattern, RecExpr, Rewrite, SymbolLang, Var, Condition, ConditionalApplier, Applier, Searcher, Language, PatternAst, ENodeOrVar, Id};
+    use egg::{Pattern, RecExpr, Rewrite, SymbolLang, Var, Condition, ConditionalApplier, Applier, Searcher, Language, PatternAst, ENodeOrVar, Id, EGraph, SearchMatches};
     use itertools::{Itertools};
     use symbolic_expressions::Sexp;
 
@@ -18,8 +18,10 @@ pub mod parser {
     use crate::eggstentions::expression_ops::{IntoTree, Tree};
     use crate::thesy::{case_split};
     use crate::tools::tools::combinations;
+    use crate::thesy::case_split::{CaseSplit, Split};
+    use std::rc::Rc;
 
-    #[derive(Default, Clone, Debug)]
+    #[derive(Default, Clone)]
     pub struct Definitions {
         /// All datatype definitions
         pub datatypes: Vec<DataType>,
@@ -29,6 +31,8 @@ pub mod parser {
         pub rws: Vec<Rewrite<SymbolLang, ()>>,
         /// Terms to prove, given as not forall, (vars - types, precondition, ex1, ex2)
         pub conjectures: Vec<(HashMap<RecExpr<SymbolLang>, RecExpr<SymbolLang>>, Option<RecExpr<SymbolLang>>, RecExpr<SymbolLang>, RecExpr<SymbolLang>)>,
+        /// Logic of when to apply case split
+        pub case_splitters: Vec<(Pattern<SymbolLang>, Var, Vec<Pattern<SymbolLang>>, Rc<dyn Condition<SymbolLang, ()>>)>,
     }
 
     impl Definitions {
@@ -48,6 +52,7 @@ pub mod parser {
                             rw1.name() != rw.name()
                         })
                 }).collect_vec());
+            self.case_splitters.extend(std::mem::take(&mut other.case_splitters));
         }
     }
 
@@ -215,9 +220,10 @@ pub mod parser {
             ).collect_vec()
         }
 
+        // Foreach function find if and when case split should be applied
         for f in &res.functions {
             let opt_pats = function_patterns.get_vec(f);
-            let rws = opt_pats.map(|pats| {
+            let case_splitters = opt_pats.map(|pats| {
                 let relevant_params = f.params.iter().enumerate().filter_map(|(i, t)| {
                     let param_datatype = res.datatypes.iter().find(|d|
                         d.name == t.into_tree().root().op.to_string());
@@ -278,7 +284,8 @@ pub mod parser {
                             } else {
                                 v
                             }).collect_vec();
-                    let mut res: Vec<Rewrite<SymbolLang, ()>> = vec![];
+                    // let mut res: Vec<Rewrite<SymbolLang, ()>> = vec![];
+                    let mut res: Vec<(Pattern<SymbolLang>, Var, Vec<Pattern<SymbolLang>>, Rc<dyn Condition<SymbolLang, ()>>)> = vec![];
                     for combs in combinations(patterns_and_vars.iter().cloned().map(|x| x.into_iter())) {
                         let mut nodes = vec![];
                         let children = combs.into_iter().map(|exp| {
@@ -300,7 +307,6 @@ pub mod parser {
                         } else {
                             None
                         };
-                        // TODO: Add datatype filter patterns as condition
                         let mut cond_texts = vec![];
                         let conds: Vec<Box<dyn Condition<SymbolLang, ()>>> = datatype.constructors.iter().map(|c| c.apply_params(
                             (0..c.params.len()).map(|i| RecExpr::from_str(&*("?param_".to_owned() + &*i.to_string())).unwrap()).collect_vec()
@@ -314,13 +320,21 @@ pub mod parser {
                         let rule_name = format!("{}_split_{}_{}", f.name, index, res.len());
                         println!("{} => {} if {}", searcher.pretty_string(), applier_text, cond_texts.join(" "));
                         let cond = AndCondition::new(conds);
-                        res.push(Rewrite::new(rule_name, searcher, DiffApplier::new(ConditionalApplier { applier, condition: cond })).unwrap());
-                        // rewrite!(rule_name; searcher => applier if cond)
+
+                        // For now pass the searcher, a condition and expressions for root and
+                        // splits. Should be (Searcher, root_var, children_expr, conditions)
+
+
+                        // res.push(Rewrite::new(rule_name, searcher, DiffApplier::new(ConditionalApplier { applier, condition: cond })).unwrap());
+                        res.push((searcher.clone(),
+                                  root_v_opt.unwrap(),
+                                  get_splitters(datatype, root_var).iter().map(|x| Pattern::from_str(x).unwrap()).collect_vec(),
+                                  Rc::new(cond)));
                     }
                     res
                 }).collect_vec()
             }).unwrap_or(vec![]);
-            res.rws.extend_from_slice(&rws);
+            res.case_splitters = case_splitters;
         }
 
         res

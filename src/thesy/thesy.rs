@@ -18,11 +18,12 @@ use crate::lang::*;
 use crate::thesy::prover::Prover;
 use crate::thesy::statistics::Stats;
 use crate::tools::tools::choose;
-use crate::thesy::case_split::case_split_all;
+use crate::thesy::case_split::{case_split_all, CaseSplit};
 use crate::thesy::{case_split, consts};
 use egg::test::run;
 use multimap::MultiMap;
 use bimap::BiHashMap;
+use crate::thesy::example_creator::Examples;
 
 /// Theory Synthesizer - Explores a given theory finding and proving new lemmas.
 pub struct TheSy {
@@ -64,6 +65,8 @@ pub struct TheSy {
     /// hooks passed to [runner]
     /// for more info check: [EGG] documentation
     equiv_reduc_hooks: Vec<Box<dyn FnMut(&mut Runner<SymbolLang,()>, &mut Vec<Rewrite<SymbolLang, ()>>) -> Result<(), String>>>,
+    /// Vars created for examples, used to reduce case split depth
+    examples: HashMap<DataType, Examples>,
 }
 
 /// *** TheSy Statics ***
@@ -96,11 +99,11 @@ impl TheSy {
         res
     }
 
-    pub fn new(datatype: DataType, examples: Vec<RecExpr<SymbolLang>>, dict: Vec<Function>) -> TheSy {
+    pub fn new(datatype: DataType, examples: Examples, dict: Vec<Function>) -> TheSy {
         Self::new_with_ph(vec![datatype.clone()], HashMap::from_iter(iter::once((datatype, examples))), dict, 2, None)
     }
 
-    pub fn new_with_ph(datatypes: Vec<DataType>, examples: HashMap<DataType, Vec<RecExpr<SymbolLang>>>, dict: Vec<Function>, ph_count: usize, lemmas: Option<Vec<(HashMap<RecExpr<SymbolLang>, RecExpr<SymbolLang>>, Option<RecExpr<SymbolLang>>, RecExpr<SymbolLang>, RecExpr<SymbolLang>)>>) -> TheSy {
+    pub fn new_with_ph(datatypes: Vec<DataType>, examples: HashMap<DataType, Examples>, dict: Vec<Function>, ph_count: usize, lemmas: Option<Vec<(HashMap<RecExpr<SymbolLang>, RecExpr<SymbolLang>>, Option<RecExpr<SymbolLang>>, RecExpr<SymbolLang>, RecExpr<SymbolLang>)>>) -> TheSy {
         let datatype_to_prover: HashMap<DataType, Prover> = datatypes.iter()
             .map(|d| (d.clone(), Prover::new(d.clone()))).collect();
         let (mut egraph, mut example_ids) = TheSy::create_graph_example_ids(&datatypes, &examples, &dict, ph_count);
@@ -159,10 +162,11 @@ impl TheSy {
             before_inference_hooks: Default::default(),
             after_inference_hooks: Default::default(),
             equiv_reduc_hooks: Default::default(),
+            examples
         }
     }
 
-    fn create_graph_example_ids(datatypes: &Vec<DataType>, examples: &HashMap<DataType, Vec<RecExpr<SymbolLang>>>, dict: &Vec<Function>, ph_count: usize) -> (EGraph<SymbolLang, ()>, HashMap<DataType, HashMap<Id, Vec<Id>, RandomState>, RandomState>) {
+    fn create_graph_example_ids(datatypes: &Vec<DataType>, examples: &HashMap<DataType, Examples>, dict: &Vec<Function>, ph_count: usize) -> (EGraph<SymbolLang, ()>, HashMap<DataType, HashMap<Id, Vec<Id>, RandomState>, RandomState>) {
         let mut egraph = EGraph::default();
         let mut example_ids = HashMap::new();
         for d in datatypes.iter() {
@@ -180,13 +184,13 @@ impl TheSy {
             let type_id = egraph.add_expr(&fun.get_type());
             egraph.add(SymbolLang::new("typed", vec![id, type_id]));
             for d in datatypes.iter() {
-                example_ids.get_mut(d).unwrap().insert(id, Vec::from_iter(iter::repeat(id).take(examples[d].len())));
+                example_ids.get_mut(d).unwrap().insert(id, Vec::from_iter(iter::repeat(id).take(examples[d].examples().len())));
             }
         }
 
         for d in datatypes.iter() {
             let ind_id = egraph.add_expr(&Self::get_ind_var(d).name.parse().unwrap());
-            let initial_example_ids = examples[d].iter()
+            let initial_example_ids = examples[d].examples().iter()
                 .map(|e| egraph.add_expr(e)).collect_vec();
             let chained = initial_example_ids.into_iter().collect_vec();
             example_ids.get_mut(d).unwrap().insert(ind_id, chained);
@@ -341,32 +345,25 @@ impl TheSy {
 
     fn equiv_reduc_depth(&mut self, rules: &mut Vec<Rewrite<SymbolLang, ()>>, depth: usize) -> StopReason {
         let mut runner = Runner::default().with_time_limit(Duration::from_secs(60 * 10)).with_node_limit(self.node_limit).with_egraph(std::mem::take(&mut self.egraph)).with_iter_limit(depth);
-        if !cfg!(feature = "split_clone") {
-            runner = runner.with_hook(|runner| {
-                for pat in case_split::split_patterns.iter() {
-                    for m in pat.search(&runner.egraph) {
-                        for s in m.substs {
-                            let colors = s.colors();
-
-                        }
-                    }
-                }
-                Ok(())
-            })
-        }
+        // TODO: Support colors
+        // if !cfg!(feature = "split_clone") {
+        //     runner = runner.with_hook(|runner| {
+        //         for pat in case_split::split_patterns.iter() {
+        //             for m in pat.search(&runner.egraph) {
+        //                 for s in m.substs {
+        //                     let colors = s.colors();
+        //
+        //                 }
+        //             }
+        //         }
+        //         Ok(())
+        //     })
+        // }
         runner = runner.run(&*rules);
         self.stats.update_rewrite_iters(std::mem::take(&mut runner.iterations));
         self.egraph = runner.egraph;
         self.egraph.rebuild();
-        // let true_pat: Pattern<SymbolLang> = "true".parse().unwrap();
-        // let false_pat: Pattern<SymbolLang> = "false".parse().unwrap();
-        // if true_pat.search(&self.egraph)[0].eclass == false_pat.search(&self.egraph)[0].eclass {
-        //     let class = self.egraph.classes().find(|c| c.id == true_pat.search(&self.egraph)[0].eclass);
-        //     for edge in class.unwrap().nodes.iter() {
-        //         println!("{}", edge.display_op());
-        //     }
-        //     panic!("Bad bad bad: true = false");
-        // }
+
 
         let reason = runner.stop_reason.unwrap();
         self.node_limit = match reason {
@@ -456,7 +453,7 @@ impl TheSy {
         res
     }
 
-    pub fn run(&mut self, rules: &mut Vec<Rewrite<SymbolLang, ()>>, max_depth: usize) -> Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, Rewrite<SymbolLang, ()>)> {
+    pub fn run(&mut self, rules: &mut Vec<Rewrite<SymbolLang, ()>>, mut case_spliter: Option<CaseSplit>, max_depth: usize) -> Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, Rewrite<SymbolLang, ()>)> {
         // TODO: dont allow rules like (take ?x ?y) => (take ?x (append ?y ?y))
         println!("Running TheSy on datatypes: {} dict: {}", self.datatypes.keys().map(|x| &x.name).join(" "), self.dict.iter().map(|x| &x.name).join(" "));
         self.stats.init_run();
@@ -478,9 +475,12 @@ impl TheSy {
             let stop_reason = self.equiv_reduc(rules);
 
             // True if goals were proven
-            if self.prove_case_split_rules(rules, &mut found_rules, new_rules_index) {
-                return found_rules;
+            if case_spliter.is_some() {
+                if self.prove_case_split_rules(case_spliter.as_mut().unwrap(), rules, &mut found_rules, new_rules_index) {
+                    return found_rules;
+                }
             }
+
 
             let mut conjectures = self.get_conjectures();
 
@@ -533,7 +533,7 @@ impl TheSy {
         found_rules
     }
 
-    fn prove_case_split_rules(&mut self, rules: &mut Vec<Rewrite<SymbolLang, ()>>, found_rules: &mut Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, Rewrite<SymbolLang, ()>)>, new_rules_index: usize) -> bool {
+    fn prove_case_split_rules(&mut self, case_splitter: &mut CaseSplit, rules: &mut Vec<Rewrite<SymbolLang, ()>>, found_rules: &mut Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, Rewrite<SymbolLang, ()>)>, new_rules_index: usize) -> bool {
         let measure_splits = if cfg!(feature = "stats") {
             let n = case_split::split_patterns.iter().map(|p|
                 p.search(&self.egraph)
@@ -550,7 +550,8 @@ impl TheSy {
         // TODO: case split + check all conjectures should be a function.
         // TODO: After finishing checking all conjectures in final depth (if a lemma was found) try case split again then finish.
         // TODO: can be a single loop with max depth
-        case_split_all(rules, &mut self.egraph, 2, 4);
+        case_splitter.case_split(&mut self.egraph, 2, rules, 4);
+        // case_split_all(rules, &mut self.egraph, 2, 4);
         self.stats.update_splits(measure_splits);
 
         let mut conjectures = self.get_conjectures();
@@ -670,7 +671,7 @@ mod test {
     fn create_list_sygue() -> TheSy {
         TheSy::new(
             create_list_type(),
-            vec!["Nil".parse().unwrap(), "(Cons x Nil)".parse().unwrap(), "(Cons y (Cons x Nil))".parse().unwrap()],
+            example_creator::new(create_list_type(), 2),
             vec![Function::new("snoc".to_string(), vec!["list".parse().unwrap(), "nat".parse().unwrap()], "list".parse().unwrap()),
                  Function::new("rev".to_string(), vec!["list".parse().unwrap()], "list".parse().unwrap()),
                  Function::new("app".to_string(), vec!["list".parse().unwrap(), "list".parse().unwrap()], "list".parse().unwrap())],

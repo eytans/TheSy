@@ -1,7 +1,8 @@
 #[macro_use(rewrite)]
 extern crate egg;
 
-#[macro_use] extern crate log;
+#[macro_use]
+extern crate log;
 extern crate simplelog;
 
 #[macro_use]
@@ -18,7 +19,7 @@ use std::process::exit;
 use std::time::SystemTime;
 
 use egg::*;
-use itertools::Itertools;
+use itertools::{Itertools, Either};
 use structopt::StructOpt;
 
 use crate::thesy::thesy::TheSy;
@@ -29,6 +30,7 @@ use crate::eggstentions::pretty_string::PrettyString;
 
 #[cfg(feature = "stats")]
 use serde_json;
+use crate::thesy::case_split::{CaseSplit, Split};
 
 mod eggstentions;
 mod tools;
@@ -49,10 +51,10 @@ struct CliOpt {
     /// Previous results to read
     dependencies: Vec<String>,
     /// Run as prover or ignore goals
-    #[structopt(name = "proof mode", short="p", long="prove")]
+    #[structopt(name = "proof mode", short = "p", long = "prove")]
     proof_mode: Option<bool>,
-    #[structopt(name = "check equivalence", short="c", long="check-equiv")]
-    check_equiv: bool
+    #[structopt(name = "check equivalence", short = "c", long = "check-equiv")]
+    check_equiv: bool,
 }
 
 impl From<&CliOpt> for TheSyConfig {
@@ -62,12 +64,12 @@ impl From<&CliOpt> for TheSyConfig {
             opts.ph_count,
             vec![],
             opts.path.with_extension("res.th"),
-            opts.proof_mode.unwrap_or(true)
+            opts.proof_mode.unwrap_or(true),
         )
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 struct TheSyConfig {
     definitions: Definitions,
     ph_count: usize,
@@ -88,7 +90,7 @@ impl TheSyConfig {
             dep_results: vec![],
             output,
             prerun: false,
-            proof_mode
+            proof_mode,
         }
         // prerun: func_len > 2}
     }
@@ -119,7 +121,8 @@ impl TheSyConfig {
                 let funcs = vec![f.clone()];
                 new_conf.definitions.functions = funcs;
                 let mut thesy = TheSy::from(&new_conf);
-                thesy.run(&mut rules, max_depth.unwrap_or(2));
+                let case_split = new_conf.translate_splitters();
+                thesy.run(&mut rules, Some(case_split), max_depth.unwrap_or(2));
             }
             for couple in choose(&self.definitions.functions[..], 2) {
                 println!("prerun {}", couple.iter().map(|x| &x.name).join(" "));
@@ -127,11 +130,13 @@ impl TheSyConfig {
                 let funcs = couple.into_iter().cloned().collect_vec();
                 new_conf.definitions.functions = funcs;
                 let mut thesy = TheSy::from(&new_conf);
-                thesy.run(&mut rules, max_depth.unwrap_or(2));
+                let case_split = new_conf.translate_splitters();
+                thesy.run(&mut rules, Some(case_split), max_depth.unwrap_or(2));
             }
         }
         let mut thesy = TheSy::from(self.borrow());
-        let results = thesy.run(&mut rules, max_depth.unwrap_or(2));
+        let case_split = self.translate_splitters();
+        let results = thesy.run(&mut rules, Some(case_split), max_depth.unwrap_or(2));
         let new_rules_text = results.iter()
             .map(|(precond, searcher, applier, rw)|
                 if precond.is_some() {
@@ -144,6 +149,40 @@ impl TheSyConfig {
         File::create(&self.output).unwrap().write_all(new_rules_text.as_bytes()).unwrap();
         (thesy, rules)
     }
+
+    pub fn translate_splitters(&self) -> CaseSplit {
+        CaseSplit::new(self.definitions.case_splitters.iter().cloned()
+            .map(|(searcher, root_var, split_exprs, conditions)| {
+                let searcher_s: Box<dyn Searcher<SymbolLang, ()>> = Box::new(searcher.clone());
+                let applier: Box<dyn FnMut(&mut EGraph<SymbolLang, ()>, SearchMatches) -> Vec<Split>> =
+                    Box::new(move |graph: &mut EGraph<SymbolLang, ()>, m: SearchMatches| {
+                        m.substs.iter().map(|s| Split::new(
+                            *s.get(root_var).unwrap(),
+                            split_exprs.iter().map(|p| {
+                                let rec_expr = p.ast.as_ref().iter().map(|node| match node {
+                                    ENodeOrVar::ENode(n) => { itertools::Either::Left(n) }
+                                    ENodeOrVar::Var(v) => { itertools::Either::Right(*s.get(*v).unwrap()) }
+                                });
+                                let mut res = vec![];
+                                for n in rec_expr {
+                                    match n {
+                                        Either::Left(n) => {
+                                            let mut node = n.clone();
+                                            node.update_children(|c| res[usize::from(c)]);
+                                            res.push(graph.add(node));
+                                        }
+                                        Either::Right(id) => {
+                                            res.push(id);
+                                        }
+                                    }
+                                }
+                                *res.last().unwrap()
+                            }).collect_vec(),
+                        )).collect_vec()
+                    });
+                    (searcher_s, applier)
+            }).collect_vec())
+    }
 }
 
 impl From<&TheSyConfig> for TheSy {
@@ -153,18 +192,19 @@ impl From<&TheSyConfig> for TheSy {
             dict.push(c.clone());
         }
         let examples = conf.definitions.datatypes.iter()
-            .map(|d| (d.clone(), example_creator::examples(d, 2)))
+            .map(|d| (d.clone(), example_creator::Examples::new(d, 2)))
             .collect();
         let conjectures = if conf.definitions.conjectures.is_empty() {
             None
         } else {
             Some(conf.definitions.conjectures.clone())
         };
+
         TheSy::new_with_ph(conf.definitions.datatypes.clone(),
                            examples,
                            dict,
                            conf.ph_count,
-                           if conf.proof_mode {conjectures} else {None})
+                           if conf.proof_mode { conjectures } else { None })
     }
 }
 
