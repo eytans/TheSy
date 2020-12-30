@@ -60,8 +60,6 @@ impl From<Rewrite<SymbolLang, ()>> for RewriteInfo {
         unimplemented!()
     }
 }
-// The standard case of SenderReceiverWrapper
-pub type MsgSenderReceiverWrapper = SenderReceiverWrapper<Box<Message>,Box<Message>>;
 
 impl From<RewriteInfo> for Rewrite<SymbolLang, ()> {
     fn from(_: RewriteInfo) -> Self {
