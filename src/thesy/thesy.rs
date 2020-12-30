@@ -25,14 +25,16 @@ use std::process::exit;
 use std::cmp::Ordering;
 use crate::eggstentions::pretty_string::PrettyString;
 // for parallel run of TheSy
-use std::sync::mpsc::{Sender, Receiver};
+//use std::sync::mpsc::{Sender, Receiver};
+use spmc;
 use std::sync::mpsc;
 use std::thread;
 use closure::closure;
 use std::thread::JoinHandle;
 use crate::thesy::thesy::Message::IdRulePair;
 use crate::utils;
-use crate::thesy::parallel::{Message, HookData, SenderReceiverWrapper, MsgSenderReceiverWrapper};
+use crate::thesy::parallel::{Message, HookData, SenderReceiverWrapper, MsgSenderReceiverWrapper, insert_parallel_hooks};
+use std::borrow::Borrow;
 
 /// Theory Synthesizer - Explores a given theory finding and proving new lemmas.
 pub struct TheSy {
@@ -887,12 +889,40 @@ impl TheSy {
 
     // TODO: check if we want to send the rules in their form in found_rules or in rules
     /// calls every hook in [after_inference_hooks]
-    fn call_after_inference_hooks(&mut self, new_rules: &[Rewrite<SymbolLang, ()>]) {
-        let hook_data = HookData{new_rules};                        // TODO: maybe use a constant reference to hook_data, so we don't need to make it every time we call this function
-        self.after_inference_hooks.iter().for_each(|hook| {hook(self, &hook_data);});
+    fn call_after_inference_hooks(&mut self, rules: &mut Vec<Rewrite<SymbolLang, ()>>) {
+        //let new_rules = new_rules.into_iter();
+        //let self.hook_data = HookData{new_rules};                        // TODO: maybe use a constant reference to hook_data, so we don't need to make it every time we call this function
+        self.after_inference_hooks.iter().for_each(|hook| {hook(self, rules);});
     }
 
-    fn run_instance_parallel(&mut self, rules: &Vec<Rewrite<SymbolLang, ()>>, communicator: Option<MsgSenderReceiverWrapper>, id: usize) -> Vec<Rewrite<SymbolLang,()>>{
+    pub fn with_before_inference_hook<F>(mut self, hook: F) -> Self
+    where
+        F: FnMut(&mut Self, &mut Vec<Rewrite<SymbolLang, ()>>) -> Result<(), String> + 'static
+    {
+        self.before_inference_hooks.push(Box::new(hook));
+        self
+    }
+
+    pub fn with_after_inference_hook<F>(mut self, hook: F) -> Self
+    where
+        F: FnMut(&mut Self, &mut Vec<Rewrite<SymbolLang, ()>>) -> Result<(), String> + 'static
+    {
+        self.after_inference_hooks.push(Box::new(hook));
+        self
+    }
+
+    pub fn with_equiv_reduc_hook<F>(mut self, hook: F) -> Self
+    where
+        F: Fn(&mut Runner<SymbolLang,()>) -> Result<(), String> + 'static,                          // TODO: change to FnMut when changing rules
+    {
+        self.equiv_reduc_hooks.push(Box::new(hook));
+        self
+    }
+
+    fn run_instance_parallel(&mut self, rules: &Vec<Rewrite<SymbolLang, ()>>,
+                             // communicator: Option<MsgSenderReceiverWrapper>,
+                             id: usize,
+                             max_depth: usize) -> Vec<Rewrite<SymbolLang,()>>{
         // fn try_recv_rules(rc: &Receiver<Box<Message>>) -> Vec<Box<Rewrite<SymbolLang, ()>>>{                      // TODO: if not working with borrowed rc, then pass ownership and then return it here
         //     let mut rule_vec = vec![];
         //     loop{
@@ -934,11 +964,11 @@ impl TheSy {
             // });
 
             // sending all new rules to other threads
-            self.call_after_inference_hooks(&rules[new_rules_index..]);
-            return found_rules.map(|r|{r.3}).collect_vec();
+            self.call_after_inference_hooks(&mut rules);
+            return found_rules.into_iter().map(|r|{r.3}).collect_vec();
         }
         // prove goals might have found some rules, so send them
-        self.call_after_inference_hooks(&rules[new_rules_index..]);
+        self.call_after_inference_hooks(&mut rules);
 
         for depth in 0..max_depth {
             // println!("Starting depth {}", depth + 1);
@@ -949,7 +979,7 @@ impl TheSy {
             rules_count_after_hooks = rules.len();
 
             self.increase_depth();
-            let stop_reason = self.equiv_reduc(&rules[..]);
+            let stop_reason = self.equiv_reduc_instance(&mut rules);
             self.update_node_limit(stop_reason);
 
             let start = TheSy::stats_get_time();
@@ -1041,7 +1071,6 @@ impl TheSy {
                 //     tx.send(Box::new(IdRulePair(id, Box::new(rule.3.clone()))));
                 // }
 
-                self.call_after_inference_hooks(new_rules.map(|r|r.3).collect_slice());
                 // original code
                 changed = true;
                 self.stats_update_proved(&ex1, &ex2, start);
@@ -1052,7 +1081,7 @@ impl TheSy {
                     // inserting like this so new rule will apply before running into node limit.
                     rules.insert(new_rules_index, r.3);
                 }
-
+                self.call_after_inference_hooks(&mut rules);
                 rules_count_before_hooks = rules.len();
                 self.call_before_inference_hooks(&mut rules);
                 rules_count_after_hooks = rules.len();
@@ -1065,7 +1094,7 @@ impl TheSy {
 
             if changed {
                 let reduc_depth = 3;
-                let stop_reason = self.equiv_reduc_depth(&rules[..], reduc_depth);
+                let stop_reason = self.equiv_reduc_depth_instance(&mut rules, reduc_depth);
                 self.update_node_limit(stop_reason);
             }
 
@@ -1102,7 +1131,7 @@ impl TheSy {
                     // for rule in new_rules.unwrap(){
                     //     tx.send(Box::new(IdRulePair(id, Box::new(rule.3.clone()))));
                     // }
-                    self.call_after_inference_hooks(new_rules.map(|r|r.3).collect_slice());
+
 
                     // original code
                     for r in new_rules.unwrap() {
@@ -1110,17 +1139,18 @@ impl TheSy {
                         // inserting like this so new rule will apply before running into node limit.
                         rules.insert(new_rules_index, r.3);
                     }
+                    self.call_after_inference_hooks(&mut rules);
                     rules_count_before_hooks = rules.len();
                     self.call_before_inference_hooks(&mut rules);
                     rules_count_after_hooks = rules.len();
                     if self.prove_goals(&mut rules, &mut found_rules, new_rules_index, start_total) {
                         // TODO: send new rules and exit
-                        self.call_after_inference_hooks(&rules[rules_count_before_hooks..]);
+                        self.call_after_inference_hooks(&mut rules);
                         return rules;
                     }
-                    self.call_after_inference_hooks(&rules[rules_count_before_hooks..]);
+                    self.call_after_inference_hooks(&mut rules);
                     let reduc_depth = 3;
-                    let stop_reason = self.equiv_reduc_depth(&rules[..], reduc_depth);
+                    let stop_reason = self.equiv_reduc_depth_instance(&mut rules, reduc_depth);
                     self.update_node_limit(stop_reason);
                     conjectures = self.get_conjectures();
                     println!();
@@ -1138,23 +1168,24 @@ impl TheSy {
         rules
     }
 
-    pub fn equiv_reduc_instance(&mut self, rules: &[Rewrite<SymbolLang, ()>]) -> StopReason {
+    pub fn equiv_reduc_instance(&mut self, rules: &mut Vec<Rewrite<SymbolLang, ()>>) -> StopReason {
         self.equiv_reduc_depth_instance(rules, self.iter_limit)
     }
 
-    fn equiv_reduc_depth_instance(&mut self, rules: &[Rewrite<SymbolLang, ()>], depth: usize) -> StopReason {
+    fn equiv_reduc_depth_instance(&mut self, rules: &mut Vec<Rewrite<SymbolLang, ()>>, depth: usize) -> StopReason {
         // TODO: for parallel running, add .with_hook() to runner instantiation, and make it get and send all new rules
-        let mut runner = Runner::default().with_time_limit(Duration::from_secs(60 * 10))
+        let mut runner = Runner::default()
+            .with_time_limit(Duration::from_secs(60 * 10))
             .with_node_limit(self.node_limit)
             .with_egraph(std::mem::take(&mut self.egraph))
-            .with_iter_limit(depth)
-            .with_hook(|runner|{
-                // TODO: make the code here send and receive new rules, maybe save previous length of thread rules and when reaching here then send the rest
-                // TODO: find a way to compare expressions
-                runner.rules = runner.rules;
-                Ok(())
-            });
-        runner = runner.run(rules);
+            .with_iter_limit(depth);
+
+        runner = self.equiv_reduc_hooks.iter()
+            .fold(runner, |r,h|
+                { r.with_hook(|r| h(r)) }
+            );
+
+        runner.run(&*rules);
         if cfg!(feature = "stats") {
             self.stats.as_mut().unwrap().equiv_red_iterations.push(std::mem::take(&mut runner.iterations));
         }
