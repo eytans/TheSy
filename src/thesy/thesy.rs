@@ -1233,10 +1233,10 @@ impl TheSy {
             Active(T),
             Inactive(T)
         }
-        struct ThreadManager<ST, RT, HT>{
+        struct ThreadManager<ST: Send, HT>{
             id: Option<usize>,
             // receiver: Receiver<RT>,
-            sender: Sender<ST>,
+            sender: spmc::Sender<ST>,
             handler: JoinHandle<HT>,
         }
 
@@ -1245,7 +1245,6 @@ impl TheSy {
             let rules_per_instance : usize = rules_count / sub_graphs_count;
             rules.windows(rules_per_instance + 1)
         }
-
         let mut thread_managers = vec![];
         let mut found_rules = vec![];
         let mut active_ids = HashSet::new();
