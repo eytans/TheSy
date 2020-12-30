@@ -66,15 +66,17 @@ pub struct TheSy {
     pub stats: Option<Stats>,
     /// the hooks are used after every step of TheSy which could expand the rules set
     /// currently used to support parallel running
-    after_inference_hooks: Vec<Box<dyn FnMut(&mut Self, &HookData, &mut MsgSenderReceiverWrapper) -> Result<(), String>>>,
+    after_inference_hooks: Vec<Box<dyn FnMut(&mut Self, &mut Vec<Rewrite<SymbolLang, ()>>) -> Result<(), String>>>,
     //after_inference_hooks: Vec<Box<dyn FnMut(&mut Self, &Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, Rewrite<SymbolLang, ()>)>) -> Result<(), String>>>,
 
     /// the hooks are used before every step of TheSy which could expand the rules set
     /// currently used to support parallel running
-    before_inference_hooks: Vec<Box<dyn FnMut(&mut Self, &mut Vec<Rewrite<SymbolLang, ()>>, &mut MsgSenderReceiverWrapper) -> Result<(), String>>>,
+    before_inference_hooks: Vec<Box<dyn FnMut(&mut Self, &mut Vec<Rewrite<SymbolLang, ()>>) -> Result<(), String>>>,
     /// hooks passed to [runner]
     /// for more info check: [EGG] documentation
-    equiv_reduc_hooks: Vec<Box<dyn FnMut(&mut Runner<SymbolLang,()>) -> Result<(), String>>>,
+    equiv_reduc_hooks: Vec<Box<dyn FnMut(&mut egg::Runner<SymbolLang,()>) -> Result<(), String>>>,     // TODO: change to FnMut when changing rules
+    // /// a workaround in order to pass and receive data from hooks
+    // pub hook_data: Option<HookData>,
 }
 // TODO:
 //      1. Finish writing hooks at [set_parallel_run_hooks]
