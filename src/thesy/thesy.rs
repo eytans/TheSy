@@ -53,7 +53,7 @@ pub struct TheSy {
     /// If stats enable contains object collecting runtime data on thesy otherwise None.
     pub stats: Stats,
     /// Assumptions to colors
-    assumptions: BiHashMap<Vec<Id>, ColorId>,
+    // assumptions: BiHashMap<Vec<Id>, ColorId>,
     /// the hooks are used after every step of TheSy which could expand the rules set
     /// currently used to support parallel running
     after_inference_hooks: Vec<Box<dyn FnMut(&mut Self, &mut Vec<Rewrite<SymbolLang, ()>>) -> Result<(), String>>>,
@@ -155,7 +155,7 @@ impl TheSy {
             iter_limit: 12,
             goals: conjectures,
             stats,
-            assumptions: Default::default(),
+            // assumptions: Default::default(),
             before_inference_hooks: Default::default(),
             after_inference_hooks: Default::default(),
             equiv_reduc_hooks: Default::default(),
@@ -342,17 +342,17 @@ impl TheSy {
     fn equiv_reduc_depth(&mut self, rules: &mut Vec<Rewrite<SymbolLang, ()>>, depth: usize) -> StopReason {
         let mut runner = Runner::default().with_time_limit(Duration::from_secs(60 * 10)).with_node_limit(self.node_limit).with_egraph(std::mem::take(&mut self.egraph)).with_iter_limit(depth);
         if !cfg!(feature = "split_clone") {
-            runner = runner.with_hook(|runner| {
-                for pat in case_split::split_patterns.iter() {
-                    for m in pat.search(&runner.egraph) {
-                        for s in m.substs {
-                            let colors = s.colors();
-
-                        }
-                    }
-                }
-                Ok(())
-            })
+            // runner = runner.with_hook(|runner| {
+            //     for pat in case_split::split_patterns.iter() {
+            //         for m in pat.search(&runner.egraph) {
+            //             for s in m.substs {
+            //                 // let colors = s.colors();
+            //
+            //             }
+            //         }
+            //     }
+            //     Ok(())
+            // })
         }
         runner = runner.run(&*rules);
         self.stats.update_rewrite_iters(std::mem::take(&mut runner.iterations));
