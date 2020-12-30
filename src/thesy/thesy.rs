@@ -1253,30 +1253,26 @@ impl TheSy {
         let rules_count = rules.len();
         let main_run_rules;
         //let stop_reason;
-        let (thread_tx, main_rc) = mscp: channel();
+        let (thread_tx, main_rc):(mpsc::Sender<Box<Message>>,mpsc::Receiver<Box<Message>>) = mpsc::channel();             // multiple senders will serve us when sending rules to main
         // id=0 is the main run of TheSy
         let windows = get_rules_slice(rules, num_processes-1);
-        debug_assert_eq!(windows.len(), num_processes);
+        // debug_assert_eq!(windows.len(), num_processes);
         for (window, i) in windows.zip(0..num_processes) {
-            let (main_tx, thread_rc) = mspc::channel();
+            let (main_tx, thread_rc):(spmc::Sender<Box<Message>>,spmc::Receiver<Box<Message>>) = spmc::channel();         // multiple receivers will serve us when receiving new rules from main
             let thread_tx_clone = thread_tx.clone();
+            let thesy_ref = self;
+            let f = closure!(move thread_rc, move thread_tx_clone, move thesy_ref, ref window ,clone max_depth, clone i,||{
+                    let mut thesy_sub_graph:TheSy = self.clone();
+                    //let run_communicator = MsgSenderReceiverWrapper{tx: thread_tx_clone, rc: thread_rc};
+                    let mut rules_vec = window.to_vec();
+                    insert_parallel_hooks(&mut thesy_sub_graph, thread_rc, thread_tx_clone, i);
+                    thesy_sub_graph.run_instance_parallel(&rules_vec /*, Some(run_communicator)*/, i, max_depth)});
             thread_managers.push(Some(ThreadManager{
-                        id: Some(i),
-                        // receiver: main_rc,
-                        sender: main_tx,
-                        handler: std::thread::spawn(closure!(move thread_rc, move thread_tx_clone, ref self, ref ,max_depth, ref i)||{
-                            // TODO: maybe the use of threads here is not good, because all runs share the same memory, which means the main run might suffer from this
-                            // Ask Eytan if a fork is a better solution in this case
-                            let mut thesy_sub_graph:TheSy = self.clone();
-                            // let rules_per_instance : usize = rules_count / num_processes;
-                            // let start_idx = i*rules_per_instance;
-                            // let end_idx = std::cmp::min((i+1)*rules_per_instance, rules_count);
-                            let run_communicator = MsgSenderReceiverWrapper{tx: thread_tx_clone, rc: thread_rc};
-                            let mut rules_vec = window.to_vec();
-                            thesy_sub_graph.run_instance_parallel(&rules_vec, Some(run_communicator), i);
-
-                        })
-                    }));
+                id: Some(i),
+                // receiver: main_rc,
+                sender: main_tx,
+                handler: std::thread::spawn(f),
+            }));
             active_ids.insert(i);
         }
 
@@ -1285,54 +1281,80 @@ impl TheSy {
         }
         loop{
             let mut received_rules = vec![];
-            let last_received = main_rc.recv();
+            let first_msg = main_rc.recv();
             let mut new_inactive_ids = HashSet::new();
+            match first_msg{
+                Err(e) => {
+                    // TODO: get rules from main run and exit
+                    utils::test_print(&"Shouldn't reach here".to_string());
+                    main_run_rules = found_rules.into_iter().map(|boxed_rule|{*boxed_rule}).collect_vec();;
+                    return main_run_rules;
+                }
+                Ok(msg) =>{
+                    match *msg{
+                        Message::IdRulePair(id, rule) => {
+                            // TODO: check if rule has already been sent
+                            received_rules.push((id, rule));
+                        },
+                        Message::Done(id) => {new_inactive_ids.insert(id);},         // TODO: if id=0 (main TheSy run) then get rules from main run and exit
+                        _ => {warn!("Shouldn't reach here! Sent a non identified message to server!")}
+                    }
+                }
+            }
             loop{
+                let last_received = main_rc.try_recv();                      // if there are multiple rules sent then we want to get them together
                 match last_received{
-                    Err(e) => {
+                    Err(e) =>{
                         match e{
-                            mpsc::Disconnected => {
-                                // TODO: get rules from main run and exit
-                                test_print(&"Shouldn't reach here".to_string());
-                                main_run_rules = found_rules.iter().map_into(|boxed_rule|{*boxed_rule}).collect_vec();;
+                            mpsc::TryRecvError::Empty =>{
+                                break;
+                            },
+                            mpsc::TryRecvError::Disconnected =>{
+                                utils::test_print(&"Shouldn't reach here".to_string());
+                                main_run_rules = found_rules.iter().map_into(|rules_string|{
+                                    // TODO: if necessary, add conversion from string to rules here
+                                }).collect_vec();;
                                 return main_run_rules;
                             },
-                            mpsc::Empty => {break;},
                         }
                     }
-                    Ok(msg) =>{
-                        match msg{
+
+                    Ok(msg) => {
+                        match *msg{
                             Message::IdRulePair(id, rule) => {received_rules.push((id, rule));},
                             Message::Done(id) => {new_inactive_ids.insert(id);},         // TODO: if id=0 (main TheSy run) then get rules from main run and exit
+                            _ => {warn!("shouldn't reach here! probably sent a rule without an id to communicator");}
                         }
                     }
                 }
-                let last_message = main_rc.try_recv();                      // if there are multiple rules sent then we want to get them together
             }
 
-            active_ids = active_ids.difference(&new_inactive_ids).collect();
-            inactive_ids = inactive_ids.union(&new_inactive_ids).collect();
-            new_rules.iter().for_each(|(i,boxed_rule)|{
-                active_ids.iter().filter(|j|{i!=j}).for_each(|i|{
-                    thread_managers[i].unwrap().sender.send(&boxed_rule);
+            active_ids = HashSet::from_iter(active_ids.difference(&new_inactive_ids).collect());
+            inactive_ids = HashSet::from_iter(inactive_ids.union(&new_inactive_ids).collect());
+            let new_rules = received_rules.iter().filter(|(id, rw_info)| {
+                // TODO: filter all rules in found_rules from received_rules and this will be new_rules
+                //       meanwhile, we return true
+                true
+            }).collect_vec();
+            new_rules.iter().for_each(|(i,rw_info)|{
+                active_ids.iter().filter(|j|{*i!=**j}).for_each(|i|{
+                    thread_managers[*i].unwrap().sender.send(Box::new(Message::Rule((*rw_info).clone())));
                 });
             });
-            found_rules.append(&mut new_rules);
+            // TODO: check if added rules already in found_rules
+            found_rules.extend_from_slice(new_rules.iter().map(|(id,rule)|rule).collect());
             for i in new_inactive_ids{
-                // TODO: what to do when one instance of TheSy fails?
-                //      gather all found rules by all instances of Thesy and return them
-                //      main thread should probably support getting and passing found rules from each thread to all threads
-
                 let return_value = thread_managers[i].unwrap().handler.join();
                 thread_managers[i] = None;                                                          // should drop everything
                 active_threads = active_threads - 1;
-                if i==0 {main_run_rules = return_value.iter().map_into(|boxed_rule|{*boxed_rule}).collect_vec();}
+                if i==0 {main_run_rules = return_value.unwrap();}                                   // TODO: there is a problem here, we are returning only the
+                                                                                                    //  the rules and not the found_rules format, find a solution for this
             }
 
             if active_threads == 0{break;};
 
         }
-        main_run_rules.iter().map_into(|boxed_rule|{*boxed_rule}).collect_vec()
+        main_run_rules
     }
 
 }
