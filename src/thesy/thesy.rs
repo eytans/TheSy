@@ -81,8 +81,13 @@ pub struct TheSy {
 // TODO:
 //      1. Finish writing hooks at [set_parallel_run_hooks]
 //      2. Find a way to compare equality of expressions
-//      3. Find a solution for the equivalence reduction hooks, which are borrowing the mut permission for tx (and overall for run_communicator)
+//      3. Find a solution for the equivalence reduction hooks, which are borrowing the mut permission for tx (and overall for run_communicator):
+//          The answer for this is using spmc channel instead of mpsc
 //      4. Finish writing everything else (if there is something I'm missing) and test!
+//      5. When parallel running, we can currently return (and we are returning) only the rules, and not the format as in found_rules. I need to change this for compatibility reasons
+//      6. implement searcher() and applier() functions which return the [Searcher] and [Applier] patterns in [egg::Pattern].
+//      7. add clone() implementation to TheSy
+//      8. Some compilation errors, need to check those
 /// *** Thesy ***
 impl TheSy {
     /// datatype: a DataType variable as used in eggstentions
@@ -945,8 +950,6 @@ impl TheSy {
         // }
 
         // TODO: rewrite all additions to code as functions and prevent as much code duplication as possible.
-        // TODO: OMER after finishing here check with Eytan if it is OK to change run to prevent code duplication
-
         // TODO: OMER Read on the way enums and Send types are passed, not sure Message should be boxed and will make the code more readable
 
         let mut rules = rules.clone();
@@ -1211,20 +1214,29 @@ impl TheSy {
     ///     2. send new rules to main thread hook
     ///     3. send and receive new rules during equivalence reduction
     // TODO: currently communication_wrapper is deleted when returning from this function, find a way to keep it "alive" during all run
-    fn set_parallel_run_hooks(&mut self, tx_thread: Sender<Box<Message>>, rc_thread: Receiver<Box<Message>>) -> MsgSenderReceiverWrapper{
-        communication_wrapper = MsgSenderReceiverWrapper{tx: tx_thread, rc: rc_thread};
-        self.before_inference_hooks.push(Box::new(|thesy, rules|{
-
-        }));
-
-        self.after_inference_hooks.push(Box::new(|thesy, new_rules|{}));
-
-        self.equiv_reduc_hooks.push(Box::new(|runner|{}));
-    }
+    // fn set_parallel_run_hooks(&mut self, tx_thread: mpsc::Sender<Box<Message>>, rc_thread: mpsc::Receiver<Box<Message>>) -> MsgSenderReceiverWrapper{
+    //     communication_wrapper = MsgSenderReceiverWrapper{tx: tx_thread, rc: rc_thread};
+    //     self.before_inference_hooks.push(Box::new(|thesy, rules|{
+    //
+    //     }));
+    //
+    //     self.after_inference_hooks.push(Box::new(|thesy, new_rules|{}));
+    //
+    //     self.equiv_reduc_hooks.push(Box::new(|runner|{}));
+    // }
 
     pub fn run_parallel(&mut self, rules: &mut Vec<Rewrite<SymbolLang, ()>>, max_depth: usize, num_processes: usize) -> Vec<(Option<Pattern<SymbolLang>>,
                                                                                                                              Pattern<SymbolLang>, Pattern<SymbolLang>,
                                                                                                                              Rewrite<SymbolLang, ()>)>{
+        // TODO:
+        //      1. Make the code compile. It currently doesn't compile because I'm trying to send rules through channels which is not safe,
+        //          plus, it is incorrect to add these rules because they have no meaning in other thesy subgraphs. The right way to do it is
+        //          to convert them to string and send it over the channels.
+        //      2. Write and test the program
+        //      3. Currently, when receiving rules they are not checked if they already exist in the subgraph, they are added anyway.
+        //          Eytan said he has an implementation of that already, so just ask him about it and use it to check if some rules were already sent and if some rules already exist
+        //      4. Merge all these additions into the new TheSy implementation, which is distributed across different files
+        //      5. Change runner so we can update rules using hooks
         enum BiUnion<T,F>{
             Type1(T),
             Type2(F)
