@@ -1,6 +1,6 @@
 /// a macro used for debugging
 /// prints only when running tests
-#[proc_macro]
+// #[proc_macro]
 pub(crate) fn test_print(str: &String){
     if cfg!(test){
         println!("{}", str);
