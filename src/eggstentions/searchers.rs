@@ -11,19 +11,20 @@ pub mod multisearcher {
     use std::fmt::Debug;
     use smallvec::alloc::fmt::Formatter;
     use std::marker::PhantomData;
+    use std::rc::Rc;
 
     pub struct EitherSearcher<L: Language, N: Analysis<L>, A: Searcher<L, N> + Debug, B: Searcher<L, N> + Debug> {
         node: Either<A, B>,
-        phantom: PhantomData<(L, N)>
+        phantom: PhantomData<(L, N)>,
     }
 
     impl<L: Language, N: Analysis<L>, A: Searcher<L, N> + Debug, B: Searcher<L, N> + Debug> EitherSearcher<L, N, A, B> {
         pub fn left(a: A) -> EitherSearcher<L, N, A, B> {
-            EitherSearcher{node: Either::Left(a), phantom: PhantomData::default()}
+            EitherSearcher { node: Either::Left(a), phantom: PhantomData::default() }
         }
 
         pub fn right(b: B) -> EitherSearcher<L, N, A, B> {
-            EitherSearcher{node: Either::Right(b), phantom: PhantomData::default()}
+            EitherSearcher { node: Either::Right(b), phantom: PhantomData::default() }
         }
     }
 
@@ -83,8 +84,7 @@ pub mod multisearcher {
         let common_vars = patterns.iter().flat_map(|p| p.vars())
             .grouped(|v| v.clone()).iter()
             .filter_map(|(k, v)|
-                if v.len() <= 1 {None}
-                else {Some((*k, v.len()))})
+                if v.len() <= 1 { None } else { Some((*k, v.len())) })
             .collect::<HashMap<Var, usize>>();
 
         fn count_commons(p: &impl Searcher<SymbolLang, ()>, common_vars: &HashMap<Var, usize>) -> usize {
@@ -140,7 +140,7 @@ pub mod multisearcher {
     }
 
     fn group_by_common_vars(mut search_results: Vec<&mut SearchMatches>, common_vars: &HashMap<Var, usize>)
-      -> Vec<HashMap<Vec<Option<Id>>, Vec<Subst>>> {
+                            -> Vec<HashMap<Vec<Option<Id>>, Vec<Subst>>> {
         let mut by_vars: Vec<HashMap<Vec<Option<Id>>, Vec<Subst>>> = Vec::new();
         for matches in search_results.iter_mut() {
             let cur_map: HashMap<Vec<Option<Id>>, Vec<Subst>> = {
@@ -163,7 +163,7 @@ pub mod multisearcher {
     impl<A: Searcher<SymbolLang, ()>> MultiEqSearcher<A> {
         pub(crate) fn new(mut patterns: Vec<A>) -> MultiEqSearcher<A> {
             let common_vars = get_common_vars(&mut patterns);
-            MultiEqSearcher{patterns, common_vars}
+            MultiEqSearcher { patterns, common_vars }
         }
     }
 
@@ -212,8 +212,7 @@ pub mod multisearcher {
 
                 let initial_limits = (0..self.common_vars.len()).map(|_| &None).collect();
                 let res = aggregate_substs(&by_vars[..], initial_limits, &self.vars());
-                if res.is_empty() {None}
-                else {Some(SearchMatches { substs: res, eclass })}
+                if res.is_empty() { None } else { Some(SearchMatches { substs: res, eclass }) }
             }).collect()
         }
 
@@ -257,7 +256,21 @@ pub mod multisearcher {
     impl<A: Searcher<SymbolLang, ()>> MultiDiffSearcher<A> {
         pub fn new(mut patterns: Vec<A>) -> MultiDiffSearcher<A> {
             let common_vars = get_common_vars(&mut patterns);
-            MultiDiffSearcher{patterns, common_vars}
+            MultiDiffSearcher { patterns, common_vars }
+        }
+    }
+
+    impl<S: Searcher<SymbolLang, ()> + 'static> ToDyn<SymbolLang, ()> for MultiDiffSearcher<S> {
+        fn into_rc_dyn(self) -> Rc<dyn Searcher<SymbolLang, ()>> {
+            let dyn_s: Rc<dyn Searcher<SymbolLang, ()>> = Rc::new(self);
+            dyn_s
+        }
+    }
+
+    impl<S: Searcher<SymbolLang, ()> + 'static> ToDyn<SymbolLang, ()> for MultiEqSearcher<S> {
+        fn into_rc_dyn(self) -> Rc<dyn Searcher<SymbolLang, ()>> {
+            let dyn_s: Rc<dyn Searcher<SymbolLang, ()>> = Rc::new(self);
+            dyn_s
         }
     }
 
@@ -301,11 +314,11 @@ pub mod multisearcher {
             // I want to merge all subst except from first
             let mut all_matches = it.map(|mut m| m.into_iter()
                 .map(|x| x.1)
-                    .fold1(|mut s1, mut s2| {
-                        s1.substs.extend(s2.substs.into_iter());
-                        s1
-                    }).unwrap_or(SearchMatches{substs: Vec::new(), eclass: Id::default()}))
-                    .collect::<Vec<SearchMatches>>();
+                .fold1(|mut s1, mut s2| {
+                    s1.substs.extend(s2.substs.into_iter());
+                    s1
+                }).unwrap_or(SearchMatches { substs: Vec::new(), eclass: Id::default() }))
+                .collect::<Vec<SearchMatches>>();
             if all_matches.iter().any(|s| s.substs.is_empty()) {
                 return Vec::new();
             }
@@ -320,15 +333,14 @@ pub mod multisearcher {
                 let initial_limits = (0..self.common_vars.len()).map(|_| &None).collect();
                 let res = aggregate_substs(&all_combinations[..], initial_limits, &self.vars());
                 all_combinations.pop();
-                if res.is_empty() {None}
-                else {
+                if res.is_empty() { None } else {
                     Some(SearchMatches { substs: res, eclass })
                 }
             }).collect()
         }
 
         fn vars(&self) -> Vec<Var> {
-            Vec::from_iter(self.patterns.iter().flat_map(|p| p.vars()))
+            Vec::from_iter(self.patterns.iter().flat_map(|p| p.vars()).sorted().dedup())
         }
     }
 
@@ -364,6 +376,123 @@ pub mod multisearcher {
             self.patterns.iter().map(|p| p.pretty_string()).intersperse(" ||| ".to_string()).collect()
         }
     }
+
+    pub type MatchFilter<L: Language, N: Analysis<L>> = Rc<dyn Fn(&EGraph<L, N>, Vec<SearchMatches>) -> Vec<SearchMatches>>;
+
+    #[derive(Clone)]
+    pub struct FilteringSearcher<L: Language, N: Analysis<L>> {
+        searcher: Rc<dyn Searcher<L, N>>,
+        predicate: Rc<dyn Fn(&EGraph<L, N>, Vec<SearchMatches>) -> Vec<SearchMatches>>,
+        phantom_ln: PhantomData<(L, N)>,
+    }
+
+    impl<L: Language + 'static, N: Analysis<L> + 'static> FilteringSearcher<L, N> {
+        pub fn create_non_pattern_filterer(searcher: Rc<dyn Searcher<L, N>>, root: Var) ->
+        Rc<dyn Fn(&EGraph<L, N>, Vec<SearchMatches>) -> Vec<SearchMatches>> {
+            Rc::new(move |graph: &EGraph<L, N>, sms: Vec<SearchMatches>| {
+                let res = searcher.search(graph).iter().map(|s| s.eclass).collect::<HashSet<Id>>();
+                sms.into_iter().filter_map(|mut sm | {
+                    let mut substs = std::mem::take(&mut sm.substs);
+                    sm.substs = substs.into_iter().filter(|s| !res.contains(&s[root])).collect_vec();
+                    if sm.substs.is_empty() {
+                        None
+                    } else {
+                        Some(sm)
+                    }
+                }).collect_vec()
+            })
+        }
+
+        pub fn create_exists_pattern_filterer(searcher: Rc<dyn Searcher<L, N>>, root: Var) ->
+        Rc<dyn Fn(&EGraph<L, N>, Vec<SearchMatches>) -> Vec<SearchMatches>> {
+            Rc::new(move |graph: &EGraph<L, N>, sms: Vec<SearchMatches>| {
+                let res = searcher.search(graph).iter().map(|s| s.eclass).collect::<HashSet<Id>>();
+                sms.into_iter().filter_map(|mut sm| {
+                    let mut substs = std::mem::take(&mut sm.substs);
+                    sm.substs = substs.into_iter().filter(|s| res.contains(&s[root])).collect_vec();
+                    if sm.substs.is_empty() {
+                        None
+                    } else {
+                        Some(sm)
+                    }
+                }).collect_vec()
+            })
+        }
+
+        pub fn new(searcher: Rc<dyn Searcher<L, N>>,
+                   predicate: MatchFilter<L, N>, ) -> Self {
+            FilteringSearcher { searcher, predicate, phantom_ln: Default::default() }
+        }
+
+        pub fn from<S: Searcher<L, N> + 'static>(s: S, predicate: MatchFilter<L, N>) -> Self {
+            let dyn_searcher: Rc<dyn Searcher<L, N>> = Rc::new(s);
+            Self::new(dyn_searcher, predicate)
+        }
+    }
+
+    pub fn aggregate_conditions<L: Language + 'static, N: Analysis<L> + 'static>(conditions: Vec<MatchFilter<L, N>>) -> MatchFilter<L, N> {
+        Rc::new(move |graph: &EGraph<L, N>, mut sms: Vec<SearchMatches>| {
+            for c in &conditions {
+                sms = c(graph, sms);
+            }
+            sms
+        })
+    }
+
+    impl<L: Language, N: Analysis<L>> Searcher<L, N> for FilteringSearcher<L, N> {
+        fn search_eclass(&self, egraph: &EGraph<L, N>, eclass: Id) -> Option<SearchMatches> {
+            unimplemented!()
+        }
+
+        fn search(&self, egraph: &EGraph<L, N>) -> Vec<SearchMatches> {
+            let origin = self.searcher.search(egraph);
+            (self.predicate)(egraph, origin)
+        }
+
+        fn vars(&self) -> Vec<Var> {
+            self.searcher.vars()
+        }
+    }
+
+    pub trait ToDyn<L: Language, N: Analysis<L>> {
+        fn into_rc_dyn(self) -> Rc<dyn Searcher<L, N>>;
+    }
+
+    impl<L: Language + 'static, N: Analysis<L> + 'static> ToDyn<L, N> for Pattern<L> {
+        fn into_rc_dyn(self) -> Rc<dyn Searcher<L, N>> {
+            let dyn_s: Rc<dyn Searcher<L, N>> = Rc::new(self);
+            dyn_s
+        }
+    }
+
+    impl<L: Language + 'static, N: Analysis<L> + 'static> ToDyn<L, N> for FilteringSearcher<L, N> {
+        fn into_rc_dyn(self) -> Rc<dyn Searcher<L, N>> {
+            let dyn_s: Rc<dyn Searcher<L, N>> = Rc::new(self);
+            dyn_s
+        }
+    }
+
+    pub struct PointerSearcher<L: Language, N: Analysis<L>> {
+        searcher: Rc<dyn Searcher<L, N>>
+    }
+
+    impl<L: Language, N: Analysis<L>> PointerSearcher<L, N> {
+        pub fn new(searcher: Rc<dyn Searcher<L, N>>) -> Self { PointerSearcher{searcher} }
+    }
+
+    impl<L: Language, N: Analysis<L>> Searcher<L, N> for PointerSearcher<L, N> {
+        fn search_eclass(&self, egraph: &EGraph<L, N>, eclass: Id) -> Option<SearchMatches> {
+            self.searcher.search_eclass(egraph, eclass)
+        }
+
+        fn search(&self, egraph: &EGraph<L, N>) -> Vec<SearchMatches> {
+            self.searcher.search(egraph)
+        }
+
+        fn vars(&self) -> Vec<Var> {
+            self.searcher.vars()
+        }
+    }
 }
 
 #[cfg(test)]
@@ -372,7 +501,7 @@ mod tests {
 
     use egg::{EGraph, RecExpr, Searcher, SymbolLang};
 
-    use crate::eggstentions::multisearcher::multisearcher::{MultiDiffSearcher, MultiEqSearcher};
+    use crate::eggstentions::searchers::multisearcher::{MultiDiffSearcher, MultiEqSearcher};
 
     #[test]
     fn eq_two_trees_one_common() {

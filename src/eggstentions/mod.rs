@@ -1,4 +1,4 @@
-pub mod multisearcher;
+pub mod searchers;
 pub mod appliers;
 pub mod reconstruct;
 pub mod costs;

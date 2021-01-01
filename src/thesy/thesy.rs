@@ -12,7 +12,7 @@ use egg::*;
 
 use crate::eggstentions::costs::{MinRep, RepOrder};
 use crate::eggstentions::expression_ops::{IntoTree, Tree};
-use crate::eggstentions::multisearcher::multisearcher::{MultiDiffSearcher};
+use crate::eggstentions::searchers::multisearcher::{MultiDiffSearcher};
 use crate::eggstentions::pretty_string::PrettyString;
 use crate::lang::*;
 use crate::thesy::prover::Prover;

@@ -4,6 +4,7 @@ use std::time::Duration;
 use std::collections::{HashMap, HashSet};
 use std::str::FromStr;
 use std::collections::hash_map::RandomState;
+use std::rc::Rc;
 
 /// To be used as the op of edges representing potential split
 pub const SPLITTER: &'static str = "potential_split";
@@ -37,11 +38,11 @@ impl Split {
 }
 
 pub struct CaseSplit {
-    splitter_rules: Vec<(Box<dyn Searcher<SymbolLang, ()>>, Box<dyn FnMut(&mut EGraph<SymbolLang, ()>, SearchMatches) -> Vec<Split>>)>,
+    splitter_rules: Vec<(Rc<dyn Searcher<SymbolLang, ()>>, Box<dyn FnMut(&mut EGraph<SymbolLang, ()>, SearchMatches) -> Vec<Split>>)>,
 }
 
 impl CaseSplit {
-    pub fn new(splitter_rules: Vec<(Box<dyn Searcher<SymbolLang, ()>>,
+    pub fn new(splitter_rules: Vec<(Rc<dyn Searcher<SymbolLang, ()>>,
                                     Box<dyn FnMut(&mut EGraph<SymbolLang, ()>, SearchMatches) -> Vec<Split>>)>) -> Self {
         CaseSplit { splitter_rules }
     }

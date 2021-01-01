@@ -31,6 +31,7 @@ use crate::eggstentions::pretty_string::PrettyString;
 #[cfg(feature = "stats")]
 use serde_json;
 use crate::thesy::case_split::{CaseSplit, Split};
+use std::rc::Rc;
 
 mod eggstentions;
 mod tools;
@@ -152,8 +153,7 @@ impl TheSyConfig {
 
     pub fn translate_splitters(&self) -> CaseSplit {
         CaseSplit::new(self.definitions.case_splitters.iter().cloned()
-            .map(|(searcher, root_var, split_exprs, conditions)| {
-                let searcher_s: Box<dyn Searcher<SymbolLang, ()>> = Box::new(searcher.clone());
+            .map(|(searcher, root_var, split_exprs)| {
                 let applier: Box<dyn FnMut(&mut EGraph<SymbolLang, ()>, SearchMatches) -> Vec<Split>> =
                     Box::new(move |graph: &mut EGraph<SymbolLang, ()>, m: SearchMatches| {
                         m.substs.iter().map(|s| Split::new(
@@ -161,7 +161,7 @@ impl TheSyConfig {
                             split_exprs.iter().map(|p| {
                                 let rec_expr = p.ast.as_ref().iter().map(|node| match node {
                                     ENodeOrVar::ENode(n) => { itertools::Either::Left(n) }
-                                    ENodeOrVar::Var(v) => { itertools::Either::Right(*s.get(*v).unwrap()) }
+                                    ENodeOrVar::Var(v) => { itertools::Either::Right(*s.get(v.clone()).unwrap()) }
                                 });
                                 let mut res = vec![];
                                 for n in rec_expr {
@@ -180,7 +180,7 @@ impl TheSyConfig {
                             }).collect_vec(),
                         )).collect_vec()
                     });
-                    (searcher_s, applier)
+                    (searcher, applier)
             }).collect_vec())
     }
 }

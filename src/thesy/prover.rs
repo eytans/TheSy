@@ -9,7 +9,7 @@ use permutohedron::heap_recursive;
 
 use crate::eggstentions::appliers::DiffApplier;
 use crate::eggstentions::expression_ops::{IntoTree, RecExpSlice, Tree};
-use crate::eggstentions::multisearcher::multisearcher::{EitherSearcher, MultiDiffSearcher, MultiEqSearcher};
+use crate::eggstentions::searchers::multisearcher::{EitherSearcher, MultiDiffSearcher, MultiEqSearcher};
 use crate::eggstentions::pretty_string::PrettyString;
 use crate::lang::{DataType, Function};
 use crate::thesy::case_split::case_split_all;
@@ -282,13 +282,14 @@ impl Prover {
         let precond_pret = precondition.pretty_string();
         let mut res = vec![];
         // Precondition on each direction of the hypothesis
+        println!("Adding hypothesis: \n{} \n{}", pret, pret2);
         if pret.starts_with("(") {
             let rw = Rewrite::new("IH1", MultiDiffSearcher::new(vec![EitherSearcher::left(clean_term1.clone()), EitherSearcher::right(precondition.clone())]), clean_term2.clone());
             if rw.is_ok() {
                 res.push(rw.unwrap())
             } else {
-                debug!("Failed to add rw, probably existential");
-                debug!("{} |> {} => {}", precond_pret, pret, pret2);
+                info!("Failed to add rw, probably existential");
+                info!("{} |> {} => {}", precond_pret, pret, pret2);
             }
         }
         if pret2.starts_with("(") {
@@ -296,8 +297,8 @@ impl Prover {
             if rw.is_ok() {
                 res.push(rw.unwrap())
             } else {
-                debug!("Failed to add rw, probably existential");
-                debug!("{} |> {} => {}", precond_pret, pret2, pret);
+                info!("Failed to add rw, probably existential");
+                info!("{} |> {} => {}", precond_pret, pret2, pret);
             }
         }
         res

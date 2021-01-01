@@ -1,46 +1,6 @@
 use egg::{Pattern, SymbolLang, Condition, EGraph, Var, Subst, Id, Searcher, Language, Analysis};
 use itertools::Itertools;
 
-pub struct NonPatternCondition {
-    pattern: Pattern<SymbolLang>,
-    root: Var
-}
-
-impl NonPatternCondition {
-    pub fn new(pattern: Pattern<SymbolLang>, root: Var) -> NonPatternCondition {
-        NonPatternCondition{pattern, root}
-    }
-}
-
-impl Condition<SymbolLang, ()> for NonPatternCondition {
-    fn check(&self, egraph: &mut EGraph<SymbolLang, ()>, eclass: Id, subst: &Subst) -> bool {
-        self.pattern.search_eclass(egraph, *subst.get(self.root).unwrap()).is_none()
-    }
-
-    fn vars(&self) -> Vec<Var> {
-        vec![self.root]
-    }
-}
-
-pub struct PatternCondition {
-    cond: NonPatternCondition
-}
-
-impl PatternCondition {
-    pub fn new(pattern: Pattern<SymbolLang>, root: Var) -> PatternCondition {
-        PatternCondition{cond: NonPatternCondition{pattern, root}}
-    }
-}
-
-impl Condition<SymbolLang, ()> for PatternCondition {
-    fn check(&self, egraph: &mut EGraph<SymbolLang, ()>, eclass: Id, subst: &Subst) -> bool {
-        !self.cond.check(egraph, eclass, subst)
-    }
-
-    fn vars(&self) -> Vec<Var> {
-        self.cond.vars()
-    }
-}
 
 pub struct AndCondition<L: Language, N: Analysis<L>> {
     conditions: Vec<Box<dyn Condition<L, N>>>
