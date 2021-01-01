@@ -1,7 +1,7 @@
 use std::cmp::max;
 use std::str::FromStr;
 
-use egg::{EGraph, ENodeOrVar, Id, Language, Pattern, PatternAst, RecExpr, Rewrite, Runner, Symbol, SymbolLang, Var};
+use egg::{EGraph, ENodeOrVar, Id, Language, Pattern, PatternAst, RecExpr, Rewrite, Runner, Symbol, SymbolLang, Var, Condition, Searcher};
 use itertools::Itertools;
 use log::{debug, info};
 use permutohedron::control::Control;
@@ -121,17 +121,14 @@ impl Prover {
     pub fn generalize_prove(&self, rules: &[Rewrite<SymbolLang, ()>], orig_ex1: &RecExpr<SymbolLang>, orig_ex2: &RecExpr<SymbolLang>)
                             -> Option<Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, Rewrite<SymbolLang, ()>)>> {
         // TODO: generalize non induction vars
-        debug_assert_eq!(orig_ex1.as_ref().iter().flat_map(|x| x.children()).count(),
-                         orig_ex1.as_ref().iter().flat_map(|x| x.children()).unique().count());
-        debug_assert_eq!(orig_ex2.as_ref().iter().flat_map(|x| x.children()).count(),
-                         orig_ex2.as_ref().iter().flat_map(|x| x.children()).unique().count());
-        let mut ex1_ph1_indices = self.collect_ph1s(orig_ex1);
-        let mut ex2_ph1_indices = self.collect_ph1s(orig_ex2);
+        let mut ex1 = orig_ex1.into_tree().to_clean_exp();
+        let mut ex2 = orig_ex2.into_tree().to_clean_exp();
+
+        let mut ex1_ph1_indices = self.collect_ph1s(&ex1);
+        let mut ex2_ph1_indices = self.collect_ph1s(&ex2);
         if ex1_ph1_indices.len() <= 1 && ex2_ph1_indices.len() <= 1 {
             return None;
         }
-        let mut ex1 = orig_ex1.clone();
-        let mut ex2 = orig_ex2.clone();
         if ex1_ph1_indices.len() > ex2_ph1_indices.len() {
             std::mem::swap(&mut ex1_ph1_indices, &mut ex2_ph1_indices);
             std::mem::swap(&mut ex1, &mut ex2);
@@ -282,9 +279,9 @@ impl Prover {
         let precond_pret = precondition.pretty_string();
         let mut res = vec![];
         // Precondition on each direction of the hypothesis
-        println!("Adding hypothesis: \n{} \n{}", pret, pret2);
         if pret.starts_with("(") {
-            let rw = Rewrite::new("IH1", MultiDiffSearcher::new(vec![EitherSearcher::left(clean_term1.clone()), EitherSearcher::right(precondition.clone())]), clean_term2.clone());
+            let searcher = MultiDiffSearcher::new(vec![EitherSearcher::left(clean_term1.clone()), EitherSearcher::right(precondition.clone())]);
+            let rw = Rewrite::new("IH1", searcher, clean_term2.clone());
             if rw.is_ok() {
                 res.push(rw.unwrap())
             } else {
@@ -293,7 +290,8 @@ impl Prover {
             }
         }
         if pret2.starts_with("(") {
-            let rw = Rewrite::new("IH2", MultiDiffSearcher::new(vec![EitherSearcher::left(clean_term2.clone()), EitherSearcher::right(precondition.clone())]), clean_term1.clone());
+            let searcher = MultiDiffSearcher::new(vec![EitherSearcher::left(clean_term2.clone()), EitherSearcher::right(precondition.clone())]);
+            let rw = Rewrite::new("IH2", searcher, clean_term1.clone());
             if rw.is_ok() {
                 res.push(rw.unwrap())
             } else {
@@ -323,7 +321,7 @@ impl Prover {
             }
         }
         add_to_exp(&mut res_exp, &exp.into_tree(), &induction_ph.name, sub_ind);
-        Pattern::from(PatternAst::from(res_exp))
+        Pattern::from(res_exp.into_tree().to_clean_exp())
     }
 
     fn ident_mapper(i: &String, induction_ph: &String, sub_ind: &String) -> String {

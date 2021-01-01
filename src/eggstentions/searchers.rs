@@ -290,6 +290,7 @@ pub mod multisearcher {
                 return self.patterns[0].search(egraph);
             }
 
+            // TODO: we dont need a hashmap here
             let mut search_results = {
                 let mut res = Vec::new();
                 for p in self.patterns.iter() {

@@ -36,6 +36,23 @@ impl<'a, L: Language> RecExpSlice<'a, L> {
             format!("({} {})", self.root().display_op().to_string(), self.children().iter().map(|t| t.to_sexp_string()).intersperse(" ".to_string()).collect::<String>())
         }
     }
+
+    pub fn to_clean_exp(&self) -> RecExpr<L> {
+        fn add_to_exp<'a, L: Language>(expr: &mut Vec<L>, child: &RecExpSlice<'a, L>) -> Id {
+            let children = child.children();
+            let mut rec_res = children.iter().map(|c| add_to_exp(expr, c));
+            let mut root = child.root().clone();
+            root.update_children(|id| rec_res.next().unwrap());
+            expr.push(root);
+            Id::from(expr.len() - 1)
+        }
+
+        let mut exp = vec![];
+        add_to_exp(&mut exp, self);
+        debug_assert_eq!(exp.iter().flat_map(|x| x.children()).count(),
+                         exp.iter().flat_map(|x| x.children()).unique().count());
+        RecExpr::from(exp)
+    }
 }
 
 impl<'a, L: Language> PartialEq for RecExpSlice<'a, L> {
