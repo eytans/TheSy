@@ -5,6 +5,7 @@ mod prover;
 pub mod statistics;
 pub mod case_split;
 mod consts;
+mod tests;
 
 pub use {
     thesy::TheSy,

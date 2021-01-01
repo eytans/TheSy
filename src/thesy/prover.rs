@@ -178,6 +178,7 @@ impl Prover {
             .map(|s| s.0).collect_vec()
     }
 
+    /// Returns Some if found rules otherwise None. Receives expressions without vars.
     pub fn prove_ind(&self, rules: &[Rewrite<SymbolLang, ()>], ex1: &RecExpr<SymbolLang>, ex2: &RecExpr<SymbolLang>)
                      -> Option<Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, Rewrite<SymbolLang, ()>)>> {
         self.prove_ind_split_d(rules, None, ex1, ex2, Self::CASE_SPLIT_DEPTH)
@@ -347,6 +348,8 @@ mod tests {
 
     use crate::lang::{DataType, Function};
     use crate::thesy::prover::Prover;
+    use crate::TheSyConfig;
+    use crate::thesy::TheSy;
 
     fn create_nat_type() -> DataType {
         DataType::new("nat".to_string(), vec![
@@ -374,5 +377,15 @@ mod tests {
         let pat: Pattern<SymbolLang> = "(ltwf y (S y))".parse().unwrap();
         assert!(pat.search(&egraph).iter().all(|s| !s.substs.is_empty()));
         assert!(!pat.search(&egraph).is_empty());
+    }
+
+    #[test]
+    fn cant_prove_wrong() {
+        let config = TheSyConfig::from_path("theories/list.th".parse().unwrap());
+        let thesy = TheSy::from(&config);
+        let p = thesy.datatypes.iter().next().unwrap().1;
+        let res = p.prove_ind(&config.definitions.rws, &"(append ts_ph_Lst_0 ts_ph_Lst_1)".parse().unwrap(), &"(append ts_ph_Lst_0 (append ts_ph_Lst_0 ts_ph_Lst_0))".parse().unwrap());
+        assert!(res.is_none());
+        //(append ?ts_ph_Lst_0 ?ts_ph_Lst_1) => (append ?ts_ph_Lst_0 (append ?ts_ph_Lst_0 ?ts_ph_Lst_0))
     }
 }

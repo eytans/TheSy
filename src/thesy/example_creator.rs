@@ -9,7 +9,7 @@ use std::collections::hash_map::RandomState;
 
 #[derive(Clone, Debug)]
 pub struct Examples {
-    datatype: DataType,
+    pub datatype: DataType,
     examples: Vec<RecExpr<SymbolLang>>,
     example_vars: Vec<HashMap<Function, Vec<RecExpr<SymbolLang>>>>,
 }
@@ -55,7 +55,7 @@ impl Examples {
             }));
         }
         for ex in res.iter() {
-            info!(" ex is: {}", ex.pretty(500));
+            warn!(" ex is: {}", ex.pretty(500));
         }
 
         Examples{datatype: datatype.clone(), examples: res, example_vars: constructor_phs}

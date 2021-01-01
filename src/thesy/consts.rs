@@ -25,14 +25,14 @@ pub(crate) fn bool_rws() -> Vec<Rewrite<SymbolLang, ()>> {
         rewrite!("or-true2"; "(or ?x true)" => "true"),
         rewrite!("or-false"; "(or false ?x)" => "?x"),
         rewrite!("or-false2"; "(or ?x false)" => "?x"),
-        or_implies,
+        // or_implies,
 
         rewrite!("and-true"; "(and true ?x)" => "?x"),
         rewrite!("and-true2"; "(and ?x true)" => "?x"),
         rewrite!("and-false"; "(and false ?x)" => "false"),
         rewrite!("and-false2"; "(and ?x false)" => "false"),
-        and_implies,
-        and_implies2,
+        // and_implies,
+        // and_implies2,
 
         rewrite!("not-true"; "(not true)" => "false"),
         rewrite!("not-false"; "(not false)" => "true"),
