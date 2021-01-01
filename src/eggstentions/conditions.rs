@@ -1,4 +1,4 @@
-use egg::{Pattern, SymbolLang, Condition, EGraph, Var, Subst, Id, Searcher, Language, Analysis};
+use egg::{Condition, EGraph, Var, Subst, Id, Language, Analysis};
 use itertools::Itertools;
 
 

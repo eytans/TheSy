@@ -31,7 +31,6 @@ use crate::eggstentions::pretty_string::PrettyString;
 #[cfg(feature = "stats")]
 use serde_json;
 use crate::thesy::case_split::{CaseSplit, Split};
-use std::rc::Rc;
 
 mod eggstentions;
 mod tools;

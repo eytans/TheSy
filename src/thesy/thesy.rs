@@ -18,10 +18,8 @@ use crate::lang::*;
 use crate::thesy::prover::Prover;
 use crate::thesy::statistics::Stats;
 use crate::tools::tools::choose;
-use crate::thesy::case_split::{case_split_all, CaseSplit};
+use crate::thesy::case_split::{CaseSplit};
 use crate::thesy::{case_split, consts};
-use egg::test::run;
-use multimap::MultiMap;
 use bimap::BiHashMap;
 use crate::thesy::example_creator::Examples;
 
@@ -637,11 +635,10 @@ mod test {
 
     use crate::eggstentions::appliers::DiffApplier;
     use crate::lang::{DataType, Function};
-    use crate::thesy::example_creator::examples;
     use crate::thesy::thesy::TheSy;
     use crate::TheSyConfig;
     use crate::thesy::case_split::case_split_all;
-    use crate::thesy::consts;
+    use crate::thesy::{consts, Examples};
     use crate::thesy::consts::ite_rws;
 
     fn create_nat_type() -> DataType {
@@ -661,7 +658,7 @@ mod test {
     fn create_nat_sygue() -> TheSy {
         TheSy::new(
             create_nat_type(),
-            vec!["Z", "(S Z)", "(S (S Z))"].into_iter().map(|s| s.parse().unwrap()).collect(),
+            Examples::new(&create_nat_type(), 2),
             vec![Function::new("Z".to_string(), vec![], "nat".parse().unwrap()),
                  Function::new("S".to_string(), vec!["nat".parse().unwrap()], "nat".parse().unwrap()),
                  Function::new("pl".to_string(), vec!["nat".parse().unwrap(), "nat".parse().unwrap()], "nat".parse().unwrap())],
@@ -671,7 +668,7 @@ mod test {
     fn create_list_sygue() -> TheSy {
         TheSy::new(
             create_list_type(),
-            example_creator::new(create_list_type(), 2),
+            Examples::new(&create_list_type(), 2),
             vec![Function::new("snoc".to_string(), vec!["list".parse().unwrap(), "nat".parse().unwrap()], "list".parse().unwrap()),
                  Function::new("rev".to_string(), vec!["list".parse().unwrap()], "list".parse().unwrap()),
                  Function::new("app".to_string(), vec!["list".parse().unwrap(), "list".parse().unwrap()], "list".parse().unwrap())],
@@ -741,7 +738,7 @@ mod test {
     #[test]
     fn test_creates_expected_terms_nat() {
         let nat = create_nat_type();
-        let nat_examples = examples(&nat, 2);
+        let nat_examples = Examples::new(&nat, 2);
         let ex_map = HashMap::from_iter(iter::once((nat.clone(), nat_examples)));
         let mut syg = {
             TheSy::new_with_ph(
@@ -783,7 +780,7 @@ mod test {
         let nat_type = create_nat_type();
         let mut syg = TheSy::new(
             nat_type.clone(),
-            vec!["Z"].into_iter().map(|s| s.parse().unwrap()).collect(),
+            Examples::new(&nat_type, 0),
             vec![Function::new("S".to_string(), vec!["nat".parse().unwrap()], "nat".parse().unwrap())],
         );
 
@@ -802,7 +799,7 @@ mod test {
         let mut syg = TheSy::new_with_ph(
             // For this test dont use full definition
             vec![new_nat.clone()],
-            HashMap::from_iter(iter::once((new_nat, vec!["Z"].into_iter().map(|s| s.parse().unwrap()).collect()))),
+            HashMap::from_iter(iter::once((new_nat.clone(), Examples::new(&new_nat, 0)))),
             vec![Function::new("x".to_string(), vec!["nat".parse().unwrap(), "nat".parse().unwrap()], "nat".parse().unwrap())],
             3,
             None,
@@ -879,7 +876,8 @@ mod test {
     #[test]
     fn split_case_filter_p_filter_q() {
         let list_type = create_list_type();
-        let list_example = examples(&list_type, 2).pop().unwrap();
+        let ex = Examples::new(&list_type, 2);
+        let list_example = ex.examples().last().unwrap();
         let mut egraph: EGraph<SymbolLang, ()> = EGraph::default();
         let pq = egraph.add_expr(&format!("(filter p (filter q {}))", list_example.pretty(400)).parse().unwrap());
         let qp = egraph.add_expr(&format!("(filter q (filter p {}))", list_example.pretty(400)).parse().unwrap());
@@ -923,7 +921,7 @@ mod test {
                                           .map(|x| x.parse().unwrap()).collect_vec(),
                                       "list".parse().unwrap(),
         )];
-        let mut thesy = TheSy::new(list_type.clone(), examples(&list_type, 2), dict.clone());
+        let mut thesy = TheSy::new(list_type.clone(), Examples::new(&list_type, 2), dict.clone());
         (list_type, dict, thesy)
     }
 
@@ -982,7 +980,7 @@ mod test {
 
     #[test]
     fn conditional_apply_playground() {
-        let mut conf = TheSyConfig::from_path("theories/goal1.smt2.th".parse().unwrap());
+        let mut conf = TheSyConfig::from_path("frontend/benchmarks/clam/goal1.smt2.th".parse().unwrap());
         let mut thesy = TheSy::from(&conf);
         let rules = std::mem::take(&mut conf.definitions.rws);
         println!("{}", rules.last().unwrap().name());

@@ -3,14 +3,13 @@ pub mod parser {
     use std::io::Read;
     use std::str::FromStr;
 
-    use egg::{Pattern, RecExpr, Rewrite, SymbolLang, Var, Condition, ConditionalApplier, Applier, Searcher, Language, PatternAst, ENodeOrVar, Id, EGraph, SearchMatches};
+    use egg::{Pattern, RecExpr, Rewrite, SymbolLang, Var, Applier, Searcher, Language, PatternAst, ENodeOrVar, Id};
     use itertools::{Itertools};
     use symbolic_expressions::Sexp;
 
     use crate::eggstentions::appliers::DiffApplier;
     use crate::lang::{DataType, Function};
     use std::collections::{HashMap};
-    use crate::eggstentions::conditions::{AndCondition};
     use multimap::MultiMap;
     use crate::eggstentions::searchers::multisearcher::{MultiDiffSearcher, EitherSearcher, MultiEqSearcher, FilteringSearcher, MatchFilter, aggregate_conditions, ToDyn, PointerSearcher};
     use std::fmt::Debug;
@@ -18,7 +17,6 @@ pub mod parser {
     use crate::eggstentions::expression_ops::{IntoTree, Tree};
     use crate::thesy::{case_split};
     use crate::tools::tools::combinations;
-    use crate::thesy::case_split::{CaseSplit, Split};
     use std::rc::Rc;
 
     #[derive(Default, Clone)]

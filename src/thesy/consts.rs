@@ -1,8 +1,7 @@
-use egg::{Rewrite, SymbolLang, Pattern, Var, ConditionalApplier};
-use crate::eggstentions::searchers::multisearcher::{MultiEqSearcher, MultiDiffSearcher, FilteringSearcher, aggregate_conditions, ToDyn};
+use egg::{Rewrite, SymbolLang, Pattern, Var};
+use crate::eggstentions::searchers::multisearcher::{MultiEqSearcher, FilteringSearcher, aggregate_conditions, ToDyn};
 use crate::eggstentions::appliers::{DiffApplier, UnionApplier};
 use std::str::FromStr;
-use crate::eggstentions::conditions::{AndCondition};
 use crate::thesy::case_split;
 
 pub(crate) fn bool_rws() -> Vec<Rewrite<SymbolLang, ()>> {

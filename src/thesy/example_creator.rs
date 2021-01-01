@@ -1,6 +1,6 @@
 use std::collections::{HashMap};
 
-use egg::{RecExpr, SymbolLang, Symbol};
+use egg::{RecExpr, SymbolLang};
 use itertools::Itertools;
 
 use crate::eggstentions::expression_ops::{IntoTree};

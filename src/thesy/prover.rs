@@ -1,7 +1,7 @@
 use std::cmp::max;
 use std::str::FromStr;
 
-use egg::{EGraph, ENodeOrVar, Id, Language, Pattern, PatternAst, RecExpr, Rewrite, Runner, Symbol, SymbolLang, Var, Condition, Searcher};
+use egg::{EGraph, ENodeOrVar, Id, Language, Pattern, RecExpr, Rewrite, Runner, Symbol, SymbolLang, Var};
 use itertools::Itertools;
 use log::{debug, info};
 use permutohedron::control::Control;
