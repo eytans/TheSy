@@ -175,10 +175,11 @@ impl TheSy {
         for fun in dict.iter()
             .chain(TheSy::collect_phs(&dict, ph_count).iter())
             // Hack for supporting bool constant, important for preconditions or and and such.
-            .chain(vec![Function::new("true".parse().unwrap(), vec![], "bool".parse().unwrap()),
-                        Function::new("false".parse().unwrap(), vec![], "bool".parse().unwrap()),
-                        Function::new("true".parse().unwrap(), vec![], "Bool".parse().unwrap()),
-                        Function::new("false".parse().unwrap(), vec![], "Bool".parse().unwrap())].iter()) {
+            .chain(vec![
+                // Function::new("true".parse().unwrap(), vec![], "bool".parse().unwrap()),
+                // Function::new("false".parse().unwrap(), vec![], "bool".parse().unwrap()),
+                Function::new("true".parse().unwrap(), vec![], "Bool".parse().unwrap()),
+                Function::new("false".parse().unwrap(), vec![], "Bool".parse().unwrap())].iter()) {
             let id = egraph.add_expr(&fun.name.parse().unwrap());
             let type_id = egraph.add_expr(&fun.get_type());
             egraph.add(SymbolLang::new("typed", vec![id, type_id]));
@@ -365,13 +366,17 @@ impl TheSy {
 
 
         let reason = runner.stop_reason.unwrap();
-        self.node_limit = match reason {
+        self.node_limit = match &reason {
             StopReason::NodeLimit(x) => {
                 info!("Reached node limit. Increasing maximum graph size.");
                 // TODO: decide dynamically
                 x + 50000
             }
-            _ => { self.node_limit }
+            StopReason::Saturated => { self.node_limit }
+            x => {
+                info!("Stop reason: {:#?}", x);
+                self.node_limit
+            }
         };
         reason
     }
@@ -495,7 +500,7 @@ impl TheSy {
                     } else {
                         ex1 = new_rules.as_ref().unwrap()[0].1.pretty_string().parse().unwrap();
                         ex2 = new_rules.as_ref().unwrap()[0].2.pretty_string().parse().unwrap();
-                        println!("generalized as case_split");
+                        println!("generalized to {} -- {}", ex1.pretty(500), ex2.pretty(500));
                     }
                     if Self::check_equality(&rules[..], &None, &ex1, &ex2) {
                         info!("bad conjecture {} = {}", &ex1.pretty(500), &ex2.pretty(500));
@@ -632,7 +637,7 @@ mod test {
 
     use itertools::Itertools;
 
-    use egg::{EGraph, Pattern, RecExpr, Rewrite, Runner, Searcher, SymbolLang};
+    use egg::{EGraph, Pattern, RecExpr, Rewrite, Runner, Searcher, SymbolLang, Symbol};
 
     use crate::eggstentions::appliers::DiffApplier;
     use crate::lang::{DataType, Function};
@@ -641,6 +646,8 @@ mod test {
     use crate::thesy::case_split::case_split_all;
     use crate::thesy::{consts, Examples};
     use crate::thesy::consts::ite_rws;
+    use crate::tools::tools::Grouped;
+    use crate::eggstentions::reconstruct::reconstruct;
 
     fn create_nat_type() -> DataType {
         DataType::new("nat".to_string(), vec![
@@ -999,5 +1006,50 @@ mod test {
         let matches = &*rules[2].search(&egraph);
         rules[2].apply(&mut egraph, matches);
         egraph.dot().to_dot("graph.dot");
+    }
+
+    fn check_types_not_merged(egraph: &EGraph<SymbolLang, ()>) {
+        egraph.classes().flat_map(|c| c.nodes.iter()
+            .filter(|n| n.op == Symbol::from_str("typed").unwrap()))
+            .grouped(|x| {
+                assert_eq!(x.children.len(), 2);
+                x.children[0]
+            }).iter().for_each(|(id, edges)| {
+            if edges.len() != 1 {
+                println!("{:#?}", edges);
+                println!("{}", reconstruct(&egraph, *id, 3).unwrap().pretty(500));
+            }
+            assert_eq!(1, edges.len())
+        });
+    }
+
+    #[test]
+    fn test_all_are_single_typed() {
+        let mut config = TheSyConfig::from_path("theories/list.th".parse().unwrap());
+        let mut thesy = TheSy::from(&config);
+        thesy.increase_depth();
+        thesy.increase_depth();
+        check_types_not_merged(&thesy.egraph);
+        config.definitions.rws.extend_from_slice(&thesy.system_rws);
+        thesy.equiv_reduc_depth(&mut config.definitions.rws, 20);
+        check_types_not_merged(&thesy.egraph);
+    }
+
+    #[test]
+    fn test_not_creating_append_nat() {
+        let mut config = TheSyConfig::from_path("theories/list.th".parse().unwrap());
+        let mut thesy = TheSy::from(&config);
+        thesy.increase_depth();
+        thesy.increase_depth();
+    }
+
+    #[test]
+    fn test_list_run_append_assoc() {
+        let mut config = TheSyConfig::from_path("theories/list.th".parse().unwrap());
+        let mut thesy = TheSy::from(&config);
+        thesy.run(&mut config.definitions.rws, None, 2);
+        assert_eq!(config.definitions.datatypes.len(), 1);
+        let res = TheSy::check_equality(&config.definitions.rws, &None, &"(append x (append y z))".parse().unwrap(), &"(append (append x y) z)".parse().unwrap());
+        assert!(res);
     }
 }
