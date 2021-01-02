@@ -78,9 +78,9 @@ impl TheSy {
         Self::replace_ops(exp, &HashMap::from_iter(iter::once((orig, replacment))))
     }
 
-    fn create_sygue_serchers(dict: &[Function]) -> HashMap<String, (MultiDiffSearcher<Pattern<SymbolLang>>, Vec<(Var, RecExpr<SymbolLang>)>)> {
+    fn create_sygue_serchers<'a>(dict: &[Function], datatypes: impl Iterator<Item=&'a DataType>) -> HashMap<String, (MultiDiffSearcher<Pattern<SymbolLang>>, Vec<(Var, RecExpr<SymbolLang>)>)> {
         let mut res = HashMap::new();
-        dict.iter().for_each(|fun| {
+        dict.iter().chain(datatypes.flat_map(|d| d.constructors.iter())).for_each(|fun| {
             if !fun.params.is_empty() {
                 let params: Vec<(Var, RecExpr<SymbolLang>)> = fun.params.iter().enumerate().map(|(i, t)| {
                     (Var::from_str(&*format!("?param_{}", i)).unwrap(), t.clone())
@@ -107,7 +107,7 @@ impl TheSy {
             .map(|d| (d.clone(), Prover::new(d.clone()))).collect();
         let (mut egraph, mut example_ids) = TheSy::create_graph_example_ids(&datatypes, &examples, &dict, ph_count);
 
-        let apply_rws = TheSy::create_apply_rws(&dict, ph_count);
+        let apply_rws = TheSy::create_apply_rws(&dict, &datatypes, ph_count);
         let system_rws: Vec<Rewrite<SymbolLang, ()>> = apply_rws.into_iter()
             .chain(consts::ite_rws().into_iter())
             .chain(consts::equality_rws().into_iter())
@@ -144,7 +144,7 @@ impl TheSy {
             }).collect_vec());
 
         let stats = Default::default();
-        let searchers = Self::create_sygue_serchers(&dict);
+        let searchers = Self::create_sygue_serchers(&dict, datatypes.iter());
 
         TheSy {
             datatypes: datatype_to_prover,
@@ -165,6 +165,10 @@ impl TheSy {
         }
     }
 
+    fn known_functions<'a>(datatypes: &'a Vec<DataType>, dict: &'a Vec<Function>) -> impl Iterator<Item = &'a Function> {
+        dict.iter().chain(datatypes.iter().flat_map(|d| d.constructors.iter()))
+    }
+
     fn create_graph_example_ids(datatypes: &Vec<DataType>, examples: &HashMap<DataType, Examples>, dict: &Vec<Function>, ph_count: usize) -> (EGraph<SymbolLang, ()>, HashMap<DataType, HashMap<Id, Vec<Id>, RandomState>, RandomState>) {
         let mut egraph = EGraph::default();
         let mut example_ids = HashMap::new();
@@ -173,13 +177,15 @@ impl TheSy {
         }
 
         for fun in dict.iter()
-            .chain(TheSy::collect_phs(&dict, ph_count).iter())
+            .chain(TheSy::collect_phs(TheSy::known_functions(datatypes, dict), ph_count).iter())
             // Hack for supporting bool constant, important for preconditions or and and such.
             .chain(vec![
                 // Function::new("true".parse().unwrap(), vec![], "bool".parse().unwrap()),
                 // Function::new("false".parse().unwrap(), vec![], "bool".parse().unwrap()),
                 Function::new("true".parse().unwrap(), vec![], "Bool".parse().unwrap()),
-                Function::new("false".parse().unwrap(), vec![], "Bool".parse().unwrap())].iter()) {
+                Function::new("false".parse().unwrap(), vec![], "Bool".parse().unwrap())].iter())
+            .chain(datatypes.iter().flat_map(|d| d.constructors.iter())){
+            println!("{}", fun.name);
             let id = egraph.add_expr(&fun.name.parse().unwrap());
             let type_id = egraph.add_expr(&fun.get_type());
             egraph.add(SymbolLang::new("typed", vec![id, type_id]));
@@ -206,9 +212,9 @@ impl TheSy {
     /// Appears at the start of every placeholder var
     pub(crate) const PH_START: &'static str = "ts_ph";
 
-    fn create_apply_rws(dict: &Vec<Function>, ph_count: usize) -> Vec<Rewrite<SymbolLang, ()>> {
+    fn create_apply_rws(dict: &Vec<Function>, datatypes: &Vec<DataType>, ph_count: usize) -> Vec<Rewrite<SymbolLang, ()>> {
         let apply_rws = dict.iter()
-            .chain(TheSy::collect_phs(&dict, ph_count).iter())
+            .chain(TheSy::collect_phs(TheSy::known_functions(datatypes, dict), ph_count).iter())
             .filter(|fun| !fun.params.is_empty())
             .map(|fun| {
                 let params = &fun.params.iter().enumerate()
@@ -223,9 +229,9 @@ impl TheSy {
     }
 
     /// Create all needed phs from
-    fn collect_phs(dict: &Vec<Function>, ph_count: usize) -> Vec<Function> {
+    fn collect_phs<'a>(known_functions: impl Iterator<Item = &'a Function>, ph_count: usize) -> Vec<Function> {
         let mut res = HashSet::new();
-        for f in dict {
+        for f in known_functions {
             for e in f.params.iter() {
                 res.insert(e.clone());
             }
@@ -313,7 +319,7 @@ impl TheSy {
             }).collect_vec();
         for (op, params, subs) in op_matches {
             let typ = {
-                let fun = &self.dict.iter()
+                let fun = &self.dict.iter().chain(self.datatypes.keys().flat_map(|d| d.constructors.iter()))
                     .find(|f| &f.name == op).unwrap();
                 let res: RecExpr<SymbolLang> = fun.ret_type.clone();
                 res
@@ -479,11 +485,11 @@ impl TheSy {
             let stop_reason = self.equiv_reduc(rules);
 
             // True if goals were proven
-            if case_spliter.is_some() {
-                if self.prove_case_split_rules(case_spliter.as_mut().unwrap(), rules, &mut found_rules, new_rules_index) {
-                    return found_rules;
-                }
-            }
+            // if case_spliter.is_some() {
+            //     if self.prove_case_split_rules(case_spliter.as_mut().unwrap(), rules, &mut found_rules, new_rules_index) {
+            //         return found_rules;
+            //     }
+            // }
 
 
             let mut conjectures = self.get_conjectures();
@@ -789,16 +795,18 @@ mod test {
         let mut syg = TheSy::new(
             nat_type.clone(),
             Examples::new(&nat_type, 0),
-            vec![Function::new("S".to_string(), vec!["nat".parse().unwrap()], "nat".parse().unwrap())],
+            vec![],
         );
 
         let anchor_patt: Pattern<SymbolLang> = Pattern::from_str("(typed ?x ?y)").unwrap();
         let results0 = anchor_patt.search(&syg.egraph);
-        assert_eq!(3usize, results0.iter().map(|x| x.substs.len()).sum());
+        // Zero, S (functions are also in graph), ph1, ph0, (true false)
+        assert_eq!(6usize, results0.iter().map(|x| x.substs.len()).sum());
         syg.increase_depth();
-        assert_eq!(5usize, anchor_patt.search(&syg.egraph).iter().map(|x| x.substs.len()).sum());
+        // Zero, S, S Zero, ph1, S ph1, ph0, S ph0, (true false)
+        assert_eq!(9usize, anchor_patt.search(&syg.egraph).iter().map(|x| x.substs.len()).sum());
         syg.increase_depth();
-        assert_eq!(7usize, anchor_patt.search(&syg.egraph).iter().map(|x| x.substs.len()).sum());
+        assert_eq!(12usize, anchor_patt.search(&syg.egraph).iter().map(|x| x.substs.len()).sum());
 
         let new_nat = DataType::new("nat".to_string(), vec![
             Function::new("Z".to_string(), vec![], "nat".parse().unwrap()),
@@ -814,13 +822,16 @@ mod test {
         );
 
         let results0 = anchor_patt.search(&syg.egraph);
-        assert_eq!(4usize, results0.iter().map(|x| x.substs.len()).sum());
+        // Zero, x, ph1, ph0, ph2, (true false)
+        assert_eq!(7usize, results0.iter().map(|x| x.substs.len()).sum());
         syg.increase_depth();
         let results1 = anchor_patt.search(&syg.egraph);
-        assert_eq!(13usize, results1.iter().map(|x| x.substs.len()).sum());
+        // 7 + 16
+        assert_eq!(23usize, results1.iter().map(|x| x.substs.len()).sum());
         syg.increase_depth();
+        // 7 + 16 + 20*20 - 16
         let results2 = anchor_patt.search(&syg.egraph);
-        assert_eq!(148usize, results2.iter().map(|x| x.substs.len()).sum());
+        assert_eq!(407usize, results2.iter().map(|x| x.substs.len()).sum());
     }
 
     #[test]
@@ -915,7 +926,7 @@ mod test {
         let (list_type, dict, mut thesy) = create_filter_thesy();
         thesy.increase_depth();
         thesy.increase_depth();
-        let phs = TheSy::collect_phs(&dict, 3).into_iter().filter(|x| !x.params.is_empty()).collect_vec();
+        let phs = TheSy::collect_phs(dict.iter().chain(list_type.constructors.iter()), 3).into_iter().filter(|x| !x.params.is_empty()).collect_vec();
         let pat1 = Pattern::from_str(&*format!("(filter {} (filter {} {}))", phs[0].name, phs[1].name, TheSy::get_ind_var(&list_type).name)).unwrap();
         let pat2 = Pattern::from_str(&*format!("(filter {} (filter {} {}))", phs[1].name, phs[0].name, TheSy::get_ind_var(&list_type).name)).unwrap();
         assert!(!pat1.search(&thesy.egraph).is_empty());
@@ -987,8 +998,8 @@ mod test {
     }
 
     #[test]
-    fn conditional_apply_playground() {
-        let mut conf = TheSyConfig::from_path("frontend/benchmarks/clam/goal1.smt2.th".parse().unwrap());
+    fn filtering_searcher_playground() {
+        let mut conf = TheSyConfig::from_path("frontend/benchmarks/cvc4-conj/original/benchmarks-dt/clam/goal1.smt2".parse().unwrap());
         let mut thesy = TheSy::from(&conf);
         let rules = std::mem::take(&mut conf.definitions.rws);
         println!("{}", rules.last().unwrap().name());

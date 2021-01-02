@@ -384,7 +384,7 @@ mod tests {
         let config = TheSyConfig::from_path("theories/list.th".parse().unwrap());
         let thesy = TheSy::from(&config);
         let p = thesy.datatypes.iter().next().unwrap().1;
-        let res = p.prove_ind(&config.definitions.rws, &"(append ts_ph_Lst_0 ts_ph_Lst_1)".parse().unwrap(), &"(append ts_ph_Lst_0 (append ts_ph_Lst_0 ts_ph_Lst_0))".parse().unwrap());
+        let res = p.prove_ind(&config.definitions.rws, &"(append ts_ph_Lst_0 ts_ph_Lst_1)".parse().unwrap(), &"(append ts_ph_Lst_0 (append ts_ph_Lst_1 ts_ph_Lst_0))".parse().unwrap());
         assert!(res.is_none());
         //(append ?ts_ph_Lst_0 ?ts_ph_Lst_1) => (append ?ts_ph_Lst_0 (append ?ts_ph_Lst_0 ?ts_ph_Lst_0))
     }
