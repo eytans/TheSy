@@ -102,7 +102,7 @@ pub fn reconstruct_all(graph: &EGraph<SymbolLang, ()>, max_depth: usize) -> Hash
 
     // The reconstruct itself.
     for d in 0..max_depth {
-        println!("depth {}", d);
+        info!("depth {}", d);
         last_level = HashSet::new();
         for e in levels.last().unwrap() {
             for v in edges_by_reqiurments.get(&e.0) {

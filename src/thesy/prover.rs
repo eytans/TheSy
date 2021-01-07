@@ -36,9 +36,9 @@ impl Prover {
 
     fn wfo_trans() -> Rewrite<SymbolLang, ()> {
         let searcher = MultiDiffSearcher::new(vec![
-            Pattern::from_str(&vec!["(", Self::wfo_op(), "?x ?y)"].join(" ")).unwrap(),
-            Pattern::from_str(&vec!["(", Self::wfo_op(), "?z ?x)"].join(" ")).unwrap()]);
-        let applier = Pattern::from_str(&vec!["(", Self::wfo_op(), "?z ?y)"].join(" ")).unwrap();
+            Pattern::from_str(&*format!("({} ?z ?x)", Self::wfo_op())).unwrap(),
+            Pattern::from_str(&*format!("({} ?x ?y)", Self::wfo_op())).unwrap()]);
+        let applier = Pattern::from_str(&*format!("({} ?z ?y)", Self::wfo_op())).unwrap();
         Rewrite::new("wfo transitivity", searcher, applier).unwrap()
     }
 
@@ -133,7 +133,7 @@ impl Prover {
             std::mem::swap(&mut ex1_ph1_indices, &mut ex2_ph1_indices);
             std::mem::swap(&mut ex1, &mut ex2);
         }
-        println!("generalizing {} = {}", ex1.pretty(500), ex2.pretty(500));
+        info!("generalizing {} = {}", ex1.pretty(500), ex2.pretty(500));
         // We want less options when checking all permutations
         let max_phs = max(ex2_ph1_indices.len(), ex1_ph1_indices.len());
         let mut res = None;
@@ -229,7 +229,6 @@ impl Prover {
         let text1 = precond_text.to_owned() + &*fixed_ex1.pretty(80) + " => " + &*fixed_ex2.pretty(80);
         let text2 = precond_text.to_owned() + &*fixed_ex2.pretty(80) + " => " + &*fixed_ex1.pretty(80);
         let mut new_rules: Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, Rewrite<SymbolLang, ()>)> = vec![];
-        // println!("proved: {}", text1);
         // TODO: dont do it so half assed
         Prover::push_rw(fixed_precond.clone(), &fixed_ex1, &fixed_ex2, text1, &mut new_rules);
         Prover::push_rw(fixed_precond, &fixed_ex2, &fixed_ex1, text2, &mut new_rules);

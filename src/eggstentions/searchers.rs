@@ -447,7 +447,8 @@ pub mod multisearcher {
 
         fn search(&self, egraph: &EGraph<L, N>) -> Vec<SearchMatches> {
             let origin = self.searcher.search(egraph);
-            (self.predicate)(egraph, origin)
+            let res = (self.predicate)(egraph, origin);
+            res
         }
 
         fn vars(&self) -> Vec<Var> {
@@ -513,7 +514,6 @@ mod tests {
         let a = egraph.add_expr(&RecExpr::from_str("(a x y)").unwrap());
         egraph.add_expr(&RecExpr::from_str("(a z x)").unwrap());
         egraph.rebuild();
-        println!("{:#?}", searcher.search(&egraph));
         assert_eq!(searcher.search(&egraph).len(), 0);
         let a2 = egraph.add(SymbolLang::new("a", vec![z, x]));
         egraph.union(a, a2);
@@ -530,7 +530,6 @@ mod tests {
         let a = egraph.add_expr(&RecExpr::from_str("(a x y)").unwrap());
         egraph.add_expr(&RecExpr::from_str("(a z x)").unwrap());
         egraph.rebuild();
-        println!("{:#?}", searcher.search(&egraph));
         assert_eq!(searcher.search(&egraph).len(), 1);
     }
 

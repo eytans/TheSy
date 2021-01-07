@@ -138,3 +138,4 @@ impl<'a, T: 'a + Language + Display> Display for RecExpSlice<'a, T> {
         write!(f, "{}", &self.to_sexp_string())
     }
 }
+

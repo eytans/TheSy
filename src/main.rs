@@ -13,30 +13,32 @@ extern crate lazy_static;
 
 use std::borrow::Borrow;
 use std::fs::File;
-use std::io::{Write};
+use std::io::Write;
 use std::path::PathBuf;
 use std::process::exit;
 use std::time::SystemTime;
 
-use egg::*;
-use itertools::{Itertools, Either};
+use itertools::{Either, Itertools};
+#[cfg(feature = "stats")]
+use serde_json;
 use structopt::StructOpt;
 
+use egg::*;
+
+use crate::eggstentions::pretty_string::PrettyString;
+use crate::thesy::{example_creator, thesy_parser};
+use crate::thesy::case_split::{CaseSplit, Split};
 use crate::thesy::thesy::TheSy;
 use crate::thesy::thesy_parser::parser::Definitions;
 use crate::tools::tools::choose;
-use crate::thesy::{thesy_parser, example_creator};
-use crate::eggstentions::pretty_string::PrettyString;
-
-#[cfg(feature = "stats")]
-use serde_json;
-use crate::thesy::case_split::{CaseSplit, Split};
+use std::rc::Rc;
 
 mod eggstentions;
 mod tools;
 mod thesy;
 mod lang;
 mod tree;
+mod tests;
 // mod smtlib_translator;
 
 /// Arguments to use to run thesy
@@ -116,26 +118,27 @@ impl TheSyConfig {
         // Prerun helps prevent state overflow
         if self.prerun && self.definitions.functions.len() > 2 {
             for f in &self.definitions.functions {
-                println!("prerun {}", f.name);
+                info!("prerun {}", f.name);
                 let mut new_conf = self.clone();
                 let funcs = vec![f.clone()];
                 new_conf.definitions.functions = funcs;
                 let mut thesy = TheSy::from(&new_conf);
-                let case_split = new_conf.translate_splitters();
+                let case_split = TheSy::create_case_splitter(new_conf.definitions.case_splitters);
                 thesy.run(&mut rules, Some(case_split), max_depth.unwrap_or(2));
             }
             for couple in choose(&self.definitions.functions[..], 2) {
-                println!("prerun {}", couple.iter().map(|x| &x.name).join(" "));
+                info!("prerun {}", couple.iter().map(|x| &x.name).join(" "));
                 let mut new_conf = self.clone();
                 let funcs = couple.into_iter().cloned().collect_vec();
                 new_conf.definitions.functions = funcs;
                 let mut thesy = TheSy::from(&new_conf);
-                let case_split = new_conf.translate_splitters();
+                let case_split = TheSy::create_case_splitter(new_conf.definitions.case_splitters);
                 thesy.run(&mut rules, Some(case_split), max_depth.unwrap_or(2));
             }
         }
-        let mut thesy = TheSy::from(self.borrow());
-        let case_split = self.translate_splitters();
+        let mut thesy: TheSy = TheSy::from(&*self);
+        // TODO: take a ref
+        let case_split = TheSy::create_case_splitter(std::mem::take(&mut self.definitions.case_splitters));
         let results = thesy.run(&mut rules, Some(case_split), max_depth.unwrap_or(2));
         let new_rules_text = results.iter()
             .map(|(precond, searcher, applier, rw)|
@@ -149,38 +152,28 @@ impl TheSyConfig {
         File::create(&self.output).unwrap().write_all(new_rules_text.as_bytes()).unwrap();
         (thesy, rules)
     }
+}
 
-    pub fn translate_splitters(&self) -> CaseSplit {
-        CaseSplit::new(self.definitions.case_splitters.iter().cloned()
-            .map(|(searcher, root_var, split_exprs)| {
-                let applier: Box<dyn FnMut(&mut EGraph<SymbolLang, ()>, SearchMatches) -> Vec<Split>> =
-                    Box::new(move |graph: &mut EGraph<SymbolLang, ()>, m: SearchMatches| {
-                        m.substs.iter().map(|s| Split::new(
-                            *s.get(root_var).unwrap(),
-                            split_exprs.iter().map(|p| {
-                                let rec_expr = p.ast.as_ref().iter().map(|node| match node {
-                                    ENodeOrVar::ENode(n) => { itertools::Either::Left(n) }
-                                    ENodeOrVar::Var(v) => { itertools::Either::Right(*s.get(v.clone()).unwrap()) }
-                                });
-                                let mut res = vec![];
-                                for n in rec_expr {
-                                    match n {
-                                        Either::Left(n) => {
-                                            let mut node = n.clone();
-                                            node.update_children(|c| res[usize::from(c)]);
-                                            res.push(graph.add(node));
-                                        }
-                                        Either::Right(id) => {
-                                            res.push(id);
-                                        }
-                                    }
-                                }
-                                *res.last().unwrap()
-                            }).collect_vec(),
-                        )).collect_vec()
-                    });
-                    (searcher, applier)
-            }).collect_vec())
+impl From<&Definitions> for TheSy {
+    fn from(defs: &Definitions) -> Self {
+        let mut dict = defs.functions.clone();
+        for c in defs.datatypes.iter().flat_map(|d| &d.constructors) {
+            dict.push(c.clone());
+        }
+        let examples = defs.datatypes.iter()
+            .map(|d| (d.clone(), example_creator::Examples::new(d, 2)))
+            .collect();
+        let conjectures = if defs.conjectures.is_empty() {
+            None
+        } else {
+            Some(defs.conjectures.clone())
+        };
+
+        TheSy::new_with_ph(defs.datatypes.clone(),
+                           examples,
+                           dict,
+                           2,
+                           conjectures)
     }
 }
 
@@ -221,7 +214,7 @@ fn main() {
     ).unwrap();
 
     if cfg!(feature = "stats") {
-        println!("Collecting statistics");
+        warn!("Collecting statistics");
     }
 
     let start = SystemTime::now();

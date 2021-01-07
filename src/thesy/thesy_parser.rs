@@ -184,8 +184,8 @@ pub mod parser {
                         }).collect();
                     let (mut precondition, mut equality) = {
                         let mut expr = forall_list[2].take_list().unwrap();
+                        info!("goal: {}", expr.iter().map(|x| x.to_string()).intersperse(" ".parse().unwrap()).collect::<String>());
                         if expr[0].string().unwrap() == "=>" {
-                            println!("expr: {}", expr.iter().map(|x| x.to_string()).intersperse(" ".parse().unwrap()).collect::<String>());
                             let equality = expr.remove(2).take_list().unwrap();
                             let precond = expr.remove(1);
                             (Some(precond), equality)
@@ -302,6 +302,7 @@ pub mod parser {
                         }).collect_vec();
                         nodes.push(ENodeOrVar::ENode(SymbolLang::new(&f.name, children)));
                         let searcher = Pattern::from(RecExpr::from(nodes));
+                        println!("Searcher: {}", searcher.pretty_string());
                         let root_var: &ENodeOrVar<SymbolLang> = searcher.ast.into_tree().children()[index].root();
                         let root_v_opt = if let &ENodeOrVar::Var(v) = root_var {
                             Some(v)
@@ -315,10 +316,6 @@ pub mod parser {
                             cond_texts.push(format!("Cond(var: {}, pat: {})", root_v_opt.as_ref().unwrap().to_string(), exp.pretty(1000)));
                             FilteringSearcher::create_non_pattern_filterer(Pattern::from_str(&*exp.pretty(1000)).unwrap().into_rc_dyn(), root_v_opt.unwrap())
                         }).collect_vec();
-                        let applier_text = format!("({} {} {})", case_split::SPLITTER, root_var.display_op(), get_splitters(datatype, root_var).join(" "));
-                        let applier: Pattern<SymbolLang> = Pattern::from_str(&*applier_text).unwrap();
-                        let rule_name = format!("{}_split_{}_{}", f.name, index, res.len());
-                        println!("{} => {} if {}", searcher.pretty_string(), applier_text, cond_texts.join(" "));
                         let dyn_searcher: Rc<dyn Searcher<SymbolLang, ()>> = Rc::new(searcher.clone());
                         let conditonal_searcher = searcher_conditions.into_iter().fold(dyn_searcher, |pattern, y|{
                             Rc::new(FilteringSearcher::new(pattern, y))
@@ -334,9 +331,9 @@ pub mod parser {
                     res
                 }).collect_vec()
             }).unwrap_or(vec![]);
-            res.case_splitters = case_splitters;
+            res.case_splitters.extend(case_splitters);
         }
-
+        
         res
     }
 
