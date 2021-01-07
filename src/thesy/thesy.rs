@@ -23,6 +23,7 @@ use crate::thesy::{case_split, consts};
 use bimap::BiHashMap;
 use crate::thesy::example_creator::Examples;
 use std::rc::Rc;
+use multimap::MultiMap;
 
 /// Theory Synthesizer - Explores a given theory finding and proving new lemmas.
 pub struct TheSy {
@@ -500,8 +501,7 @@ impl TheSy {
 
             let mut conjectures = self.get_conjectures();
 
-            'outer: while !conjectures.is_empty() {
-                self.egraph.dot().to_dot("graph.dot").unwrap();
+                'outer: while !conjectures.is_empty() {
                 let (_, mut ex1, mut ex2, d) = conjectures.pop().unwrap();
                 let measure_key = self.stats.init_measure(|| 0);
                 let mut new_rules = self.datatypes[&d].prove_ind(&rules, &ex1, &ex2);

@@ -333,7 +333,7 @@ pub mod parser {
             }).unwrap_or(vec![]);
             res.case_splitters.extend(case_splitters);
         }
-        
+
         res
     }
 
