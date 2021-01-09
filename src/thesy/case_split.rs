@@ -135,7 +135,9 @@ impl CaseSplit {
     }
 
     pub fn case_split(&mut self, egraph: &mut EGraph<SymbolLang, ()>, split_depth: usize, rules: &[Rewrite<SymbolLang, ()>], run_depth: usize) {
-        self.inner_case_split(egraph, split_depth, &Default::default(), rules, run_depth)
+        if !cfg!(feature = "no_split") {
+            self.inner_case_split(egraph, split_depth, &Default::default(), rules, run_depth)
+        }
     }
 
     fn inner_case_split(&mut self, egraph: &mut EGraph<SymbolLang, ()>, split_depth: usize, known_splits: &HashSet<Split>, rules: &[Rewrite<SymbolLang, ()>], run_depth: usize) {

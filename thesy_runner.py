@@ -1,4 +1,4 @@
-# For some weird reason we need to be inside the hol library directory when running isabelle for this to work
+ # For some weird reason we need to be inside the hol library directory when running isabelle for this to work
 import os
 import argparse
 import shutil

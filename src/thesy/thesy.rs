@@ -494,11 +494,13 @@ impl TheSy {
             let stop_reason = self.equiv_reduc(rules);
 
             // True if goals were proven
-            if splitter_to_use.is_some() {
-                if self.prove_case_split_rules(splitter_to_use.unwrap(), rules, &mut found_rules, new_rules_index) {
-                    return found_rules;
+            if !cfg!(feature="no_expl_split") {
+                if splitter_to_use.is_some() {
+                    if self.prove_case_split_rules(splitter_to_use.unwrap(), rules, &mut found_rules, new_rules_index) {
+                        return found_rules;
+                    }
+                    splitter_to_use = case_spliter.as_mut();
                 }
-                splitter_to_use = case_spliter.as_mut();
             }
 
             let mut conjectures = self.get_conjectures();
