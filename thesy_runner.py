@@ -44,8 +44,12 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("inputdir", nargs='+')
     parser.add_argument('-p', '--prove', action='store_true', default=False)
+    parser.add_argument('-f', '--features', default="")
+    parser.add_argument('--skip', nargs='+')
+
     args = parser.parse_args()
     CMD.append(str(args.prove).lower())
+    BUILD_CMD[4] = BUILD_CMD[4] + args.features
     p = subprocess.run(BUILD_CMD, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
     if p.returncode != 0:
         print(p.stderr.decode())
@@ -53,9 +57,9 @@ if __name__ == '__main__':
         exit()
     print("Build done")
     inputdirs = args.inputdir
-    files = [os.path.join(folder, fn) for folder in inputdirs for fn in os.listdir(folder) if fn.endswith(".th") and not fn.endswith("res.th")]
+    files = [os.path.join(folder, fn) for folder in inputdirs for fn in os.listdir(folder) if fn.endswith(".th") and not fn.endswith("res.th") and fn not in args.skip]
     # isa_files = ["./temp/" + f for f in isa_files]
     cg.set_memory_limit(32, 'gigabytes')
-    pn = 32
+    pn = 20
     pool = multiprocessing.Pool(pn)
     pool.map(run_thesy, files)
