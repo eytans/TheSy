@@ -436,7 +436,7 @@ impl TheSy {
         !runner.egraph.equivs(ex1, ex2).is_empty()
     }
 
-    fn check_goals(&mut self, rules: &mut Vec<Rewrite<SymbolLang, ()>>)
+    fn check_goals(&mut self, case_splitter: &mut Option<&mut CaseSplit>, rules: &mut Vec<Rewrite<SymbolLang, ()>>)
                    -> Option<Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, Rewrite<SymbolLang, ()>)>> {
         if self.goals.is_none() {
             return None;
@@ -450,7 +450,7 @@ impl TheSy {
                     let start = if cfg!(feature = "stats") {
                         Some(SystemTime::now())
                     } else { None };
-                    res = p.prove_all_split_d(rules, Option::from(precond), ex1, ex2, 3);
+                    res = p.prove_all_split_d(case_splitter, rules, Option::from(precond), ex1, ex2, 3);
                     index = i;
                     if res.is_some() {
                         if cfg!(feature = "stats") {
@@ -482,8 +482,9 @@ impl TheSy {
             rules.push(r.clone());
         }
         let new_rules_index = rules.len();
+        let mut splitter_to_use = case_spliter.as_mut();
 
-        if self.prove_goals(rules, &mut found_rules, new_rules_index) {
+        if self.prove_goals(&mut splitter_to_use, rules, &mut found_rules, new_rules_index) {
             return found_rules;
         }
 
@@ -493,10 +494,11 @@ impl TheSy {
             let stop_reason = self.equiv_reduc(rules);
 
             // True if goals were proven
-            if case_spliter.is_some() {
-                if self.prove_case_split_rules(case_spliter.as_mut().unwrap(), rules, &mut found_rules, new_rules_index) {
+            if splitter_to_use.is_some() {
+                if self.prove_case_split_rules(splitter_to_use.unwrap(), rules, &mut found_rules, new_rules_index) {
                     return found_rules;
                 }
+                splitter_to_use = case_spliter.as_mut();
             }
 
             let mut conjectures = self.get_conjectures();
@@ -504,10 +506,10 @@ impl TheSy {
                 'outer: while !conjectures.is_empty() {
                 let (_, mut ex1, mut ex2, d) = conjectures.pop().unwrap();
                 let measure_key = self.stats.init_measure(|| 0);
-                let mut new_rules = self.datatypes[&d].prove_ind(&rules, &ex1, &ex2);
+                let mut new_rules = self.datatypes[&d].prove_ind(&mut splitter_to_use, &rules, &ex1, &ex2);
                 if new_rules.is_some() {
                     let temp = new_rules;
-                    new_rules = self.datatypes[&d].generalize_prove(&rules, &ex1, &ex2);
+                    new_rules = self.datatypes[&d].generalize_prove(&mut splitter_to_use, &rules, &ex1, &ex2);
                     if new_rules.is_none() {
                         new_rules = temp;
                     } else {
@@ -529,7 +531,7 @@ impl TheSy {
                         rules.insert(new_rules_index, r.3);
                     }
 
-                    if self.prove_goals(rules, &mut found_rules, new_rules_index) {
+                    if self.prove_goals(&mut splitter_to_use, rules, &mut found_rules, new_rules_index) {
                         return found_rules;
                     }
 
@@ -570,6 +572,8 @@ impl TheSy {
         // case_split_all(rules, &mut self.egraph, 2, 4);
         self.stats.update_splits(measure_splits);
 
+        let mut splitter_to_use = Some(case_splitter);
+
         let mut conjectures = self.get_conjectures();
         let mut changed = false;
         for (o, mut ex1, mut ex2, d) in conjs_before_cases.into_iter().rev() {
@@ -582,12 +586,12 @@ impl TheSy {
                 continue;
             }
             // Might be a false conjecture that just doesnt get picked anymore in reconstruct.
-            let mut new_rules = self.datatypes[&d].prove_all(rules, &ex1, &ex2);
+            let mut new_rules = self.datatypes[&d].prove_all(&mut splitter_to_use, rules, &ex1, &ex2);
             if new_rules.is_none() {
                 continue;
             } else {
                 let temp = new_rules;
-                new_rules = self.datatypes[&d].generalize_prove(&rules, &ex1, &ex2);
+                new_rules = self.datatypes[&d].generalize_prove(&mut splitter_to_use, &rules, &ex1, &ex2);
                 if new_rules.is_none() {
                     new_rules = temp;
                 } else {
@@ -604,7 +608,7 @@ impl TheSy {
                 // inserting like this so new rule will apply before running into node limit.
                 rules.insert(new_rules_index, r.3);
             }
-            if self.prove_goals(rules, found_rules, new_rules_index) {
+            if self.prove_goals(&mut splitter_to_use, rules, found_rules, new_rules_index) {
                 return true;
             }
         }
@@ -617,9 +621,9 @@ impl TheSy {
     }
 
     /// Attempt to prove all lemmas with retry. Return true if finished all goals.
-    fn prove_goals(&mut self, rules: &mut Vec<Rewrite<SymbolLang, ()>>, found_rules: &mut Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, Rewrite<SymbolLang, ()>)>, new_rules_index: usize) -> bool {
+    fn prove_goals(&mut self, case_splitter: &mut Option<&mut CaseSplit>, rules: &mut Vec<Rewrite<SymbolLang, ()>>, found_rules: &mut Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, Rewrite<SymbolLang, ()>)>, new_rules_index: usize) -> bool {
         loop {
-            let lemma = self.check_goals(rules);
+            let lemma = self.check_goals(case_splitter, rules);
             if lemma.is_none() {
                 break;
             }
@@ -655,7 +659,7 @@ mod test {
     use crate::lang::{DataType, Function};
     use crate::thesy::thesy::TheSy;
     use crate::TheSyConfig;
-    use crate::thesy::case_split::{case_split_all, CaseSplit, SplitApplier, Split};
+    use crate::thesy::case_split::{CaseSplit, SplitApplier, Split};
     use crate::thesy::{consts, Examples};
     use crate::thesy::consts::ite_rws;
     use crate::tools::tools::Grouped;
@@ -898,7 +902,7 @@ mod test {
         let nat = create_nat_type();
         let mut rewrites = create_pl_rewrites();
         let ind_rec = TheSy::get_ind_var(&nat);
-        assert!(syg.datatypes[&nat].prove_ind(&rewrites[..], &format!("(pl {} Z)", ind_rec.name).parse().unwrap(), &ind_rec.name.parse().unwrap()).is_some())
+        assert!(syg.datatypes[&nat].prove_ind(&mut None,&rewrites[..], &format!("(pl {} Z)", ind_rec.name).parse().unwrap(), &ind_rec.name.parse().unwrap()).is_some())
     }
 
     fn filter_definitions() -> Definitions {
@@ -981,7 +985,7 @@ mod test {
     fn take_drop_equiv_red() {
         // init_logging();
 
-        let mut conf = TheSyConfig::from_path("theories/goal1.smt2.th".parse().unwrap());
+        let mut conf = TheSyConfig::from_path("frontend/benchmarks/cvc4_translated/isaplanner/goal1.smt2.th".parse().unwrap());
         let mut thesy = TheSy::from(&conf);
         let mut case_split = TheSy::create_case_splitter(conf.definitions.case_splitters);
         let mut rules = std::mem::take(&mut conf.definitions.rws);

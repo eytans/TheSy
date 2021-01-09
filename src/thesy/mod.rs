@@ -1,5 +1,4 @@
 pub use {
-    case_split::case_split_all,
     example_creator::Examples,
     thesy::TheSy,
     thesy_parser::parser,
