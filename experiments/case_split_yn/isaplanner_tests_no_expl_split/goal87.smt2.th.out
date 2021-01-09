@@ -1,0 +1,121 @@
+Collecting statistics
+(leq ?__x0 ?__y1) => (or (= ?__x0 ?__y1) (less ?__x0 ?__y1))
+(or (= ?__x0 ?__y1) (less ?__x0 ?__y1)) => (leq ?__x0 ?__y1)
+(append nil ?x) => ?x
+(append (cons ?x2 ?y) ?z) => (cons ?x2 (append ?y ?z))
+(cons ?x2 (append ?y ?z)) => (append (cons ?x2 ?y) ?z)
+(len nil) => zero
+zero => (len nil)
+(len (cons ?x3 ?y)) => (succ (len ?y))
+(rev nil) => nil
+nil => (rev nil)
+(rev (cons ?x4 ?y)) => (append (rev ?y) (cons ?x4 nil))
+(append (rev ?y) (cons ?x4 nil)) => (rev (cons ?x4 ?y))
+(zip nil ?x) => znil
+(zip ?x nil) => znil
+(zip (cons ?x5 ?y) (cons ?z6 ?w)) => (zcons (mkpair ?x5 ?z6) (zip ?y ?w))
+(zcons (mkpair ?x5 ?z6) (zip ?y ?w)) => (zip (cons ?x5 ?y) (cons ?z6 ?w))
+(zappend znil ?x7) => ?x7
+(zappend (zcons ?x8 ?y9) ?z10) => (zcons ?x8 (zappend ?y9 ?z10))
+(zcons ?x8 (zappend ?y9 ?z10)) => (zappend (zcons ?x8 ?y9) ?z10)
+(zrev znil) => znil
+znil => (zrev znil)
+(zrev (zcons ?x11 ?y12)) => (zappend (zrev ?y12) (zcons ?x11 znil))
+(zappend (zrev ?y12) (zcons ?x11 znil)) => (zrev (zcons ?x11 ?y12))
+(zip ?autovar7 (cons ?autovar3 ?autovar4)) => (potential_split ?autovar7 (cons (param_Lst_0 ?autovar7) (param_Lst_1 ?autovar7)) nil) if Cond(var: ?autovar7, pat: (cons ?param_0 ?param_1)) Cond(var: ?autovar7, pat: nil)
+(zip (cons ?autovar5 ?autovar6) ?autovar8) => (potential_split ?autovar8 (cons (param_Lst_0 ?autovar8) (param_Lst_1 ?autovar8)) nil) if Cond(var: ?autovar8, pat: (cons ?param_0 ?param_1)) Cond(var: ?autovar8, pat: nil)
+ ex is: zero
+ ex is: (succ zero)
+ ex is: (succ (succ zero))
+ ex is: nil
+ ex is: (cons autovar_Nat_0 nil)
+ ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+ ex is: (mkpair autovar_Nat_0 autovar_Nat_1)
+ ex is: znil
+ ex is: (zcons autovar_Pair_0 znil)
+ ex is: (zcons autovar_Pair_1 (zcons autovar_Pair_0 znil))
+ ex is: zero
+ ex is: (succ zero)
+ ex is: (succ (succ zero))
+ ex is: nil
+ ex is: (cons autovar_Nat_0 nil)
+ ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+ ex is: (mkpair autovar_Nat_0 autovar_Nat_1)
+ ex is: znil
+ ex is: (zcons autovar_Pair_0 znil)
+ ex is: (zcons autovar_Pair_1 (zcons autovar_Pair_0 znil))
+Running TheSy on datatypes: Lst Pair ZLst Nat dict: append len rev zip zappend zrev leq succ zero cons nil mkpair zcons znil
+Starting depth 1
+14:10:47 [0m[33m[WARN] [0m# of splitters: 1
+14:10:47 [0m[33m[WARN] [0m# of splitters: 2
+14:10:47 [0m[33m[WARN] [0mproved: (append ?ts_ph_Lst_0 nil) => ?ts_ph_Lst_0
+14:10:47 [0m[33m[WARN] [0mproved: (leq zero ?ts_ph_Nat_0) => true
+14:10:47 [0m[33m[WARN] [0mproved: (zappend ?ts_ph_ZLst_0 znil) => ?ts_ph_ZLst_0
+
+Starting depth 2
+14:10:47 [0m[33m[WARN] [0m# of splitters: 10
+14:10:47 [0m[33m[WARN] [0m# of splitters: 9
+14:10:48 [0m[33m[WARN] [0m# of splitters: 5
+14:10:51 [0m[33m[WARN] [0m# of splitters: 8
+14:10:52 [0m[33m[WARN] [0m# of splitters: 8
+14:10:53 [0m[33m[WARN] [0m# of splitters: 7
+14:10:54 [0m[33m[WARN] [0m# of splitters: 7
+14:10:55 [0m[33m[WARN] [0m# of splitters: 6
+14:10:56 [0m[33m[WARN] [0m# of splitters: 6
+14:10:56 [0m[33m[WARN] [0m# of splitters: 5
+14:10:57 [0m[33m[WARN] [0m# of splitters: 2
+14:10:57 [0m[33m[WARN] [0m# of splitters: 4
+14:10:58 [0m[33m[WARN] [0m# of splitters: 4
+14:10:59 [0m[33m[WARN] [0m# of splitters: 3
+14:11:00 [0m[33m[WARN] [0m# of splitters: 3
+14:11:00 [0m[33m[WARN] [0m# of splitters: 2
+14:11:00 [0m[33m[WARN] [0m# of splitters: 2
+generalizing (append ts_ph_Lst_0 (append ts_ph_Lst_1 ts_ph_Lst_1)) = (append (append ts_ph_Lst_0 ts_ph_Lst_1) ts_ph_Lst_1)
+generalized as case_split
+14:11:00 [0m[33m[WARN] [0mproved: (append ?ts_ph_Lst_0 (append ?ts_ph_Lst_1 ?ts_ph_Lst_2)) => (append (append ?ts_ph_Lst_0 ?ts_ph_Lst_1) ?ts_ph_Lst_2)
+14:11:00 [0m[33m[WARN] [0mproved: (append (append ?ts_ph_Lst_0 ?ts_ph_Lst_1) ?ts_ph_Lst_2) => (append ?ts_ph_Lst_0 (append ?ts_ph_Lst_1 ?ts_ph_Lst_2))
+14:11:00 [0m[33m[WARN] [0mproved: (zip ?ts_ph_Lst_0 (append ?ts_ph_Lst_0 ?ts_ph_Lst_1)) => (zip (append ?ts_ph_Lst_0 ?ts_ph_Lst_1) ?ts_ph_Lst_0)
+14:11:00 [0m[33m[WARN] [0mproved: (zip (append ?ts_ph_Lst_0 ?ts_ph_Lst_1) ?ts_ph_Lst_0) => (zip ?ts_ph_Lst_0 (append ?ts_ph_Lst_0 ?ts_ph_Lst_1))
+14:11:00 [0m[33m[WARN] [0mproved: (zip (append ?ts_ph_Lst_0 ?ts_ph_Lst_1) ?ts_ph_Lst_0) => (zip ?ts_ph_Lst_0 (append ?ts_ph_Lst_0 ?ts_ph_Lst_0))
+14:11:00 [0m[33m[WARN] [0mproved: (leq (succ zero) (succ ?ts_ph_Nat_0)) => true
+14:11:00 [0m[33m[WARN] [0m# of splitters: 1
+14:11:00 [0m[33m[WARN] [0m# of splitters: 1
+14:11:00 [0m[33m[WARN] [0m# of splitters: 1
+14:11:00 [0m[33m[WARN] [0m# of splitters: 1
+14:11:00 [0m[33m[WARN] [0m# of splitters: 1
+14:11:00 [0m[33m[WARN] [0m# of splitters: 1
+generalizing (zappend (zip ts_ph_Lst_0 ts_ph_Lst_0) (zip ts_ph_Lst_1 ts_ph_Lst_1)) = (zip (append ts_ph_Lst_0 ts_ph_Lst_1) (append ts_ph_Lst_0 ts_ph_Lst_1))
+generalized as case_split
+14:11:00 [0m[33m[WARN] [0mproved: (zappend (zip ?ts_ph_Lst_0 ?ts_ph_Lst_0) (zip ?ts_ph_Lst_1 ?ts_ph_Lst_2)) => (zip (append ?ts_ph_Lst_0 ?ts_ph_Lst_1) (append ?ts_ph_Lst_0 ?ts_ph_Lst_2))
+14:11:00 [0m[33m[WARN] [0mproved: (zip (append ?ts_ph_Lst_0 ?ts_ph_Lst_1) (append ?ts_ph_Lst_0 ?ts_ph_Lst_2)) => (zappend (zip ?ts_ph_Lst_0 ?ts_ph_Lst_0) (zip ?ts_ph_Lst_1 ?ts_ph_Lst_2))
+14:11:00 [0m[33m[WARN] [0mproved: (zip ?ts_ph_Lst_0 (cons ?ts_ph_Nat_1 nil)) => (zip (append ?ts_ph_Lst_0 ?ts_ph_Lst_0) (cons ?ts_ph_Nat_1 nil))
+14:11:00 [0m[33m[WARN] [0mproved: (zip (append ?ts_ph_Lst_0 ?ts_ph_Lst_0) (cons ?ts_ph_Nat_1 nil)) => (zip ?ts_ph_Lst_0 (cons ?ts_ph_Nat_1 nil))
+14:11:00 [0m[33m[WARN] [0mproved: (zip (cons ?ts_ph_Nat_1 nil) (append ?ts_ph_Lst_0 ?ts_ph_Lst_0)) => (zip (cons ?ts_ph_Nat_1 nil) ?ts_ph_Lst_0)
+14:11:00 [0m[33m[WARN] [0mproved: (zip (cons ?ts_ph_Nat_1 nil) ?ts_ph_Lst_0) => (zip (cons ?ts_ph_Nat_1 nil) (append ?ts_ph_Lst_0 ?ts_ph_Lst_0))
+generalizing (append (append ts_ph_Lst_0 ts_ph_Lst_1) ts_ph_Lst_1) = (append ts_ph_Lst_0 (append ts_ph_Lst_1 ts_ph_Lst_1))
+generalized as case_split
+generalizing (zappend ts_ph_ZLst_0 (zappend ts_ph_ZLst_1 ts_ph_ZLst_1)) = (zappend (zappend ts_ph_ZLst_0 ts_ph_ZLst_1) ts_ph_ZLst_1)
+generalized as case_split
+14:11:01 [0m[33m[WARN] [0mproved: (zappend ?ts_ph_ZLst_0 (zappend ?ts_ph_ZLst_1 ?ts_ph_ZLst_2)) => (zappend (zappend ?ts_ph_ZLst_0 ?ts_ph_ZLst_1) ?ts_ph_ZLst_2)
+14:11:01 [0m[33m[WARN] [0mproved: (zappend (zappend ?ts_ph_ZLst_0 ?ts_ph_ZLst_1) ?ts_ph_ZLst_2) => (zappend ?ts_ph_ZLst_0 (zappend ?ts_ph_ZLst_1 ?ts_ph_ZLst_2))
+
+14:11:01 [0m[33m[WARN] [0mproved: (rev (append ?ts_ph_Lst_0 ?ts_ph_Lst_1)) => (append (rev ?ts_ph_Lst_1) (rev ?ts_ph_Lst_0))
+14:11:01 [0m[33m[WARN] [0mproved: (append (rev ?ts_ph_Lst_1) (rev ?ts_ph_Lst_0)) => (rev (append ?ts_ph_Lst_0 ?ts_ph_Lst_1))
+
+14:11:02 [0m[33m[WARN] [0mproved: (rev (rev ?ts_ph_Lst_0)) => ?ts_ph_Lst_0
+
+14:11:10 [0m[33m[WARN] [0mproved: (zappend (zrev ?ts_ph_ZLst_1) (zrev ?ts_ph_ZLst_0)) => (zrev (zappend ?ts_ph_ZLst_0 ?ts_ph_ZLst_1))
+14:11:10 [0m[33m[WARN] [0mproved: (zrev (zappend ?ts_ph_ZLst_0 ?ts_ph_ZLst_1)) => (zappend (zrev ?ts_ph_ZLst_1) (zrev ?ts_ph_ZLst_0))
+
+14:11:27 [0m[33m[WARN] [0mproved: (zrev (zrev ?ts_ph_ZLst_0)) => ?ts_ph_ZLst_0
+
+14:11:50 [0m[33m[WARN] [0mproved: (zip (rev ?ts_ph_Lst_0) (rev ?ts_ph_Lst_0)) => (zrev (zip ?ts_ph_Lst_0 ?ts_ph_Lst_0))
+14:11:50 [0m[33m[WARN] [0mproved: (zrev (zip ?ts_ph_Lst_0 ?ts_ph_Lst_0)) => (zip (rev ?ts_ph_Lst_0) (rev ?ts_ph_Lst_0))
+
+14:12:40 [0m[33m[WARN] [0m# of splitters: 1
+14:12:40 [0m[33m[WARN] [0m# of splitters: 1
+14:12:40 [0m[33m[WARN] [0m# of splitters: 1
+14:12:40 [0m[33m[WARN] [0m# of splitters: 1
+14:12:40 [0m[33m[WARN] [0m# of splitters: 1
+14:12:40 [0m[33m[WARN] [0m# of splitters: 1
+done in 113613

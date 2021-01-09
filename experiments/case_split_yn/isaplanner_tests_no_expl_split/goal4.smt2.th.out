@@ -1,0 +1,177 @@
+Collecting statistics
+(leq ?__x0 ?__y1) => (or (= ?__x0 ?__y1) (less ?__x0 ?__y1))
+(or (= ?__x0 ?__y1) (less ?__x0 ?__y1)) => (leq ?__x0 ?__y1)
+(plus zero ?n) => ?n
+(plus (succ ?n) ?m) => (succ (plus ?n ?m))
+(succ (plus ?n ?m)) => (plus (succ ?n) ?m)
+(count ?x nil) => zero
+(count ?x (cons ?y ?z)) => (ite (= ?x ?y) (succ (count ?x ?z)) (count ?x ?z))
+(ite (= ?x ?y) (succ (count ?x ?z)) (count ?x ?z)) => (count ?x (cons ?y ?z))
+ ex is: zero
+ ex is: (succ zero)
+ ex is: (succ (succ zero))
+ ex is: nil
+ ex is: (cons autovar_Nat_0 nil)
+ ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+ ex is: zero
+ ex is: (succ zero)
+ ex is: (succ (succ zero))
+ ex is: nil
+ ex is: (cons autovar_Nat_0 nil)
+ ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+Running TheSy on datatypes: Lst Nat dict: plus count leq succ zero cons nil
+Starting depth 1
+14:11:24 [0m[33m[WARN] [0m# of splitters: 6
+14:11:24 [0m[33m[WARN] [0m# of splitters: 5
+14:11:24 [0m[33m[WARN] [0m# of splitters: 5
+14:11:24 [0m[33m[WARN] [0m# of splitters: 4
+14:11:24 [0m[33m[WARN] [0m# of splitters: 4
+14:11:24 [0m[33m[WARN] [0m# of splitters: 3
+14:11:24 [0m[33m[WARN] [0m# of splitters: 3
+14:11:24 [0m[33m[WARN] [0m# of splitters: 2
+14:11:24 [0m[33m[WARN] [0m# of splitters: 2
+14:11:24 [0m[33m[WARN] [0m# of splitters: 1
+14:11:24 [0m[33m[WARN] [0m# of splitters: 1
+14:11:24 [0m[33m[WARN] [0mproved: (plus ?ts_ph_Nat_0 zero) => ?ts_ph_Nat_0
+14:11:24 [0m[33m[WARN] [0mproved: (leq zero ?ts_ph_Nat_0) => true
+
+Starting depth 2
+14:11:24 [0m[33m[WARN] [0m# of splitters: 145
+14:11:24 [0m[33m[WARN] [0m# of splitters: 123
+14:11:26 [0m[33m[WARN] [0m# of splitters: 141
+14:11:27 [0m[33m[WARN] [0m# of splitters: 128
+14:11:27 [0m[33m[WARN] [0m# of splitters: 139
+14:11:28 [0m[33m[WARN] [0m# of splitters: 121
+14:11:28 [0m[33m[WARN] [0m# of splitters: 139
+14:11:29 [0m[33m[WARN] [0m# of splitters: 125
+14:11:30 [0m[33m[WARN] [0m# of splitters: 136
+14:11:30 [0m[33m[WARN] [0m# of splitters: 118
+14:11:31 [0m[33m[WARN] [0m# of splitters: 136
+14:11:33 [0m[33m[WARN] [0m# of splitters: 123
+14:11:34 [0m[33m[WARN] [0m# of splitters: 134
+14:11:34 [0m[33m[WARN] [0m# of splitters: 133
+14:11:34 [0m[33m[WARN] [0m# of splitters: 137
+14:11:34 [0m[33m[WARN] [0m# of splitters: 59
+14:11:34 [0m[33m[WARN] [0m# of splitters: 136
+14:11:35 [0m[33m[WARN] [0m# of splitters: 132
+14:11:35 [0m[33m[WARN] [0m# of splitters: 134
+14:11:36 [0m[33m[WARN] [0m# of splitters: 131
+14:11:36 [0m[33m[WARN] [0m# of splitters: 133
+14:11:37 [0m[33m[WARN] [0m# of splitters: 130
+14:11:37 [0m[33m[WARN] [0m# of splitters: 132
+14:11:38 [0m[33m[WARN] [0m# of splitters: 129
+14:11:38 [0m[33m[WARN] [0m# of splitters: 131
+14:11:39 [0m[33m[WARN] [0m# of splitters: 126
+14:11:40 [0m[33m[WARN] [0m# of splitters: 130
+14:11:40 [0m[33m[WARN] [0m# of splitters: 5
+14:11:40 [0m[33m[WARN] [0m# of splitters: 129
+14:11:41 [0m[33m[WARN] [0m# of splitters: 121
+14:11:42 [0m[33m[WARN] [0m# of splitters: 124
+14:11:42 [0m[33m[WARN] [0m# of splitters: 55
+14:11:42 [0m[33m[WARN] [0m# of splitters: 123
+14:11:43 [0m[33m[WARN] [0m# of splitters: 92
+14:11:45 [0m[33m[WARN] [0m# of splitters: 122
+14:11:45 [0m[33m[WARN] [0m# of splitters: 122
+14:11:45 [0m[33m[WARN] [0m# of splitters: 121
+14:11:46 [0m[33m[WARN] [0m# of splitters: 121
+14:11:47 [0m[33m[WARN] [0m# of splitters: 120
+14:11:47 [0m[33m[WARN] [0m# of splitters: 114
+14:11:47 [0m[33m[WARN] [0m# of splitters: 119
+14:11:48 [0m[33m[WARN] [0m# of splitters: 115
+14:11:48 [0m[33m[WARN] [0m# of splitters: 118
+14:11:48 [0m[33m[WARN] [0m# of splitters: 112
+14:11:49 [0m[33m[WARN] [0m# of splitters: 117
+14:11:50 [0m[33m[WARN] [0m# of splitters: 114
+14:11:50 [0m[33m[WARN] [0m# of splitters: 116
+14:11:50 [0m[33m[WARN] [0m# of splitters: 110
+14:11:51 [0m[33m[WARN] [0m# of splitters: 115
+14:11:51 [0m[33m[WARN] [0m# of splitters: 115
+14:11:52 [0m[33m[WARN] [0m# of splitters: 114
+14:11:53 [0m[33m[WARN] [0m# of splitters: 115
+14:11:54 [0m[33m[WARN] [0m# of splitters: 114
+14:11:54 [0m[33m[WARN] [0m# of splitters: 70
+14:11:54 [0m[33m[WARN] [0m# of splitters: 113
+14:11:55 [0m[33m[WARN] [0m# of splitters: 69
+14:11:55 [0m[33m[WARN] [0m# of splitters: 112
+14:11:56 [0m[33m[WARN] [0m# of splitters: 5
+14:11:56 [0m[33m[WARN] [0m# of splitters: 111
+14:11:56 [0m[33m[WARN] [0m# of splitters: 66
+14:11:56 [0m[33m[WARN] [0m# of splitters: 109
+14:11:57 [0m[33m[WARN] [0m# of splitters: 74
+14:11:57 [0m[33m[WARN] [0m# of splitters: 108
+14:11:57 [0m[33m[WARN] [0m# of splitters: 66
+14:11:57 [0m[33m[WARN] [0m# of splitters: 107
+14:11:58 [0m[33m[WARN] [0m# of splitters: 72
+14:11:58 [0m[33m[WARN] [0m# of splitters: 105
+14:11:58 [0m[33m[WARN] [0m# of splitters: 81
+14:11:58 [0m[33m[WARN] [0m# of splitters: 104
+14:11:58 [0m[33m[WARN] [0m# of splitters: 101
+14:11:59 [0m[33m[WARN] [0m# of splitters: 85
+14:11:59 [0m[33m[WARN] [0m# of splitters: 99
+14:12:00 [0m[33m[WARN] [0m# of splitters: 102
+14:12:01 [0m[33m[WARN] [0m# of splitters: 95
+14:12:01 [0m[33m[WARN] [0m# of splitters: 101
+14:12:01 [0m[33m[WARN] [0m# of splitters: 99
+14:12:02 [0m[33m[WARN] [0m# of splitters: 100
+14:12:02 [0m[33m[WARN] [0m# of splitters: 4
+14:12:02 [0m[33m[WARN] [0m# of splitters: 100
+14:12:02 [0m[33m[WARN] [0m# of splitters: 92
+14:12:03 [0m[33m[WARN] [0m# of splitters: 97
+14:12:03 [0m[33m[WARN] [0m# of splitters: 42
+14:12:03 [0m[33m[WARN] [0m# of splitters: 96
+14:12:03 [0m[33m[WARN] [0m# of splitters: 91
+14:12:04 [0m[33m[WARN] [0m# of splitters: 95
+14:12:04 [0m[33m[WARN] [0m# of splitters: 87
+14:12:04 [0m[33m[WARN] [0m# of splitters: 94
+14:12:05 [0m[33m[WARN] [0m# of splitters: 94
+14:12:05 [0m[33m[WARN] [0m# of splitters: 93
+14:12:05 [0m[33m[WARN] [0m# of splitters: 93
+14:12:06 [0m[33m[WARN] [0m# of splitters: 92
+14:12:06 [0m[33m[WARN] [0m# of splitters: 86
+14:12:06 [0m[33m[WARN] [0m# of splitters: 91
+14:12:06 [0m[33m[WARN] [0m# of splitters: 67
+14:12:07 [0m[33m[WARN] [0m# of splitters: 90
+14:12:07 [0m[33m[WARN] [0m# of splitters: 84
+14:12:07 [0m[33m[WARN] [0m# of splitters: 89
+14:12:07 [0m[33m[WARN] [0m# of splitters: 84
+14:12:08 [0m[33m[WARN] [0m# of splitters: 88
+14:12:08 [0m[33m[WARN] [0m# of splitters: 3
+14:12:08 [0m[33m[WARN] [0m# of splitters: 88
+14:12:08 [0m[33m[WARN] [0m# of splitters: 83
+14:12:09 [0m[33m[WARN] [0m# of splitters: 86
+14:12:09 [0m[33m[WARN] [0m# of splitters: 37
+14:12:09 [0m[33m[WARN] [0m# of splitters: 85
+14:12:10 [0m[33m[WARN] [0m# of splitters: 81
+14:12:10 [0m[33m[WARN] [0m# of splitters: 84
+14:12:10 [0m[33m[WARN] [0m# of splitters: 83
+14:12:10 [0m[33m[WARN] [0m# of splitters: 83
+14:12:10 [0m[33m[WARN] [0m# of splitters: 83
+14:12:11 [0m[33m[WARN] [0m# of splitters: 82
+14:12:11 [0m[33m[WARN] [0m# of splitters: 79
+14:12:12 [0m[33m[WARN] [0m# of splitters: 81
+14:12:12 [0m[33m[WARN] [0m# of splitters: 78
+14:12:12 [0m[33m[WARN] [0m# of splitters: 80
+14:12:12 [0m[33m[WARN] [0m# of splitters: 80
+14:12:12 [0m[33m[WARN] [0m# of splitters: 79
+14:12:13 [0m[33m[WARN] [0m# of splitters: 79
+14:12:13 [0m[33m[WARN] [0m# of splitters: 78
+14:12:14 [0m[33m[WARN] [0m# of splitters: 2
+14:12:14 [0m[33m[WARN] [0m# of splitters: 78
+14:12:14 [0m[33m[WARN] [0mproved: (succ ?ts_ph_Nat_0) => (plus ?ts_ph_Nat_0 (succ zero))
+14:12:14 [0m[33m[WARN] [0mproved: (plus ?ts_ph_Nat_0 (succ zero)) => (succ ?ts_ph_Nat_0)
+14:12:14 [0m[33m[WARN] [0mproved: (leq (succ zero) (succ ?ts_ph_Nat_0)) => true
+14:12:14 [0m[33m[WARN] [0mproved: (plus ?ts_ph_Nat_0 (succ ?ts_ph_Nat_1)) => (succ (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1))
+14:12:14 [0m[33m[WARN] [0mproved: (succ (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1)) => (plus ?ts_ph_Nat_0 (succ ?ts_ph_Nat_1))
+
+14:12:15 [0m[33m[WARN] [0mproved: (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1) => (plus ?ts_ph_Nat_1 ?ts_ph_Nat_0)
+14:12:15 [0m[33m[WARN] [0mproved: (plus ?ts_ph_Nat_1 ?ts_ph_Nat_0) => (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1)
+
+generalizing (plus ts_ph_Nat_0 (plus ts_ph_Nat_1 ts_ph_Nat_1)) = (plus ts_ph_Nat_1 (plus ts_ph_Nat_0 ts_ph_Nat_1))
+generalized as case_split
+14:12:15 [0m[33m[WARN] [0mproved: (plus ?ts_ph_Nat_0 (plus ?ts_ph_Nat_1 ?ts_ph_Nat_2)) => (plus ?ts_ph_Nat_1 (plus ?ts_ph_Nat_0 ?ts_ph_Nat_2))
+14:12:15 [0m[33m[WARN] [0mproved: (plus ?ts_ph_Nat_1 (plus ?ts_ph_Nat_0 ?ts_ph_Nat_2)) => (plus ?ts_ph_Nat_0 (plus ?ts_ph_Nat_1 ?ts_ph_Nat_2))
+
+14:12:15 [0m[33m[WARN] [0mproved: (leq (succ zero) ?ts_ph_Nat_0) => (leq (succ zero) (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0))
+14:12:15 [0m[33m[WARN] [0mproved: (leq (succ zero) (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0)) => (leq (succ zero) ?ts_ph_Nat_0)
+
+done in 50693
