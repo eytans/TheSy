@@ -49,7 +49,7 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     CMD.append(str(args.prove).lower())
-    BUILD_CMD[4] = BUILD_CMD[4] + args.features
+    BUILD_CMD[4] = BUILD_CMD[4] + " " + args.features
     p = subprocess.run(BUILD_CMD, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
     if p.returncode != 0:
         print(p.stderr.decode())
