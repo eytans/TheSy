@@ -45,7 +45,7 @@ if __name__ == '__main__':
     parser.add_argument("inputdir", nargs='+')
     parser.add_argument('-p', '--prove', action='store_true', default=False)
     parser.add_argument('-f', '--features', default="")
-    parser.add_argument('--skip', nargs='+')
+    parser.add_argument('--skip', nargs='*', default=[])
 
     args = parser.parse_args()
     CMD.append(str(args.prove).lower())
