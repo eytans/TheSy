@@ -16,7 +16,7 @@ if split:
     features = ''
 else:
     dir = dir_no_s
-    features = '--features no_split_expl'
+    features = '--features no_expl_split'
 
 # files = open('experiments/case_split_yn/isaplanner_with_cs').read().strip().split()
 # skip_files = [f for f in os.listdir(dir) if f.endswith('.th') and (not f.endswith('res.th')) and f.strip() not in files]
