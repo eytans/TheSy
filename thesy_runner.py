@@ -26,7 +26,9 @@ def run_thesy(fn):
     in_my_cgroup()
     print(f"running {fn}")
     try:
-        res = subprocess.run(CMD + [fn], stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=60*60*1)
+        cmd = [s for s in CMD]
+        cmd[1] = fn
+        res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=60*15*1)
         out = res.stdout.decode("utf8")
         error = res.stderr.decode("utf8")
     except subprocess.TimeoutExpired:
@@ -48,8 +50,9 @@ if __name__ == '__main__':
     parser.add_argument('--skip', nargs='*', default=[])
 
     args = parser.parse_args()
-    CMD.append(str(args.prove).lower())
-    BUILD_CMD[4] = BUILD_CMD[4] + " " + args.features
+    if args.prove:
+        CMD.append('--prove')
+    BUILD_CMD[4] = (BUILD_CMD[4] + " " + args.features).strip()
     p = subprocess.run(BUILD_CMD, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
     if p.returncode != 0:
         print(p.stderr.decode())
@@ -57,7 +60,7 @@ if __name__ == '__main__':
         exit()
     print("Build done")
     inputdirs = args.inputdir
-    files = [os.path.join(folder, fn) for folder in inputdirs for fn in os.listdir(folder) if fn.endswith(".th") and not fn.endswith("res.th") and fn not in args.skip]
+    files = [os.path.join(folder, fn) for folder in inputdirs for fn in os.listdir(folder) if fn.endswith(".th") and (not fn.endswith("res.th")) and fn not in args.skip]
     # isa_files = ["./temp/" + f for f in isa_files]
     cg.set_memory_limit(32, 'gigabytes')
     pn = 20
