@@ -11,7 +11,7 @@ use std::collections::hash_map::RandomState;
 pub struct Examples {
     pub datatype: DataType,
     examples: Vec<RecExpr<SymbolLang>>,
-    example_vars: Vec<HashMap<Function, Vec<RecExpr<SymbolLang>>>>,
+    pub example_vars: Vec<HashMap<Function, Vec<RecExpr<SymbolLang>>>>,
 }
 
 impl Examples {

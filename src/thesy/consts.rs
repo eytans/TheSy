@@ -1,10 +1,11 @@
-use egg::{Rewrite, SymbolLang, Pattern, Var};
+use egg::{Rewrite, SymbolLang, Pattern, Var, EGraph, Subst, Id, SearchMatches, Searcher};
 use crate::eggstentions::searchers::multisearcher::{MultiEqSearcher, FilteringSearcher, aggregate_conditions, ToDyn};
 use crate::eggstentions::appliers::{DiffApplier, UnionApplier};
 use std::str::FromStr;
-use crate::thesy::{case_split, TheSy};
-use crate::thesy::case_split::{CaseSplit, Split, SplitApplier};
+use crate::thesy::{case_split, TheSy, Examples};
+use crate::thesy::case_split::{CaseSplit, Split, SplitAdapter, MultiPatternAdapter};
 use itertools::Itertools;
+use std::rc::Rc;
 
 pub(crate) fn bool_rws() -> Vec<Rewrite<SymbolLang, ()>> {
     let and_multi_searcher = MultiEqSearcher::new(vec![
@@ -80,30 +81,48 @@ pub(crate) fn ite_rws() -> Vec<Rewrite<SymbolLang, ()>> {
     ]
 }
 
-pub fn system_case_splits() -> CaseSplit {
+struct OrSplitAdapter {
+    searcher: MultiEqSearcher<Pattern<SymbolLang>>,
+    x_var: Var,
+    y_var: Var
+}
+
+impl OrSplitAdapter {
+    pub fn new() -> Self {
+        let searcher = MultiEqSearcher::new(vec![
+            Pattern::from_str("true").unwrap(),
+            Pattern::from_str("(or ?x ?y)").unwrap(),
+        ]);
+        let x_var = Var::from_str("?x").unwrap();
+        let y_var = Var::from_str("?y").unwrap();
+        OrSplitAdapter{searcher, x_var, y_var}
+    }
+}
+
+impl SplitAdapter for OrSplitAdapter {
+    fn search(&self, egraph: &EGraph<SymbolLang, ()>) -> Vec<SearchMatches> {
+        self.searcher.search(egraph)
+    }
+
+    fn apply(&self, graph: &mut EGraph<SymbolLang, ()>, search_matches: Vec<SearchMatches>, id_map: Vec<Vec<Id>>) -> Vec<Split> {
+        let true_root = graph.add_expr(&"true".parse().unwrap());
+        search_matches.iter().flat_map(|sm| sm.substs.iter().map(|subs|
+            Split::new(true_root, vec![*subs.get(self.x_var).unwrap(), *subs.get(self.y_var).unwrap()])
+        )).collect_vec()
+    }
+
+    fn add_match_pattern(&self, graph: &mut EGraph<SymbolLang, ()>, subst: Subst) -> Id {
+        unimplemented!()
+    }
+}
+
+pub fn system_case_splits(examples: Vec<Examples>) -> CaseSplit {
+    let searcher: Pattern<SymbolLang> = Pattern::from_str("(ite ?z ?x ?y)").unwrap();
     let ite_searcher = {
-        let searcher: Pattern<SymbolLang> = Pattern::from_str("(ite ?z ?x ?y)").unwrap();
         let true_cond = FilteringSearcher::create_non_pattern_filterer(Pattern::from_str("true").unwrap().into_rc_dyn(), Var::from_str("?z").unwrap());
         let false_cond = FilteringSearcher::create_non_pattern_filterer(Pattern::from_str("false").unwrap().into_rc_dyn(), Var::from_str("?z").unwrap());
         FilteringSearcher::new(searcher.into_rc_dyn(), aggregate_conditions::<SymbolLang, ()>(vec![true_cond, false_cond]))
     };
-    let mut res = CaseSplit::from_applier_patterns(vec![(ite_searcher.into_rc_dyn(), Var::from_str("?z").unwrap(), vec!["true".parse().unwrap(), "false".parse().unwrap()])]);
-
-    let or_multi_searcher = MultiEqSearcher::new(vec![
-        Pattern::from_str("true").unwrap(),
-        Pattern::from_str("(or ?x ?y)").unwrap(),
-    ]);
-
-    let x_var = Var::from_str("?x").unwrap();
-    let y_var = Var::from_str("?y").unwrap();
-    let or_implies_applier: SplitApplier = Box::new(move |graph, sms| {
-        let true_root = graph.add_expr(&"true".parse().unwrap());
-        sms.iter().flat_map(|sm| sm.substs.iter().map(|subs|
-            Split::new(true_root, vec![*subs.get(x_var).unwrap(), *subs.get(y_var).unwrap()])
-        )).collect_vec()
-    });
-
-    res.extend(CaseSplit::new(vec![(or_multi_searcher.into_rc_dyn(), or_implies_applier)]));
-    res
-
+    let ite_adapter = MultiPatternAdapter::new(ite_searcher.into_rc_dyn(), Box::new(searcher), Var::from_str("?z").unwrap(), vec!["true".parse().unwrap(), "false".parse().unwrap()]);
+    CaseSplit::new(vec![Rc::new(OrSplitAdapter::new()), Rc::new(ite_adapter)])
 }

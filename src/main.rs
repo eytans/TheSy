@@ -123,7 +123,7 @@ impl TheSyConfig {
                 let funcs = vec![f.clone()];
                 new_conf.definitions.functions = funcs;
                 let mut thesy = TheSy::from(&new_conf);
-                let case_split = TheSy::create_case_splitter(new_conf.definitions.case_splitters);
+                let case_split = TheSy::create_case_splitter(new_conf.definitions.case_splitters, thesy.examples.values().cloned().collect_vec());
                 thesy.run(&mut rules, Some(case_split), max_depth.unwrap_or(2));
             }
             for couple in choose(&self.definitions.functions[..], 2) {
@@ -132,13 +132,13 @@ impl TheSyConfig {
                 let funcs = couple.into_iter().cloned().collect_vec();
                 new_conf.definitions.functions = funcs;
                 let mut thesy = TheSy::from(&new_conf);
-                let case_split = TheSy::create_case_splitter(new_conf.definitions.case_splitters);
+                let case_split = TheSy::create_case_splitter(new_conf.definitions.case_splitters, thesy.examples.values().cloned().collect_vec());
                 thesy.run(&mut rules, Some(case_split), max_depth.unwrap_or(2));
             }
         }
         let mut thesy: TheSy = TheSy::from(&*self);
         // TODO: take a ref
-        let case_split = TheSy::create_case_splitter(std::mem::take(&mut self.definitions.case_splitters));
+        let case_split = TheSy::create_case_splitter(std::mem::take(&mut self.definitions.case_splitters), thesy.examples.values().cloned().collect_vec());
         let results = thesy.run(&mut rules, Some(case_split), max_depth.unwrap_or(2));
         let new_rules_text = results.iter()
             .map(|(precond, searcher, applier, rw)|

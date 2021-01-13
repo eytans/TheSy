@@ -1,5 +1,5 @@
-use egg::{Rewrite, SymbolLang, EGraph, Id, Runner, StopReason, EClass, Var, Pattern, Searcher, SearchMatches, Applier};
-use itertools::Itertools;
+use egg::{Rewrite, SymbolLang, EGraph, Id, Runner, StopReason, EClass, Var, Pattern, Searcher, SearchMatches, Applier, RecExpr, Subst};
+use itertools::{Itertools, Either};
 use std::time::Duration;
 use std::collections::{HashMap, HashSet};
 use std::str::FromStr;
@@ -8,6 +8,8 @@ use std::rc::Rc;
 use std::path::Display;
 use std::fmt;
 use smallvec::alloc::fmt::Formatter;
+use crate::thesy::Examples;
+use crate::tools::tools::combinations;
 
 /// To be used as the op of edges representing potential split
 pub const SPLITTER: &'static str = "potential_split";
@@ -25,54 +27,116 @@ lazy_static! {
 
 #[derive(Clone, Hash, PartialEq, Eq, Debug)]
 pub struct Split {
-    root: Id,
-    splits: Vec<Id>,
+    roots: Vec<Id>,
+    splits: Vec<Vec<Id>>,
 }
 
 impl Split {
-    pub fn new(root: Id, splits: Vec<Id>) -> Self {Split{root, splits}}
+    pub fn new(root: Id, splits: Vec<Id>) -> Self {Split{roots: vec![root], splits: vec![splits]}}
+
+    pub fn multi(roots: Vec<Id>, splits: Vec<Vec<Id>>) -> Self {Split{roots, splits}}
 
     pub(crate) fn update(&mut self, egraph: &EGraph<SymbolLang, ()>) {
-        self.root = egraph.find(self.root);
-        for i in 0..self.splits.len() {
-            self.splits[i] = egraph.find(self.splits[i]);
-        }
+        self.roots.iter_mut().for_each(|x| *x = egraph.find(**&x));
+        self.splits.iter_mut().for_each(|v| v.iter_mut().for_each(|x| *x = egraph.find(**&x)));
     }
 }
 
 impl fmt::Display for Split {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        write!(f, "(root: {}, splits [{}])", self.root, self.splits.iter().map(|x| usize::from(*x).to_string()).intersperse(" ".parse().unwrap()).collect::<String>())
+        write!(f, "(root: {}, splits [{}])", self.roots.iter().map(|x| usize::from(*x).to_string()).intersperse(" ".parse().unwrap()).collect::<String>(), self.splits.iter().flat_map(|x| x.iter().map(|x| usize::from(*x).to_string())).intersperse(" ".parse().unwrap()).collect::<String>())
     }
 }
 
-pub type SplitApplier = Box<dyn FnMut(&mut EGraph<SymbolLang, ()>, Vec<SearchMatches>) -> Vec<Split>>;
+// /// Function from graph and split_searcher matches to splits. This is useful for when multiple
+// /// examples match together, so we need a few substs together.
+// pub type SplitApplier = Box<dyn FnMut(&mut EGraph<SymbolLang, ()>, Vec<Vec<(Id, Subst)>>) -> Vec<Split>>;
+
+/// Function from graph and example var ids to substs for applier.
+pub trait SplitAdapter {
+    fn search(&self, egraph: &EGraph<SymbolLang, ()>) -> Vec<SearchMatches>;
+
+    /// Add needed edges to the graph and return all splits.
+    /// id_map is a vector of sets of ids, representing the id as it appears in all examples.
+    fn apply(&self, graph: &mut EGraph<SymbolLang, ()>, search_matches: Vec<SearchMatches>, id_map: Vec<Vec<Id>>) -> Vec<Split>;
+
+    fn add_match_pattern(&self, graph: &mut EGraph<SymbolLang, ()>, subst: Subst) -> Id;
+}
+
+pub struct MultiPatternAdapter {
+    source_searcher: Rc<dyn Searcher<SymbolLang, ()>>,
+    source_applier: Box<dyn Applier<SymbolLang, ()>>,
+    root: Var,
+    split_appliers: Vec<Pattern<SymbolLang>>,
+}
+
+impl MultiPatternAdapter {
+    pub fn new(source_searcher: Rc<dyn Searcher<SymbolLang, ()>>,
+               source_applier: Box<dyn Applier<SymbolLang, ()>>,
+               root: Var, split_appliers: Vec<Pattern<SymbolLang>>) -> Self {
+        MultiPatternAdapter{source_searcher, source_applier, root, split_appliers}
+    }
+}
+
+impl SplitAdapter for MultiPatternAdapter {
+    fn search(&self, egraph: &EGraph<SymbolLang, ()>) -> Vec<SearchMatches> {
+        self.source_searcher.search(egraph)
+    }
+
+    fn apply(&self, graph: &mut EGraph<SymbolLang, ()>, search_matches: Vec<SearchMatches>, id_map: Vec<Vec<Id>>) -> Vec<Split> {
+        let mut res = vec![];
+        for sm in search_matches {
+            for sub in sm.substs {
+                let known_ids: HashSet<Id> = self.source_searcher.vars().into_iter().map(|v| sub[&v]).collect();
+                let mut split_options = self.split_appliers.iter().map(|ev| ev.apply_one(graph, sm.eclass, &sub)[0]).collect_vec();
+                let id_vecs = id_map.iter().filter(|ids| ids.iter().any(|id| known_ids.contains(id))).collect_vec();
+                let position = id_vecs.first().map(|is| is.iter().find_position(|x| known_ids.contains(x)).unwrap().0);
+                assert!(id_vecs.iter().all(|ids| known_ids.contains(&ids[position.unwrap()])));
+                assert!(id_vecs.iter().all(|ids| ids.iter().all(|i| if i != ids[position.unwrap()] {
+                    !known_ids.contains(i)
+                } else {
+                    true
+                })));
+
+                for ids in id_vecs {
+
+                }
+                res.push(Split::new(sub[self.root], split_options));
+            }
+        }
+        res
+    }
+
+    fn add_match_pattern(&self, graph: &mut EGraph<SymbolLang, ()>, subst: Subst) -> Id {
+        self.source_applier.apply_one(graph, Id::from(0), &subst)[0]
+    }
+}
 
 pub struct CaseSplit {
-    splitter_rules: Vec<(Rc<dyn Searcher<SymbolLang, ()>>, SplitApplier)>,
+    splitter_rules: Vec<Rc<dyn SplitAdapter>>,
 }
 
 impl CaseSplit {
-    pub fn new(splitter_rules: Vec<(Rc<dyn Searcher<SymbolLang, ()>>,
-                                    SplitApplier)>) -> Self {
+    pub fn new(splitter_rules: Vec<Rc<dyn SplitAdapter>>) -> Self {
         CaseSplit { splitter_rules }
     }
 
-    pub fn from_applier_patterns(case_splitters: Vec<(Rc<dyn Searcher<SymbolLang, ()>>, Var, Vec<Pattern<SymbolLang>>)>) -> CaseSplit {
-        let mut res = CaseSplit::new(case_splitters.into_iter().map(|(searcher, root, split_evaluators)| {
-            let applier: SplitApplier = Box::new(move |graph: &mut EGraph<SymbolLang, ()>, sms: Vec<SearchMatches>| {
-                let mut res = vec![];
-                for sm in sms {
-                    for subst in &sm.substs {
-                        res.push(Split::new(subst[root], split_evaluators.iter().map(|ev| ev.apply_one(graph, sm.eclass, &subst)[0]).collect_vec()));
+    pub fn examples_to_id_groups(graph: &mut EGraph<SymbolLang, ()>, examples: Vec<Examples>) -> Vec<Vec<Id>> {
+        let mut ex_var_map: Vec<Vec<Id>> = Default::default();
+        for ex in examples {
+            ex_var_map.push(ex.examples().iter().map(|e| graph.add_expr(e)).collect());
+            for (constr, params) in ex.example_vars.first().unwrap() {
+                for (i, v) in params.iter().enumerate() {
+                    let mut set: Vec<Id> = Default::default();
+                    set.push(graph.add_expr(v));
+                    for x in ex.example_vars.iter().skip(1) {
+                        set.push(graph.add_expr(&x[constr][i]));
                     }
+                    ex_var_map.push(set);
                 }
-                res
-            });
-            (searcher.clone(),
-             applier)
-        }).collect_vec());
-        res
+            }
+        }
+        ex_var_map
     }
 
     pub fn extend(&mut self, other: Self) {
@@ -82,9 +146,12 @@ impl CaseSplit {
     // TODO: can this be an iterator?
     fn split_graph(egraph: &EGraph<SymbolLang, ()>,
                    split: &Split) -> Vec<EGraph<SymbolLang, ()>> {
-        split.splits.iter().map(|child| {
+        let combs = combinations(split.splits.iter());
+        combs.map(|children| {
             let mut new_graph = egraph.clone();
-            new_graph.union(split.root, *child);
+            split.roots.iter().zip(children).for_each(|(root, child)| {
+                new_graph.union(*root, *child);
+            });
             new_graph
         }).collect_vec()
     }

@@ -18,7 +18,7 @@ use crate::lang::*;
 use crate::thesy::prover::Prover;
 use crate::thesy::statistics::Stats;
 use crate::tools::tools::choose;
-use crate::thesy::case_split::{CaseSplit, Split, SplitApplier};
+use crate::thesy::case_split::{CaseSplit, Split, MultiPatternAdapter};
 use crate::thesy::{case_split, consts};
 use bimap::BiHashMap;
 use crate::thesy::example_creator::Examples;
@@ -66,7 +66,7 @@ pub struct TheSy {
     /// for more info check: [EGG] documentation
     equiv_reduc_hooks: Vec<Box<dyn FnMut(&mut Runner<SymbolLang, ()>, &mut Vec<Rewrite<SymbolLang, ()>>) -> Result<(), String>>>,
     /// Vars created for examples, used to reduce case split depth
-    examples: HashMap<DataType, Examples>,
+    pub examples: HashMap<DataType, Examples>,
 }
 
 /// *** TheSy Statics ***
@@ -264,9 +264,9 @@ impl TheSy {
         Self::get_ph(&d.as_exp(), 0)
     }
 
-    pub fn create_case_splitter(case_splitters: Vec<(Rc<dyn Searcher<SymbolLang, ()>>, Var, Vec<Pattern<SymbolLang>>)>) -> CaseSplit {
-        let mut res = CaseSplit::from_applier_patterns(case_splitters);
-        res.extend(consts::system_case_splits());
+    pub fn create_case_splitter(case_splitters: Vec<(Rc<dyn Searcher<SymbolLang, ()>>, Var, Vec<Pattern<SymbolLang>>)>, examples: Vec<Examples>) -> CaseSplit {
+        let mut res = CaseSplit::new(case_splitters.into_iter().map(|(a, b, c)| MultiPatternAdapter::new(a, b, c)).collect_vec());
+        res.extend(consts::system_case_splits(examples));
         res
     }
 }
@@ -655,7 +655,7 @@ mod test {
     use crate::lang::{DataType, Function};
     use crate::thesy::thesy::TheSy;
     use crate::TheSyConfig;
-    use crate::thesy::case_split::{case_split_all, CaseSplit, SplitApplier, Split};
+    use crate::thesy::case_split::{case_split_all, CaseSplit, Split};
     use crate::thesy::{consts, Examples};
     use crate::thesy::consts::ite_rws;
     use crate::tools::tools::Grouped;
@@ -962,7 +962,7 @@ mod test {
         thesy.egraph.rebuild();
         assert!(filter_p_filter_q_exists(&thesy.egraph, 1));
 
-        let mut case_splitter = TheSy::create_case_splitter(filter_defs.case_splitters);
+        let mut case_splitter = TheSy::create_case_splitter(filter_defs.case_splitters, thesy.examples.values().cloned().collect_vec());
 
         case_splitter.case_split(&mut thesy.egraph, 4, &filter_defs.rws, 4);
         let conjs = thesy.get_conjectures();
@@ -983,7 +983,7 @@ mod test {
 
         let mut conf = TheSyConfig::from_path("theories/goal1.smt2.th".parse().unwrap());
         let mut thesy = TheSy::from(&conf);
-        let mut case_split = TheSy::create_case_splitter(conf.definitions.case_splitters);
+        let mut case_split = TheSy::create_case_splitter(conf.definitions.case_splitters, thesy.examples.values().cloned().collect_vec());
         let mut rules = std::mem::take(&mut conf.definitions.rws);
         let nil = thesy.egraph.add_expr(&"nil".parse().unwrap());
         let consx = thesy.egraph.add_expr(&"(cons x nil)".parse().unwrap());
@@ -1030,7 +1030,7 @@ mod test {
         let mut egraph: EGraph<SymbolLang, ()> = EGraph::default();
         egraph.add_expr(&RecExpr::from_str("(ite z x y)").unwrap());
         egraph.rebuild();
-        let mut case_splitters: CaseSplit = consts::system_case_splits();
+        let mut case_splitters: CaseSplit = consts::system_case_splits(vec![]);
         assert!(!case_splitters.find_splitters(&mut egraph).is_empty());
     }
 
