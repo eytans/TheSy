@@ -8,8 +8,8 @@ from datetime import datetime
 
 from cgroups import Cgroup
 
-BUILD_CMD = [r"/home/eytan.s/.cargo/bin/cargo", "build", "--release", "--features", "stats", "--package", "TheSy", "--bin", "TheSy"]
-CMD = [r"/home/eytan.s/CLionProjects/TheSy/target/release/TheSy", '-p']
+BUILD_CMD = [r"C:\Users\eytan\.cargo\bin\cargo.exe", "build", "--release", "--features", "stats", "--package", "TheSy", "--bin", "TheSy"]
+CMD = [r"D:\work\synthesis\TheSy_dev\target\release\TheSy.exe", ""]
 
 # First we create the cgroup 'charlie' and we set it's cpu and memory limits
 cg = Cgroup('thesy_cgroup')
@@ -62,7 +62,7 @@ if __name__ == '__main__':
     inputdirs = args.inputdir
     files = [os.path.join(folder, fn) for folder in inputdirs for fn in os.listdir(folder) if fn.endswith(".th") and (not fn.endswith("res.th")) and fn not in args.skip]
     # isa_files = ["./temp/" + f for f in isa_files]
-    cg.set_memory_limit(32, 'gigabytes')
-    pn = 20
+    cg.set_memory_limit(16, 'gigabytes')
+    pn = 6
     pool = multiprocessing.Pool(pn)
     pool.map(run_thesy, files)
