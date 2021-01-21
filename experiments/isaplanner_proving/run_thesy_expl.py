@@ -28,8 +28,10 @@ if __name__ == '__main__':
         shutil.move(thesy_with_cs, backup / thesy_with_cs.name)
 
     # Default proof mode is false so we are doing exploration
+    shutil.copytree(isaplanner_tests, thesy_no_cs)
     run_all([thesy_no_cs], features='no_split')
     create_stats(thesy_no_cs)
+    shutil.copytree(isaplanner_tests, thesy_with_cs)
     run_all([thesy_with_cs])
     create_stats(thesy_with_cs)
 
