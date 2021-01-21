@@ -9,6 +9,7 @@ import pathlib
 from thesy_runner import run_all
 from experiments.stats_processor import create_stats
 
+
 experiment_folder = pathlib.Path(sys.argv[0]).parent
 isaplanner_tests = experiment_folder / "isaplanner"
 runner_path = experiment_folder.parent.parent / 'thesy_runner.py'
