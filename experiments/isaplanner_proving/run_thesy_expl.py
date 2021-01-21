@@ -16,7 +16,8 @@ runner_path = experiment_folder.parent.parent / 'thesy_runner.py'
 thesy_with_cs = experiment_folder / 'isaplanner_with_cs'
 thesy_no_cs = experiment_folder / 'isaplanner_no_cs'
 backup = experiment_folder / 'backup'
-backup.mkdir()
+if not backup.exists():
+    backup.mkdir()
 
 if __name__ == '__main__':
     if thesy_no_cs.exists() or thesy_with_cs.exists():
