@@ -3,14 +3,33 @@ import sys
 import subprocess
 
 from argparse import ArgumentParser
+import shutil
+import pathlib
 
-experiment_folder = os.path.dirname(sys.argv[0])
-isaplanner_tests = os.path.join(experiment_folder, "isaplanner")
-runner_path = os.path.join(experiment_folder, os.path.pardir, os.path.pardir, 'thesy_runner.py')
+from thesy_runner import run_all
+from experiments.stats_processor import create_stats
+
+experiment_folder = pathlib.Path(sys.argv[0]).parent
+isaplanner_tests = experiment_folder / "isaplanner"
+runner_path = experiment_folder.parent.parent / 'thesy_runner.py'
+
+thesy_with_cs = experiment_folder / 'isaplanner_with_cs'
+thesy_no_cs = experiment_folder / 'isaplanner_no_cs'
+backup = experiment_folder / 'backup'
+backup.mkdir()
 
 if __name__ == '__main__':
-    # parser = ArgumentParser()
-    # args = parser.parse_args()
+    if thesy_no_cs.exists() or thesy_with_cs.exists():
+        shutil.rmtree(backup)
+        backup.mkdir()
+    if thesy_no_cs.exists():
+        shutil.move(thesy_no_cs, backup / thesy_no_cs.name)
+    if thesy_with_cs.exists():
+        shutil.move(thesy_with_cs, backup / thesy_with_cs.name)
 
     # Default proof mode is false so we are doing exploration
-    subprocess.run(['python', runner_path, isaplanner_tests])
+    run_all([thesy_no_cs], features='no_split')
+    create_stats(thesy_no_cs)
+    run_all([thesy_with_cs])
+    create_stats(thesy_with_cs)
+

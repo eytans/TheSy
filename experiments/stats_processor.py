@@ -6,15 +6,11 @@ import json
 from collections import Counter
 
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument('path')
-    args = parser.parse_args()
-
+def create_stats(path):
     jsons = []
-    for fn in os.listdir(args.path):
+    for fn in os.listdir(path):
         if fn.endswith(".json"):
-            with open(os.path.join(args.path, fn)) as f:
+            with open(os.path.join(path, fn)) as f:
                 d = json.load(f)
                 d['file_name'] = fn
                 jsons.append(d)
@@ -30,4 +26,12 @@ if __name__ == '__main__':
     res['proofs_later_filtered'] = df['filtered_lemmas'].apply(len)
     res['file_name'] = df['file_name']
 
-    res.to_csv(os.path.join(args.path, 'stats.csv'))
+    res.to_csv(os.path.join(path, 'stats.csv'))
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('path')
+    args = parser.parse_args()
+
+    create_stats(args.path)

@@ -1,4 +1,3 @@
- # For some weird reason we need to be inside the hol library directory when running isabelle for this to work
 import os
 import argparse
 import shutil
@@ -8,8 +7,8 @@ from datetime import datetime
 
 from cgroups import Cgroup
 
-BUILD_CMD = [r"C:\Users\eytan\.cargo\bin\cargo.exe", "build", "--release", "--features", "stats", "--package", "TheSy", "--bin", "TheSy"]
-CMD = [r"D:\work\synthesis\TheSy_dev\target\release\TheSy.exe", ""]
+BUILD_CMD = [r"/home/eytan.s/.cargo/bin/cargo", "build", "--release", "--features", "stats", "--package", "TheSy", "--bin", "TheSy"]
+CMD = [r"/home/eytan.s/CLionProjects/TheSy/target/release/TheSy"]
 
 # First we create the cgroup 'charlie' and we set it's cpu and memory limits
 cg = Cgroup('thesy_cgroup')
@@ -22,13 +21,14 @@ def in_my_cgroup():
     cg.add(pid)
 
 
-def run_thesy(fn):
+def run_thesy(fn_to):
+    fn, to = fn_to
     in_my_cgroup()
     print(f"running {fn}")
     try:
         cmd = [s for s in CMD]
         cmd[1] = fn
-        res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=60*15*1)
+        res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=to)
         out = res.stdout.decode("utf8")
         error = res.stderr.decode("utf8")
     except subprocess.TimeoutExpired:
@@ -42,27 +42,36 @@ def run_thesy(fn):
     # with open(fn + ".json", 'w') as f:
 
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument("inputdir", nargs='+')
-    parser.add_argument('-p', '--prove', action='store_true', default=False)
-    parser.add_argument('-f', '--features', default="")
-    parser.add_argument('--skip', nargs='*', default=[])
-
-    args = parser.parse_args()
-    if args.prove:
+def run_all(dirs, prove=False, features="", skip=None, timeout=60, processnum=8, memorylimit=32):
+    to = timeout * 60
+    if prove:
         CMD.append('--prove')
-    BUILD_CMD[4] = (BUILD_CMD[4] + " " + args.features).strip()
+    BUILD_CMD[4] = (BUILD_CMD[4] + " " + features).strip()
     p = subprocess.run(BUILD_CMD, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
     if p.returncode != 0:
         print(p.stderr.decode())
         print(p.stdout.decode())
         exit()
     print("Build done")
-    inputdirs = args.inputdir
-    files = [os.path.join(folder, fn) for folder in inputdirs for fn in os.listdir(folder) if fn.endswith(".th") and (not fn.endswith("res.th")) and fn not in args.skip]
+    inputdirs = dirs
+    files = [(os.path.join(folder, fn), to) for folder in inputdirs for fn in os.listdir(folder) if fn.endswith(".th") and (not fn.endswith("res.th")) and fn not in skip]
     # isa_files = ["./temp/" + f for f in isa_files]
-    cg.set_memory_limit(16, 'gigabytes')
-    pn = 6
+    cg.set_memory_limit(memorylimit, 'gigabytes')
+    pn = processnum
     pool = multiprocessing.Pool(pn)
     pool.map(run_thesy, files)
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument("inputdir", nargs='+')
+    parser.add_argument('-p', '--prove', action='store_true', default=False)
+    parser.add_argument('-f', '--features', default="")
+    parser.add_argument('--skip', nargs='*', default=None)
+    parser.add_argument('-t', '--timeout', default=60)
+    parser.add_argument('-n', '--processnum', default=8)
+    parser.add_argument('-m', '--memorylimit', default=32)
+
+    args = parser.parse_args()
+
+    run_all(args.inputdir, args.prove, args.features, args.skip, args.timeout, args.processnum, args.memorylimit)
