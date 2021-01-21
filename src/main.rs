@@ -52,9 +52,9 @@ struct CliOpt {
     ph_count: usize,
     /// Previous results to read
     dependencies: Vec<String>,
-    /// Run as prover or ignore goals
+    /// Run as prover or ignore goals, true if flag is present
     #[structopt(name = "proof mode", short = "p", long = "prove")]
-    proof_mode: Option<bool>,
+    proof_mode: bool,
     #[structopt(name = "check equivalence", short = "c", long = "check-equiv")]
     check_equiv: bool,
 }
@@ -66,7 +66,7 @@ impl From<&CliOpt> for TheSyConfig {
             opts.ph_count,
             vec![],
             opts.path.with_extension("res.th"),
-            opts.proof_mode.unwrap_or(true),
+            opts.proof_mode,
         )
     }
 }
@@ -191,6 +191,10 @@ impl From<&TheSyConfig> for TheSy {
         } else {
             Some(conf.definitions.conjectures.clone())
         };
+
+        if conf.proof_mode && conjectures.iter().any(|x| !x.is_empty()) {
+            warn!("Running exploration without proof mode, but goals were given");
+        }
 
         TheSy::new_with_ph(conf.definitions.datatypes.clone(),
                            examples,
