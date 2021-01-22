@@ -1,1 +1,0 @@
-(=> "(drop Z ?ts_ph_list_0) => ?ts_ph_list_0" (drop Z ?ts_ph_list_0) ?ts_ph_list_0)

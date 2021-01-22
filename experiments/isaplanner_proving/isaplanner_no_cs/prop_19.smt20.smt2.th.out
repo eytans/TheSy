@@ -1,4 +1,5 @@
-Collecting statistics
+16:57:45 [0m[33m[WARN] [0mCollecting statistics
+16:57:45 [0m[33m[WARN] [0mproof mode false
 (-2 Z ?y) => Z
 (-2 (S ?z) Z) => (S ?z)
 (S ?z) => (-2 (S ?z) Z)
@@ -10,34 +11,32 @@ Z => (len nil)
 (drop Z ?y1) => ?y1
 (drop (S ?z) nil) => nil
 (drop (S ?z) (cons ?x22 ?x3)) => (drop ?z ?x3)
-(drop ?autovar7 nil) => (potential_split ?autovar7 Z (S (param_Nat_0 ?autovar7))) if Cond(var: ?autovar7, pat: Z) Cond(var: ?autovar7, pat: (S ?param_0))
-(drop ?autovar7 (cons ?autovar3 ?autovar4)) => (potential_split ?autovar7 Z (S (param_Nat_0 ?autovar7))) if Cond(var: ?autovar7, pat: Z) Cond(var: ?autovar7, pat: (S ?param_0))
-(drop (S ?autovar5) ?autovar8) => (potential_split ?autovar8 nil (cons (param_list_0 ?autovar8) (param_list_1 ?autovar8))) if Cond(var: ?autovar8, pat: nil) Cond(var: ?autovar8, pat: (cons ?param_0 ?param_1))
-(drop (S ?autovar6) ?autovar8) => (potential_split ?autovar8 nil (cons (param_list_0 ?autovar8) (param_list_1 ?autovar8))) if Cond(var: ?autovar8, pat: nil) Cond(var: ?autovar8, pat: (cons ?param_0 ?param_1))
-(-2 ?autovar6 Z) => (potential_split ?autovar6 Z (S (param_Nat_0 ?autovar6))) if Cond(var: ?autovar6, pat: Z) Cond(var: ?autovar6, pat: (S ?param_0))
-(-2 ?autovar6 (S ?autovar3)) => (potential_split ?autovar6 Z (S (param_Nat_0 ?autovar6))) if Cond(var: ?autovar6, pat: Z) Cond(var: ?autovar6, pat: (S ?param_0))
-(-2 (S ?autovar4) ?autovar7) => (potential_split ?autovar7 Z (S (param_Nat_0 ?autovar7))) if Cond(var: ?autovar7, pat: Z) Cond(var: ?autovar7, pat: (S ?param_0))
-(-2 (S ?autovar5) ?autovar7) => (potential_split ?autovar7 Z (S (param_Nat_0 ?autovar7))) if Cond(var: ?autovar7, pat: Z) Cond(var: ?autovar7, pat: (S ?param_0))
- ex is: nil
- ex is: (cons autovar_sk_0 nil)
- ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
- ex is: Z
- ex is: (S Z)
- ex is: (S (S Z))
- ex is: nil
- ex is: (cons autovar_sk_0 nil)
- ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
- ex is: Z
- ex is: (S Z)
- ex is: (S (S Z))
-Running TheSy on datatypes: Nat list dict: len drop -2 nil cons Z S
-14:49:26 [0m[33m[WARN] [0m# of splitters: 1
-14:49:26 [0m[33m[WARN] [0m# of splitters: 2
-14:49:26 [0m[33m[WARN] [0m# of splitters: 1
-14:49:26 [0m[33m[WARN] [0m# of splitters: 2
-14:49:26 [0m[33m[WARN] [0m# of splitters: 1
-14:49:26 [0m[33m[WARN] [0m# of splitters: 5
-proved: (len (drop ?ts_ph_Nat_0 ?ts_ph_list_1)) => (-2 (len ?ts_ph_list_1) ?ts_ph_Nat_0)
-proved: (-2 (len ?ts_ph_list_1) ?ts_ph_Nat_0) => (len (drop ?ts_ph_Nat_0 ?ts_ph_list_1))
-14:49:26 [0m[33m[WARN] [0mFound all lemmas
-done in 71
+Searcher: (drop ?autovar7 nil)
+Searcher: (drop ?autovar7 (cons ?autovar3 ?autovar4))
+Searcher: (drop (S ?autovar5) ?autovar8)
+Searcher: (drop (S ?autovar6) ?autovar8)
+Searcher: (-2 ?autovar6 Z)
+Searcher: (-2 ?autovar6 (S ?autovar3))
+Searcher: (-2 (S ?autovar4) ?autovar7)
+Searcher: (-2 (S ?autovar5) ?autovar7)
+16:57:45 [0m[33m[WARN] [0m ex is: nil
+16:57:45 [0m[33m[WARN] [0m ex is: (cons autovar_sk_0 nil)
+16:57:45 [0m[33m[WARN] [0m ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
+16:57:45 [0m[33m[WARN] [0m ex is: Z
+16:57:45 [0m[33m[WARN] [0m ex is: (S Z)
+16:57:45 [0m[33m[WARN] [0m ex is: (S (S Z))
+16:57:45 [0m[33m[WARN] [0mProof mode: false
+16:57:45 [0m[33m[WARN] [0m ex is: nil
+16:57:45 [0m[33m[WARN] [0m ex is: (cons autovar_sk_0 nil)
+16:57:45 [0m[33m[WARN] [0m ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
+16:57:45 [0m[33m[WARN] [0m ex is: Z
+16:57:45 [0m[33m[WARN] [0m ex is: (S Z)
+16:57:45 [0m[33m[WARN] [0m ex is: (S (S Z))
+16:57:45 [0m[33m[WARN] [0mProof mode: false
+16:57:45 [0m[33m[WARN] [0mproved: (-2 ?ts_ph_Nat_0 ?ts_ph_Nat_0) => Z
+16:57:45 [0m[33m[WARN] [0mproved: (-2 ?ts_ph_Nat_0 Z) => ?ts_ph_Nat_0
+16:57:45 [0m[33m[WARN] [0mproved: (drop ?ts_ph_Nat_0 nil) => nil
+16:57:45 [0m[33m[WARN] [0mproved: (-2 ?ts_ph_Nat_0 (S ?ts_ph_Nat_0)) => Z
+16:57:45 [0m[33m[WARN] [0mproved: (-2 (S ?ts_ph_Nat_0) ?ts_ph_Nat_0) => (S Z)
+16:57:45 [0m[33m[WARN] [0mproved: (drop (len ?ts_ph_list_0) ?ts_ph_list_0) => nil
+done in 156

@@ -3,12 +3,18 @@ import argparse
 import shutil
 import subprocess
 import multiprocessing
+import pathlib
+
 from datetime import datetime
 
 from cgroups import Cgroup
 
-BUILD_CMD = [r"/home/eytan.s/.cargo/bin/cargo", "build", "--release", "--features", "stats", "--package", "TheSy", "--bin", "TheSy"]
-CMD = [r"/home/eytan.s/CLionProjects/TheSy/target/release/TheSy"]
+project_dir = pathlib.Path(__file__).parent
+thesy_exe_path = project_dir / "target/release/TheSy"
+cargo_path = pathlib.Path.home() / ".cargo/bin/cargo"
+
+BUILD_CMD = [str(cargo_path), "build", "--release", "--features", "stats", "--package", "TheSy", "--bin", "TheSy"]
+CMD = [str(thesy_exe_path)]
 
 # First we create the cgroup 'charlie' and we set it's cpu and memory limits
 cg = Cgroup('thesy_cgroup')
@@ -28,6 +34,7 @@ def run_thesy(fn_to):
     try:
         cmd = [s for s in CMD]
         cmd.append(fn)
+        print(cmd)
         res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=to)
         out = res.stdout.decode("utf8")
         error = res.stderr.decode("utf8")

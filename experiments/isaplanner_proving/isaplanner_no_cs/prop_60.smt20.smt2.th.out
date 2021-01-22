@@ -1,4 +1,5 @@
-Collecting statistics
+16:57:44 [0m[33m[WARN] [0mCollecting statistics
+16:57:44 [0m[33m[WARN] [0mproof mode false
 (last nil) => Z
 Z => (last nil)
 (last (cons ?y nil)) => ?y
@@ -6,28 +7,23 @@ Z => (last nil)
 (++ nil ?y0) => ?y0
 (++ (cons ?z ?xs) ?y1) => (cons ?z (++ ?xs ?y1))
 (cons ?z (++ ?xs ?y1)) => (++ (cons ?z ?xs) ?y1)
- ex is: Z
- ex is: (S Z)
- ex is: (S (S Z))
- ex is: nil
- ex is: (cons autovar_Nat_0 nil)
- ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
- ex is: Z
- ex is: (S Z)
- ex is: (S (S Z))
- ex is: nil
- ex is: (cons autovar_Nat_0 nil)
- ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
-Running TheSy on datatypes: Nat list dict: last ++ Z S nil cons
-Starting depth 1
-14:49:27 [0m[33m[WARN] [0mproved: (++ ?ts_ph_list_0 nil) => ?ts_ph_list_0
-Starting depth 2
-14:49:27 [0m[33m[WARN] [0mproved: (last (cons Z ?ts_ph_list_0)) => (last ?ts_ph_list_0)
-14:49:27 [0m[33m[WARN] [0mproved: (last ?ts_ph_list_0) => (last (cons Z ?ts_ph_list_0))
-
-generalizing (++ (++ ts_ph_list_0 ts_ph_list_1) ts_ph_list_1) = (++ ts_ph_list_0 (++ ts_ph_list_1 ts_ph_list_1))
-generalized as case_split
-14:49:27 [0m[33m[WARN] [0mproved: (++ (++ ?ts_ph_list_0 ?ts_ph_list_1) ?ts_ph_list_2) => (++ ?ts_ph_list_0 (++ ?ts_ph_list_1 ?ts_ph_list_2))
-14:49:27 [0m[33m[WARN] [0mproved: (++ ?ts_ph_list_0 (++ ?ts_ph_list_1 ?ts_ph_list_2)) => (++ (++ ?ts_ph_list_0 ?ts_ph_list_1) ?ts_ph_list_2)
-
-done in 350
+16:57:44 [0m[33m[WARN] [0m ex is: Z
+16:57:44 [0m[33m[WARN] [0m ex is: (S Z)
+16:57:44 [0m[33m[WARN] [0m ex is: (S (S Z))
+16:57:44 [0m[33m[WARN] [0m ex is: nil
+16:57:44 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_0 nil)
+16:57:44 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+16:57:44 [0m[33m[WARN] [0mProof mode: false
+16:57:44 [0m[33m[WARN] [0m ex is: Z
+16:57:44 [0m[33m[WARN] [0m ex is: (S Z)
+16:57:44 [0m[33m[WARN] [0m ex is: (S (S Z))
+16:57:44 [0m[33m[WARN] [0m ex is: nil
+16:57:44 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_0 nil)
+16:57:44 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+16:57:44 [0m[33m[WARN] [0mProof mode: false
+16:57:44 [0m[33m[WARN] [0mproved: (++ ?ts_ph_list_0 nil) => ?ts_ph_list_0
+16:57:44 [0m[33m[WARN] [0mproved: (last (cons Z ?ts_ph_list_0)) => (last ?ts_ph_list_0)
+16:57:44 [0m[33m[WARN] [0mproved: (last ?ts_ph_list_0) => (last (cons Z ?ts_ph_list_0))
+16:57:44 [0m[33m[WARN] [0mproved: (++ ?ts_ph_list_0 (++ ?ts_ph_list_1 ?ts_ph_list_2)) => (++ (++ ?ts_ph_list_0 ?ts_ph_list_1) ?ts_ph_list_2)
+16:57:44 [0m[33m[WARN] [0mproved: (++ (++ ?ts_ph_list_0 ?ts_ph_list_1) ?ts_ph_list_2) => (++ ?ts_ph_list_0 (++ ?ts_ph_list_1 ?ts_ph_list_2))
+done in 111

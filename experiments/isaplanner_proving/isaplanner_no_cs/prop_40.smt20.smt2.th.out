@@ -1,25 +1,26 @@
-Collecting statistics
+16:57:44 [0m[33m[WARN] [0mCollecting statistics
+16:57:44 [0m[33m[WARN] [0mproof mode false
 (take Z ?y) => nil
 (take (S ?z) nil) => nil
 (take (S ?z) (cons ?x2 ?x3)) => (cons ?x2 (take ?z ?x3))
 (cons ?x2 (take ?z ?x3)) => (take (S ?z) (cons ?x2 ?x3))
-(take ?autovar7 nil) => (potential_split ?autovar7 Z (S (param_Nat_0 ?autovar7))) if Cond(var: ?autovar7, pat: Z) Cond(var: ?autovar7, pat: (S ?param_0))
-(take ?autovar7 (cons ?autovar3 ?autovar4)) => (potential_split ?autovar7 Z (S (param_Nat_0 ?autovar7))) if Cond(var: ?autovar7, pat: Z) Cond(var: ?autovar7, pat: (S ?param_0))
-(take (S ?autovar5) ?autovar8) => (potential_split ?autovar8 nil (cons (param_list_0 ?autovar8) (param_list_1 ?autovar8))) if Cond(var: ?autovar8, pat: nil) Cond(var: ?autovar8, pat: (cons ?param_0 ?param_1))
-(take (S ?autovar6) ?autovar8) => (potential_split ?autovar8 nil (cons (param_list_0 ?autovar8) (param_list_1 ?autovar8))) if Cond(var: ?autovar8, pat: nil) Cond(var: ?autovar8, pat: (cons ?param_0 ?param_1))
- ex is: nil
- ex is: (cons autovar_sk_0 nil)
- ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
- ex is: Z
- ex is: (S Z)
- ex is: (S (S Z))
- ex is: nil
- ex is: (cons autovar_sk_0 nil)
- ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
- ex is: Z
- ex is: (S Z)
- ex is: (S (S Z))
-Running TheSy on datatypes: list Nat dict: take nil cons Z S
-proved: (take Z ?ts_ph_list_0) => nil
-14:49:26 [0m[33m[WARN] [0mFound all lemmas
-done in 0
+Searcher: (take ?autovar7 nil)
+Searcher: (take ?autovar7 (cons ?autovar3 ?autovar4))
+Searcher: (take (S ?autovar5) ?autovar8)
+Searcher: (take (S ?autovar6) ?autovar8)
+16:57:44 [0m[33m[WARN] [0m ex is: nil
+16:57:44 [0m[33m[WARN] [0m ex is: (cons autovar_sk_0 nil)
+16:57:44 [0m[33m[WARN] [0m ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
+16:57:44 [0m[33m[WARN] [0m ex is: Z
+16:57:44 [0m[33m[WARN] [0m ex is: (S Z)
+16:57:44 [0m[33m[WARN] [0m ex is: (S (S Z))
+16:57:44 [0m[33m[WARN] [0mProof mode: false
+16:57:44 [0m[33m[WARN] [0m ex is: nil
+16:57:44 [0m[33m[WARN] [0m ex is: (cons autovar_sk_0 nil)
+16:57:44 [0m[33m[WARN] [0m ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
+16:57:44 [0m[33m[WARN] [0m ex is: Z
+16:57:44 [0m[33m[WARN] [0m ex is: (S Z)
+16:57:44 [0m[33m[WARN] [0m ex is: (S (S Z))
+16:57:44 [0m[33m[WARN] [0mProof mode: false
+16:57:44 [0m[33m[WARN] [0mproved: (take ?ts_ph_Nat_0 nil) => nil
+done in 212

@@ -1,2 +1,0 @@
-(=> "(len (drop ?ts_ph_Nat_0 ?ts_ph_list_1)) => (-2 (len ?ts_ph_list_1) ?ts_ph_Nat_0)" (len (drop ?ts_ph_Nat_0 ?ts_ph_list_1)) (-2 (len ?ts_ph_list_1) ?ts_ph_Nat_0))
-(=> "(-2 (len ?ts_ph_list_1) ?ts_ph_Nat_0) => (len (drop ?ts_ph_Nat_0 ?ts_ph_list_1))" (-2 (len ?ts_ph_list_1) ?ts_ph_Nat_0) (len (drop ?ts_ph_Nat_0 ?ts_ph_list_1)))

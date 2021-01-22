@@ -1,2 +1,3 @@
-(=> "(take ?ts_ph_Nat_0 (zip ?ts_ph_list2_1 ?ts_ph_list2_2)) => (zip (take2 ?ts_ph_Nat_0 ?ts_ph_list2_1) (take2 ?ts_ph_Nat_0 ?ts_ph_list2_2))" (take ?ts_ph_Nat_0 (zip ?ts_ph_list2_1 ?ts_ph_list2_2)) (zip (take2 ?ts_ph_Nat_0 ?ts_ph_list2_1) (take2 ?ts_ph_Nat_0 ?ts_ph_list2_2)))
-(=> "(zip (take2 ?ts_ph_Nat_0 ?ts_ph_list2_1) (take2 ?ts_ph_Nat_0 ?ts_ph_list2_2)) => (take ?ts_ph_Nat_0 (zip ?ts_ph_list2_1 ?ts_ph_list2_2))" (zip (take2 ?ts_ph_Nat_0 ?ts_ph_list2_1) (take2 ?ts_ph_Nat_0 ?ts_ph_list2_2)) (take ?ts_ph_Nat_0 (zip ?ts_ph_list2_1 ?ts_ph_list2_2)))
+(=> "(zip ?ts_ph_list2_0 nil2) => nil" (zip ?ts_ph_list2_0 nil2) nil)
+(=> "(take2 ?ts_ph_Nat_0 nil2) => nil2" (take2 ?ts_ph_Nat_0 nil2) nil2)
+(=> "(take ?ts_ph_Nat_0 nil) => nil" (take ?ts_ph_Nat_0 nil) nil)

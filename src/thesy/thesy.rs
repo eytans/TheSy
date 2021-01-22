@@ -149,6 +149,8 @@ impl TheSy {
         let stats = Default::default();
         let searchers = Self::create_sygue_serchers(&dict, datatypes.iter());
 
+        warn!("Proof mode: {}", conjectures.is_some());
+
         TheSy {
             datatypes: datatype_to_prover,
             dict,

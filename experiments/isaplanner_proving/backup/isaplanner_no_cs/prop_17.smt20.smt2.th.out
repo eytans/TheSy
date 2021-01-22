@@ -1,4 +1,5 @@
-Collecting statistics
+16:57:23 [0m[33m[WARN] [0mCollecting statistics
+16:57:23 [0m[33m[WARN] [0mproof mode false
 (== Z Z) => true
 (== Z (S ?z)) => false
 (== (S ?x2) Z) => false
@@ -8,26 +9,36 @@ Collecting statistics
 (<=2 (S ?z) Z) => false
 (<=2 (S ?z) (S ?x2)) => (<=2 ?z ?x2)
 (<=2 ?z ?x2) => (<=2 (S ?z) (S ?x2))
-(== ?autovar7 Z) => (potential_split ?autovar7 Z (S (param_Nat_0 ?autovar7))) if Cond(var: ?autovar7, pat: Z) Cond(var: ?autovar7, pat: (S ?param_0))
-(== ?autovar7 (S ?autovar1)) => (potential_split ?autovar7 Z (S (param_Nat_0 ?autovar7))) if Cond(var: ?autovar7, pat: Z) Cond(var: ?autovar7, pat: (S ?param_0))
-(== ?autovar7 Z) => (potential_split ?autovar7 Z (S (param_Nat_0 ?autovar7))) if Cond(var: ?autovar7, pat: Z) Cond(var: ?autovar7, pat: (S ?param_0))
-(== ?autovar7 (S ?autovar4)) => (potential_split ?autovar7 Z (S (param_Nat_0 ?autovar7))) if Cond(var: ?autovar7, pat: Z) Cond(var: ?autovar7, pat: (S ?param_0))
-(== Z ?autovar8) => (potential_split ?autovar8 Z (S (param_Nat_0 ?autovar8))) if Cond(var: ?autovar8, pat: Z) Cond(var: ?autovar8, pat: (S ?param_0))
-(== Z ?autovar8) => (potential_split ?autovar8 Z (S (param_Nat_0 ?autovar8))) if Cond(var: ?autovar8, pat: Z) Cond(var: ?autovar8, pat: (S ?param_0))
-(== (S ?autovar5) ?autovar8) => (potential_split ?autovar8 Z (S (param_Nat_0 ?autovar8))) if Cond(var: ?autovar8, pat: Z) Cond(var: ?autovar8, pat: (S ?param_0))
-(== (S ?autovar6) ?autovar8) => (potential_split ?autovar8 Z (S (param_Nat_0 ?autovar8))) if Cond(var: ?autovar8, pat: Z) Cond(var: ?autovar8, pat: (S ?param_0))
-(<=2 ?autovar6 Z) => (potential_split ?autovar6 Z (S (param_Nat_0 ?autovar6))) if Cond(var: ?autovar6, pat: Z) Cond(var: ?autovar6, pat: (S ?param_0))
-(<=2 ?autovar6 (S ?autovar3)) => (potential_split ?autovar6 Z (S (param_Nat_0 ?autovar6))) if Cond(var: ?autovar6, pat: Z) Cond(var: ?autovar6, pat: (S ?param_0))
-(<=2 (S ?autovar4) ?autovar7) => (potential_split ?autovar7 Z (S (param_Nat_0 ?autovar7))) if Cond(var: ?autovar7, pat: Z) Cond(var: ?autovar7, pat: (S ?param_0))
-(<=2 (S ?autovar5) ?autovar7) => (potential_split ?autovar7 Z (S (param_Nat_0 ?autovar7))) if Cond(var: ?autovar7, pat: Z) Cond(var: ?autovar7, pat: (S ?param_0))
- ex is: Z
- ex is: (S Z)
- ex is: (S (S Z))
- ex is: Z
- ex is: (S Z)
- ex is: (S (S Z))
-Running TheSy on datatypes: Nat dict: == <=2 Z S
-proved: (<=2 ?ts_ph_Nat_0 Z) => (== ?ts_ph_Nat_0 Z)
-proved: (== ?ts_ph_Nat_0 Z) => (<=2 ?ts_ph_Nat_0 Z)
-13:04:09 [0m[33m[WARN] [0mFound all lemmas
-done in 3
+Searcher: (== ?autovar7 Z)
+Searcher: (== ?autovar7 (S ?autovar1))
+Searcher: (== ?autovar7 Z)
+Searcher: (== ?autovar7 (S ?autovar4))
+Searcher: (== Z ?autovar8)
+Searcher: (== Z ?autovar8)
+Searcher: (== (S ?autovar5) ?autovar8)
+Searcher: (== (S ?autovar6) ?autovar8)
+Searcher: (<=2 ?autovar6 Z)
+Searcher: (<=2 ?autovar6 (S ?autovar3))
+Searcher: (<=2 (S ?autovar4) ?autovar7)
+Searcher: (<=2 (S ?autovar5) ?autovar7)
+16:57:23 [0m[33m[WARN] [0m ex is: Z
+16:57:23 [0m[33m[WARN] [0m ex is: (S Z)
+16:57:23 [0m[33m[WARN] [0m ex is: (S (S Z))
+16:57:23 [0m[33m[WARN] [0mProof mode: false
+16:57:23 [0m[33m[WARN] [0m ex is: Z
+16:57:23 [0m[33m[WARN] [0m ex is: (S Z)
+16:57:23 [0m[33m[WARN] [0m ex is: (S (S Z))
+16:57:23 [0m[33m[WARN] [0mProof mode: false
+16:57:23 [0m[33m[WARN] [0mproved: (<=2 ?ts_ph_Nat_0 ?ts_ph_Nat_0) => true
+16:57:23 [0m[33m[WARN] [0mproved: (== ?ts_ph_Nat_0 Z) => (<=2 ?ts_ph_Nat_0 Z)
+16:57:23 [0m[33m[WARN] [0mproved: (<=2 ?ts_ph_Nat_0 Z) => (== ?ts_ph_Nat_0 Z)
+16:57:23 [0m[33m[WARN] [0mproved: (== Z ?ts_ph_Nat_0) => (== ?ts_ph_Nat_0 Z)
+16:57:23 [0m[33m[WARN] [0mproved: (== ?ts_ph_Nat_0 Z) => (== Z ?ts_ph_Nat_0)
+16:57:23 [0m[33m[WARN] [0mproved: (== ?ts_ph_Nat_0 ?ts_ph_Nat_0) => true
+16:57:23 [0m[33m[WARN] [0mproved: (<=2 ?ts_ph_Nat_0 (S ?ts_ph_Nat_0)) => true
+16:57:23 [0m[33m[WARN] [0mproved: (== (S Z) ?ts_ph_Nat_0) => (== ?ts_ph_Nat_0 (S Z))
+16:57:23 [0m[33m[WARN] [0mproved: (== ?ts_ph_Nat_0 (S Z)) => (== (S Z) ?ts_ph_Nat_0)
+16:57:23 [0m[33m[WARN] [0mproved: (<=2 (S ?ts_ph_Nat_0) ?ts_ph_Nat_0) => false
+16:57:23 [0m[33m[WARN] [0mproved: (== ?ts_ph_Nat_0 (S ?ts_ph_Nat_0)) => false
+16:57:23 [0m[33m[WARN] [0mproved: (== (S ?ts_ph_Nat_0) ?ts_ph_Nat_0) => false
+done in 97

@@ -1,4 +1,5 @@
-Collecting statistics
+16:57:44 [0m[33m[WARN] [0mCollecting statistics
+16:57:44 [0m[33m[WARN] [0mproof mode false
 (zip nil3 ?y) => nil
 (zip2 nil4 ?y) => nil2
 (zip (cons3 ?z ?x2) nil4) => nil
@@ -7,33 +8,34 @@ Collecting statistics
 (cons (pair2 ?z ?x3) (zip ?x2 ?x4)) => (zip (cons3 ?z ?x2) (cons4 ?x3 ?x4))
 (zip2 (cons4 ?z2 ?x23) (cons4 ?x3 ?x4)) => (cons2 (pair22 ?z2 ?x3) (zip2 ?x23 ?x4))
 (cons2 (pair22 ?z2 ?x3) (zip2 ?x23 ?x4)) => (zip2 (cons4 ?z2 ?x23) (cons4 ?x3 ?x4))
-(zip ?autovar11 nil4) => (potential_split ?autovar11 nil3 (cons3 (param_list3_0 ?autovar11) (param_list3_1 ?autovar11))) if Cond(var: ?autovar11, pat: nil3) Cond(var: ?autovar11, pat: (cons3 ?param_0 ?param_1))
-(zip ?autovar11 (cons4 ?autovar5 ?autovar6)) => (potential_split ?autovar11 nil3 (cons3 (param_list3_0 ?autovar11) (param_list3_1 ?autovar11))) if Cond(var: ?autovar11, pat: nil3) Cond(var: ?autovar11, pat: (cons3 ?param_0 ?param_1))
-(zip (cons3 ?autovar7 ?autovar8) ?autovar12) => (potential_split ?autovar12 nil4 (cons4 (param_list4_0 ?autovar12) (param_list4_1 ?autovar12))) if Cond(var: ?autovar12, pat: nil4) Cond(var: ?autovar12, pat: (cons4 ?param_0 ?param_1))
-(zip (cons3 ?autovar9 ?autovar10) ?autovar12) => (potential_split ?autovar12 nil4 (cons4 (param_list4_0 ?autovar12) (param_list4_1 ?autovar12))) if Cond(var: ?autovar12, pat: nil4) Cond(var: ?autovar12, pat: (cons4 ?param_0 ?param_1))
-(zip2 ?autovar11 nil4) => (potential_split ?autovar11 nil4 (cons4 (param_list4_0 ?autovar11) (param_list4_1 ?autovar11))) if Cond(var: ?autovar11, pat: nil4) Cond(var: ?autovar11, pat: (cons4 ?param_0 ?param_1))
-(zip2 ?autovar11 (cons4 ?autovar5 ?autovar6)) => (potential_split ?autovar11 nil4 (cons4 (param_list4_0 ?autovar11) (param_list4_1 ?autovar11))) if Cond(var: ?autovar11, pat: nil4) Cond(var: ?autovar11, pat: (cons4 ?param_0 ?param_1))
-(zip2 (cons4 ?autovar7 ?autovar8) ?autovar12) => (potential_split ?autovar12 nil4 (cons4 (param_list4_0 ?autovar12) (param_list4_1 ?autovar12))) if Cond(var: ?autovar12, pat: nil4) Cond(var: ?autovar12, pat: (cons4 ?param_0 ?param_1))
-(zip2 (cons4 ?autovar9 ?autovar10) ?autovar12) => (potential_split ?autovar12 nil4 (cons4 (param_list4_0 ?autovar12) (param_list4_1 ?autovar12))) if Cond(var: ?autovar12, pat: nil4) Cond(var: ?autovar12, pat: (cons4 ?param_0 ?param_1))
- ex is: nil4
- ex is: (cons4 autovar_sk_0 nil4)
- ex is: (cons4 autovar_sk_1 (cons4 autovar_sk_0 nil4))
- ex is: zero
- ex is: (succ zero)
- ex is: (succ (succ zero))
- ex is: nil3
- ex is: (cons3 autovar_Nat_0 nil3)
- ex is: (cons3 autovar_Nat_1 (cons3 autovar_Nat_0 nil3))
- ex is: nil4
- ex is: (cons4 autovar_sk_0 nil4)
- ex is: (cons4 autovar_sk_1 (cons4 autovar_sk_0 nil4))
- ex is: zero
- ex is: (succ zero)
- ex is: (succ (succ zero))
- ex is: nil3
- ex is: (cons3 autovar_Nat_0 nil3)
- ex is: (cons3 autovar_Nat_1 (cons3 autovar_Nat_0 nil3))
-Running TheSy on datatypes: list3 list4 Nat dict: zip zip2 nil4 cons4 zero succ nil3 cons3
-proved: (zip nil3 ?ts_ph_list4_0) => nil
-14:49:26 [0m[33m[WARN] [0mFound all lemmas
-done in 1
+Searcher: (zip ?autovar11 nil4)
+Searcher: (zip ?autovar11 (cons4 ?autovar5 ?autovar6))
+Searcher: (zip (cons3 ?autovar7 ?autovar8) ?autovar12)
+Searcher: (zip (cons3 ?autovar9 ?autovar10) ?autovar12)
+Searcher: (zip2 ?autovar11 nil4)
+Searcher: (zip2 ?autovar11 (cons4 ?autovar5 ?autovar6))
+Searcher: (zip2 (cons4 ?autovar7 ?autovar8) ?autovar12)
+Searcher: (zip2 (cons4 ?autovar9 ?autovar10) ?autovar12)
+16:57:44 [0m[33m[WARN] [0m ex is: nil4
+16:57:44 [0m[33m[WARN] [0m ex is: (cons4 autovar_sk_0 nil4)
+16:57:44 [0m[33m[WARN] [0m ex is: (cons4 autovar_sk_1 (cons4 autovar_sk_0 nil4))
+16:57:44 [0m[33m[WARN] [0m ex is: zero
+16:57:44 [0m[33m[WARN] [0m ex is: (succ zero)
+16:57:44 [0m[33m[WARN] [0m ex is: (succ (succ zero))
+16:57:44 [0m[33m[WARN] [0m ex is: nil3
+16:57:44 [0m[33m[WARN] [0m ex is: (cons3 autovar_Nat_0 nil3)
+16:57:44 [0m[33m[WARN] [0m ex is: (cons3 autovar_Nat_1 (cons3 autovar_Nat_0 nil3))
+16:57:44 [0m[33m[WARN] [0mProof mode: false
+16:57:44 [0m[33m[WARN] [0m ex is: nil4
+16:57:44 [0m[33m[WARN] [0m ex is: (cons4 autovar_sk_0 nil4)
+16:57:44 [0m[33m[WARN] [0m ex is: (cons4 autovar_sk_1 (cons4 autovar_sk_0 nil4))
+16:57:44 [0m[33m[WARN] [0m ex is: zero
+16:57:44 [0m[33m[WARN] [0m ex is: (succ zero)
+16:57:44 [0m[33m[WARN] [0m ex is: (succ (succ zero))
+16:57:44 [0m[33m[WARN] [0m ex is: nil3
+16:57:44 [0m[33m[WARN] [0m ex is: (cons3 autovar_Nat_0 nil3)
+16:57:44 [0m[33m[WARN] [0m ex is: (cons3 autovar_Nat_1 (cons3 autovar_Nat_0 nil3))
+16:57:44 [0m[33m[WARN] [0mProof mode: false
+16:57:44 [0m[33m[WARN] [0mproved: (zip2 ?ts_ph_list4_0 nil4) => nil2
+16:57:44 [0m[33m[WARN] [0mproved: (zip ?ts_ph_list3_0 nil4) => nil
+done in 30

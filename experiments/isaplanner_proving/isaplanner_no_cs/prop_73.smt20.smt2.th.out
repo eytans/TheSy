@@ -1,4 +1,5 @@
-Collecting statistics
+16:57:45 [0m[33m[WARN] [0mCollecting statistics
+16:57:45 [0m[33m[WARN] [0mproof mode false
 (rev nil) => nil
 nil => (rev nil)
 (filter ?x nil) => nil
@@ -10,78 +11,18 @@ nil => (rev nil)
 (cons ?z (++ ?xs ?y)) => (++ (cons ?z ?xs) ?y)
 (rev (cons ?y0 ?xs)) => (++ (rev ?xs) (cons ?y0 nil))
 (++ (rev ?xs) (cons ?y0 nil)) => (rev (cons ?y0 ?xs))
-(++ ?autovar3 (cons ?autovar2 nil)) => (potential_split ?autovar3 nil (cons (param_list_0 ?autovar3) (param_list_1 ?autovar3))) if Cond(var: ?autovar3, pat: nil) Cond(var: ?autovar3, pat: (cons ?param_0 ?param_1))
- ex is: nil
- ex is: (cons autovar_sk_0 nil)
- ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
- ex is: nil
- ex is: (cons autovar_sk_0 nil)
- ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
-Running TheSy on datatypes: list dict: filter ++ rev apply12 nil cons
-14:49:31 [0m[33m[WARN] [0m# of splitters: 1
-14:49:31 [0m[33m[WARN] [0m# of splitters: 1
-Starting depth 1
-14:49:31 [0m[33m[WARN] [0m# of splitters: 1
-14:49:31 [0m[33m[WARN] [0m# of splitters: 2
-14:49:31 [0m[33m[WARN] [0mproved: (++ ?ts_ph_list_0 nil) => ?ts_ph_list_0
-14:49:31 [0m[33m[WARN] [0m# of splitters: 1
-14:49:31 [0m[33m[WARN] [0m# of splitters: 1
-
-Starting depth 2
-14:49:31 [0m[33m[WARN] [0m# of splitters: 19
-14:49:31 [0m[33m[WARN] [0m# of splitters: 11
-14:49:31 [0m[33m[WARN] [0m# of splitters: 24
-14:49:32 [0m[33m[WARN] [0m# of splitters: 17
-14:49:32 [0m[33m[WARN] [0m# of splitters: 19
-14:49:32 [0m[33m[WARN] [0m# of splitters: 16
-14:49:32 [0m[33m[WARN] [0m# of splitters: 18
-14:49:32 [0m[33m[WARN] [0m# of splitters: 15
-14:49:33 [0m[33m[WARN] [0m# of splitters: 17
-14:49:33 [0m[33m[WARN] [0m# of splitters: 14
-14:49:33 [0m[33m[WARN] [0m# of splitters: 16
-14:49:33 [0m[33m[WARN] [0m# of splitters: 8
-14:49:34 [0m[33m[WARN] [0m# of splitters: 17
-14:49:34 [0m[33m[WARN] [0m# of splitters: 12
-14:49:34 [0m[33m[WARN] [0m# of splitters: 14
-14:49:34 [0m[33m[WARN] [0m# of splitters: 11
-14:49:34 [0m[33m[WARN] [0m# of splitters: 13
-14:49:35 [0m[33m[WARN] [0m# of splitters: 10
-14:49:35 [0m[33m[WARN] [0m# of splitters: 12
-14:49:35 [0m[33m[WARN] [0m# of splitters: 9
-14:49:35 [0m[33m[WARN] [0m# of splitters: 11
-14:49:35 [0m[33m[WARN] [0m# of splitters: 8
-14:49:35 [0m[33m[WARN] [0m# of splitters: 10
-14:49:36 [0m[33m[WARN] [0m# of splitters: 7
-14:49:36 [0m[33m[WARN] [0m# of splitters: 9
-14:49:36 [0m[33m[WARN] [0m# of splitters: 2
-14:49:36 [0m[33m[WARN] [0m# of splitters: 1
-14:49:36 [0m[33m[WARN] [0m# of splitters: 2
-14:49:36 [0m[33m[WARN] [0m# of splitters: 1
-14:49:36 [0m[33m[WARN] [0m# of splitters: 2
-generalizing (++ (++ ts_ph_list_0 ts_ph_list_1) ts_ph_list_1) = (++ ts_ph_list_0 (++ ts_ph_list_1 ts_ph_list_1))
-generalized as case_split
-14:49:36 [0m[33m[WARN] [0mproved: (++ (++ ?ts_ph_list_0 ?ts_ph_list_1) ?ts_ph_list_2) => (++ ?ts_ph_list_0 (++ ?ts_ph_list_1 ?ts_ph_list_2))
-14:49:36 [0m[33m[WARN] [0mproved: (++ ?ts_ph_list_0 (++ ?ts_ph_list_1 ?ts_ph_list_2)) => (++ (++ ?ts_ph_list_0 ?ts_ph_list_1) ?ts_ph_list_2)
-14:49:36 [0m[33m[WARN] [0m# of splitters: 1
-14:49:36 [0m[33m[WARN] [0m# of splitters: 1
-14:49:36 [0m[33m[WARN] [0m# of splitters: 1
-
-14:49:36 [0m[33m[WARN] [0m# of splitters: 1
-14:49:36 [0m[33m[WARN] [0m# of splitters: 2
-14:49:36 [0m[33m[WARN] [0m# of splitters: 2
-14:49:36 [0m[33m[WARN] [0m# of splitters: 1
-14:49:36 [0m[33m[WARN] [0m# of splitters: 2
-14:49:36 [0m[33m[WARN] [0mproved: (++ (rev ?ts_ph_list_1) (rev ?ts_ph_list_0)) => (rev (++ ?ts_ph_list_0 ?ts_ph_list_1))
-14:49:36 [0m[33m[WARN] [0mproved: (rev (++ ?ts_ph_list_0 ?ts_ph_list_1)) => (++ (rev ?ts_ph_list_1) (rev ?ts_ph_list_0))
-14:49:36 [0m[33m[WARN] [0m# of splitters: 1
-14:49:36 [0m[33m[WARN] [0m# of splitters: 1
-14:49:36 [0m[33m[WARN] [0m# of splitters: 15
-14:49:37 [0m[33m[WARN] [0m# of splitters: 1
-
-14:49:37 [0m[33m[WARN] [0m# of splitters: 1
-14:49:37 [0m[33m[WARN] [0m# of splitters: 4
-14:49:37 [0m[33m[WARN] [0mproved: (rev (rev ?ts_ph_list_0)) => ?ts_ph_list_0
-14:49:37 [0m[33m[WARN] [0m# of splitters: 1
-14:49:37 [0m[33m[WARN] [0m# of splitters: 1
-
-done in 6300
+16:57:45 [0m[33m[WARN] [0m ex is: nil
+16:57:45 [0m[33m[WARN] [0m ex is: (cons autovar_sk_0 nil)
+16:57:45 [0m[33m[WARN] [0m ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
+16:57:45 [0m[33m[WARN] [0mProof mode: false
+16:57:45 [0m[33m[WARN] [0m ex is: nil
+16:57:45 [0m[33m[WARN] [0m ex is: (cons autovar_sk_0 nil)
+16:57:45 [0m[33m[WARN] [0m ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
+16:57:45 [0m[33m[WARN] [0mProof mode: false
+16:57:45 [0m[33m[WARN] [0mproved: (++ ?ts_ph_list_0 nil) => ?ts_ph_list_0
+16:57:45 [0m[33m[WARN] [0mproved: (++ (++ ?ts_ph_list_0 ?ts_ph_list_1) ?ts_ph_list_2) => (++ ?ts_ph_list_0 (++ ?ts_ph_list_1 ?ts_ph_list_2))
+16:57:45 [0m[33m[WARN] [0mproved: (++ ?ts_ph_list_0 (++ ?ts_ph_list_1 ?ts_ph_list_2)) => (++ (++ ?ts_ph_list_0 ?ts_ph_list_1) ?ts_ph_list_2)
+16:57:45 [0m[33m[WARN] [0mproved: (rev (++ ?ts_ph_list_0 ?ts_ph_list_1)) => (++ (rev ?ts_ph_list_1) (rev ?ts_ph_list_0))
+16:57:45 [0m[33m[WARN] [0mproved: (++ (rev ?ts_ph_list_1) (rev ?ts_ph_list_0)) => (rev (++ ?ts_ph_list_0 ?ts_ph_list_1))
+16:57:45 [0m[33m[WARN] [0mproved: (rev (rev ?ts_ph_list_0)) => ?ts_ph_list_0
+done in 191
