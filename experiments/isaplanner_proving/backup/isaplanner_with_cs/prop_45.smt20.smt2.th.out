@@ -1,0 +1,21 @@
+Collecting statistics
+(zip nil2 ?y) => nil
+(zip (cons2 ?z ?x2) nil2) => nil
+(zip (cons2 ?z ?x2) (cons2 ?x3 ?x4)) => (cons (pair2 ?z ?x3) (zip ?x2 ?x4))
+(cons (pair2 ?z ?x3) (zip ?x2 ?x4)) => (zip (cons2 ?z ?x2) (cons2 ?x3 ?x4))
+(zip ?autovar11 nil2) => (potential_split ?autovar11 nil2 (cons2 (param_list2_0 ?autovar11) (param_list2_1 ?autovar11))) if Cond(var: ?autovar11, pat: nil2) Cond(var: ?autovar11, pat: (cons2 ?param_0 ?param_1))
+(zip ?autovar11 (cons2 ?autovar5 ?autovar6)) => (potential_split ?autovar11 nil2 (cons2 (param_list2_0 ?autovar11) (param_list2_1 ?autovar11))) if Cond(var: ?autovar11, pat: nil2) Cond(var: ?autovar11, pat: (cons2 ?param_0 ?param_1))
+(zip (cons2 ?autovar7 ?autovar8) ?autovar12) => (potential_split ?autovar12 nil2 (cons2 (param_list2_0 ?autovar12) (param_list2_1 ?autovar12))) if Cond(var: ?autovar12, pat: nil2) Cond(var: ?autovar12, pat: (cons2 ?param_0 ?param_1))
+(zip (cons2 ?autovar9 ?autovar10) ?autovar12) => (potential_split ?autovar12 nil2 (cons2 (param_list2_0 ?autovar12) (param_list2_1 ?autovar12))) if Cond(var: ?autovar12, pat: nil2) Cond(var: ?autovar12, pat: (cons2 ?param_0 ?param_1))
+ ex is: nil2
+ ex is: (cons2 autovar_sk_0 nil2)
+ ex is: (cons2 autovar_sk_1 (cons2 autovar_sk_0 nil2))
+ ex is: nil2
+ ex is: (cons2 autovar_sk_0 nil2)
+ ex is: (cons2 autovar_sk_1 (cons2 autovar_sk_0 nil2))
+Running TheSy on datatypes: list2 dict: zip nil2 cons2
+14:19:00 [0m[33m[WARN] [0m# of splitters: 1
+proved: (zip (cons2 ?ts_ph_sk_1 ?ts_ph_list2_0) (cons2 ?ts_ph_sk_2 ?ts_ph_list2_2)) => (cons (pair2 ?ts_ph_sk_1 ?ts_ph_sk_2) (zip ?ts_ph_list2_0 ?ts_ph_list2_2))
+proved: (cons (pair2 ?ts_ph_sk_1 ?ts_ph_sk_2) (zip ?ts_ph_list2_0 ?ts_ph_list2_2)) => (zip (cons2 ?ts_ph_sk_1 ?ts_ph_list2_0) (cons2 ?ts_ph_sk_2 ?ts_ph_list2_2))
+14:19:00 [0m[33m[WARN] [0mFound all lemmas
+done in 1

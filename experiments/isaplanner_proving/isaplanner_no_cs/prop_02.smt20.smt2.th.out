@@ -1,0 +1,143 @@
+Collecting statistics
+(== Z Z) => true
+(== Z (S ?z)) => false
+(== (S ?x2) Z) => false
+(== (S ?x2) (S ?y2)) => (== ?x2 ?y2)
+(== ?x2 ?y2) => (== (S ?x2) (S ?y2))
+(count ?x nil) => Z
+(count ?x (cons ?z ?ys)) => (count ?x ?ys)
+(count ?x (cons ?z ?ys)) => (S (count ?x ?ys))
+(+2 Z ?y) => ?y
+(+2 (S ?z) ?y) => (S (+2 ?z ?y))
+(S (+2 ?z ?y)) => (+2 (S ?z) ?y)
+(++ nil ?y0) => ?y0
+(++ (cons ?z ?xs) ?y1) => (cons ?z (++ ?xs ?y1))
+(cons ?z (++ ?xs ?y1)) => (++ (cons ?z ?xs) ?y1)
+(== ?autovar7 Z) => (potential_split ?autovar7 Z (S (param_Nat_0 ?autovar7))) if Cond(var: ?autovar7, pat: Z) Cond(var: ?autovar7, pat: (S ?param_0))
+(== ?autovar7 (S ?autovar1)) => (potential_split ?autovar7 Z (S (param_Nat_0 ?autovar7))) if Cond(var: ?autovar7, pat: Z) Cond(var: ?autovar7, pat: (S ?param_0))
+(== ?autovar7 Z) => (potential_split ?autovar7 Z (S (param_Nat_0 ?autovar7))) if Cond(var: ?autovar7, pat: Z) Cond(var: ?autovar7, pat: (S ?param_0))
+(== ?autovar7 (S ?autovar4)) => (potential_split ?autovar7 Z (S (param_Nat_0 ?autovar7))) if Cond(var: ?autovar7, pat: Z) Cond(var: ?autovar7, pat: (S ?param_0))
+(== Z ?autovar8) => (potential_split ?autovar8 Z (S (param_Nat_0 ?autovar8))) if Cond(var: ?autovar8, pat: Z) Cond(var: ?autovar8, pat: (S ?param_0))
+(== Z ?autovar8) => (potential_split ?autovar8 Z (S (param_Nat_0 ?autovar8))) if Cond(var: ?autovar8, pat: Z) Cond(var: ?autovar8, pat: (S ?param_0))
+(== (S ?autovar5) ?autovar8) => (potential_split ?autovar8 Z (S (param_Nat_0 ?autovar8))) if Cond(var: ?autovar8, pat: Z) Cond(var: ?autovar8, pat: (S ?param_0))
+(== (S ?autovar6) ?autovar8) => (potential_split ?autovar8 Z (S (param_Nat_0 ?autovar8))) if Cond(var: ?autovar8, pat: Z) Cond(var: ?autovar8, pat: (S ?param_0))
+ ex is: Z
+ ex is: (S Z)
+ ex is: (S (S Z))
+ ex is: nil
+ ex is: (cons autovar_Nat_0 nil)
+ ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+ ex is: Z
+ ex is: (S Z)
+ ex is: (S (S Z))
+ ex is: nil
+ ex is: (cons autovar_Nat_0 nil)
+ ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+Running TheSy on datatypes: list Nat dict: == count +2 ++ Z S nil cons
+Starting depth 1
+14:49:29 [0m[33m[WARN] [0m# of splitters: 2
+14:49:29 [0m[33m[WARN] [0m# of splitters: 1
+14:49:29 [0m[33m[WARN] [0m# of splitters: 1
+14:49:29 [0m[33m[WARN] [0m# of splitters: 1
+14:49:29 [0m[33m[WARN] [0mproved: (== ?ts_ph_Nat_0 ?ts_ph_Nat_0) => true
+14:49:29 [0m[33m[WARN] [0mproved: (== Z ?ts_ph_Nat_0) => (== ?ts_ph_Nat_0 Z)
+14:49:29 [0m[33m[WARN] [0mproved: (== ?ts_ph_Nat_0 Z) => (== Z ?ts_ph_Nat_0)
+14:49:29 [0m[33m[WARN] [0mproved: (++ ?ts_ph_list_0 nil) => ?ts_ph_list_0
+
+14:49:29 [0m[33m[WARN] [0mproved: (+2 ?ts_ph_Nat_0 Z) => ?ts_ph_Nat_0
+
+Starting depth 2
+14:49:29 [0m[33m[WARN] [0m# of splitters: 24
+14:49:29 [0m[33m[WARN] [0m# of splitters: 16
+14:49:30 [0m[33m[WARN] [0m# of splitters: 24
+14:49:31 [0m[33m[WARN] [0m# of splitters: 15
+14:49:31 [0m[33m[WARN] [0m# of splitters: 23
+14:49:32 [0m[33m[WARN] [0m# of splitters: 21
+14:49:33 [0m[33m[WARN] [0m# of splitters: 22
+14:49:33 [0m[33m[WARN] [0m# of splitters: 20
+14:49:34 [0m[33m[WARN] [0m# of splitters: 21
+14:49:35 [0m[33m[WARN] [0m# of splitters: 19
+14:49:36 [0m[33m[WARN] [0m# of splitters: 20
+14:49:37 [0m[33m[WARN] [0m# of splitters: 18
+14:49:37 [0m[33m[WARN] [0m# of splitters: 19
+14:49:38 [0m[33m[WARN] [0m# of splitters: 17
+14:49:38 [0m[33m[WARN] [0m# of splitters: 18
+14:49:39 [0m[33m[WARN] [0m# of splitters: 16
+14:49:39 [0m[33m[WARN] [0m# of splitters: 17
+14:49:39 [0m[33m[WARN] [0m# of splitters: 15
+14:49:40 [0m[33m[WARN] [0m# of splitters: 16
+14:49:40 [0m[33m[WARN] [0m# of splitters: 14
+14:49:41 [0m[33m[WARN] [0m# of splitters: 15
+14:49:42 [0m[33m[WARN] [0m# of splitters: 13
+14:49:42 [0m[33m[WARN] [0m# of splitters: 14
+14:49:42 [0m[33m[WARN] [0m# of splitters: 12
+14:49:42 [0m[33m[WARN] [0m# of splitters: 13
+14:49:43 [0m[33m[WARN] [0m# of splitters: 11
+14:49:43 [0m[33m[WARN] [0m# of splitters: 12
+14:49:43 [0m[33m[WARN] [0m# of splitters: 10
+14:49:43 [0m[33m[WARN] [0m# of splitters: 11
+14:49:44 [0m[33m[WARN] [0m# of splitters: 9
+14:49:44 [0m[33m[WARN] [0m# of splitters: 10
+14:49:45 [0m[33m[WARN] [0m# of splitters: 8
+14:49:45 [0m[33m[WARN] [0m# of splitters: 9
+14:49:45 [0m[33m[WARN] [0mproved: (S (+2 ?ts_ph_Nat_0 ?ts_ph_Nat_1)) => (+2 ?ts_ph_Nat_0 (S ?ts_ph_Nat_1))
+14:49:45 [0m[33m[WARN] [0mproved: (+2 ?ts_ph_Nat_0 (S ?ts_ph_Nat_1)) => (S (+2 ?ts_ph_Nat_0 ?ts_ph_Nat_1))
+14:49:45 [0m[33m[WARN] [0m# of splitters: 1
+14:49:45 [0m[33m[WARN] [0m# of splitters: 1
+14:49:45 [0m[33m[WARN] [0mproved: (== (S ?ts_ph_Nat_0) ?ts_ph_Nat_0) => false
+14:49:45 [0m[33m[WARN] [0m# of splitters: 1
+14:49:45 [0m[33m[WARN] [0m# of splitters: 1
+14:49:45 [0m[33m[WARN] [0mproved: (== (S ?ts_ph_Nat_0) ?ts_ph_Nat_0) => (== ?ts_ph_Nat_0 (S ?ts_ph_Nat_0))
+14:49:45 [0m[33m[WARN] [0mproved: (== ?ts_ph_Nat_0 (S ?ts_ph_Nat_0)) => (== (S ?ts_ph_Nat_0) ?ts_ph_Nat_0)
+14:49:45 [0m[33m[WARN] [0m# of splitters: 1
+14:49:45 [0m[33m[WARN] [0mproved: (== (S Z) ?ts_ph_Nat_0) => (== ?ts_ph_Nat_0 (S Z))
+14:49:45 [0m[33m[WARN] [0mproved: (== ?ts_ph_Nat_0 (S Z)) => (== (S Z) ?ts_ph_Nat_0)
+generalizing (+2 (+2 ts_ph_Nat_0 ts_ph_Nat_1) ts_ph_Nat_1) = (+2 ts_ph_Nat_0 (+2 ts_ph_Nat_1 ts_ph_Nat_1))
+generalized as case_split
+14:49:45 [0m[33m[WARN] [0mproved: (+2 (+2 ?ts_ph_Nat_0 ?ts_ph_Nat_1) ?ts_ph_Nat_2) => (+2 ?ts_ph_Nat_0 (+2 ?ts_ph_Nat_1 ?ts_ph_Nat_2))
+14:49:45 [0m[33m[WARN] [0mproved: (+2 ?ts_ph_Nat_0 (+2 ?ts_ph_Nat_1 ?ts_ph_Nat_2)) => (+2 (+2 ?ts_ph_Nat_0 ?ts_ph_Nat_1) ?ts_ph_Nat_2)
+14:49:45 [0m[33m[WARN] [0mproved: (== Z ?ts_ph_Nat_0) => (== Z (+2 ?ts_ph_Nat_0 ?ts_ph_Nat_0))
+14:49:45 [0m[33m[WARN] [0mproved: (== Z (+2 ?ts_ph_Nat_0 ?ts_ph_Nat_0)) => (== Z ?ts_ph_Nat_0)
+14:49:45 [0m[33m[WARN] [0m# of splitters: 8
+14:49:45 [0m[33m[WARN] [0m# of splitters: 11
+14:49:45 [0m[33m[WARN] [0m# of splitters: 56
+14:49:45 [0m[33m[WARN] [0m# of splitters: 8
+14:49:45 [0m[33m[WARN] [0m# of splitters: 11
+14:49:46 [0m[33m[WARN] [0m# of splitters: 56
+14:49:48 [0m[33m[WARN] [0m# of splitters: 1
+14:49:48 [0m[33m[WARN] [0m# of splitters: 1
+14:49:48 [0m[33m[WARN] [0m# of splitters: 1
+14:49:48 [0m[33m[WARN] [0m# of splitters: 3
+14:49:48 [0m[33m[WARN] [0m# of splitters: 2
+14:49:48 [0m[33m[WARN] [0m# of splitters: 1
+14:49:48 [0m[33m[WARN] [0m# of splitters: 4
+14:49:48 [0m[33m[WARN] [0m# of splitters: 1
+14:49:48 [0m[33m[WARN] [0mproved: (== (+2 ?ts_ph_Nat_0 ?ts_ph_Nat_1) (S ?ts_ph_Nat_0)) => (== ?ts_ph_Nat_1 (S Z))
+14:49:48 [0m[33m[WARN] [0m# of splitters: 1
+14:49:48 [0m[33m[WARN] [0m# of splitters: 3
+14:49:48 [0m[33m[WARN] [0m# of splitters: 2
+14:49:48 [0m[33m[WARN] [0m# of splitters: 1
+14:49:48 [0m[33m[WARN] [0m# of splitters: 4
+14:49:48 [0m[33m[WARN] [0mproved: (== (S ?ts_ph_Nat_0) (+2 ?ts_ph_Nat_0 ?ts_ph_Nat_1)) => (== (+2 ?ts_ph_Nat_0 ?ts_ph_Nat_1) (S ?ts_ph_Nat_0))
+14:49:48 [0m[33m[WARN] [0mproved: (== (+2 ?ts_ph_Nat_0 ?ts_ph_Nat_1) (S ?ts_ph_Nat_0)) => (== (S ?ts_ph_Nat_0) (+2 ?ts_ph_Nat_0 ?ts_ph_Nat_1))
+14:49:48 [0m[33m[WARN] [0m# of splitters: 5
+14:49:48 [0m[33m[WARN] [0mproved: (== (+2 ?ts_ph_Nat_0 ?ts_ph_Nat_0) (S Z)) => false
+14:49:48 [0m[33m[WARN] [0m# of splitters: 1
+14:49:48 [0m[33m[WARN] [0mproved: (== ?ts_ph_Nat_0 ?ts_ph_Nat_1) => (== ?ts_ph_Nat_1 ?ts_ph_Nat_0)
+14:49:48 [0m[33m[WARN] [0mproved: (== ?ts_ph_Nat_1 ?ts_ph_Nat_0) => (== ?ts_ph_Nat_0 ?ts_ph_Nat_1)
+
+14:49:48 [0m[33m[WARN] [0mproved: (+2 ?ts_ph_Nat_1 ?ts_ph_Nat_0) => (+2 ?ts_ph_Nat_0 ?ts_ph_Nat_1)
+14:49:48 [0m[33m[WARN] [0mproved: (+2 ?ts_ph_Nat_0 ?ts_ph_Nat_1) => (+2 ?ts_ph_Nat_1 ?ts_ph_Nat_0)
+
+generalizing (++ ts_ph_list_0 (++ ts_ph_list_1 ts_ph_list_1)) = (++ (++ ts_ph_list_0 ts_ph_list_1) ts_ph_list_1)
+generalized as case_split
+14:49:48 [0m[33m[WARN] [0mproved: (++ ?ts_ph_list_0 (++ ?ts_ph_list_1 ?ts_ph_list_2)) => (++ (++ ?ts_ph_list_0 ?ts_ph_list_1) ?ts_ph_list_2)
+14:49:48 [0m[33m[WARN] [0mproved: (++ (++ ?ts_ph_list_0 ?ts_ph_list_1) ?ts_ph_list_2) => (++ ?ts_ph_list_0 (++ ?ts_ph_list_1 ?ts_ph_list_2))
+
+14:49:53 [0m[33m[WARN] [0m# of splitters: 2
+14:49:53 [0m[33m[WARN] [0m# of splitters: 2
+14:49:53 [0m[33m[WARN] [0m# of splitters: 1
+14:49:53 [0m[33m[WARN] [0mproved: (== (+2 ?ts_ph_Nat_0 ?ts_ph_Nat_1) (+2 ?ts_ph_Nat_0 ?ts_ph_Nat_0)) => (== ?ts_ph_Nat_0 ?ts_ph_Nat_1)
+14:49:53 [0m[33m[WARN] [0mproved: (== ?ts_ph_Nat_0 ?ts_ph_Nat_1) => (== (+2 ?ts_ph_Nat_0 ?ts_ph_Nat_1) (+2 ?ts_ph_Nat_0 ?ts_ph_Nat_0))
+
+done in 343771

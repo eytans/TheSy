@@ -1,0 +1,16 @@
+Collecting statistics
+(takeWhile ?x nil) => nil
+(takeWhile ?x (cons ?z ?xs)) => (cons ?z (takeWhile ?x ?xs))
+(takeWhile ?x (cons ?z ?xs)) => (cons ?z (takeWhile ?x ?xs))
+(takeWhile ?x (cons ?z ?xs)) => nil
+(apply12 lam ?x0) => true
+ ex is: nil
+ ex is: (cons autovar_sk_0 nil)
+ ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
+ ex is: nil
+ ex is: (cons autovar_sk_0 nil)
+ ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
+Running TheSy on datatypes: list dict: takeWhile lam apply12 nil cons
+Starting depth 1
+Starting depth 2
+done in 3

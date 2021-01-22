@@ -1,0 +1,2 @@
+(=> "(take (S ?ts_ph_Nat_0) (cons ?ts_ph_sk_1 ?ts_ph_list_1)) => (cons ?ts_ph_sk_1 (take ?ts_ph_Nat_0 ?ts_ph_list_1))" (take (S ?ts_ph_Nat_0) (cons ?ts_ph_sk_1 ?ts_ph_list_1)) (cons ?ts_ph_sk_1 (take ?ts_ph_Nat_0 ?ts_ph_list_1)))
+(=> "(cons ?ts_ph_sk_1 (take ?ts_ph_Nat_0 ?ts_ph_list_1)) => (take (S ?ts_ph_Nat_0) (cons ?ts_ph_sk_1 ?ts_ph_list_1))" (cons ?ts_ph_sk_1 (take ?ts_ph_Nat_0 ?ts_ph_list_1)) (take (S ?ts_ph_Nat_0) (cons ?ts_ph_sk_1 ?ts_ph_list_1)))

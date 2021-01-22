@@ -1,0 +1,2 @@
+(=> "(drop ?ts_ph_Nat_2 (take ?ts_ph_Nat_0 ?ts_ph_list_1)) => (take (-2 ?ts_ph_Nat_0 ?ts_ph_Nat_2) (drop ?ts_ph_Nat_2 ?ts_ph_list_1))" (drop ?ts_ph_Nat_2 (take ?ts_ph_Nat_0 ?ts_ph_list_1)) (take (-2 ?ts_ph_Nat_0 ?ts_ph_Nat_2) (drop ?ts_ph_Nat_2 ?ts_ph_list_1)))
+(=> "(take (-2 ?ts_ph_Nat_0 ?ts_ph_Nat_2) (drop ?ts_ph_Nat_2 ?ts_ph_list_1)) => (drop ?ts_ph_Nat_2 (take ?ts_ph_Nat_0 ?ts_ph_list_1))" (take (-2 ?ts_ph_Nat_0 ?ts_ph_Nat_2) (drop ?ts_ph_Nat_2 ?ts_ph_list_1)) (drop ?ts_ph_Nat_2 (take ?ts_ph_Nat_0 ?ts_ph_list_1)))

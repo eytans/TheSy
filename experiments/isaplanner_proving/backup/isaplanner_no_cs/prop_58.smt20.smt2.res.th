@@ -1,0 +1,3 @@
+(=> "(zip ?ts_ph_list2_0 nil2) => nil" (zip ?ts_ph_list2_0 nil2) nil)
+(=> "(drop ?ts_ph_Nat_0 (zip ?ts_ph_list2_1 ?ts_ph_list2_2)) => (zip (drop2 ?ts_ph_Nat_0 ?ts_ph_list2_1) (drop2 ?ts_ph_Nat_0 ?ts_ph_list2_2))" (drop ?ts_ph_Nat_0 (zip ?ts_ph_list2_1 ?ts_ph_list2_2)) (zip (drop2 ?ts_ph_Nat_0 ?ts_ph_list2_1) (drop2 ?ts_ph_Nat_0 ?ts_ph_list2_2)))
+(=> "(zip (drop2 ?ts_ph_Nat_0 ?ts_ph_list2_1) (drop2 ?ts_ph_Nat_0 ?ts_ph_list2_2)) => (drop ?ts_ph_Nat_0 (zip ?ts_ph_list2_1 ?ts_ph_list2_2))" (zip (drop2 ?ts_ph_Nat_0 ?ts_ph_list2_1) (drop2 ?ts_ph_Nat_0 ?ts_ph_list2_2)) (drop ?ts_ph_Nat_0 (zip ?ts_ph_list2_1 ?ts_ph_list2_2)))

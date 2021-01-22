@@ -1,0 +1,8 @@
+(datatype Nat () ((Z Nat) (S Nat Nat)))
+(declare-fun max (Nat Nat) Nat)
+(=> rule0 (max Z ?y) ?y)
+(=> rule1 (max (S ?z) Z) (S ?z))
+(=> rule2 (S ?z) (max (S ?z) Z))
+(=> rule3 (max (S ?z) (S ?x2)) (S (max ?z ?x2)))
+(=> rule4 (S (max ?z ?x2)) (max (S ?z) (S ?x2)))
+(prove (forall ((a Nat)(b Nat)(c Nat)) (= (max (max a b) c) (max a (max b c)))))

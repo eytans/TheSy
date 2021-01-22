@@ -1,0 +1,28 @@
+Collecting statistics
+(<2 ?x Z) => false
+(<2 Z (S ?z)) => true
+(<2 (S ?x2) (S ?z)) => (<2 ?x2 ?z)
+(<2 ?x2 ?z) => (<2 (S ?x2) (S ?z))
+(+2 Z ?y) => ?y
+(+2 (S ?z) ?y) => (S (+2 ?z ?y))
+(S (+2 ?z ?y)) => (+2 (S ?z) ?y)
+(<2 ?autovar5 (S ?autovar1)) => (potential_split ?autovar5 Z (S (param_Nat_0 ?autovar5))) if Cond(var: ?autovar5, pat: Z) Cond(var: ?autovar5, pat: (S ?param_0))
+(<2 ?autovar5 (S ?autovar3)) => (potential_split ?autovar5 Z (S (param_Nat_0 ?autovar5))) if Cond(var: ?autovar5, pat: Z) Cond(var: ?autovar5, pat: (S ?param_0))
+(<2 Z ?autovar6) => (potential_split ?autovar6 Z (S (param_Nat_0 ?autovar6))) if Cond(var: ?autovar6, pat: Z) Cond(var: ?autovar6, pat: (S ?param_0))
+(<2 (S ?autovar4) ?autovar6) => (potential_split ?autovar6 Z (S (param_Nat_0 ?autovar6))) if Cond(var: ?autovar6, pat: Z) Cond(var: ?autovar6, pat: (S ?param_0))
+ ex is: Z
+ ex is: (S Z)
+ ex is: (S (S Z))
+ ex is: Z
+ ex is: (S Z)
+ ex is: (S (S Z))
+Running TheSy on datatypes: Nat dict: <2 +2 Z S
+14:49:26 [0m[33m[WARN] [0m# of splitters: 1
+14:49:26 [0m[33m[WARN] [0m# of splitters: 1
+14:49:26 [0m[33m[WARN] [0m# of splitters: 1
+14:49:26 [0m[33m[WARN] [0m# of splitters: 1
+14:49:26 [0m[33m[WARN] [0m# of splitters: 1
+14:49:26 [0m[33m[WARN] [0m# of splitters: 1
+proved: (<2 ?ts_ph_Nat_0 (S (+2 ?ts_ph_Nat_0 ?ts_ph_Nat_1))) => true
+14:49:26 [0m[33m[WARN] [0mFound all lemmas
+done in 17

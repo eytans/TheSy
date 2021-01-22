@@ -1,0 +1,2 @@
+(=> "(-2 (-2 (S ?ts_ph_Nat_0) ?ts_ph_Nat_3) (S ?ts_ph_Nat_1)) => (-2 (-2 ?ts_ph_Nat_0 ?ts_ph_Nat_3) ?ts_ph_Nat_1)" (-2 (-2 (S ?ts_ph_Nat_0) ?ts_ph_Nat_3) (S ?ts_ph_Nat_1)) (-2 (-2 ?ts_ph_Nat_0 ?ts_ph_Nat_3) ?ts_ph_Nat_1))
+(=> "(-2 (-2 ?ts_ph_Nat_0 ?ts_ph_Nat_3) ?ts_ph_Nat_1) => (-2 (-2 (S ?ts_ph_Nat_0) ?ts_ph_Nat_3) (S ?ts_ph_Nat_1))" (-2 (-2 ?ts_ph_Nat_0 ?ts_ph_Nat_3) ?ts_ph_Nat_1) (-2 (-2 (S ?ts_ph_Nat_0) ?ts_ph_Nat_3) (S ?ts_ph_Nat_1)))

@@ -1,0 +1,100 @@
+Collecting statistics
+(== Z Z) => true
+(== Z (S ?z)) => false
+(== (S ?x2) Z) => false
+(== (S ?x2) (S ?y2)) => (== ?x2 ?y2)
+(== ?x2 ?y2) => (== (S ?x2) (S ?y2))
+(elem ?x nil) => false
+(elem ?x (cons ?z ?xs)) => (elem ?x ?xs)
+(elem ?x (cons ?z ?xs)) => true
+(<2 ?x Z) => false
+(<2 Z (S ?z)) => true
+(<2 (S ?x2) (S ?z)) => (<2 ?x2 ?z)
+(<2 ?x2 ?z) => (<2 (S ?x2) (S ?z))
+(ins ?x nil) => (cons ?x nil)
+(cons ?x nil) => (ins ?x nil)
+(ins ?x (cons ?z ?xs)) => (cons ?z (ins ?x ?xs))
+(ins ?x (cons ?z ?xs)) => (cons ?z (ins ?x ?xs))
+(ins ?x (cons ?z ?xs)) => (cons ?x (cons ?z ?xs))
+(ins ?x (cons ?z ?xs)) => (cons ?x (cons ?z ?xs))
+(== ?autovar7 Z) => (potential_split ?autovar7 Z (S (param_Nat_0 ?autovar7))) if Cond(var: ?autovar7, pat: Z) Cond(var: ?autovar7, pat: (S ?param_0))
+(== ?autovar7 (S ?autovar1)) => (potential_split ?autovar7 Z (S (param_Nat_0 ?autovar7))) if Cond(var: ?autovar7, pat: Z) Cond(var: ?autovar7, pat: (S ?param_0))
+(== ?autovar7 Z) => (potential_split ?autovar7 Z (S (param_Nat_0 ?autovar7))) if Cond(var: ?autovar7, pat: Z) Cond(var: ?autovar7, pat: (S ?param_0))
+(== ?autovar7 (S ?autovar4)) => (potential_split ?autovar7 Z (S (param_Nat_0 ?autovar7))) if Cond(var: ?autovar7, pat: Z) Cond(var: ?autovar7, pat: (S ?param_0))
+(== Z ?autovar8) => (potential_split ?autovar8 Z (S (param_Nat_0 ?autovar8))) if Cond(var: ?autovar8, pat: Z) Cond(var: ?autovar8, pat: (S ?param_0))
+(== Z ?autovar8) => (potential_split ?autovar8 Z (S (param_Nat_0 ?autovar8))) if Cond(var: ?autovar8, pat: Z) Cond(var: ?autovar8, pat: (S ?param_0))
+(== (S ?autovar5) ?autovar8) => (potential_split ?autovar8 Z (S (param_Nat_0 ?autovar8))) if Cond(var: ?autovar8, pat: Z) Cond(var: ?autovar8, pat: (S ?param_0))
+(== (S ?autovar6) ?autovar8) => (potential_split ?autovar8 Z (S (param_Nat_0 ?autovar8))) if Cond(var: ?autovar8, pat: Z) Cond(var: ?autovar8, pat: (S ?param_0))
+(<2 ?autovar5 (S ?autovar1)) => (potential_split ?autovar5 Z (S (param_Nat_0 ?autovar5))) if Cond(var: ?autovar5, pat: Z) Cond(var: ?autovar5, pat: (S ?param_0))
+(<2 ?autovar5 (S ?autovar3)) => (potential_split ?autovar5 Z (S (param_Nat_0 ?autovar5))) if Cond(var: ?autovar5, pat: Z) Cond(var: ?autovar5, pat: (S ?param_0))
+(<2 Z ?autovar6) => (potential_split ?autovar6 Z (S (param_Nat_0 ?autovar6))) if Cond(var: ?autovar6, pat: Z) Cond(var: ?autovar6, pat: (S ?param_0))
+(<2 (S ?autovar4) ?autovar6) => (potential_split ?autovar6 Z (S (param_Nat_0 ?autovar6))) if Cond(var: ?autovar6, pat: Z) Cond(var: ?autovar6, pat: (S ?param_0))
+ ex is: Z
+ ex is: (S Z)
+ ex is: (S (S Z))
+ ex is: nil
+ ex is: (cons autovar_Nat_0 nil)
+ ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+ ex is: Z
+ ex is: (S Z)
+ ex is: (S (S Z))
+ ex is: nil
+ ex is: (cons autovar_Nat_0 nil)
+ ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+Running TheSy on datatypes: Nat list dict: == elem <2 ins Z S nil cons
+13:04:03 [0m[33m[WARN] [0m# of splitters: 1
+Starting depth 1
+13:04:03 [0m[33m[WARN] [0m# of splitters: 2
+13:04:03 [0m[33m[WARN] [0m# of splitters: 1
+13:04:03 [0m[33m[WARN] [0m# of splitters: 1
+13:04:03 [0m[33m[WARN] [0m# of splitters: 1
+13:04:03 [0m[33m[WARN] [0mproved: (== ?ts_ph_Nat_0 Z) => (== Z ?ts_ph_Nat_0)
+13:04:03 [0m[33m[WARN] [0mproved: (== Z ?ts_ph_Nat_0) => (== ?ts_ph_Nat_0 Z)
+13:04:03 [0m[33m[WARN] [0m# of splitters: 1
+13:04:03 [0m[33m[WARN] [0mproved: (<2 ?ts_ph_Nat_0 ?ts_ph_Nat_0) => false
+13:04:03 [0m[33m[WARN] [0m# of splitters: 1
+13:04:03 [0m[33m[WARN] [0mproved: (== ?ts_ph_Nat_0 ?ts_ph_Nat_0) => true
+13:04:03 [0m[33m[WARN] [0m# of splitters: 1
+Starting depth 2
+13:04:03 [0m[33m[WARN] [0m# of splitters: 2
+13:04:03 [0m[33m[WARN] [0m# of splitters: 1
+13:04:03 [0m[33m[WARN] [0m# of splitters: 2
+13:04:03 [0m[33m[WARN] [0m# of splitters: 1
+13:04:03 [0m[33m[WARN] [0m# of splitters: 1
+13:04:03 [0m[33m[WARN] [0m# of splitters: 1
+13:04:03 [0m[33m[WARN] [0mproved: (== ?ts_ph_Nat_0 (S ?ts_ph_Nat_0)) => false
+13:04:03 [0m[33m[WARN] [0m# of splitters: 1
+13:04:03 [0m[33m[WARN] [0m# of splitters: 1
+13:04:03 [0m[33m[WARN] [0m# of splitters: 1
+13:04:03 [0m[33m[WARN] [0mproved: (== (S ?ts_ph_Nat_0) ?ts_ph_Nat_0) => false
+13:04:03 [0m[33m[WARN] [0m# of splitters: 1
+13:04:03 [0m[33m[WARN] [0m# of splitters: 1
+13:04:03 [0m[33m[WARN] [0m# of splitters: 1
+13:04:03 [0m[33m[WARN] [0mproved: (<2 (S ?ts_ph_Nat_0) ?ts_ph_Nat_0) => false
+13:04:03 [0m[33m[WARN] [0m# of splitters: 1
+13:04:03 [0m[33m[WARN] [0mproved: (<2 ?ts_ph_Nat_0 (S Z)) => (== Z ?ts_ph_Nat_0)
+13:04:03 [0m[33m[WARN] [0mproved: (== Z ?ts_ph_Nat_0) => (<2 ?ts_ph_Nat_0 (S Z))
+13:04:03 [0m[33m[WARN] [0m# of splitters: 1
+13:04:03 [0m[33m[WARN] [0m# of splitters: 1
+13:04:03 [0m[33m[WARN] [0m# of splitters: 1
+13:04:03 [0m[33m[WARN] [0mproved: (<2 ?ts_ph_Nat_0 (S ?ts_ph_Nat_0)) => true
+13:04:03 [0m[33m[WARN] [0m# of splitters: 1
+13:04:03 [0m[33m[WARN] [0m# of splitters: 1
+13:04:03 [0m[33m[WARN] [0mproved: (== ?ts_ph_Nat_0 (S Z)) => (== (S Z) ?ts_ph_Nat_0)
+13:04:03 [0m[33m[WARN] [0mproved: (== (S Z) ?ts_ph_Nat_0) => (== ?ts_ph_Nat_0 (S Z))
+13:04:03 [0m[33m[WARN] [0m# of splitters: 1
+13:04:03 [0m[33m[WARN] [0m# of splitters: 1
+13:04:03 [0m[33m[WARN] [0m# of splitters: 1
+13:04:03 [0m[33m[WARN] [0m# of splitters: 1
+13:04:03 [0m[33m[WARN] [0m# of splitters: 1
+13:04:03 [0m[33m[WARN] [0m# of splitters: 1
+13:04:03 [0m[33m[WARN] [0m# of splitters: 1
+13:04:03 [0m[33m[WARN] [0m# of splitters: 1
+13:04:03 [0m[33m[WARN] [0m# of splitters: 1
+13:04:03 [0m[33m[WARN] [0m# of splitters: 1
+13:04:03 [0m[33m[WARN] [0m# of splitters: 1
+13:04:03 [0m[33m[WARN] [0m# of splitters: 1
+13:04:03 [0m[33m[WARN] [0m# of splitters: 1
+13:04:03 [0m[33m[WARN] [0m# of splitters: 1
+13:04:03 [0m[33m[WARN] [0m# of splitters: 1
+done in 553

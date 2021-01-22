@@ -1,0 +1,32 @@
+Collecting statistics
+(take Z ?y) => nil
+(take (S ?z) nil) => nil
+(take (S ?z) (cons ?x2 ?x3)) => (cons ?x2 (take ?z ?x3))
+(cons ?x2 (take ?z ?x3)) => (take (S ?z) (cons ?x2 ?x3))
+(map2 ?x nil) => nil
+(map2 ?x (cons ?z0 ?xs)) => (cons (apply1 ?x ?z0) (map2 ?x ?xs))
+(cons (apply1 ?x ?z0) (map2 ?x ?xs)) => (map2 ?x (cons ?z0 ?xs))
+(take ?autovar7 nil) => (potential_split ?autovar7 Z (S (param_Nat_0 ?autovar7))) if Cond(var: ?autovar7, pat: Z) Cond(var: ?autovar7, pat: (S ?param_0))
+(take ?autovar7 (cons ?autovar3 ?autovar4)) => (potential_split ?autovar7 Z (S (param_Nat_0 ?autovar7))) if Cond(var: ?autovar7, pat: Z) Cond(var: ?autovar7, pat: (S ?param_0))
+(take (S ?autovar5) ?autovar8) => (potential_split ?autovar8 nil (cons (param_list_0 ?autovar8) (param_list_1 ?autovar8))) if Cond(var: ?autovar8, pat: nil) Cond(var: ?autovar8, pat: (cons ?param_0 ?param_1))
+(take (S ?autovar6) ?autovar8) => (potential_split ?autovar8 nil (cons (param_list_0 ?autovar8) (param_list_1 ?autovar8))) if Cond(var: ?autovar8, pat: nil) Cond(var: ?autovar8, pat: (cons ?param_0 ?param_1))
+ ex is: nil
+ ex is: (cons autovar_sk_0 nil)
+ ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
+ ex is: Z
+ ex is: (S Z)
+ ex is: (S (S Z))
+ ex is: nil
+ ex is: (cons autovar_sk_0 nil)
+ ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
+ ex is: Z
+ ex is: (S Z)
+ ex is: (S (S Z))
+Running TheSy on datatypes: list Nat dict: take map2 apply1 nil cons Z S
+16:20:49 [0m[33m[WARN] [0m# of splitters: 2
+16:20:49 [0m[33m[WARN] [0m# of splitters: 1
+16:20:49 [0m[33m[WARN] [0m# of splitters: 1
+proved: (take ?ts_ph_Nat_0 (map2 ?ts_ph_fun1_1 ?ts_ph_list_1)) => (map2 ?ts_ph_fun1_1 (take ?ts_ph_Nat_0 ?ts_ph_list_1))
+proved: (map2 ?ts_ph_fun1_1 (take ?ts_ph_Nat_0 ?ts_ph_list_1)) => (take ?ts_ph_Nat_0 (map2 ?ts_ph_fun1_1 ?ts_ph_list_1))
+16:20:49 [0m[33m[WARN] [0mFound all lemmas
+done in 3

@@ -1,0 +1,43 @@
+Collecting statistics
+(min Z ?y) => Z
+(min (S ?z) Z) => Z
+(min (S ?z) (S ?y1)) => (S (min ?z ?y1))
+(S (min ?z ?y1)) => (min (S ?z) (S ?y1))
+(== Z Z) => true
+(== Z (S ?z)) => false
+(== (S ?x2) Z) => false
+(== (S ?x2) (S ?y2)) => (== ?x2 ?y2)
+(== ?x2 ?y2) => (== (S ?x2) (S ?y2))
+(<=2 Z ?y) => true
+(<=2 (S ?z) Z) => false
+(<=2 (S ?z) (S ?x2)) => (<=2 ?z ?x2)
+(<=2 ?z ?x2) => (<=2 (S ?z) (S ?x2))
+(min ?autovar6 Z) => (potential_split ?autovar6 Z (S (param_Nat_0 ?autovar6))) if Cond(var: ?autovar6, pat: Z) Cond(var: ?autovar6, pat: (S ?param_0))
+(min ?autovar6 (S ?autovar3)) => (potential_split ?autovar6 Z (S (param_Nat_0 ?autovar6))) if Cond(var: ?autovar6, pat: Z) Cond(var: ?autovar6, pat: (S ?param_0))
+(min (S ?autovar4) ?autovar7) => (potential_split ?autovar7 Z (S (param_Nat_0 ?autovar7))) if Cond(var: ?autovar7, pat: Z) Cond(var: ?autovar7, pat: (S ?param_0))
+(min (S ?autovar5) ?autovar7) => (potential_split ?autovar7 Z (S (param_Nat_0 ?autovar7))) if Cond(var: ?autovar7, pat: Z) Cond(var: ?autovar7, pat: (S ?param_0))
+(== ?autovar7 Z) => (potential_split ?autovar7 Z (S (param_Nat_0 ?autovar7))) if Cond(var: ?autovar7, pat: Z) Cond(var: ?autovar7, pat: (S ?param_0))
+(== ?autovar7 (S ?autovar1)) => (potential_split ?autovar7 Z (S (param_Nat_0 ?autovar7))) if Cond(var: ?autovar7, pat: Z) Cond(var: ?autovar7, pat: (S ?param_0))
+(== ?autovar7 Z) => (potential_split ?autovar7 Z (S (param_Nat_0 ?autovar7))) if Cond(var: ?autovar7, pat: Z) Cond(var: ?autovar7, pat: (S ?param_0))
+(== ?autovar7 (S ?autovar4)) => (potential_split ?autovar7 Z (S (param_Nat_0 ?autovar7))) if Cond(var: ?autovar7, pat: Z) Cond(var: ?autovar7, pat: (S ?param_0))
+(== Z ?autovar8) => (potential_split ?autovar8 Z (S (param_Nat_0 ?autovar8))) if Cond(var: ?autovar8, pat: Z) Cond(var: ?autovar8, pat: (S ?param_0))
+(== Z ?autovar8) => (potential_split ?autovar8 Z (S (param_Nat_0 ?autovar8))) if Cond(var: ?autovar8, pat: Z) Cond(var: ?autovar8, pat: (S ?param_0))
+(== (S ?autovar5) ?autovar8) => (potential_split ?autovar8 Z (S (param_Nat_0 ?autovar8))) if Cond(var: ?autovar8, pat: Z) Cond(var: ?autovar8, pat: (S ?param_0))
+(== (S ?autovar6) ?autovar8) => (potential_split ?autovar8 Z (S (param_Nat_0 ?autovar8))) if Cond(var: ?autovar8, pat: Z) Cond(var: ?autovar8, pat: (S ?param_0))
+(<=2 ?autovar6 Z) => (potential_split ?autovar6 Z (S (param_Nat_0 ?autovar6))) if Cond(var: ?autovar6, pat: Z) Cond(var: ?autovar6, pat: (S ?param_0))
+(<=2 ?autovar6 (S ?autovar3)) => (potential_split ?autovar6 Z (S (param_Nat_0 ?autovar6))) if Cond(var: ?autovar6, pat: Z) Cond(var: ?autovar6, pat: (S ?param_0))
+(<=2 (S ?autovar4) ?autovar7) => (potential_split ?autovar7 Z (S (param_Nat_0 ?autovar7))) if Cond(var: ?autovar7, pat: Z) Cond(var: ?autovar7, pat: (S ?param_0))
+(<=2 (S ?autovar5) ?autovar7) => (potential_split ?autovar7 Z (S (param_Nat_0 ?autovar7))) if Cond(var: ?autovar7, pat: Z) Cond(var: ?autovar7, pat: (S ?param_0))
+ ex is: Z
+ ex is: (S Z)
+ ex is: (S (S Z))
+ ex is: Z
+ ex is: (S Z)
+ ex is: (S (S Z))
+Running TheSy on datatypes: Nat dict: min == <=2 Z S
+13:04:03 [0m[33m[WARN] [0m# of splitters: 2
+13:04:03 [0m[33m[WARN] [0m# of splitters: 1
+proved: (== (min ?ts_ph_Nat_0 ?ts_ph_Nat_2) ?ts_ph_Nat_0) => (<=2 ?ts_ph_Nat_0 ?ts_ph_Nat_2)
+proved: (<=2 ?ts_ph_Nat_0 ?ts_ph_Nat_2) => (== (min ?ts_ph_Nat_0 ?ts_ph_Nat_2) ?ts_ph_Nat_0)
+13:04:03 [0m[33m[WARN] [0mFound all lemmas
+done in 27

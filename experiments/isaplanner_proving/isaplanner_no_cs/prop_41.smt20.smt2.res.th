@@ -1,0 +1,2 @@
+(=> "(take ?ts_ph_Nat_0 (map2 ?ts_ph_fun1_1 ?ts_ph_list_1)) => (map2 ?ts_ph_fun1_1 (take ?ts_ph_Nat_0 ?ts_ph_list_1))" (take ?ts_ph_Nat_0 (map2 ?ts_ph_fun1_1 ?ts_ph_list_1)) (map2 ?ts_ph_fun1_1 (take ?ts_ph_Nat_0 ?ts_ph_list_1)))
+(=> "(map2 ?ts_ph_fun1_1 (take ?ts_ph_Nat_0 ?ts_ph_list_1)) => (take ?ts_ph_Nat_0 (map2 ?ts_ph_fun1_1 ?ts_ph_list_1))" (map2 ?ts_ph_fun1_1 (take ?ts_ph_Nat_0 ?ts_ph_list_1)) (take ?ts_ph_Nat_0 (map2 ?ts_ph_fun1_1 ?ts_ph_list_1)))

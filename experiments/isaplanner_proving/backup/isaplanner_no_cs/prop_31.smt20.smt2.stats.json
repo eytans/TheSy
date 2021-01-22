@@ -1,0 +1,1 @@
+{"conjectures_proved":[],"failed_proofs":[],"goals_proved":[["(min (min ts_ph_Nat_0 ts_ph_Nat_3) ts_ph_Nat_2)","(min ts_ph_Nat_0 (min ts_ph_Nat_3 ts_ph_Nat_2))",{"secs":0,"nanos":3001014}]],"failed_proofs_goals":[],"equiv_red_iterations":[],"case_split":[],"term_creation":[],"get_conjectures":[],"filtered_lemmas":[],"total_time":{"secs":0,"nanos":3027806}}

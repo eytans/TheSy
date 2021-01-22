@@ -1,0 +1,7 @@
+(=> "(== ?ts_ph_Nat_0 Z) => (== Z ?ts_ph_Nat_0)" (== ?ts_ph_Nat_0 Z) (== Z ?ts_ph_Nat_0))
+(=> "(== Z ?ts_ph_Nat_0) => (== ?ts_ph_Nat_0 Z)" (== Z ?ts_ph_Nat_0) (== ?ts_ph_Nat_0 Z))
+(=> "(== ?ts_ph_Nat_0 ?ts_ph_Nat_0) => true" (== ?ts_ph_Nat_0 ?ts_ph_Nat_0) true)
+(=> "(== (S Z) ?ts_ph_Nat_0) => (== ?ts_ph_Nat_0 (S Z))" (== (S Z) ?ts_ph_Nat_0) (== ?ts_ph_Nat_0 (S Z)))
+(=> "(== ?ts_ph_Nat_0 (S Z)) => (== (S Z) ?ts_ph_Nat_0)" (== ?ts_ph_Nat_0 (S Z)) (== (S Z) ?ts_ph_Nat_0))
+(=> "(== ?ts_ph_Nat_0 (S ?ts_ph_Nat_0)) => false" (== ?ts_ph_Nat_0 (S ?ts_ph_Nat_0)) false)
+(=> "(== (S ?ts_ph_Nat_0) ?ts_ph_Nat_0) => false" (== (S ?ts_ph_Nat_0) ?ts_ph_Nat_0) false)

@@ -1,0 +1,7 @@
+(datatype Nat () ((Z Nat) (S Nat Nat)))
+(declare-fun min (Nat Nat) Nat)
+(=> rule0 (min Z ?y) Z)
+(=> rule1 (min (S ?z) Z) Z)
+(=> rule2 (min (S ?z) (S ?y1)) (S (min ?z ?y1)))
+(=> rule3 (S (min ?z ?y1)) (min (S ?z) (S ?y1)))
+(prove (forall ((a Nat)(b Nat)) (= (min a b) (min b a))))

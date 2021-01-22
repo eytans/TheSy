@@ -1,0 +1,2 @@
+(=> "(min ?ts_ph_Nat_0 ?ts_ph_Nat_2) => (min ?ts_ph_Nat_2 ?ts_ph_Nat_0)" (min ?ts_ph_Nat_0 ?ts_ph_Nat_2) (min ?ts_ph_Nat_2 ?ts_ph_Nat_0))
+(=> "(min ?ts_ph_Nat_2 ?ts_ph_Nat_0) => (min ?ts_ph_Nat_0 ?ts_ph_Nat_2)" (min ?ts_ph_Nat_2 ?ts_ph_Nat_0) (min ?ts_ph_Nat_0 ?ts_ph_Nat_2))

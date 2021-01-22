@@ -1,0 +1,5 @@
+Collecting statistics
+(<=2 Z ?y) => true
+(<=2 (S ?z) Z) => false
+(<=2 (S ?z) (S ?x2)) => (<=2 ?z ?x2)
+(<=2 ?z ?x2) => (<=2 (S ?z) (S ?x2))

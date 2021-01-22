@@ -1,0 +1,8 @@
+(datatype Nat () ((Z Nat) (S Nat Nat)))
+(datatype list () ((nil list) (cons Nat list list)))
+(declare-fun last (list) Nat)
+(=> rule0 (last nil) Z)
+(=> rule1 Z (last nil))
+(=> rule2 (last (cons ?y nil)) ?y)
+(=> rule3 (last (cons ?y (cons ?x2 ?x3))) (last (cons ?x2 ?x3)))
+(prove (forall ((x Nat)(xs list)) (=> (= xs nil) (= (last (cons x xs)) x))))

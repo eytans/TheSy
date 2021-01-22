@@ -1,0 +1,24 @@
+Collecting statistics
+(min Z ?y) => Z
+(min (S ?z) Z) => Z
+(min (S ?z) (S ?y1)) => (S (min ?z ?y1))
+(S (min ?z ?y1)) => (min (S ?z) (S ?y1))
+(min ?autovar6 Z) => (potential_split ?autovar6 Z (S (param_Nat_0 ?autovar6))) if Cond(var: ?autovar6, pat: Z) Cond(var: ?autovar6, pat: (S ?param_0))
+(min ?autovar6 (S ?autovar3)) => (potential_split ?autovar6 Z (S (param_Nat_0 ?autovar6))) if Cond(var: ?autovar6, pat: Z) Cond(var: ?autovar6, pat: (S ?param_0))
+(min (S ?autovar4) ?autovar7) => (potential_split ?autovar7 Z (S (param_Nat_0 ?autovar7))) if Cond(var: ?autovar7, pat: Z) Cond(var: ?autovar7, pat: (S ?param_0))
+(min (S ?autovar5) ?autovar7) => (potential_split ?autovar7 Z (S (param_Nat_0 ?autovar7))) if Cond(var: ?autovar7, pat: Z) Cond(var: ?autovar7, pat: (S ?param_0))
+ ex is: Z
+ ex is: (S Z)
+ ex is: (S (S Z))
+ ex is: Z
+ ex is: (S Z)
+ ex is: (S (S Z))
+Running TheSy on datatypes: Nat dict: min Z S
+13:04:05 [0m[33m[WARN] [0m# of splitters: 2
+13:04:05 [0m[33m[WARN] [0m# of splitters: 2
+13:04:05 [0m[33m[WARN] [0m# of splitters: 1
+13:04:05 [0m[33m[WARN] [0m# of splitters: 1
+proved: (min (min ?ts_ph_Nat_0 ?ts_ph_Nat_3) ?ts_ph_Nat_2) => (min ?ts_ph_Nat_0 (min ?ts_ph_Nat_3 ?ts_ph_Nat_2))
+proved: (min ?ts_ph_Nat_0 (min ?ts_ph_Nat_3 ?ts_ph_Nat_2)) => (min (min ?ts_ph_Nat_0 ?ts_ph_Nat_3) ?ts_ph_Nat_2)
+13:04:05 [0m[33m[WARN] [0mFound all lemmas
+done in 3

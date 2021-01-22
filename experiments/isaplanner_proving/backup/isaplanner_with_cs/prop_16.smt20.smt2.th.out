@@ -1,0 +1,21 @@
+Collecting statistics
+(last nil) => Z
+Z => (last nil)
+(last (cons ?y nil)) => ?y
+(last (cons ?y (cons ?x2 ?x3))) => (last (cons ?x2 ?x3))
+ ex is: Z
+ ex is: (S Z)
+ ex is: (S (S Z))
+ ex is: nil
+ ex is: (cons autovar_Nat_0 nil)
+ ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+ ex is: Z
+ ex is: (S Z)
+ ex is: (S (S Z))
+ ex is: nil
+ ex is: (cons autovar_Nat_0 nil)
+ ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+Running TheSy on datatypes: list Nat dict: last Z S nil cons
+proved: (= ?ts_ph_list_1 nil) |> (last (cons ?ts_ph_Nat_0 ?ts_ph_list_1)) => ?ts_ph_Nat_0
+14:19:06 [0m[33m[WARN] [0mFound all lemmas
+done in 0

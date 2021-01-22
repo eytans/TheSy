@@ -1,0 +1,2 @@
+(=> "(take ?ts_ph_Nat_1 (zip ?ts_ph_list2_2 ?ts_ph_list2_0)) => (zip (take2 ?ts_ph_Nat_1 ?ts_ph_list2_2) (take2 ?ts_ph_Nat_1 ?ts_ph_list2_0))" (take ?ts_ph_Nat_1 (zip ?ts_ph_list2_2 ?ts_ph_list2_0)) (zip (take2 ?ts_ph_Nat_1 ?ts_ph_list2_2) (take2 ?ts_ph_Nat_1 ?ts_ph_list2_0)))
+(=> "(zip (take2 ?ts_ph_Nat_1 ?ts_ph_list2_2) (take2 ?ts_ph_Nat_1 ?ts_ph_list2_0)) => (take ?ts_ph_Nat_1 (zip ?ts_ph_list2_2 ?ts_ph_list2_0))" (zip (take2 ?ts_ph_Nat_1 ?ts_ph_list2_2) (take2 ?ts_ph_Nat_1 ?ts_ph_list2_0)) (take ?ts_ph_Nat_1 (zip ?ts_ph_list2_2 ?ts_ph_list2_0)))

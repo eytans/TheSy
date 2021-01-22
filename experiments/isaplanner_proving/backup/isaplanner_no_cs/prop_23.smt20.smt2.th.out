@@ -1,0 +1,23 @@
+Collecting statistics
+(max Z ?y) => ?y
+(max (S ?z) Z) => (S ?z)
+(S ?z) => (max (S ?z) Z)
+(max (S ?z) (S ?x2)) => (S (max ?z ?x2))
+(S (max ?z ?x2)) => (max (S ?z) (S ?x2))
+(max ?autovar6 Z) => (potential_split ?autovar6 Z (S (param_Nat_0 ?autovar6))) if Cond(var: ?autovar6, pat: Z) Cond(var: ?autovar6, pat: (S ?param_0))
+(max ?autovar6 (S ?autovar3)) => (potential_split ?autovar6 Z (S (param_Nat_0 ?autovar6))) if Cond(var: ?autovar6, pat: Z) Cond(var: ?autovar6, pat: (S ?param_0))
+(max (S ?autovar4) ?autovar7) => (potential_split ?autovar7 Z (S (param_Nat_0 ?autovar7))) if Cond(var: ?autovar7, pat: Z) Cond(var: ?autovar7, pat: (S ?param_0))
+(max (S ?autovar5) ?autovar7) => (potential_split ?autovar7 Z (S (param_Nat_0 ?autovar7))) if Cond(var: ?autovar7, pat: Z) Cond(var: ?autovar7, pat: (S ?param_0))
+ ex is: Z
+ ex is: (S Z)
+ ex is: (S (S Z))
+ ex is: Z
+ ex is: (S Z)
+ ex is: (S (S Z))
+Running TheSy on datatypes: Nat dict: max Z S
+13:04:03 [0m[33m[WARN] [0m# of splitters: 1
+13:04:03 [0m[33m[WARN] [0m# of splitters: 1
+proved: (max ?ts_ph_Nat_0 ?ts_ph_Nat_1) => (max ?ts_ph_Nat_1 ?ts_ph_Nat_0)
+proved: (max ?ts_ph_Nat_1 ?ts_ph_Nat_0) => (max ?ts_ph_Nat_0 ?ts_ph_Nat_1)
+13:04:03 [0m[33m[WARN] [0mFound all lemmas
+done in 1

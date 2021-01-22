@@ -27,7 +27,7 @@ def run_thesy(fn_to):
     print(f"running {fn}")
     try:
         cmd = [s for s in CMD]
-        cmd[1] = fn
+        cmd.append(fn)
         res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=to)
         out = res.stdout.decode("utf8")
         error = res.stderr.decode("utf8")
@@ -42,7 +42,9 @@ def run_thesy(fn_to):
     # with open(fn + ".json", 'w') as f:
 
 
-def run_all(dirs, prove=False, features="", skip=None, timeout=60, processnum=8, memorylimit=32):
+def run_all(dirs, prove=False, features="", skip=None, timeout=60, processnum=20, memorylimit=32):
+    if skip is None:
+        skip = []
     to = timeout * 60
     if prove:
         CMD.append('--prove')
@@ -69,7 +71,7 @@ if __name__ == '__main__':
     parser.add_argument('-f', '--features', default="")
     parser.add_argument('--skip', nargs='*', default=None)
     parser.add_argument('-t', '--timeout', default=60)
-    parser.add_argument('-n', '--processnum', default=8)
+    parser.add_argument('-n', '--processnum', default=20)
     parser.add_argument('-m', '--memorylimit', default=32)
 
     args = parser.parse_args()
