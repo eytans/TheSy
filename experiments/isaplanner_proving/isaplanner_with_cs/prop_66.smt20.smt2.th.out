@@ -1,0 +1,34 @@
+18:01:26 [0m[33m[WARN] [0mCollecting statistics
+(len nil) => Z
+Z => (len nil)
+(len (cons ?y ?xs)) => (S (len ?xs))
+(filter ?x nil) => nil
+(filter ?x (cons ?z ?xs)) => (cons ?z (filter ?x ?xs))
+(filter ?x (cons ?z ?xs)) => (cons ?z (filter ?x ?xs))
+(filter ?x (cons ?z ?xs)) => (filter ?x ?xs)
+(<=2 Z ?y0) => true
+(<=2 (S ?z1) Z) => false
+(<=2 (S ?z2) (S ?x2)) => (<=2 ?z2 ?x2)
+(<=2 ?z2 ?x2) => (<=2 (S ?z2) (S ?x2))
+Searcher: (<=2 ?autovar6 Z)
+Searcher: (<=2 ?autovar6 (S ?autovar3))
+Searcher: (<=2 (S ?autovar4) ?autovar7)
+Searcher: (<=2 (S ?autovar5) ?autovar7)
+18:01:26 [0m[33m[WARN] [0m ex is: nil
+18:01:26 [0m[33m[WARN] [0m ex is: (cons autovar_sk_0 nil)
+18:01:26 [0m[33m[WARN] [0m ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
+18:01:26 [0m[33m[WARN] [0m ex is: Z
+18:01:26 [0m[33m[WARN] [0m ex is: (S Z)
+18:01:26 [0m[33m[WARN] [0m ex is: (S (S Z))
+18:01:26 [0m[33m[WARN] [0mProof mode: false
+18:01:26 [0m[33m[WARN] [0m ex is: nil
+18:01:26 [0m[33m[WARN] [0m ex is: (cons autovar_sk_0 nil)
+18:01:26 [0m[33m[WARN] [0m ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
+18:01:26 [0m[33m[WARN] [0m ex is: Z
+18:01:26 [0m[33m[WARN] [0m ex is: (S Z)
+18:01:26 [0m[33m[WARN] [0m ex is: (S (S Z))
+18:01:26 [0m[33m[WARN] [0mProof mode: false
+18:01:26 [0m[33m[WARN] [0mproved: (<=2 ?ts_ph_Nat_0 ?ts_ph_Nat_0) => true
+18:01:26 [0m[33m[WARN] [0mproved: (<=2 (S ?ts_ph_Nat_0) ?ts_ph_Nat_0) => false
+18:01:26 [0m[33m[WARN] [0mproved: (<=2 ?ts_ph_Nat_0 (S ?ts_ph_Nat_0)) => true
+done in 43

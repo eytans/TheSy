@@ -1,0 +1,1 @@
+(=> "(drop ?ts_ph_Nat_0 nil) => nil" (drop ?ts_ph_Nat_0 nil) nil)

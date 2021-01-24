@@ -1,0 +1,27 @@
+18:01:27 [0m[33m[WARN] [0mCollecting statistics
+(max Z ?y) => ?y
+(max (S ?z) Z) => (S ?z)
+(S ?z) => (max (S ?z) Z)
+(max (S ?z) (S ?x2)) => (S (max ?z ?x2))
+(S (max ?z ?x2)) => (max (S ?z) (S ?x2))
+Searcher: (max ?autovar6 Z)
+Searcher: (max ?autovar6 (S ?autovar3))
+Searcher: (max (S ?autovar4) ?autovar7)
+Searcher: (max (S ?autovar5) ?autovar7)
+18:01:27 [0m[33m[WARN] [0m ex is: Z
+18:01:27 [0m[33m[WARN] [0m ex is: (S Z)
+18:01:27 [0m[33m[WARN] [0m ex is: (S (S Z))
+18:01:27 [0m[33m[WARN] [0mProof mode: false
+18:01:27 [0m[33m[WARN] [0m ex is: Z
+18:01:27 [0m[33m[WARN] [0m ex is: (S Z)
+18:01:27 [0m[33m[WARN] [0m ex is: (S (S Z))
+18:01:27 [0m[33m[WARN] [0mProof mode: false
+18:01:27 [0m[33m[WARN] [0mproved: (max ?ts_ph_Nat_0 ?ts_ph_Nat_0) => ?ts_ph_Nat_0
+18:01:27 [0m[33m[WARN] [0mproved: (max ?ts_ph_Nat_0 Z) => ?ts_ph_Nat_0
+18:01:27 [0m[33m[WARN] [0mproved: (S ?ts_ph_Nat_0) => (max (S ?ts_ph_Nat_0) ?ts_ph_Nat_0)
+18:01:27 [0m[33m[WARN] [0mproved: (max (S ?ts_ph_Nat_0) ?ts_ph_Nat_0) => (S ?ts_ph_Nat_0)
+18:01:27 [0m[33m[WARN] [0mproved: (max (S Z) ?ts_ph_Nat_0) => (max ?ts_ph_Nat_0 (S Z))
+18:01:27 [0m[33m[WARN] [0mproved: (max ?ts_ph_Nat_0 (S Z)) => (max (S Z) ?ts_ph_Nat_0)
+18:01:27 [0m[33m[WARN] [0mproved: (S ?ts_ph_Nat_0) => (max ?ts_ph_Nat_0 (S ?ts_ph_Nat_0))
+18:01:27 [0m[33m[WARN] [0mproved: (max ?ts_ph_Nat_0 (S ?ts_ph_Nat_0)) => (S ?ts_ph_Nat_0)
+done in 8

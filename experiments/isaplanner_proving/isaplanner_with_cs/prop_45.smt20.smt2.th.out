@@ -1,0 +1,19 @@
+18:01:27 [0m[33m[WARN] [0mCollecting statistics
+(zip nil2 ?y) => nil
+(zip (cons2 ?z ?x2) nil2) => nil
+(zip (cons2 ?z ?x2) (cons2 ?x3 ?x4)) => (cons (pair2 ?z ?x3) (zip ?x2 ?x4))
+(cons (pair2 ?z ?x3) (zip ?x2 ?x4)) => (zip (cons2 ?z ?x2) (cons2 ?x3 ?x4))
+Searcher: (zip ?autovar11 nil2)
+Searcher: (zip ?autovar11 (cons2 ?autovar5 ?autovar6))
+Searcher: (zip (cons2 ?autovar7 ?autovar8) ?autovar12)
+Searcher: (zip (cons2 ?autovar9 ?autovar10) ?autovar12)
+18:01:27 [0m[33m[WARN] [0m ex is: nil2
+18:01:27 [0m[33m[WARN] [0m ex is: (cons2 autovar_sk_0 nil2)
+18:01:27 [0m[33m[WARN] [0m ex is: (cons2 autovar_sk_1 (cons2 autovar_sk_0 nil2))
+18:01:27 [0m[33m[WARN] [0mProof mode: false
+18:01:27 [0m[33m[WARN] [0m ex is: nil2
+18:01:27 [0m[33m[WARN] [0m ex is: (cons2 autovar_sk_0 nil2)
+18:01:27 [0m[33m[WARN] [0m ex is: (cons2 autovar_sk_1 (cons2 autovar_sk_0 nil2))
+18:01:27 [0m[33m[WARN] [0mProof mode: false
+18:01:27 [0m[33m[WARN] [0mproved: (zip ?ts_ph_list2_0 nil2) => nil
+done in 10

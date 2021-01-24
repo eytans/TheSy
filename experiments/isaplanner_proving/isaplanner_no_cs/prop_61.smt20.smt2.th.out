@@ -1,0 +1,61 @@
+17:00:45 [0m[33m[WARN] [0mCollecting statistics
+(last nil) => Z
+Z => (last nil)
+(last (cons ?y nil)) => ?y
+(last (cons ?y (cons ?x2 ?x3))) => (last (cons ?x2 ?x3))
+(lastOfTwo ?x nil) => (last ?x)
+(last ?x) => (lastOfTwo ?x nil)
+(lastOfTwo ?x (cons ?z ?x20)) => (last (cons ?z ?x20))
+(++ nil ?y1) => ?y1
+(++ (cons ?z ?xs) ?y2) => (cons ?z (++ ?xs ?y2))
+(cons ?z (++ ?xs ?y2)) => (++ (cons ?z ?xs) ?y2)
+17:00:45 [0m[33m[WARN] [0m ex is: Z
+17:00:45 [0m[33m[WARN] [0m ex is: (S Z)
+17:00:45 [0m[33m[WARN] [0m ex is: (S (S Z))
+17:00:45 [0m[33m[WARN] [0m ex is: nil
+17:00:45 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_0 nil)
+17:00:45 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+17:00:45 [0m[33m[WARN] [0mProof mode: false
+17:00:45 [0m[33m[WARN] [0m ex is: Z
+17:00:45 [0m[33m[WARN] [0m ex is: (S Z)
+17:00:45 [0m[33m[WARN] [0m ex is: (S (S Z))
+17:00:45 [0m[33m[WARN] [0m ex is: nil
+17:00:45 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_0 nil)
+17:00:45 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+17:00:45 [0m[33m[WARN] [0mProof mode: false
+17:00:45 [0m[33m[WARN] [0mproved: (++ ?ts_ph_list_0 nil) => ?ts_ph_list_0
+17:00:45 [0m[33m[WARN] [0mproved: (last ?ts_ph_list_0) => (lastOfTwo ?ts_ph_list_0 ?ts_ph_list_0)
+17:00:45 [0m[33m[WARN] [0mproved: (lastOfTwo ?ts_ph_list_0 ?ts_ph_list_0) => (last ?ts_ph_list_0)
+17:00:45 [0m[33m[WARN] [0mproved: (last ?ts_ph_list_0) => (lastOfTwo nil ?ts_ph_list_0)
+17:00:45 [0m[33m[WARN] [0mproved: (lastOfTwo nil ?ts_ph_list_0) => (last ?ts_ph_list_0)
+17:00:45 [0m[33m[WARN] [0mproved: (last (cons Z ?ts_ph_list_0)) => (last ?ts_ph_list_0)
+17:00:45 [0m[33m[WARN] [0mproved: (last ?ts_ph_list_0) => (last (cons Z ?ts_ph_list_0))
+17:00:45 [0m[33m[WARN] [0mproved: (++ ?ts_ph_list_0 (++ ?ts_ph_list_1 ?ts_ph_list_2)) => (++ (++ ?ts_ph_list_0 ?ts_ph_list_1) ?ts_ph_list_2)
+17:00:45 [0m[33m[WARN] [0mproved: (++ (++ ?ts_ph_list_0 ?ts_ph_list_1) ?ts_ph_list_2) => (++ ?ts_ph_list_0 (++ ?ts_ph_list_1 ?ts_ph_list_2))
+17:00:45 [0m[33m[WARN] [0mproved: (last (++ ?ts_ph_list_0 ?ts_ph_list_1)) => (lastOfTwo ?ts_ph_list_1 (++ ?ts_ph_list_0 ?ts_ph_list_1))
+17:00:45 [0m[33m[WARN] [0mproved: (lastOfTwo ?ts_ph_list_1 (++ ?ts_ph_list_0 ?ts_ph_list_1)) => (last (++ ?ts_ph_list_0 ?ts_ph_list_1))
+17:00:45 [0m[33m[WARN] [0mproved: (last (++ ?ts_ph_list_0 ?ts_ph_list_1)) => (lastOfTwo ?ts_ph_list_0 (++ ?ts_ph_list_0 ?ts_ph_list_1))
+17:00:45 [0m[33m[WARN] [0mproved: (lastOfTwo ?ts_ph_list_0 (++ ?ts_ph_list_0 ?ts_ph_list_1)) => (last (++ ?ts_ph_list_0 ?ts_ph_list_1))
+17:00:45 [0m[33m[WARN] [0mproved: (last (cons ?ts_ph_Nat_1 ?ts_ph_list_0)) => (lastOfTwo (cons ?ts_ph_Nat_1 ?ts_ph_list_0) ?ts_ph_list_0)
+17:00:45 [0m[33m[WARN] [0mproved: (lastOfTwo (cons ?ts_ph_Nat_1 ?ts_ph_list_0) ?ts_ph_list_0) => (last (cons ?ts_ph_Nat_1 ?ts_ph_list_0))
+17:00:45 [0m[33m[WARN] [0mproved: (lastOfTwo (cons ?ts_ph_Nat_1 nil) ?ts_ph_list_0) => (last (cons ?ts_ph_Nat_1 ?ts_ph_list_0))
+17:00:45 [0m[33m[WARN] [0mproved: (last (cons ?ts_ph_Nat_1 ?ts_ph_list_0)) => (lastOfTwo (cons ?ts_ph_Nat_1 nil) ?ts_ph_list_0)
+17:00:45 [0m[33m[WARN] [0mproved: (lastOfTwo ?ts_ph_list_1 ?ts_ph_list_0) => (lastOfTwo (cons Z ?ts_ph_list_1) ?ts_ph_list_0)
+17:00:45 [0m[33m[WARN] [0mproved: (lastOfTwo (cons Z ?ts_ph_list_1) ?ts_ph_list_0) => (lastOfTwo ?ts_ph_list_1 ?ts_ph_list_0)
+17:00:46 [0m[33m[WARN] [0mproved: (lastOfTwo ?ts_ph_list_1 ?ts_ph_list_0) => (lastOfTwo (++ ?ts_ph_list_0 ?ts_ph_list_1) ?ts_ph_list_0)
+17:00:46 [0m[33m[WARN] [0mproved: (lastOfTwo (++ ?ts_ph_list_0 ?ts_ph_list_1) ?ts_ph_list_0) => (lastOfTwo ?ts_ph_list_1 ?ts_ph_list_0)
+17:00:46 [0m[33m[WARN] [0mproved: (lastOfTwo (++ ?ts_ph_list_1 ?ts_ph_list_0) ?ts_ph_list_0) => (lastOfTwo ?ts_ph_list_1 ?ts_ph_list_0)
+17:00:46 [0m[33m[WARN] [0mproved: (lastOfTwo ?ts_ph_list_1 ?ts_ph_list_0) => (lastOfTwo (++ ?ts_ph_list_1 ?ts_ph_list_0) ?ts_ph_list_0)
+17:00:51 [0m[33m[WARN] [0mproved: (last (cons ?ts_ph_Nat_1 (++ ?ts_ph_list_0 ?ts_ph_list_1))) => (lastOfTwo (cons ?ts_ph_Nat_1 ?ts_ph_list_1) (++ ?ts_ph_list_0 ?ts_ph_list_1))
+17:00:51 [0m[33m[WARN] [0mproved: (lastOfTwo (cons ?ts_ph_Nat_1 ?ts_ph_list_1) (++ ?ts_ph_list_0 ?ts_ph_list_1)) => (last (cons ?ts_ph_Nat_1 (++ ?ts_ph_list_0 ?ts_ph_list_1)))
+17:00:58 [0m[33m[WARN] [0mproved: (last (cons ?ts_ph_Nat_1 (++ ?ts_ph_list_0 ?ts_ph_list_1))) => (lastOfTwo (cons ?ts_ph_Nat_1 ?ts_ph_list_0) (++ ?ts_ph_list_0 ?ts_ph_list_1))
+17:00:58 [0m[33m[WARN] [0mproved: (lastOfTwo (cons ?ts_ph_Nat_1 ?ts_ph_list_0) (++ ?ts_ph_list_0 ?ts_ph_list_1)) => (last (cons ?ts_ph_Nat_1 (++ ?ts_ph_list_0 ?ts_ph_list_1)))
+17:01:11 [0m[33m[WARN] [0mproved: (last (++ ?ts_ph_list_0 ?ts_ph_list_1)) => (lastOfTwo (++ ?ts_ph_list_1 ?ts_ph_list_1) (++ ?ts_ph_list_0 ?ts_ph_list_1))
+17:01:11 [0m[33m[WARN] [0mproved: (lastOfTwo (++ ?ts_ph_list_1 ?ts_ph_list_1) (++ ?ts_ph_list_0 ?ts_ph_list_1)) => (last (++ ?ts_ph_list_0 ?ts_ph_list_1))
+17:01:30 [0m[33m[WARN] [0mproved: (last (++ ?ts_ph_list_0 ?ts_ph_list_1)) => (lastOfTwo (++ ?ts_ph_list_1 ?ts_ph_list_0) (++ ?ts_ph_list_0 ?ts_ph_list_1))
+17:01:30 [0m[33m[WARN] [0mproved: (lastOfTwo (++ ?ts_ph_list_1 ?ts_ph_list_0) (++ ?ts_ph_list_0 ?ts_ph_list_1)) => (last (++ ?ts_ph_list_0 ?ts_ph_list_1))
+17:02:00 [0m[33m[WARN] [0mproved: (lastOfTwo (++ ?ts_ph_list_2 ?ts_ph_list_0) (++ ?ts_ph_list_0 ?ts_ph_list_1)) => (lastOfTwo (++ ?ts_ph_list_1 ?ts_ph_list_2) (++ ?ts_ph_list_0 ?ts_ph_list_1))
+17:02:00 [0m[33m[WARN] [0mproved: (lastOfTwo (++ ?ts_ph_list_1 ?ts_ph_list_2) (++ ?ts_ph_list_0 ?ts_ph_list_1)) => (lastOfTwo (++ ?ts_ph_list_2 ?ts_ph_list_0) (++ ?ts_ph_list_0 ?ts_ph_list_1))
+17:02:47 [0m[33m[WARN] [0mproved: (lastOfTwo ?ts_ph_list_1 (++ ?ts_ph_list_0 ?ts_ph_list_0)) => (lastOfTwo (++ ?ts_ph_list_1 ?ts_ph_list_0) (++ ?ts_ph_list_0 ?ts_ph_list_0))
+17:02:47 [0m[33m[WARN] [0mproved: (lastOfTwo (++ ?ts_ph_list_1 ?ts_ph_list_0) (++ ?ts_ph_list_0 ?ts_ph_list_0)) => (lastOfTwo ?ts_ph_list_1 (++ ?ts_ph_list_0 ?ts_ph_list_0))
+done in 205335

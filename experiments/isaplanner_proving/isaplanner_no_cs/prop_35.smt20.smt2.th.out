@@ -1,15 +1,14 @@
-16:57:43 [0m[33m[WARN] [0mCollecting statistics
-16:57:43 [0m[33m[WARN] [0mproof mode false
+17:00:45 [0m[33m[WARN] [0mCollecting statistics
 (dropWhile ?x nil) => nil
 (dropWhile ?x (cons ?z ?xs)) => (dropWhile ?x ?xs)
 (dropWhile ?x (cons ?z ?xs)) => (cons ?z ?xs)
 (apply12 lam ?x0) => false
-16:57:43 [0m[33m[WARN] [0m ex is: nil
-16:57:43 [0m[33m[WARN] [0m ex is: (cons autovar_sk_0 nil)
-16:57:43 [0m[33m[WARN] [0m ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
-16:57:43 [0m[33m[WARN] [0mProof mode: false
-16:57:43 [0m[33m[WARN] [0m ex is: nil
-16:57:43 [0m[33m[WARN] [0m ex is: (cons autovar_sk_0 nil)
-16:57:43 [0m[33m[WARN] [0m ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
-16:57:43 [0m[33m[WARN] [0mProof mode: false
+17:00:45 [0m[33m[WARN] [0m ex is: nil
+17:00:45 [0m[33m[WARN] [0m ex is: (cons autovar_sk_0 nil)
+17:00:45 [0m[33m[WARN] [0m ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
+17:00:45 [0m[33m[WARN] [0mProof mode: false
+17:00:45 [0m[33m[WARN] [0m ex is: nil
+17:00:45 [0m[33m[WARN] [0m ex is: (cons autovar_sk_0 nil)
+17:00:45 [0m[33m[WARN] [0m ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
+17:00:45 [0m[33m[WARN] [0mProof mode: false
 done in 2

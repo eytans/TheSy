@@ -1,0 +1,48 @@
+18:01:28 [0m[33m[WARN] [0mCollecting statistics
+(-2 Z ?y) => Z
+(-2 (S ?z) Z) => (S ?z)
+(S ?z) => (-2 (S ?z) Z)
+(-2 (S ?z) (S ?x2)) => (-2 ?z ?x2)
+(-2 ?z ?x2) => (-2 (S ?z) (S ?x2))
+(len nil) => Z
+Z => (len nil)
+(len (cons ?y0 ?xs)) => (S (len ?xs))
+(drop Z ?y1) => ?y1
+(drop (S ?z) nil) => nil
+(drop (S ?z) (cons ?x22 ?x3)) => (drop ?z ?x3)
+(++ nil ?y3) => ?y3
+(++ (cons ?z5 ?xs) ?y4) => (cons ?z5 (++ ?xs ?y4))
+(cons ?z5 (++ ?xs ?y4)) => (++ (cons ?z5 ?xs) ?y4)
+Searcher: (drop ?autovar7 nil)
+Searcher: (drop ?autovar7 (cons ?autovar3 ?autovar4))
+Searcher: (drop (S ?autovar5) ?autovar8)
+Searcher: (drop (S ?autovar6) ?autovar8)
+Searcher: (-2 ?autovar6 Z)
+Searcher: (-2 ?autovar6 (S ?autovar3))
+Searcher: (-2 (S ?autovar4) ?autovar7)
+Searcher: (-2 (S ?autovar5) ?autovar7)
+18:01:28 [0m[33m[WARN] [0m ex is: nil
+18:01:28 [0m[33m[WARN] [0m ex is: (cons autovar_sk_0 nil)
+18:01:28 [0m[33m[WARN] [0m ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
+18:01:28 [0m[33m[WARN] [0m ex is: Z
+18:01:28 [0m[33m[WARN] [0m ex is: (S Z)
+18:01:28 [0m[33m[WARN] [0m ex is: (S (S Z))
+18:01:28 [0m[33m[WARN] [0mProof mode: false
+18:01:28 [0m[33m[WARN] [0m ex is: nil
+18:01:28 [0m[33m[WARN] [0m ex is: (cons autovar_sk_0 nil)
+18:01:28 [0m[33m[WARN] [0m ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
+18:01:28 [0m[33m[WARN] [0m ex is: Z
+18:01:28 [0m[33m[WARN] [0m ex is: (S Z)
+18:01:28 [0m[33m[WARN] [0m ex is: (S (S Z))
+18:01:28 [0m[33m[WARN] [0mProof mode: false
+18:01:28 [0m[33m[WARN] [0mproved: (++ ?ts_ph_list_0 nil) => ?ts_ph_list_0
+18:01:28 [0m[33m[WARN] [0mproved: (-2 ?ts_ph_Nat_0 ?ts_ph_Nat_0) => Z
+18:01:28 [0m[33m[WARN] [0mproved: (-2 ?ts_ph_Nat_0 Z) => ?ts_ph_Nat_0
+18:01:28 [0m[33m[WARN] [0mproved: (drop ?ts_ph_Nat_0 nil) => nil
+18:01:28 [0m[33m[WARN] [0mproved: (-2 ?ts_ph_Nat_0 (S ?ts_ph_Nat_0)) => Z
+18:01:28 [0m[33m[WARN] [0mproved: (-2 (S ?ts_ph_Nat_0) ?ts_ph_Nat_0) => (S Z)
+18:01:28 [0m[33m[WARN] [0mproved: (drop (len ?ts_ph_list_0) ?ts_ph_list_0) => nil
+18:01:28 [0m[33m[WARN] [0mproved: (++ (++ ?ts_ph_list_0 ?ts_ph_list_1) ?ts_ph_list_2) => (++ ?ts_ph_list_0 (++ ?ts_ph_list_1 ?ts_ph_list_2))
+18:01:28 [0m[33m[WARN] [0mproved: (++ ?ts_ph_list_0 (++ ?ts_ph_list_1 ?ts_ph_list_2)) => (++ (++ ?ts_ph_list_0 ?ts_ph_list_1) ?ts_ph_list_2)
+18:01:28 [0m[33m[WARN] [0mproved: (drop (len ?ts_ph_list_0) (++ ?ts_ph_list_0 ?ts_ph_list_1)) => ?ts_ph_list_1
+done in 416

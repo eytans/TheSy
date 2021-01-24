@@ -1,5 +1,5 @@
-16:57:22 [0m[33m[WARN] [0mCollecting statistics
-16:57:22 [0m[33m[WARN] [0mproof mode false
+16:57:44 [0m[33m[WARN] [0mCollecting statistics
+16:57:44 [0m[33m[WARN] [0mproof mode false
 (zip nil3 ?y) => nil
 (zip2 nil4 ?y) => nil2
 (zip (cons3 ?z ?x2) nil4) => nil
@@ -16,26 +16,26 @@ Searcher: (zip2 ?autovar11 nil4)
 Searcher: (zip2 ?autovar11 (cons4 ?autovar5 ?autovar6))
 Searcher: (zip2 (cons4 ?autovar7 ?autovar8) ?autovar12)
 Searcher: (zip2 (cons4 ?autovar9 ?autovar10) ?autovar12)
-16:57:22 [0m[33m[WARN] [0m ex is: nil4
-16:57:22 [0m[33m[WARN] [0m ex is: (cons4 autovar_sk_0 nil4)
-16:57:22 [0m[33m[WARN] [0m ex is: (cons4 autovar_sk_1 (cons4 autovar_sk_0 nil4))
-16:57:22 [0m[33m[WARN] [0m ex is: zero
-16:57:22 [0m[33m[WARN] [0m ex is: (succ zero)
-16:57:22 [0m[33m[WARN] [0m ex is: (succ (succ zero))
-16:57:22 [0m[33m[WARN] [0m ex is: nil3
-16:57:22 [0m[33m[WARN] [0m ex is: (cons3 autovar_Nat_0 nil3)
-16:57:22 [0m[33m[WARN] [0m ex is: (cons3 autovar_Nat_1 (cons3 autovar_Nat_0 nil3))
-16:57:22 [0m[33m[WARN] [0mProof mode: false
-16:57:22 [0m[33m[WARN] [0m ex is: nil4
-16:57:22 [0m[33m[WARN] [0m ex is: (cons4 autovar_sk_0 nil4)
-16:57:22 [0m[33m[WARN] [0m ex is: (cons4 autovar_sk_1 (cons4 autovar_sk_0 nil4))
-16:57:22 [0m[33m[WARN] [0m ex is: zero
-16:57:22 [0m[33m[WARN] [0m ex is: (succ zero)
-16:57:22 [0m[33m[WARN] [0m ex is: (succ (succ zero))
-16:57:22 [0m[33m[WARN] [0m ex is: nil3
-16:57:22 [0m[33m[WARN] [0m ex is: (cons3 autovar_Nat_0 nil3)
-16:57:22 [0m[33m[WARN] [0m ex is: (cons3 autovar_Nat_1 (cons3 autovar_Nat_0 nil3))
-16:57:22 [0m[33m[WARN] [0mProof mode: false
-16:57:22 [0m[33m[WARN] [0mproved: (zip2 ?ts_ph_list4_0 nil4) => nil2
-16:57:22 [0m[33m[WARN] [0mproved: (zip ?ts_ph_list3_0 nil4) => nil
+16:57:44 [0m[33m[WARN] [0m ex is: nil4
+16:57:44 [0m[33m[WARN] [0m ex is: (cons4 autovar_sk_0 nil4)
+16:57:44 [0m[33m[WARN] [0m ex is: (cons4 autovar_sk_1 (cons4 autovar_sk_0 nil4))
+16:57:44 [0m[33m[WARN] [0m ex is: zero
+16:57:44 [0m[33m[WARN] [0m ex is: (succ zero)
+16:57:44 [0m[33m[WARN] [0m ex is: (succ (succ zero))
+16:57:44 [0m[33m[WARN] [0m ex is: nil3
+16:57:44 [0m[33m[WARN] [0m ex is: (cons3 autovar_Nat_0 nil3)
+16:57:44 [0m[33m[WARN] [0m ex is: (cons3 autovar_Nat_1 (cons3 autovar_Nat_0 nil3))
+16:57:44 [0m[33m[WARN] [0mProof mode: false
+16:57:44 [0m[33m[WARN] [0m ex is: nil4
+16:57:44 [0m[33m[WARN] [0m ex is: (cons4 autovar_sk_0 nil4)
+16:57:44 [0m[33m[WARN] [0m ex is: (cons4 autovar_sk_1 (cons4 autovar_sk_0 nil4))
+16:57:44 [0m[33m[WARN] [0m ex is: zero
+16:57:44 [0m[33m[WARN] [0m ex is: (succ zero)
+16:57:44 [0m[33m[WARN] [0m ex is: (succ (succ zero))
+16:57:44 [0m[33m[WARN] [0m ex is: nil3
+16:57:44 [0m[33m[WARN] [0m ex is: (cons3 autovar_Nat_0 nil3)
+16:57:44 [0m[33m[WARN] [0m ex is: (cons3 autovar_Nat_1 (cons3 autovar_Nat_0 nil3))
+16:57:44 [0m[33m[WARN] [0mProof mode: false
+16:57:44 [0m[33m[WARN] [0mproved: (zip2 ?ts_ph_list4_0 nil4) => nil2
+16:57:44 [0m[33m[WARN] [0mproved: (zip ?ts_ph_list3_0 nil4) => nil
 done in 30

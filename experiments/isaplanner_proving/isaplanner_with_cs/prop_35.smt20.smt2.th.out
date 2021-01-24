@@ -1,0 +1,14 @@
+18:01:26 [0m[33m[WARN] [0mCollecting statistics
+(dropWhile ?x nil) => nil
+(dropWhile ?x (cons ?z ?xs)) => (dropWhile ?x ?xs)
+(dropWhile ?x (cons ?z ?xs)) => (cons ?z ?xs)
+(apply12 lam ?x0) => false
+18:01:26 [0m[33m[WARN] [0m ex is: nil
+18:01:26 [0m[33m[WARN] [0m ex is: (cons autovar_sk_0 nil)
+18:01:26 [0m[33m[WARN] [0m ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
+18:01:26 [0m[33m[WARN] [0mProof mode: false
+18:01:26 [0m[33m[WARN] [0m ex is: nil
+18:01:26 [0m[33m[WARN] [0m ex is: (cons autovar_sk_0 nil)
+18:01:26 [0m[33m[WARN] [0m ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
+18:01:26 [0m[33m[WARN] [0mProof mode: false
+done in 2

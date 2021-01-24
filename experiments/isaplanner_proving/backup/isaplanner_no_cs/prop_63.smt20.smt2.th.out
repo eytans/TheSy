@@ -1,5 +1,5 @@
-16:57:21 [0m[33m[WARN] [0mCollecting statistics
-16:57:21 [0m[33m[WARN] [0mproof mode false
+16:57:43 [0m[33m[WARN] [0mCollecting statistics
+16:57:43 [0m[33m[WARN] [0mproof mode false
 (last nil) => Z
 Z => (last nil)
 (last (cons ?y nil)) => ?y
@@ -22,27 +22,27 @@ Searcher: (<2 ?autovar5 (S ?autovar1))
 Searcher: (<2 ?autovar5 (S ?autovar3))
 Searcher: (<2 Z ?autovar6)
 Searcher: (<2 (S ?autovar4) ?autovar6)
-16:57:21 [0m[33m[WARN] [0m ex is: Z
-16:57:21 [0m[33m[WARN] [0m ex is: (S Z)
-16:57:21 [0m[33m[WARN] [0m ex is: (S (S Z))
-16:57:21 [0m[33m[WARN] [0m ex is: nil
-16:57:21 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_0 nil)
-16:57:21 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
-16:57:21 [0m[33m[WARN] [0mProof mode: false
-16:57:21 [0m[33m[WARN] [0m ex is: Z
-16:57:21 [0m[33m[WARN] [0m ex is: (S Z)
-16:57:21 [0m[33m[WARN] [0m ex is: (S (S Z))
-16:57:21 [0m[33m[WARN] [0m ex is: nil
-16:57:21 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_0 nil)
-16:57:21 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
-16:57:21 [0m[33m[WARN] [0mProof mode: false
-16:57:21 [0m[33m[WARN] [0mproved: (drop ?ts_ph_Nat_0 nil) => nil
-16:57:21 [0m[33m[WARN] [0mproved: (<2 ?ts_ph_Nat_0 ?ts_ph_Nat_0) => false
-16:57:21 [0m[33m[WARN] [0mproved: (last (cons Z ?ts_ph_list_0)) => (last ?ts_ph_list_0)
-16:57:21 [0m[33m[WARN] [0mproved: (last ?ts_ph_list_0) => (last (cons Z ?ts_ph_list_0))
-16:57:21 [0m[33m[WARN] [0mproved: (drop (len ?ts_ph_list_0) ?ts_ph_list_0) => nil
-16:57:21 [0m[33m[WARN] [0mproved: (<2 ?ts_ph_Nat_0 (S ?ts_ph_Nat_0)) => true
-16:57:21 [0m[33m[WARN] [0mproved: (<2 (S ?ts_ph_Nat_0) ?ts_ph_Nat_0) => false
-16:57:21 [0m[33m[WARN] [0mproved: (drop ?ts_ph_Nat_0 (cons Z ?ts_ph_list_1)) => (drop ?ts_ph_Nat_0 (cons ?ts_ph_Nat_0 ?ts_ph_list_1))
-16:57:21 [0m[33m[WARN] [0mproved: (drop ?ts_ph_Nat_0 (cons ?ts_ph_Nat_0 ?ts_ph_list_1)) => (drop ?ts_ph_Nat_0 (cons Z ?ts_ph_list_1))
-done in 174
+16:57:43 [0m[33m[WARN] [0m ex is: Z
+16:57:43 [0m[33m[WARN] [0m ex is: (S Z)
+16:57:43 [0m[33m[WARN] [0m ex is: (S (S Z))
+16:57:43 [0m[33m[WARN] [0m ex is: nil
+16:57:43 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_0 nil)
+16:57:43 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+16:57:43 [0m[33m[WARN] [0mProof mode: false
+16:57:43 [0m[33m[WARN] [0m ex is: Z
+16:57:43 [0m[33m[WARN] [0m ex is: (S Z)
+16:57:43 [0m[33m[WARN] [0m ex is: (S (S Z))
+16:57:43 [0m[33m[WARN] [0m ex is: nil
+16:57:43 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_0 nil)
+16:57:43 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+16:57:43 [0m[33m[WARN] [0mProof mode: false
+16:57:43 [0m[33m[WARN] [0mproved: (drop ?ts_ph_Nat_0 nil) => nil
+16:57:43 [0m[33m[WARN] [0mproved: (<2 ?ts_ph_Nat_0 ?ts_ph_Nat_0) => false
+16:57:43 [0m[33m[WARN] [0mproved: (drop (len ?ts_ph_list_0) ?ts_ph_list_0) => nil
+16:57:44 [0m[33m[WARN] [0mproved: (<2 ?ts_ph_Nat_0 (S ?ts_ph_Nat_0)) => true
+16:57:44 [0m[33m[WARN] [0mproved: (last ?ts_ph_list_0) => (last (cons Z ?ts_ph_list_0))
+16:57:44 [0m[33m[WARN] [0mproved: (last (cons Z ?ts_ph_list_0)) => (last ?ts_ph_list_0)
+16:57:44 [0m[33m[WARN] [0mproved: (<2 (S ?ts_ph_Nat_0) ?ts_ph_Nat_0) => false
+16:57:44 [0m[33m[WARN] [0mproved: (drop ?ts_ph_Nat_0 (cons ?ts_ph_Nat_0 ?ts_ph_list_1)) => (drop ?ts_ph_Nat_0 (cons Z ?ts_ph_list_1))
+16:57:44 [0m[33m[WARN] [0mproved: (drop ?ts_ph_Nat_0 (cons Z ?ts_ph_list_1)) => (drop ?ts_ph_Nat_0 (cons ?ts_ph_Nat_0 ?ts_ph_list_1))
+done in 155

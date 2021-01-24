@@ -1,0 +1,3 @@
+(=> "(zip ?ts_ph_list2_0 nil2) => nil" (zip ?ts_ph_list2_0 nil2) nil)
+(=> "(zipConcat ?ts_ph_sk_1 ?ts_ph_list2_1 ?ts_ph_list2_0) => (zip (cons2 ?ts_ph_sk_1 ?ts_ph_list2_1) ?ts_ph_list2_0)" (zipConcat ?ts_ph_sk_1 ?ts_ph_list2_1 ?ts_ph_list2_0) (zip (cons2 ?ts_ph_sk_1 ?ts_ph_list2_1) ?ts_ph_list2_0))
+(=> "(zip (cons2 ?ts_ph_sk_1 ?ts_ph_list2_1) ?ts_ph_list2_0) => (zipConcat ?ts_ph_sk_1 ?ts_ph_list2_1 ?ts_ph_list2_0)" (zip (cons2 ?ts_ph_sk_1 ?ts_ph_list2_1) ?ts_ph_list2_0) (zipConcat ?ts_ph_sk_1 ?ts_ph_list2_1 ?ts_ph_list2_0))

@@ -1,5 +1,5 @@
-16:57:21 [0m[33m[WARN] [0mCollecting statistics
-16:57:21 [0m[33m[WARN] [0mproof mode false
+16:57:43 [0m[33m[WARN] [0mCollecting statistics
+16:57:43 [0m[33m[WARN] [0mproof mode false
 (+2 Z ?y) => ?y
 (+2 (S ?z) ?y) => (S (+2 ?z ?y))
 (S (+2 ?z ?y)) => (+2 (S ?z) ?y)
@@ -10,28 +10,28 @@ Searcher: (drop ?autovar7 nil)
 Searcher: (drop ?autovar7 (cons ?autovar3 ?autovar4))
 Searcher: (drop (S ?autovar5) ?autovar8)
 Searcher: (drop (S ?autovar6) ?autovar8)
-16:57:21 [0m[33m[WARN] [0m ex is: nil
-16:57:21 [0m[33m[WARN] [0m ex is: (cons autovar_sk_0 nil)
-16:57:21 [0m[33m[WARN] [0m ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
-16:57:21 [0m[33m[WARN] [0m ex is: Z
-16:57:21 [0m[33m[WARN] [0m ex is: (S Z)
-16:57:21 [0m[33m[WARN] [0m ex is: (S (S Z))
-16:57:21 [0m[33m[WARN] [0mProof mode: false
-16:57:21 [0m[33m[WARN] [0m ex is: nil
-16:57:21 [0m[33m[WARN] [0m ex is: (cons autovar_sk_0 nil)
-16:57:21 [0m[33m[WARN] [0m ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
-16:57:21 [0m[33m[WARN] [0m ex is: Z
-16:57:21 [0m[33m[WARN] [0m ex is: (S Z)
-16:57:21 [0m[33m[WARN] [0m ex is: (S (S Z))
-16:57:21 [0m[33m[WARN] [0mProof mode: false
-16:57:21 [0m[33m[WARN] [0mproved: (+2 ?ts_ph_Nat_0 Z) => ?ts_ph_Nat_0
-16:57:21 [0m[33m[WARN] [0mproved: (drop ?ts_ph_Nat_0 nil) => nil
-16:57:21 [0m[33m[WARN] [0mproved: (S (+2 ?ts_ph_Nat_0 ?ts_ph_Nat_1)) => (+2 ?ts_ph_Nat_0 (S ?ts_ph_Nat_1))
-16:57:21 [0m[33m[WARN] [0mproved: (+2 ?ts_ph_Nat_0 (S ?ts_ph_Nat_1)) => (S (+2 ?ts_ph_Nat_0 ?ts_ph_Nat_1))
-16:57:21 [0m[33m[WARN] [0mproved: (+2 ?ts_ph_Nat_0 ?ts_ph_Nat_1) => (+2 ?ts_ph_Nat_1 ?ts_ph_Nat_0)
-16:57:21 [0m[33m[WARN] [0mproved: (+2 ?ts_ph_Nat_1 ?ts_ph_Nat_0) => (+2 ?ts_ph_Nat_0 ?ts_ph_Nat_1)
-16:57:21 [0m[33m[WARN] [0mproved: (+2 ?ts_ph_Nat_0 (+2 ?ts_ph_Nat_1 ?ts_ph_Nat_2)) => (+2 ?ts_ph_Nat_1 (+2 ?ts_ph_Nat_0 ?ts_ph_Nat_2))
-16:57:21 [0m[33m[WARN] [0mproved: (+2 ?ts_ph_Nat_1 (+2 ?ts_ph_Nat_0 ?ts_ph_Nat_2)) => (+2 ?ts_ph_Nat_0 (+2 ?ts_ph_Nat_1 ?ts_ph_Nat_2))
-16:57:21 [0m[33m[WARN] [0mproved: (drop (+2 ?ts_ph_Nat_0 ?ts_ph_Nat_0) (cons ?ts_ph_sk_1 nil)) => (drop ?ts_ph_Nat_0 (cons ?ts_ph_sk_1 nil))
-16:57:21 [0m[33m[WARN] [0mproved: (drop ?ts_ph_Nat_0 (cons ?ts_ph_sk_1 nil)) => (drop (+2 ?ts_ph_Nat_0 ?ts_ph_Nat_0) (cons ?ts_ph_sk_1 nil))
-done in 43
+16:57:43 [0m[33m[WARN] [0m ex is: nil
+16:57:43 [0m[33m[WARN] [0m ex is: (cons autovar_sk_0 nil)
+16:57:43 [0m[33m[WARN] [0m ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
+16:57:43 [0m[33m[WARN] [0m ex is: Z
+16:57:43 [0m[33m[WARN] [0m ex is: (S Z)
+16:57:43 [0m[33m[WARN] [0m ex is: (S (S Z))
+16:57:43 [0m[33m[WARN] [0mProof mode: false
+16:57:43 [0m[33m[WARN] [0m ex is: nil
+16:57:43 [0m[33m[WARN] [0m ex is: (cons autovar_sk_0 nil)
+16:57:43 [0m[33m[WARN] [0m ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
+16:57:43 [0m[33m[WARN] [0m ex is: Z
+16:57:43 [0m[33m[WARN] [0m ex is: (S Z)
+16:57:43 [0m[33m[WARN] [0m ex is: (S (S Z))
+16:57:43 [0m[33m[WARN] [0mProof mode: false
+16:57:43 [0m[33m[WARN] [0mproved: (+2 ?ts_ph_Nat_0 Z) => ?ts_ph_Nat_0
+16:57:43 [0m[33m[WARN] [0mproved: (drop ?ts_ph_Nat_0 nil) => nil
+16:57:43 [0m[33m[WARN] [0mproved: (S (+2 ?ts_ph_Nat_0 ?ts_ph_Nat_1)) => (+2 ?ts_ph_Nat_0 (S ?ts_ph_Nat_1))
+16:57:43 [0m[33m[WARN] [0mproved: (+2 ?ts_ph_Nat_0 (S ?ts_ph_Nat_1)) => (S (+2 ?ts_ph_Nat_0 ?ts_ph_Nat_1))
+16:57:43 [0m[33m[WARN] [0mproved: (+2 ?ts_ph_Nat_1 ?ts_ph_Nat_0) => (+2 ?ts_ph_Nat_0 ?ts_ph_Nat_1)
+16:57:43 [0m[33m[WARN] [0mproved: (+2 ?ts_ph_Nat_0 ?ts_ph_Nat_1) => (+2 ?ts_ph_Nat_1 ?ts_ph_Nat_0)
+16:57:43 [0m[33m[WARN] [0mproved: (+2 ?ts_ph_Nat_1 (+2 ?ts_ph_Nat_0 ?ts_ph_Nat_2)) => (+2 ?ts_ph_Nat_0 (+2 ?ts_ph_Nat_1 ?ts_ph_Nat_2))
+16:57:43 [0m[33m[WARN] [0mproved: (+2 ?ts_ph_Nat_0 (+2 ?ts_ph_Nat_1 ?ts_ph_Nat_2)) => (+2 ?ts_ph_Nat_1 (+2 ?ts_ph_Nat_0 ?ts_ph_Nat_2))
+16:57:43 [0m[33m[WARN] [0mproved: (drop ?ts_ph_Nat_0 (cons ?ts_ph_sk_1 nil)) => (drop (+2 ?ts_ph_Nat_0 ?ts_ph_Nat_0) (cons ?ts_ph_sk_1 nil))
+16:57:43 [0m[33m[WARN] [0mproved: (drop (+2 ?ts_ph_Nat_0 ?ts_ph_Nat_0) (cons ?ts_ph_sk_1 nil)) => (drop ?ts_ph_Nat_0 (cons ?ts_ph_sk_1 nil))
+done in 50

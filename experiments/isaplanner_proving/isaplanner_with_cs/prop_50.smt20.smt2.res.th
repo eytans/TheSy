@@ -1,0 +1,8 @@
+(=> "(-2 ?ts_ph_Nat_0 Z) => ?ts_ph_Nat_0" (-2 ?ts_ph_Nat_0 Z) ?ts_ph_Nat_0)
+(=> "(take ?ts_ph_Nat_0 nil) => nil" (take ?ts_ph_Nat_0 nil) nil)
+(=> "(-2 ?ts_ph_Nat_0 ?ts_ph_Nat_0) => Z" (-2 ?ts_ph_Nat_0 ?ts_ph_Nat_0) Z)
+(=> "(-2 ?ts_ph_Nat_0 (S ?ts_ph_Nat_0)) => Z" (-2 ?ts_ph_Nat_0 (S ?ts_ph_Nat_0)) Z)
+(=> "(-2 (S ?ts_ph_Nat_0) ?ts_ph_Nat_0) => (S Z)" (-2 (S ?ts_ph_Nat_0) ?ts_ph_Nat_0) (S Z))
+(=> "(take (len ?ts_ph_list_0) ?ts_ph_list_0) => ?ts_ph_list_0" (take (len ?ts_ph_list_0) ?ts_ph_list_0) ?ts_ph_list_0)
+(=> "(butlast (cons ?ts_ph_sk_1 ?ts_ph_list_0)) => (take (len ?ts_ph_list_0) (cons ?ts_ph_sk_1 ?ts_ph_list_0))" (butlast (cons ?ts_ph_sk_1 ?ts_ph_list_0)) (take (len ?ts_ph_list_0) (cons ?ts_ph_sk_1 ?ts_ph_list_0)))
+(=> "(take (len ?ts_ph_list_0) (cons ?ts_ph_sk_1 ?ts_ph_list_0)) => (butlast (cons ?ts_ph_sk_1 ?ts_ph_list_0))" (take (len ?ts_ph_list_0) (cons ?ts_ph_sk_1 ?ts_ph_list_0)) (butlast (cons ?ts_ph_sk_1 ?ts_ph_list_0)))

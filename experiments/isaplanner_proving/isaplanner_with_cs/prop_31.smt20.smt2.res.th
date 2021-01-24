@@ -1,0 +1,6 @@
+(=> "(min ?ts_ph_Nat_0 ?ts_ph_Nat_0) => ?ts_ph_Nat_0" (min ?ts_ph_Nat_0 ?ts_ph_Nat_0) ?ts_ph_Nat_0)
+(=> "(min ?ts_ph_Nat_0 Z) => Z" (min ?ts_ph_Nat_0 Z) Z)
+(=> "(min (S Z) ?ts_ph_Nat_0) => (min ?ts_ph_Nat_0 (S Z))" (min (S Z) ?ts_ph_Nat_0) (min ?ts_ph_Nat_0 (S Z)))
+(=> "(min ?ts_ph_Nat_0 (S Z)) => (min (S Z) ?ts_ph_Nat_0)" (min ?ts_ph_Nat_0 (S Z)) (min (S Z) ?ts_ph_Nat_0))
+(=> "(min (S ?ts_ph_Nat_0) ?ts_ph_Nat_0) => ?ts_ph_Nat_0" (min (S ?ts_ph_Nat_0) ?ts_ph_Nat_0) ?ts_ph_Nat_0)
+(=> "(min ?ts_ph_Nat_0 (S ?ts_ph_Nat_0)) => ?ts_ph_Nat_0" (min ?ts_ph_Nat_0 (S ?ts_ph_Nat_0)) ?ts_ph_Nat_0)

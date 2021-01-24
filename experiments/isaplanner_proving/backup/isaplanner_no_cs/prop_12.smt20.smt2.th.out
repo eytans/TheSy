@@ -1,5 +1,5 @@
-16:57:21 [0m[33m[WARN] [0mCollecting statistics
-16:57:21 [0m[33m[WARN] [0mproof mode false
+16:57:43 [0m[33m[WARN] [0mCollecting statistics
+16:57:43 [0m[33m[WARN] [0mproof mode false
 (map2 ?x nil) => nil
 (map2 ?x (cons ?z ?xs)) => (cons (apply1 ?x ?z) (map2 ?x ?xs))
 (cons (apply1 ?x ?z) (map2 ?x ?xs)) => (map2 ?x (cons ?z ?xs))
@@ -10,19 +10,19 @@ Searcher: (drop ?autovar7 nil)
 Searcher: (drop ?autovar7 (cons ?autovar3 ?autovar4))
 Searcher: (drop (S ?autovar5) ?autovar8)
 Searcher: (drop (S ?autovar6) ?autovar8)
-16:57:21 [0m[33m[WARN] [0m ex is: nil
-16:57:21 [0m[33m[WARN] [0m ex is: (cons autovar_sk_0 nil)
-16:57:21 [0m[33m[WARN] [0m ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
-16:57:21 [0m[33m[WARN] [0m ex is: Z
-16:57:21 [0m[33m[WARN] [0m ex is: (S Z)
-16:57:21 [0m[33m[WARN] [0m ex is: (S (S Z))
-16:57:21 [0m[33m[WARN] [0mProof mode: false
-16:57:21 [0m[33m[WARN] [0m ex is: nil
-16:57:21 [0m[33m[WARN] [0m ex is: (cons autovar_sk_0 nil)
-16:57:21 [0m[33m[WARN] [0m ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
-16:57:21 [0m[33m[WARN] [0m ex is: Z
-16:57:21 [0m[33m[WARN] [0m ex is: (S Z)
-16:57:21 [0m[33m[WARN] [0m ex is: (S (S Z))
-16:57:21 [0m[33m[WARN] [0mProof mode: false
-16:57:21 [0m[33m[WARN] [0mproved: (drop ?ts_ph_Nat_0 nil) => nil
-done in 13
+16:57:43 [0m[33m[WARN] [0m ex is: nil
+16:57:43 [0m[33m[WARN] [0m ex is: (cons autovar_sk_0 nil)
+16:57:43 [0m[33m[WARN] [0m ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
+16:57:43 [0m[33m[WARN] [0m ex is: Z
+16:57:43 [0m[33m[WARN] [0m ex is: (S Z)
+16:57:43 [0m[33m[WARN] [0m ex is: (S (S Z))
+16:57:43 [0m[33m[WARN] [0mProof mode: false
+16:57:43 [0m[33m[WARN] [0m ex is: nil
+16:57:43 [0m[33m[WARN] [0m ex is: (cons autovar_sk_0 nil)
+16:57:43 [0m[33m[WARN] [0m ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
+16:57:43 [0m[33m[WARN] [0m ex is: Z
+16:57:43 [0m[33m[WARN] [0m ex is: (S Z)
+16:57:43 [0m[33m[WARN] [0m ex is: (S (S Z))
+16:57:43 [0m[33m[WARN] [0mProof mode: false
+16:57:43 [0m[33m[WARN] [0mproved: (drop ?ts_ph_Nat_0 nil) => nil
+done in 8

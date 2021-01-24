@@ -1,0 +1,24 @@
+18:00:50 [0m[33m[WARN] [0mCollecting statistics
+(min Z ?y) => Z
+(min (S ?z) Z) => Z
+(min (S ?z) (S ?y1)) => (S (min ?z ?y1))
+(S (min ?z ?y1)) => (min (S ?z) (S ?y1))
+Searcher: (min ?autovar6 Z)
+Searcher: (min ?autovar6 (S ?autovar3))
+Searcher: (min (S ?autovar4) ?autovar7)
+Searcher: (min (S ?autovar5) ?autovar7)
+18:00:50 [0m[33m[WARN] [0m ex is: Z
+18:00:50 [0m[33m[WARN] [0m ex is: (S Z)
+18:00:50 [0m[33m[WARN] [0m ex is: (S (S Z))
+18:00:50 [0m[33m[WARN] [0mProof mode: false
+18:00:50 [0m[33m[WARN] [0m ex is: Z
+18:00:50 [0m[33m[WARN] [0m ex is: (S Z)
+18:00:50 [0m[33m[WARN] [0m ex is: (S (S Z))
+18:00:50 [0m[33m[WARN] [0mProof mode: false
+18:00:50 [0m[33m[WARN] [0mproved: (min ?ts_ph_Nat_0 Z) => Z
+18:00:50 [0m[33m[WARN] [0mproved: (min ?ts_ph_Nat_0 ?ts_ph_Nat_0) => ?ts_ph_Nat_0
+18:00:50 [0m[33m[WARN] [0mproved: (min (S Z) ?ts_ph_Nat_0) => (min ?ts_ph_Nat_0 (S Z))
+18:00:50 [0m[33m[WARN] [0mproved: (min ?ts_ph_Nat_0 (S Z)) => (min (S Z) ?ts_ph_Nat_0)
+18:00:50 [0m[33m[WARN] [0mproved: (min (S ?ts_ph_Nat_0) ?ts_ph_Nat_0) => ?ts_ph_Nat_0
+18:00:50 [0m[33m[WARN] [0mproved: (min ?ts_ph_Nat_0 (S ?ts_ph_Nat_0)) => ?ts_ph_Nat_0
+done in 32

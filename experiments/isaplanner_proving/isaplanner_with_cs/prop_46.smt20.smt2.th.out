@@ -1,0 +1,40 @@
+18:01:27 [0m[33m[WARN] [0mCollecting statistics
+(zip nil3 ?y) => nil
+(zip2 nil4 ?y) => nil2
+(zip (cons3 ?z ?x2) nil4) => nil
+(zip2 (cons4 ?z0 ?x21) nil4) => nil2
+(zip (cons3 ?z ?x2) (cons4 ?x3 ?x4)) => (cons (pair2 ?z ?x3) (zip ?x2 ?x4))
+(cons (pair2 ?z ?x3) (zip ?x2 ?x4)) => (zip (cons3 ?z ?x2) (cons4 ?x3 ?x4))
+(zip2 (cons4 ?z2 ?x23) (cons4 ?x3 ?x4)) => (cons2 (pair22 ?z2 ?x3) (zip2 ?x23 ?x4))
+(cons2 (pair22 ?z2 ?x3) (zip2 ?x23 ?x4)) => (zip2 (cons4 ?z2 ?x23) (cons4 ?x3 ?x4))
+Searcher: (zip ?autovar11 nil4)
+Searcher: (zip ?autovar11 (cons4 ?autovar5 ?autovar6))
+Searcher: (zip (cons3 ?autovar7 ?autovar8) ?autovar12)
+Searcher: (zip (cons3 ?autovar9 ?autovar10) ?autovar12)
+Searcher: (zip2 ?autovar11 nil4)
+Searcher: (zip2 ?autovar11 (cons4 ?autovar5 ?autovar6))
+Searcher: (zip2 (cons4 ?autovar7 ?autovar8) ?autovar12)
+Searcher: (zip2 (cons4 ?autovar9 ?autovar10) ?autovar12)
+18:01:27 [0m[33m[WARN] [0m ex is: nil4
+18:01:27 [0m[33m[WARN] [0m ex is: (cons4 autovar_sk_0 nil4)
+18:01:27 [0m[33m[WARN] [0m ex is: (cons4 autovar_sk_1 (cons4 autovar_sk_0 nil4))
+18:01:27 [0m[33m[WARN] [0m ex is: zero
+18:01:27 [0m[33m[WARN] [0m ex is: (succ zero)
+18:01:27 [0m[33m[WARN] [0m ex is: (succ (succ zero))
+18:01:27 [0m[33m[WARN] [0m ex is: nil3
+18:01:27 [0m[33m[WARN] [0m ex is: (cons3 autovar_Nat_0 nil3)
+18:01:27 [0m[33m[WARN] [0m ex is: (cons3 autovar_Nat_1 (cons3 autovar_Nat_0 nil3))
+18:01:27 [0m[33m[WARN] [0mProof mode: false
+18:01:27 [0m[33m[WARN] [0m ex is: nil4
+18:01:27 [0m[33m[WARN] [0m ex is: (cons4 autovar_sk_0 nil4)
+18:01:27 [0m[33m[WARN] [0m ex is: (cons4 autovar_sk_1 (cons4 autovar_sk_0 nil4))
+18:01:27 [0m[33m[WARN] [0m ex is: zero
+18:01:27 [0m[33m[WARN] [0m ex is: (succ zero)
+18:01:27 [0m[33m[WARN] [0m ex is: (succ (succ zero))
+18:01:27 [0m[33m[WARN] [0m ex is: nil3
+18:01:27 [0m[33m[WARN] [0m ex is: (cons3 autovar_Nat_0 nil3)
+18:01:27 [0m[33m[WARN] [0m ex is: (cons3 autovar_Nat_1 (cons3 autovar_Nat_0 nil3))
+18:01:27 [0m[33m[WARN] [0mProof mode: false
+18:01:27 [0m[33m[WARN] [0mproved: (zip2 ?ts_ph_list4_0 nil4) => nil2
+18:01:27 [0m[33m[WARN] [0mproved: (zip ?ts_ph_list3_0 nil4) => nil
+done in 30
