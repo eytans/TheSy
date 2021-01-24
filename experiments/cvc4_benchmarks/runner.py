@@ -30,3 +30,7 @@ def run():
             new_rules = p.read_text()
             updated.write(new_rules)
     run_all([d for d in proof_after_expl_dir.iterdir() if d.is_dir()], True, timeout=5)
+
+
+if __name__ == '__main__':
+    run()
