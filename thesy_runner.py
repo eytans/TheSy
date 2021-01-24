@@ -6,15 +6,13 @@ import multiprocessing
 import pathlib
 
 from datetime import datetime
-
 from cgroups import Cgroup
+from . import executable_release, project_root, cargo_path
 
-project_dir = pathlib.Path(__file__).parent
-thesy_exe_path = project_dir / "target/release/TheSy"
-cargo_path = pathlib.Path.home() / ".cargo/bin/cargo"
+project_dir = project_root
 
 BUILD_CMD = [str(cargo_path), "build", "--release", "--features", "stats", "--package", "TheSy", "--bin", "TheSy"]
-CMD = [str(thesy_exe_path)]
+CMD = [str(executable_release)]
 
 # First we create the cgroup 'charlie' and we set it's cpu and memory limits
 cg = Cgroup('thesy_cgroup')
