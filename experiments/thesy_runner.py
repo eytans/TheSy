@@ -7,7 +7,7 @@ import pathlib
 
 from datetime import datetime
 from cgroups import Cgroup
-from . import executable_release, project_root, cargo_path
+from experiments import executable_release, project_root, cargo_path
 
 project_dir = project_root
 

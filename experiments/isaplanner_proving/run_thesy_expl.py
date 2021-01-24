@@ -1,12 +1,7 @@
-import os
-import sys
-import subprocess
-
-from argparse import ArgumentParser
 import shutil
 import pathlib
 
-from thesy_runner import run_all
+from experiments.thesy_runner import run_all
 from experiments.stats_processor import create_stats
 
 

@@ -1,9 +1,7 @@
-import argparse
 import shutil
-import pathlib
 
-from thesy_runner import run_all
-from ... import experiments_dir, project_root
+from experiments.thesy_runner import run_all
+from experiments import experiments_dir, project_root
 
 tests_dir = experiments_dir / 'cvc4_benchmarks' / 'tests'
 explr_dir = experiments_dir / 'cvc4_benchmarks' / 'expl'
