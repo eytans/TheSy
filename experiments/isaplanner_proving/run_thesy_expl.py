@@ -2,7 +2,7 @@ import shutil
 import pathlib
 
 from experiments.thesy_runner import run_all
-from experiments.stats_processor import create_stats
+from experiments.stats_processor import write_stats
 
 
 experiment_folder = pathlib.Path(__file__).parent
@@ -27,8 +27,8 @@ if __name__ == '__main__':
     # Default proof mode is false so we are doing exploration
     shutil.copytree(isaplanner_tests, thesy_no_cs)
     run_all([thesy_no_cs], features='no_split')
-    create_stats(thesy_no_cs)
+    write_stats(thesy_no_cs)
     shutil.copytree(isaplanner_tests, thesy_with_cs)
     run_all([thesy_with_cs])
-    create_stats(thesy_with_cs)
+    write_stats(thesy_with_cs)
 

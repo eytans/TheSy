@@ -20,12 +20,16 @@ def create_stats(path):
     print(df.columns)
     res['time'] = df['total_time'].apply(lambda d: d['secs'] + d['nanos']*10**-9)
     res['stop_reasons'] = df.equiv_red_iterations.apply(lambda v: sorted(Counter([list(v1[-1]['stop_reason'].keys())[0] if v1[-1]['stop_reason'] != "Saturated" else "Saturated" for v1 in v]).keys()))
-    res['proved_count'] = df['conjectures_proved'].apply(lambda cs: len(cs))
     res['success'] = df['goals_proved'].apply(lambda gp: len(gp) > 0)
     res['lemma_count'] = df['conjectures_proved'].apply(len)
     res['proofs_later_filtered'] = df['filtered_lemmas'].apply(len)
+    # res['case_splits'] = df['case_split'].
     res['file_name'] = df['file_name']
+    return res
 
+
+def write_stats(path):
+    res = create_stats(path)
     res.to_csv(os.path.join(path, 'stats.csv'))
 
 
@@ -33,5 +37,4 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('path')
     args = parser.parse_args()
-
-    create_stats(args.path)
+    write_stats(args.path)
