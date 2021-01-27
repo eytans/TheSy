@@ -39,7 +39,7 @@ def run():
     proof_expl_subdirs = [d for d in proof_after_expl_dir.iterdir() if d.is_dir()]
     run_all(proof_expl_subdirs, True, timeout=5)
     all_stats = pandas.concat([create_stats(d) for d in proof_expl_subdirs], keys=[d.name for d in proof_expl_subdirs])
-    concated = pandas.concat([tests_stats, expl_stats, all_stats], keys=['no expl proofs, expl, with expl proofs'])
+    concated = pandas.concat([tests_stats, expl_stats, all_stats], keys=['no expl proofs', 'expl', 'with expl proofs'])
     concated.to_csv(res_path)
 
 
