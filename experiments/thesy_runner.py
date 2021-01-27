@@ -57,7 +57,7 @@ def run_thesy(params: RunParams):
     # with open(fn + ".json", 'w') as f:
 
 
-def run_all(dirs, prove=False, features="", skip=None, timeout=60, processnum=15, memorylimit=32):
+def run_all(dirs, prove=False, features="", skip=None, timeout=60, processnum=15, memorylimit=32, multiprocess=True):
     if skip is None:
         skip = []
     to = timeout * 60
@@ -75,14 +75,19 @@ def run_all(dirs, prove=False, features="", skip=None, timeout=60, processnum=15
     if not is_windows:
         cg.set_memory_limit(memorylimit, 'gigabytes')
     pn = processnum
-    pool = multiprocessing.Pool(pn)
-    pool.map(run_thesy, files)
+    if multiprocess:
+        pool = multiprocessing.Pool(pn)
+        pool.map(run_thesy, files)
+    else:
+        for f in files:
+            run_thesy(f)
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("inputdir", nargs='+')
     parser.add_argument('-p', '--prove', action='store_true', default=False)
+    parser.add_argument('-s', '--singlethread', action='store_false', default=True)
     parser.add_argument('-f', '--features', default="")
     parser.add_argument('--skip', nargs='*', default=None)
     parser.add_argument('-t', '--timeout', default=60)
@@ -91,4 +96,4 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    run_all(args.inputdir, args.prove, args.features, args.skip, args.timeout, args.processnum, args.memorylimit)
+    run_all(args.inputdir, args.prove, args.features, args.skip, args.timeout, args.processnum, args.memorylimit, args.singlethread)
