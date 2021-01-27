@@ -1,6 +1,7 @@
 import shutil
 import pathlib
 
+from experiments import copy_tree_th_only
 from experiments.thesy_runner import run_all
 from experiments.stats_processor import write_stats
 
@@ -25,10 +26,10 @@ if __name__ == '__main__':
         shutil.move(thesy_with_cs, backup / thesy_with_cs.name)
 
     # Default proof mode is false so we are doing exploration
-    shutil.copytree(isaplanner_tests, thesy_no_cs)
+    copy_tree_th_only(isaplanner_tests, thesy_no_cs)
     run_all([thesy_no_cs], features='no_split')
     write_stats(thesy_no_cs)
-    shutil.copytree(isaplanner_tests, thesy_with_cs)
+    copy_tree_th_only(isaplanner_tests, thesy_with_cs)
     run_all([thesy_with_cs])
     write_stats(thesy_with_cs)
 
