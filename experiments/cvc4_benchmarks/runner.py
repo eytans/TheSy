@@ -56,5 +56,8 @@ def run(expl_timeout=None, prove_timeout=None, rerun=None):
 
 
 if __name__ == '__main__':
-    parser = ArgumentParser
-    run()
+    parser = ArgumentParser()
+    parser.add_argument('-t', '--timeout', default=None)
+    parser.add_argument('-n', '--norerun', action='store_true', default=None)
+    args = parser.parse_args()
+    run(expl_timeout=args.timeout, rerun=not args.norerun)
