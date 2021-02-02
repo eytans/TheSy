@@ -5,7 +5,7 @@ pub mod parser {
 
     use egg::{Pattern, RecExpr, Rewrite, SymbolLang, Var, Applier, Searcher, Language, PatternAst, ENodeOrVar, Id};
     use itertools::{Itertools};
-    use symbolic_expressions::Sexp;
+    use symbolic_expressions::{Sexp, SexpError};
 
     use crate::eggstentions::appliers::DiffApplier;
     use crate::lang::{DataType, Function};
@@ -18,6 +18,32 @@ pub mod parser {
     use crate::thesy::{case_split};
     use crate::tools::tools::combinations;
     use std::rc::Rc;
+    use std::error::Error;
+    use smallvec::alloc::fmt::Formatter;
+    use std::fmt;
+    use crate::thesy::parser::TheSyParseErr::IOError;
+    use crate::thesy::thesy_parser::parser::TheSyParseErr::UnknownError;
+
+    #[derive(Debug)]
+    pub enum TheSyParseErr {
+        UnknownError,
+        IOError(std::io::Error),
+        SexpError(SexpError),
+    }
+
+    impl Error for TheSyParseErr {}
+
+    impl std::fmt::Display for TheSyParseErr {
+        fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+            let mut res = writeln!(f, "Error during thesy parsing");
+            if res.is_ok() {
+                if let IOError(x) = self {
+                    res = std::fmt::Display::fmt(&x, f);
+                }
+            }
+            res
+        }
+    }
 
     #[derive(Default, Clone)]
     pub struct Definitions {
@@ -54,11 +80,11 @@ pub mod parser {
         }
     }
 
-    pub fn parse_file(f: String) -> Definitions {
-        let mut file = File::open(f).unwrap();
+    pub fn parse_file(f: String) -> Result<Definitions, TheSyParseErr> {
+        let mut file = File::open(f);
         let mut contents = String::new();
-        file.read_to_string(&mut contents).unwrap();
-        parse(&contents.split("\n").map(|s| s.to_string()).collect_vec()[..])
+        file.and_then(|mut f| f.read_to_string(&mut contents)).map_err(|x| IOError(x))
+            .and_then(|_| parse(&contents.split("\n").map(|s| s.to_string()).collect_vec()[..]))
     }
 
     fn collected_precon_conds_to_rw(name: String, precond: Option<Pattern<SymbolLang>>, searcher: impl Searcher<SymbolLang, ()> + Debug + 'static, applier: impl Applier<SymbolLang, ()> + 'static, dif_app: bool, conditions: Vec<MatchFilter<SymbolLang, ()>>) -> Result<Rewrite<SymbolLang, ()>, String> {
@@ -92,7 +118,7 @@ pub mod parser {
         Rewrite::new(name, psearcher, applier)
     }
 
-    pub fn parse(lines: &[String]) -> Definitions {
+    pub fn parse(lines: &[String]) -> Result<Definitions, TheSyParseErr> {
         // Creating case split rewrites is done per function.
         // Either the body of the function contains ite or the different rewrites
         // span a match expression on a second variable.
@@ -106,56 +132,86 @@ pub mod parser {
             if l.trim().is_empty() || l.starts_with(";") {
                 continue;
             }
-            let mut sexp = symbolic_expressions::parser::parse_str(l).unwrap();
-            let mut l = sexp.take_list().unwrap();
-            let name = l[0].take_string().unwrap();
-            match name.as_ref() {
+
+            let mut sexp = symbolic_expressions::parser::parse_str(l);
+            if !(sexp.is_ok() && sexp.iter().all(|s| s.is_list())) {
+                continue;
+            }
+            let mut l = sexp.unwrap().take_list().unwrap();
+            let name = l[0].take_string();
+            if name.is_err() {
+                continue;
+            }
+            let mut defs = Definitions::default();
+            let temp: Result<Definitions, TheSyParseErr> = match name.unwrap().as_ref() {
                 "include" => {
-                    let mut to_include = parse_file(format!("theories/{}.th", l[1].take_string().unwrap()));
-                    res.merge(to_include);
+                    parse_file(format!("theories/{}.th", l[1].take_string().unwrap()))
                 }
                 "datatype" => {
+                    if !(l.len() > 3 && l[1].is_string() && l[2].is_list() && l[3].is_list()) {
+                        continue;
+                    }
                     let type_name = l[1].take_string().unwrap();
                     let type_params = l[2].take_list().unwrap();
                     // Constructor name applied on param types
                     let constructors = l[3].take_list().unwrap();
-                    res.datatypes.push(DataType::generic(type_name,
+                    defs.datatypes.push(DataType::generic(type_name,
                                                          sexp_list_to_recexpr(type_params),
                                                          sexp_list_to_recexpr(constructors)
                                                              .into_iter()
                                                              .map(|e| Function::from(e))
                                                              .collect_vec(),
                     ));
+                    Ok(defs)
                 }
                 "declare-fun" => {
-                    let fun_name = l[1].take_string().unwrap();
-                    let params = sexp_list_to_recexpr(l[2].take_list().unwrap());
+                    let fun_name = l[1].take_string();
                     let return_type = sexp_to_recexpr(&l[3]);
-                    res.functions.push(Function::new(fun_name, params, return_type));
+                    let params = l[2].take_list();
+                    if fun_name.is_ok() && params.is_ok() {
+                        defs.functions.push(Function::new(fun_name.unwrap(), sexp_list_to_recexpr(params.unwrap()), return_type));
+                        Ok(defs)
+                    } else {
+                        fun_name.and_then(|_| params.and_then(|_| Ok(defs))).map_err(|e| TheSyParseErr::SexpError(e))
+                    }
                 }
                 "=>" => {
-                    let (name, precondition, mut searcher, applier, conditions) = collect_rule(&mut l);
+                    let rules = collect_rule(&mut l);
+                    if rules.is_err() {
+                        continue;
+                    }
+                    let (name, precondition, mut searcher, applier, conditions) = rules.unwrap();
                     // TODO: case split on precondition?
                     if !searcher.ast.into_tree().root().is_leaf() {
                         name_pats.push((format!("{}", searcher.ast.into_tree().root().display_op()), searcher.ast.clone()));
                     }
                     let rw = collected_precon_conds_to_rw(name, precondition, searcher, applier, false, conditions);
-                    res.rws.push(rw.unwrap());
+                    defs.rws.push(rw.unwrap());
+                    Ok(defs)
                 }
                 "=|>" => {
-                    let (name, precondition, mut searcher, applier, conditions) = collect_rule(&mut l);
+                    let rules = collect_rule(&mut l);
+                    if rules.is_err() {
+                        continue;
+                    }
+                    let (name, precondition, mut searcher, applier, conditions) = rules.unwrap();
                     // TODO: case split on precondition?
                     if !searcher.ast.into_tree().root().is_leaf() {
                         name_pats.push((format!("{}", searcher.ast.into_tree().root().display_op()), searcher.ast.clone()));
                     }
                     let rw = collected_precon_conds_to_rw(name, precondition, searcher, applier, true, conditions);
-                    res.rws.push(rw.unwrap());
+                    defs.rws.push(rw.unwrap());
+                    Ok(defs)
                 }
                 "<=>" => {
-                    let (name, precondition, mut searcher, mut applier, conditions) = collect_rule(&mut l);
+                    let rules = collect_rule(&mut l);
+                    if rules.is_err() {
+                        continue;
+                    }
+                    let (name, precondition, mut searcher, applier, conditions) = rules.unwrap();
                     if !conditions.is_empty() {
                         error!("Can't handle conditions with <=> in {}", name);
-                        continue;
+                        return Err(UnknownError);
                     }
                     // TODO: case split on precondition?
                     if !searcher.ast.into_tree().root().is_leaf() {
@@ -170,22 +226,38 @@ pub mod parser {
                     // TODO: Shouldnt need to create empty filter
                     let rw2 = collected_precon_conds_to_rw(name + "-rev", precondition, applier1, searcher1, false, vec![]);
                     let rws = vec![rw1, rw2].into_iter().flatten().collect_vec();
-                    res.rws.extend(rws);
+                    defs.rws.extend(rws);
+                    Ok(defs)
                     // buggy macro
                     // res.rws.extend_from_slice(&rewrite!(name; searcher <=> applier));
                 }
                 "prove" => {
+                    if !(l[1].is_list() && l[1].list().unwrap().len() > 2 && l[1].list().unwrap()[0].is_string()) {
+                        continue;
+                    }
                     let mut forall_list = l[1].take_list().unwrap();
                     assert_eq!(forall_list[0].take_string().unwrap(), "forall");
+                    if !(forall_list[1].is_list() && forall_list[1].list().unwrap().iter().all(|s| s.is_list())) {
+                        continue;
+                    }
                     let mut var_map = forall_list[1].take_list().unwrap().iter_mut()
                         .map(|s| {
                             let s_list = s.take_list().unwrap();
                             (sexp_to_recexpr(&s_list[0]), sexp_to_recexpr(&s_list[1]))
                         }).collect();
                     let (mut precondition, mut equality) = {
+                        if !forall_list[2].is_list() {
+                            continue;
+                        }
                         let mut expr = forall_list[2].take_list().unwrap();
                         info!("goal: {}", expr.iter().map(|x| x.to_string()).intersperse(" ".parse().unwrap()).collect::<String>());
+                        if !expr[0].is_string() {
+                            continue;
+                        }
                         if expr[0].string().unwrap() == "=>" {
+                            if expr.len() < 3 || !expr[2].is_list() {
+                                continue;
+                            }
                             let equality = expr.remove(2).take_list().unwrap();
                             let precond = expr.remove(1);
                             (Some(precond), equality)
@@ -196,11 +268,16 @@ pub mod parser {
                     if !(equality[0].string().unwrap() == "=" || equality[0].string().unwrap() == "<=>") {
                         equality = vec![Sexp::String("=".to_string()), Sexp::String("true".to_string()), Sexp::List(equality)];
                     }
-                    res.conjectures.push((var_map, precondition.map(|x| sexp_to_recexpr(&x)), sexp_to_recexpr(&equality[1]), sexp_to_recexpr(&equality[2])));
+                    defs.conjectures.push((var_map, precondition.map(|x| sexp_to_recexpr(&x)), sexp_to_recexpr(&equality[1]), sexp_to_recexpr(&equality[2])));
+                    Ok(defs)
                 }
                 _ => {
-                    println!("Error parsing smtlib2 line, found {} op which is not supported", l[0].to_string())
+                    println!("Error parsing smtlib2 line, found {} op which is not supported", l[0].to_string());
+                    Err(UnknownError)
                 }
+            };
+            if temp.is_ok() {
+                res.merge(temp.unwrap());
             }
         }
 
@@ -317,7 +394,7 @@ pub mod parser {
                             FilteringSearcher::create_non_pattern_filterer(Pattern::from_str(&*exp.pretty(1000)).unwrap().into_rc_dyn(), root_v_opt.unwrap())
                         }).collect_vec();
                         let dyn_searcher: Rc<dyn Searcher<SymbolLang, ()>> = Rc::new(searcher.clone());
-                        let conditonal_searcher = searcher_conditions.into_iter().fold(dyn_searcher, |pattern, y|{
+                        let conditonal_searcher = searcher_conditions.into_iter().fold(dyn_searcher, |pattern, y| {
                             Rc::new(FilteringSearcher::new(pattern, y))
                         });
 
@@ -334,28 +411,44 @@ pub mod parser {
             res.case_splitters.extend(case_splitters);
         }
 
-        res
+        Ok(res)
     }
 
-    fn collect_rule(l: &mut Vec<Sexp>) -> (String, Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, Vec<MatchFilter<SymbolLang, ()>>) {
+    fn collect_rule(l: &mut Vec<Sexp>) -> Result<(String, Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, Vec<MatchFilter<SymbolLang, ()>>), TheSyParseErr> {
+        if !l[1].is_string() {
+            return Err(UnknownError);
+        }
         let name = l[1].take_string().unwrap();
 
         let mut conditions_inx = 4;
         // implies
-        let (precondition, searcher, applier) = if l[2].is_list() && l[2].list_name().unwrap() == "=>" {
-            conditions_inx = 3;
-            let mut pre_list = l[2].take_list().unwrap();
-            let precondition = Some(Pattern::from_str(&*pre_list[1].to_string()).unwrap());
-            let mut equals = pre_list[2].take_list().unwrap();
-            assert!(equals[0].take_string().unwrap() == "=");
-            let searcher = Pattern::from_str(&*equals[1].to_string()).unwrap();
-            let applier = Pattern::from_str(&*equals[2].to_string()).unwrap();
-            (precondition, searcher, applier)
-        } else {
-            let searcher = Pattern::from_str(&*l[2].to_string()).unwrap();
-            let applier = Pattern::from_str(&*l[3].to_string()).unwrap();
-            (None, searcher, applier)
+        let (precondition, searcher, applier) = {
+            if l[2].is_list() && l[2].list().unwrap()[0].is_string() && l[2].list_name().unwrap() == "=>" {
+                conditions_inx = 3;
+                let mut pre_list = l[2].take_list().unwrap();
+                let pat_res = Pattern::from_str(&*pre_list[1].to_string());
+                if pat_res.is_err() || !pre_list[2].is_list() {
+                    return Err(UnknownError);
+                }
+                let precondition = Some(pat_res.unwrap());
+                let mut equals = pre_list[2].take_list().unwrap();
+                if !(equals[0].is_string() && equals[0].take_string().unwrap() == "=") {
+                    return Err(UnknownError);
+                }
+                // TODO: Error manage patterns
+                let searcher = Pattern::from_str(&*equals[1].to_string()).unwrap();
+                let applier = Pattern::from_str(&*equals[2].to_string()).unwrap();
+                (precondition, searcher, applier)
+            } else {
+                // TODO: Error manage patterns
+                let searcher = Pattern::from_str(&*l[2].to_string()).unwrap();
+                let applier = Pattern::from_str(&*l[3].to_string()).unwrap();
+                (None, searcher, applier)
+            }
         };
+        if l[conditions_inx..].iter().any(|x| !(x.is_list() && x.list().unwrap().len() > 1 && x.list().unwrap()[0].is_string() && x.list().unwrap()[1].is_string())) {
+            return Err(UnknownError);
+        }
         let conditions = l[conditions_inx..].iter().map(|s| {
             let v_cond = s.list().unwrap();
             let var = Var::from_str(v_cond[0].string().unwrap()).unwrap();
@@ -363,7 +456,7 @@ pub mod parser {
             FilteringSearcher::create_non_pattern_filterer(cond.into_rc_dyn(), var)
         }).collect_vec();
         println!("{} => {}", searcher.pretty_string(), applier.pretty_string());
-        (name, precondition, searcher, applier, conditions)
+       Ok((name, precondition, searcher, applier, conditions))
     }
 
     fn sexp_list_to_recexpr(sexps: Vec<Sexp>) -> Vec<RecExpr<SymbolLang>> {

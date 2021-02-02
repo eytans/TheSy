@@ -62,7 +62,7 @@ struct CliOpt {
 impl From<&CliOpt> for TheSyConfig {
     fn from(opts: &CliOpt) -> Self {
         TheSyConfig::new(
-            thesy_parser::parser::parse_file(opts.path.to_str().unwrap().to_string()),
+            thesy_parser::parser::parse_file(opts.path.to_str().unwrap().to_string()).unwrap(),
             opts.ph_count,
             vec![],
             opts.path.with_extension("res.th"),
@@ -107,7 +107,7 @@ impl TheSyConfig {
 
     pub fn from_path(path: String) -> TheSyConfig {
         let definitions = thesy_parser::parser::parse_file(path.clone());
-        TheSyConfig::new(definitions, 2, vec![], PathBuf::from(path).with_extension("res"), true)
+        TheSyConfig::new(definitions.unwrap(), 2, vec![], PathBuf::from(path).with_extension("res"), true)
     }
 
     /// Run thesy using current configuration returning (thesy instance, previous + new rewrites)
