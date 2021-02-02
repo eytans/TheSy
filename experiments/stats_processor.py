@@ -7,12 +7,17 @@ from collections import Counter
 
 
 def create_stats(path):
+    keys_assertions = ['total_time', 'stop_reason', 'goals_proved', 'conjectures_proved', 'filtered_lemmas', 'case_split', 'file_name']
+
     jsons = []
     for fn in os.listdir(path):
         if fn.endswith(".json"):
             with open(os.path.join(path, fn)) as f:
                 d = json.load(f)
                 d['file_name'] = fn
+                if any(map(lambda k: not k in d, keys_assertions)):
+                    continue
+
                 jsons.append(d)
 
     df = pandas.DataFrame(jsons)

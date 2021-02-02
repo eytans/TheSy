@@ -436,14 +436,20 @@ pub mod parser {
                     return Err(UnknownError);
                 }
                 // TODO: Error manage patterns
-                let searcher = Pattern::from_str(&*equals[1].to_string()).unwrap();
-                let applier = Pattern::from_str(&*equals[2].to_string()).unwrap();
-                (precondition, searcher, applier)
+                let searcher = Pattern::from_str(&*equals[1].to_string());
+                let applier = Pattern::from_str(&*equals[2].to_string());
+                if searcher.is_err() || applier.is_err() {
+                    return Err(UnknownError);
+                }
+                (precondition, searcher.unwrap(), applier.unwrap())
             } else {
                 // TODO: Error manage patterns
-                let searcher = Pattern::from_str(&*l[2].to_string()).unwrap();
-                let applier = Pattern::from_str(&*l[3].to_string()).unwrap();
-                (None, searcher, applier)
+                let searcher = Pattern::from_str(&*l[2].to_string());
+                let applier = Pattern::from_str(&*l[3].to_string());
+                if searcher.is_err() || applier.is_err() {
+                    return Err(UnknownError);
+                }
+                (None, searcher.unwrap(), applier.unwrap())
             }
         };
         if l[conditions_inx..].iter().any(|x| !(x.is_list() && x.list().unwrap().len() > 1 && x.list().unwrap()[0].is_string() && x.list().unwrap()[1].is_string())) {
