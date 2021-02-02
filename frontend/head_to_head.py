@@ -16,7 +16,7 @@ THESY_DIR = 'frontend/benchmarks/isaplanner_smt_nosortnat_th'
 THESY_PREAMBLE = 'prop_%s.smt20.smt2.th'
 THESY_RULES = 'prop_%s.smt20.smt2.res.th'
 THESY_GOALS = 'prop_%s.smt20.smt2.goal.th'
-HIPSTER_DIR = 'frontend/benchmarks/isaplanner/via_hipster'
+HIPSTER_DIR = 'experiments/isaplanner_proving/via_hipster'
 HIPSTER_RULES = 'Prop_%s.rules.th'
 HIPSTER_GOALS = 'Prop_%s.goals.th'
 
@@ -27,7 +27,9 @@ HIPSTER_TIME = 'Prop_%s.thy.time'
 def main():
     a = argparse.ArgumentParser()
     a.add_argument('benchmarks', nargs='*')
-    a.add_argument('--dir', default='both',
+    a.add_argument('--thesy-dir', default=THESY_DIR)
+    a.add_argument('--hipster-dir', default=HIPSTER_DIR)
+    a.add_argument('--direction', default='both',
                    help="direction: h-t (hipster < thesy), t-h (thesy < hipster), " +
                         "or both [default: both]")
     a.add_argument('--show-all', action='store_true',
@@ -44,25 +46,25 @@ def main():
     results = ResultStore()
 
     for bm in expand_benchmarks(a.benchmarks):
-        preamble_fn = os.path.join(THESY_DIR, THESY_PREAMBLE % bm)
-        thesy_rules_fn = os.path.join(THESY_DIR, THESY_RULES % bm)
-        thesy_goals_fn = os.path.join(THESY_DIR, THESY_GOALS % bm)
-        hipster_rules_fn = os.path.join(HIPSTER_DIR, HIPSTER_RULES % bm)
-        hipster_goals_fn = os.path.join(HIPSTER_DIR, HIPSTER_GOALS % bm)
+        preamble_fn = os.path.join(a.thesy_dir, THESY_PREAMBLE % bm)
+        thesy_rules_fn = os.path.join(a.thesy_dir, THESY_RULES % bm)
+        thesy_goals_fn = os.path.join(a.thesy_dir, THESY_GOALS % bm)
+        hipster_rules_fn = os.path.join(a.hipster_dir, HIPSTER_RULES % bm)
+        hipster_goals_fn = os.path.join(a.hipster_dir, HIPSTER_GOALS % bm)
 
         r = results.get(bm)
-        if a.dir == 'h-t' or a.dir == 'both':
+        if a.direction == 'h-t' or a.direction == 'both':
             r['hipster < thesy'] = compare_theories(bm, preamble_fn, thesy_rules_fn, hipster_goals_fn)
-        if a.dir == 't-h' or a.dir == 'both':
+        if a.direction == 't-h' or a.direction == 'both':
             r['thesy < hipster'] = compare_theories(bm, preamble_fn, hipster_rules_fn, thesy_goals_fn)
         results.save()
 
-    extract_times(results)
+    extract_times(results, a)
 
     if a.show_all:
         if a.benchmarks: print('-' * 60)
-        show_all_results(results)
-        export_csv(results)
+        show_all_results(results, a)
+        export_csv(results, a)
     
     if a.scatter:
         generate_scatter(results)
@@ -91,13 +93,13 @@ def expand_benchmarks(bms):
             yield bm
 
 
-def extract_times(results):
+def extract_times(results, opts):
     for k, v in results.d.items():
-        v['thesy time'] = get_time_from_json(os.path.join(THESY_DIR, THESY_STATS % k))
-        v['hipster time'] = get_time_from_hms(os.path.join(HIPSTER_DIR, HIPSTER_TIME % k))
+        v['thesy time'] = get_time_from_json(os.path.join(opts.thesy_dir, THESY_STATS % k))
+        v['hipster time'] = get_time_from_hms(os.path.join(opts.hipster_dir, HIPSTER_TIME % k))
 
 
-def show_all_results(results):
+def show_all_results(results, opts):
     stats = {d: {'goals': 0, 'proved': 0, 'theories': 0} 
              for d in ['hipster < thesy', 'thesy < hipster']}
     def accumulate_stats(d, item):
@@ -116,10 +118,10 @@ def show_all_results(results):
             else:
                 cells += ['??']
         
-        thesy_time = get_time_from_json(os.path.join(THESY_DIR, THESY_STATS % k))
+        thesy_time = get_time_from_json(os.path.join(opts.thesy_dir, THESY_STATS % k))
         cells += [thesy_time or 't/o']
 
-        hipster_time = get_time_from_hms(os.path.join(HIPSTER_DIR, HIPSTER_TIME % k))
+        hipster_time = get_time_from_hms(os.path.join(opts.hipster_dir, HIPSTER_TIME % k))
         cells += [hipster_time or 't/o']
 
         print(f"Prop_{k}        {' '.join('%12s' % s for s in cells)}")
@@ -129,7 +131,7 @@ def show_all_results(results):
         print(f"{d}:  Proved {st['proved']}/{st['goals']} lemmas in {st['theories']} theories")
 
 
-def export_csv(results, out_filename="head_to_head.csv"):
+def export_csv(results, opts, out_filename="head_to_head.csv"):
     export_data = []
     for k, v in results.d.items():
         export_cells = [f"Prop_{k}"]
@@ -137,10 +139,10 @@ def export_csv(results, out_filename="head_to_head.csv"):
             if d in v:
                 export_cells += [len(v[d]['goals']), len(v[d]['proved'])]
 
-        thesy_time = get_time_from_json(os.path.join(THESY_DIR, THESY_STATS % k))
+        thesy_time = get_time_from_json(os.path.join(opts.thesy_dir, THESY_STATS % k))
         export_cells += [thesy_time or 3600]
 
-        hipster_time = get_time_from_hms(os.path.join(HIPSTER_DIR, HIPSTER_TIME % k))
+        hipster_time = get_time_from_hms(os.path.join(opts.hipster_dir, HIPSTER_TIME % k))
         export_cells += [hipster_time or 3600]
 
         export_data.append(export_cells)
@@ -180,19 +182,22 @@ def compare_theories(bm, preamble_fn, assumed_rules_fn, goals_fn):
     }
 
 
-def generate_scatter(results):
-    print("h-t      t-h")
-    for k, v in results.d.items():
-        cells = []
-        for d in ['hipster < thesy', 'thesy < hipster']:
-            if d in v:
-                nom, den = len(v[d]['proved']), len(v[d]['goals'])
-                cells += [nom / den if den else 1.0]
+def generate_scatter(results, output_filename="scatter-plot.dat.txt"):
+    with open(output_filename, "w") as outf:
+        print("h<t      t<h", file=outf)
+        for k, v in results.d.items():
+            cells = []
+            for d in ['hipster < thesy', 'thesy < hipster']:
+                if d in v:
+                    nom, den = len(v[d]['proved']), len(v[d]['goals'])
+                    cells += [nom / den if den else 1.0]
 
-        print("%5.5f   %5.5f" % tuple(cells))
-        
+            print("%5.5f   %5.5f" % tuple(cells), file=outf)
 
-def generate_cactus(results):
+    print("wrote {}".format(output_filename))
+
+
+def generate_cactus(results, output_filename="cactus-plot.dat.txt"):
     TIMEOUT = 3600
     data = {}
     for sy in ['thesy', 'hipster']:
@@ -202,10 +207,13 @@ def generate_cactus(results):
         for tm in sorted(bm_time): acc.append(acc[-1] + tm)
         data[sy] = acc
 
-    print("n      thesy        hipster")
-    for i, row in enumerate(zip(data['thesy'], data['hipster'])):
-        print("%4d  %10.2f  %15.2f" % ((i,) + row))
-        
+    with open(output_filename, "w") as outf:
+        print("n      thesy        hipster", file=outf)
+        for i, row in enumerate(zip(data['thesy'], data['hipster'])):
+            print("%4d  %10.2f  %15.2f" % ((i,) + row), file=outf)
+
+    print("wrote {}".format(output_filename))
+
 
 # Some low-level utils
 
