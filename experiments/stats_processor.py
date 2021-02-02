@@ -7,7 +7,7 @@ from collections import Counter
 
 
 def create_stats(path):
-    keys_assertions = ['total_time', 'stop_reason', 'goals_proved', 'conjectures_proved', 'filtered_lemmas', 'case_split', 'file_name']
+    keys_assertions = ['equiv_red_iterations', 'total_time', 'goals_proved', 'conjectures_proved', 'filtered_lemmas', 'case_split', 'file_name']
 
     jsons = []
     for fn in os.listdir(path):
@@ -22,7 +22,6 @@ def create_stats(path):
 
     df = pandas.DataFrame(jsons)
     res = pandas.DataFrame()
-    print(df.columns)
     res['time'] = df['total_time'].apply(lambda d: d['secs'] + d['nanos']*10**-9)
     res['stop_reasons'] = df.equiv_red_iterations.apply(lambda v: sorted(Counter([list(v1[-1]['stop_reason'].keys())[0] if v1[-1]['stop_reason'] != "Saturated" else "Saturated" for v1 in v]).keys()))
     res['success'] = df['goals_proved'].apply(lambda gp: len(gp) > 0)

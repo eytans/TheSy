@@ -57,7 +57,7 @@ def run_thesy(params: RunParams):
     # with open(fn + ".json", 'w') as f:
 
 
-def run_all(dirs, prove=False, features="", skip=None, timeout=60, processnum=15, memorylimit=32, multiprocess=True):
+def run_all(dirs, prove=False, features="", skip=None, timeout=60, processnum=15, memorylimit=32, multiprocess=True, rerun=True):
     if skip is None:
         skip = []
     to = timeout * 60
@@ -71,6 +71,8 @@ def run_all(dirs, prove=False, features="", skip=None, timeout=60, processnum=15
     print("Build done")
     inputdirs = dirs
     files = [RunParams(os.path.join(folder, fn), timeout=to, proof_mode=prove) for folder in inputdirs for fn in os.listdir(folder) if fn.endswith(".th") and (not fn.endswith("res.th")) and fn not in skip]
+    if not rerun:
+        files = [p for p in files if not pathlib.Path(p.fn).with_suffix('.stats.json').exists()]
     # isa_files = ["./temp/" + f for f in isa_files]
     if not is_windows:
         cg.set_memory_limit(memorylimit, 'gigabytes')
@@ -93,7 +95,9 @@ if __name__ == '__main__':
     parser.add_argument('-t', '--timeout', default=60)
     parser.add_argument('-n', '--processnum', default=15)
     parser.add_argument('-m', '--memorylimit', default=32)
+    parser.add_argument('--norerun', action='store_true', default=False)
 
     args = parser.parse_args()
+    rerun = not args.norerun
 
-    run_all(args.inputdir, args.prove, args.features, args.skip, args.timeout, args.processnum, args.memorylimit, args.singlethread)
+    run_all(args.inputdir, args.prove, args.features, args.skip, args.timeout, args.processnum, args.memorylimit, args.singlethread, rerun)
