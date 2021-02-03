@@ -1,25 +1,23 @@
-23:06:52 [WARN] Collecting statistics
-23:06:52 [WARN]  ex is: Z
-23:06:52 [WARN]  ex is: (S Z)
-23:06:52 [WARN]  ex is: (S (S Z))
-23:06:52 [WARN]  ex is: nil
-23:06:52 [WARN]  ex is: (cons autovar_Nat_0 nil)
-23:06:52 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
-23:06:52 [WARN] Proof mode: false
-23:06:52 [WARN]  ex is: Z
-23:06:52 [WARN]  ex is: (S Z)
-23:06:52 [WARN]  ex is: (S (S Z))
-23:06:52 [WARN]  ex is: nil
-23:06:52 [WARN]  ex is: (cons autovar_Nat_0 nil)
-23:06:52 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
-23:06:52 [WARN] Proof mode: false
-23:06:52 [WARN] proved: (== Z ?ts_ph_Nat_0) => (== ?ts_ph_Nat_0 Z)
-23:06:52 [WARN] proved: (== ?ts_ph_Nat_0 Z) => (== Z ?ts_ph_Nat_0)
-23:06:52 [WARN] proved: (== ?ts_ph_Nat_0 ?ts_ph_Nat_0) => true
-23:06:52 [WARN] proved: (== (S ?ts_ph_Nat_0) ?ts_ph_Nat_0) => (== ?ts_ph_Nat_0 (S ?ts_ph_Nat_0))
-23:06:52 [WARN] proved: (== ?ts_ph_Nat_0 (S ?ts_ph_Nat_0)) => (== (S ?ts_ph_Nat_0) ?ts_ph_Nat_0)
-23:06:52 [WARN] proved: (== ?ts_ph_Nat_0 (S Z)) => (== (S Z) ?ts_ph_Nat_0)
-23:06:52 [WARN] proved: (== (S Z) ?ts_ph_Nat_0) => (== ?ts_ph_Nat_0 (S Z))
-23:06:52 [WARN] proved: (== ?ts_ph_Nat_1 ?ts_ph_Nat_0) => (== ?ts_ph_Nat_0 ?ts_ph_Nat_1)
-23:06:52 [WARN] proved: (== ?ts_ph_Nat_0 ?ts_ph_Nat_1) => (== ?ts_ph_Nat_1 ?ts_ph_Nat_0)
-23:06:52 [WARN] proved: (== ?ts_ph_Nat_0 (S ?ts_ph_Nat_0)) => false
+13:07:31 [WARN] Collecting statistics
+13:07:31 [WARN]  ex is: Z
+13:07:31 [WARN]  ex is: (S Z)
+13:07:31 [WARN]  ex is: (S (S Z))
+13:07:31 [WARN]  ex is: nil
+13:07:31 [WARN]  ex is: (cons autovar_Nat_0 nil)
+13:07:31 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+13:07:31 [WARN] Proof mode: false
+13:07:31 [WARN]  ex is: Z
+13:07:31 [WARN]  ex is: (S Z)
+13:07:31 [WARN]  ex is: (S (S Z))
+13:07:31 [WARN]  ex is: nil
+13:07:31 [WARN]  ex is: (cons autovar_Nat_0 nil)
+13:07:31 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+13:07:31 [WARN] Proof mode: false
+13:07:31 [WARN] proved: (== Z ?ts_ph_Nat_0) => (== ?ts_ph_Nat_0 Z)
+13:07:31 [WARN] proved: (== ?ts_ph_Nat_0 Z) => (== Z ?ts_ph_Nat_0)
+13:07:31 [WARN] proved: (== ?ts_ph_Nat_0 ?ts_ph_Nat_0) => true
+13:07:31 [WARN] proved: (== ?ts_ph_Nat_0 (S Z)) => (== (S Z) ?ts_ph_Nat_0)
+13:07:31 [WARN] proved: (== (S Z) ?ts_ph_Nat_0) => (== ?ts_ph_Nat_0 (S Z))
+13:07:31 [WARN] proved: (== ?ts_ph_Nat_1 ?ts_ph_Nat_0) => (== ?ts_ph_Nat_0 ?ts_ph_Nat_1)
+13:07:31 [WARN] proved: (== ?ts_ph_Nat_0 ?ts_ph_Nat_1) => (== ?ts_ph_Nat_1 ?ts_ph_Nat_0)
+13:07:31 [WARN] proved: (== ?ts_ph_Nat_0 (S ?ts_ph_Nat_0)) => false

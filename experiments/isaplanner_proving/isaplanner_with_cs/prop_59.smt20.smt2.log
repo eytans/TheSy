@@ -1,21 +1,21 @@
-22:18:51 [WARN] Collecting statistics
-22:18:51 [WARN]  ex is: Z
-22:18:51 [WARN]  ex is: (S Z)
-22:18:51 [WARN]  ex is: (S (S Z))
-22:18:51 [WARN]  ex is: nil
-22:18:51 [WARN]  ex is: (cons autovar_Nat_0 nil)
-22:18:51 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
-22:18:51 [WARN] Proof mode: false
-22:18:51 [WARN]  ex is: Z
-22:18:51 [WARN]  ex is: (S Z)
-22:18:51 [WARN]  ex is: (S (S Z))
-22:18:51 [WARN]  ex is: nil
-22:18:51 [WARN]  ex is: (cons autovar_Nat_0 nil)
-22:18:51 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
-22:18:51 [WARN] Proof mode: false
-22:18:51 [WARN] proved: (++ ?ts_ph_list_0 nil) => ?ts_ph_list_0
-22:18:51 [WARN] generalized case_split proof as: (++ ?ts_ph_list_0 (++ ?ts_ph_list_1 ?ts_ph_list_2)) -- (++ (++ ?ts_ph_list_0 ?ts_ph_list_1) ?ts_ph_list_2)
-22:18:51 [WARN] proved: (++ ?ts_ph_list_0 (++ ?ts_ph_list_1 ?ts_ph_list_2)) => (++ (++ ?ts_ph_list_0 ?ts_ph_list_1) ?ts_ph_list_2)
-22:18:51 [WARN] proved: (++ (++ ?ts_ph_list_0 ?ts_ph_list_1) ?ts_ph_list_2) => (++ ?ts_ph_list_0 (++ ?ts_ph_list_1 ?ts_ph_list_2))
-22:18:51 [WARN] proved: (last ?ts_ph_list_0) => (last (cons Z ?ts_ph_list_0))
-22:18:51 [WARN] proved: (last (cons Z ?ts_ph_list_0)) => (last ?ts_ph_list_0)
+12:09:05 [WARN] Collecting statistics
+12:09:05 [WARN]  ex is: Z
+12:09:05 [WARN]  ex is: (S Z)
+12:09:05 [WARN]  ex is: (S (S Z))
+12:09:05 [WARN]  ex is: nil
+12:09:05 [WARN]  ex is: (cons autovar_Nat_0 nil)
+12:09:05 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+12:09:05 [WARN] Proof mode: false
+12:09:05 [WARN]  ex is: Z
+12:09:05 [WARN]  ex is: (S Z)
+12:09:05 [WARN]  ex is: (S (S Z))
+12:09:05 [WARN]  ex is: nil
+12:09:05 [WARN]  ex is: (cons autovar_Nat_0 nil)
+12:09:05 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+12:09:05 [WARN] Proof mode: false
+12:09:05 [WARN] proved: (++ ?ts_ph_list_0 nil) => ?ts_ph_list_0
+12:09:05 [WARN] proved: (last (cons Z ?ts_ph_list_0)) => (last ?ts_ph_list_0)
+12:09:05 [WARN] proved: (last ?ts_ph_list_0) => (last (cons Z ?ts_ph_list_0))
+12:09:05 [WARN] generalized case_split proof as: (++ (++ ?ts_ph_list_0 ?ts_ph_list_1) ?ts_ph_list_2) -- (++ ?ts_ph_list_0 (++ ?ts_ph_list_1 ?ts_ph_list_2))
+12:09:05 [WARN] proved: (++ (++ ?ts_ph_list_0 ?ts_ph_list_1) ?ts_ph_list_2) => (++ ?ts_ph_list_0 (++ ?ts_ph_list_1 ?ts_ph_list_2))
+12:09:05 [WARN] proved: (++ ?ts_ph_list_0 (++ ?ts_ph_list_1 ?ts_ph_list_2)) => (++ (++ ?ts_ph_list_0 ?ts_ph_list_1) ?ts_ph_list_2)

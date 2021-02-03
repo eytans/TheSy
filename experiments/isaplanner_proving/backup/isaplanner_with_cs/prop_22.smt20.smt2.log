@@ -1,0 +1,12 @@
+21:20:38 [WARN] Collecting statistics
+21:20:38 [WARN]  ex is: Z
+21:20:38 [WARN]  ex is: (S Z)
+21:20:38 [WARN]  ex is: (S (S Z))
+21:20:38 [WARN] Proof mode: false
+21:20:38 [WARN]  ex is: Z
+21:20:38 [WARN]  ex is: (S Z)
+21:20:38 [WARN]  ex is: (S (S Z))
+21:20:38 [WARN] Proof mode: false
+21:20:41 [WARN] proved: (max ?ts_ph_Nat_0 Z) => (max ?ts_ph_Nat_0 ?ts_ph_Nat_0)
+21:20:41 [WARN] proved: (max ?ts_ph_Nat_0 ?ts_ph_Nat_0) => (max ?ts_ph_Nat_0 Z)
+21:20:41 [WARN] proved: (max ?ts_ph_Nat_0 Z) => ?ts_ph_Nat_0

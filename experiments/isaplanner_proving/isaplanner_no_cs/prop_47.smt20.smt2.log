@@ -1,24 +1,24 @@
-20:13:14 [WARN] Collecting statistics
-20:13:14 [WARN]  ex is: Leaf
-20:13:14 [WARN]  ex is: (Node Leaf autovar_sk_0 Leaf)
-20:13:14 [WARN]  ex is: (Node (Node Leaf autovar_sk_0 Leaf) autovar_sk_1 (Node Leaf autovar_sk_0 Leaf))
-20:13:14 [WARN]  ex is: Z
-20:13:14 [WARN]  ex is: (S Z)
-20:13:14 [WARN]  ex is: (S (S Z))
-20:13:14 [WARN] Proof mode: false
-20:13:14 [WARN]  ex is: Leaf
-20:13:14 [WARN]  ex is: (Node Leaf autovar_sk_0 Leaf)
-20:13:14 [WARN]  ex is: (Node (Node Leaf autovar_sk_0 Leaf) autovar_sk_1 (Node Leaf autovar_sk_0 Leaf))
-20:13:14 [WARN]  ex is: Z
-20:13:14 [WARN]  ex is: (S Z)
-20:13:14 [WARN]  ex is: (S (S Z))
-20:13:14 [WARN] Proof mode: false
-20:13:14 [WARN] proved: (max ?ts_ph_Nat_0 ?ts_ph_Nat_0) => ?ts_ph_Nat_0
-20:13:14 [WARN] proved: (max ?ts_ph_Nat_0 Z) => ?ts_ph_Nat_0
-20:13:14 [WARN] proved: (mirror (mirror ?ts_ph_Tree_0)) => ?ts_ph_Tree_0
-20:13:14 [WARN] proved: (max (S Z) ?ts_ph_Nat_0) => (max ?ts_ph_Nat_0 (S Z))
-20:13:14 [WARN] proved: (max ?ts_ph_Nat_0 (S Z)) => (max (S Z) ?ts_ph_Nat_0)
-20:13:14 [WARN] proved: (max ?ts_ph_Nat_0 (S ?ts_ph_Nat_0)) => (S ?ts_ph_Nat_0)
-20:13:14 [WARN] proved: (S ?ts_ph_Nat_0) => (max ?ts_ph_Nat_0 (S ?ts_ph_Nat_0))
-20:13:14 [WARN] proved: (max (S ?ts_ph_Nat_0) ?ts_ph_Nat_0) => (S ?ts_ph_Nat_0)
-20:13:14 [WARN] proved: (S ?ts_ph_Nat_0) => (max (S ?ts_ph_Nat_0) ?ts_ph_Nat_0)
+11:01:53 [WARN] Collecting statistics
+11:01:53 [WARN]  ex is: Leaf
+11:01:53 [WARN]  ex is: (Node Leaf autovar_sk_0 Leaf)
+11:01:53 [WARN]  ex is: (Node (Node Leaf autovar_sk_0 Leaf) autovar_sk_1 (Node Leaf autovar_sk_0 Leaf))
+11:01:53 [WARN]  ex is: Z
+11:01:53 [WARN]  ex is: (S Z)
+11:01:53 [WARN]  ex is: (S (S Z))
+11:01:54 [WARN] Proof mode: false
+11:01:54 [WARN]  ex is: Leaf
+11:01:54 [WARN]  ex is: (Node Leaf autovar_sk_0 Leaf)
+11:01:54 [WARN]  ex is: (Node (Node Leaf autovar_sk_0 Leaf) autovar_sk_1 (Node Leaf autovar_sk_0 Leaf))
+11:01:54 [WARN]  ex is: Z
+11:01:54 [WARN]  ex is: (S Z)
+11:01:54 [WARN]  ex is: (S (S Z))
+11:01:54 [WARN] Proof mode: false
+11:01:54 [WARN] proved: (max ?ts_ph_Nat_0 Z) => ?ts_ph_Nat_0
+11:01:54 [WARN] proved: (max ?ts_ph_Nat_0 ?ts_ph_Nat_0) => ?ts_ph_Nat_0
+11:01:54 [WARN] proved: (mirror (mirror ?ts_ph_Tree_0)) => ?ts_ph_Tree_0
+11:01:54 [WARN] proved: (S ?ts_ph_Nat_0) => (max (S ?ts_ph_Nat_0) ?ts_ph_Nat_0)
+11:01:54 [WARN] proved: (max (S ?ts_ph_Nat_0) ?ts_ph_Nat_0) => (S ?ts_ph_Nat_0)
+11:01:54 [WARN] proved: (max ?ts_ph_Nat_0 (S Z)) => (max (S Z) ?ts_ph_Nat_0)
+11:01:54 [WARN] proved: (max (S Z) ?ts_ph_Nat_0) => (max ?ts_ph_Nat_0 (S Z))
+11:01:54 [WARN] proved: (S ?ts_ph_Nat_0) => (max ?ts_ph_Nat_0 (S ?ts_ph_Nat_0))
+11:01:54 [WARN] proved: (max ?ts_ph_Nat_0 (S ?ts_ph_Nat_0)) => (S ?ts_ph_Nat_0)

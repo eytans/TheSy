@@ -1,4 +1,4 @@
-20:13:14 [0m[33m[WARN] [0mCollecting statistics
+11:01:54 [0m[33m[WARN] [0mCollecting statistics
 (zip nil2 ?y) => nil
 (zip (cons2 ?z ?x2) nil2) => nil
 (zip (cons2 ?z ?x2) (cons2 ?x3 ?x4)) => (cons (pair2 ?z ?x3) (zip ?x2 ?x4))
@@ -19,25 +19,25 @@ Searcher: (zip ?autovar11 nil2)
 Searcher: (zip ?autovar11 (cons2 ?autovar5 ?autovar6))
 Searcher: (zip (cons2 ?autovar7 ?autovar8) ?autovar12)
 Searcher: (zip (cons2 ?autovar9 ?autovar10) ?autovar12)
-20:13:14 [0m[33m[WARN] [0m ex is: nil2
-20:13:14 [0m[33m[WARN] [0m ex is: (cons2 autovar_sk_0 nil2)
-20:13:14 [0m[33m[WARN] [0m ex is: (cons2 autovar_sk_1 (cons2 autovar_sk_0 nil2))
-20:13:14 [0m[33m[WARN] [0mProof mode: false
-20:13:14 [0m[33m[WARN] [0m ex is: nil2
-20:13:14 [0m[33m[WARN] [0m ex is: (cons2 autovar_sk_0 nil2)
-20:13:14 [0m[33m[WARN] [0m ex is: (cons2 autovar_sk_1 (cons2 autovar_sk_0 nil2))
-20:13:14 [0m[33m[WARN] [0mProof mode: false
-20:13:14 [0m[33m[WARN] [0mproved: (++ ?ts_ph_list2_0 nil2) => ?ts_ph_list2_0
-20:13:14 [0m[33m[WARN] [0mproved: (zip ?ts_ph_list2_0 nil2) => nil
-20:13:14 [0m[33m[WARN] [0mproved: (++ ?ts_ph_list2_0 (++ ?ts_ph_list2_1 ?ts_ph_list2_2)) => (++ (++ ?ts_ph_list2_0 ?ts_ph_list2_1) ?ts_ph_list2_2)
-20:13:14 [0m[33m[WARN] [0mproved: (++ (++ ?ts_ph_list2_0 ?ts_ph_list2_1) ?ts_ph_list2_2) => (++ ?ts_ph_list2_0 (++ ?ts_ph_list2_1 ?ts_ph_list2_2))
-20:13:14 [0m[33m[WARN] [0mproved: (zip (++ ?ts_ph_list2_0 ?ts_ph_list2_1) ?ts_ph_list2_0) => (zip ?ts_ph_list2_0 ?ts_ph_list2_0)
-20:13:14 [0m[33m[WARN] [0mproved: (++ (rev2 ?ts_ph_list2_1) (rev2 ?ts_ph_list2_0)) => (rev2 (++ ?ts_ph_list2_0 ?ts_ph_list2_1))
-20:13:14 [0m[33m[WARN] [0mproved: (rev2 (++ ?ts_ph_list2_0 ?ts_ph_list2_1)) => (++ (rev2 ?ts_ph_list2_1) (rev2 ?ts_ph_list2_0))
-20:13:14 [0m[33m[WARN] [0mproved: (rev2 (rev2 ?ts_ph_list2_0)) => ?ts_ph_list2_0
-20:13:15 [0m[33m[WARN] [0mproved: (zip ?ts_ph_list2_0 (++ ?ts_ph_list2_0 ?ts_ph_list2_1)) => (zip ?ts_ph_list2_0 ?ts_ph_list2_0)
-20:13:15 [0m[33m[WARN] [0mproved: (zip ?ts_ph_list2_0 (cons2 ?ts_ph_sk_1 nil2)) => (zip (++ ?ts_ph_list2_0 ?ts_ph_list2_0) (cons2 ?ts_ph_sk_1 nil2))
-20:13:15 [0m[33m[WARN] [0mproved: (zip (++ ?ts_ph_list2_0 ?ts_ph_list2_0) (cons2 ?ts_ph_sk_1 nil2)) => (zip ?ts_ph_list2_0 (cons2 ?ts_ph_sk_1 nil2))
-20:13:15 [0m[33m[WARN] [0mproved: (zip (cons2 ?ts_ph_sk_1 nil2) ?ts_ph_list2_0) => (zip (cons2 ?ts_ph_sk_1 nil2) (++ ?ts_ph_list2_0 ?ts_ph_list2_0))
-20:13:15 [0m[33m[WARN] [0mproved: (zip (cons2 ?ts_ph_sk_1 nil2) (++ ?ts_ph_list2_0 ?ts_ph_list2_0)) => (zip (cons2 ?ts_ph_sk_1 nil2) ?ts_ph_list2_0)
-done in 706
+11:01:54 [0m[33m[WARN] [0m ex is: nil2
+11:01:54 [0m[33m[WARN] [0m ex is: (cons2 autovar_sk_0 nil2)
+11:01:54 [0m[33m[WARN] [0m ex is: (cons2 autovar_sk_1 (cons2 autovar_sk_0 nil2))
+11:01:54 [0m[33m[WARN] [0mProof mode: false
+11:01:54 [0m[33m[WARN] [0m ex is: nil2
+11:01:54 [0m[33m[WARN] [0m ex is: (cons2 autovar_sk_0 nil2)
+11:01:54 [0m[33m[WARN] [0m ex is: (cons2 autovar_sk_1 (cons2 autovar_sk_0 nil2))
+11:01:54 [0m[33m[WARN] [0mProof mode: false
+11:01:54 [0m[33m[WARN] [0mproved: (++ ?ts_ph_list2_0 nil2) => ?ts_ph_list2_0
+11:01:54 [0m[33m[WARN] [0mproved: (zip ?ts_ph_list2_0 nil2) => nil
+11:01:54 [0m[33m[WARN] [0mproved: (++ (++ ?ts_ph_list2_0 ?ts_ph_list2_1) ?ts_ph_list2_2) => (++ ?ts_ph_list2_0 (++ ?ts_ph_list2_1 ?ts_ph_list2_2))
+11:01:54 [0m[33m[WARN] [0mproved: (++ ?ts_ph_list2_0 (++ ?ts_ph_list2_1 ?ts_ph_list2_2)) => (++ (++ ?ts_ph_list2_0 ?ts_ph_list2_1) ?ts_ph_list2_2)
+11:01:54 [0m[33m[WARN] [0mproved: (rev2 (++ ?ts_ph_list2_0 ?ts_ph_list2_1)) => (++ (rev2 ?ts_ph_list2_1) (rev2 ?ts_ph_list2_0))
+11:01:54 [0m[33m[WARN] [0mproved: (++ (rev2 ?ts_ph_list2_1) (rev2 ?ts_ph_list2_0)) => (rev2 (++ ?ts_ph_list2_0 ?ts_ph_list2_1))
+11:01:54 [0m[33m[WARN] [0mproved: (rev2 (rev2 ?ts_ph_list2_0)) => ?ts_ph_list2_0
+11:01:54 [0m[33m[WARN] [0mproved: (zip (++ ?ts_ph_list2_0 ?ts_ph_list2_1) ?ts_ph_list2_0) => (zip ?ts_ph_list2_0 ?ts_ph_list2_0)
+11:01:54 [0m[33m[WARN] [0mproved: (zip ?ts_ph_list2_0 (++ ?ts_ph_list2_0 ?ts_ph_list2_1)) => (zip ?ts_ph_list2_0 ?ts_ph_list2_0)
+11:01:54 [0m[33m[WARN] [0mproved: (zip (cons2 ?ts_ph_sk_1 nil2) (++ ?ts_ph_list2_0 ?ts_ph_list2_0)) => (zip (cons2 ?ts_ph_sk_1 nil2) ?ts_ph_list2_0)
+11:01:54 [0m[33m[WARN] [0mproved: (zip (cons2 ?ts_ph_sk_1 nil2) ?ts_ph_list2_0) => (zip (cons2 ?ts_ph_sk_1 nil2) (++ ?ts_ph_list2_0 ?ts_ph_list2_0))
+11:01:55 [0m[33m[WARN] [0mproved: (zip (++ ?ts_ph_list2_0 ?ts_ph_list2_0) (cons2 ?ts_ph_sk_1 nil2)) => (zip ?ts_ph_list2_0 (cons2 ?ts_ph_sk_1 nil2))
+11:01:55 [0m[33m[WARN] [0mproved: (zip ?ts_ph_list2_0 (cons2 ?ts_ph_sk_1 nil2)) => (zip (++ ?ts_ph_list2_0 ?ts_ph_list2_0) (cons2 ?ts_ph_sk_1 nil2))
+done in 727

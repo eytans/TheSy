@@ -1,45 +1,37 @@
-22:33:56 [WARN] Collecting statistics
-22:33:56 [WARN]  ex is: nil
-22:33:56 [WARN]  ex is: (cons autovar_sk_0 nil)
-22:33:56 [WARN]  ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
-22:33:56 [WARN]  ex is: Z
-22:33:56 [WARN]  ex is: (S Z)
-22:33:56 [WARN]  ex is: (S (S Z))
-22:33:56 [WARN] Proof mode: false
-22:33:56 [WARN]  ex is: nil
-22:33:56 [WARN]  ex is: (cons autovar_sk_0 nil)
-22:33:56 [WARN]  ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
-22:33:56 [WARN]  ex is: Z
-22:33:56 [WARN]  ex is: (S Z)
-22:33:56 [WARN]  ex is: (S (S Z))
-22:33:56 [WARN] Proof mode: false
-22:33:59 [WARN] proved: (++ ?ts_ph_list_0 nil) => ?ts_ph_list_0
-22:33:59 [WARN] proved: (-2 ?ts_ph_Nat_0 ?ts_ph_Nat_0) => Z
-22:33:59 [WARN] proved: (-2 ?ts_ph_Nat_0 Z) => ?ts_ph_Nat_0
-22:33:59 [WARN] proved: (drop ?ts_ph_Nat_0 nil) => nil
-22:33:59 [WARN] proved: (take ?ts_ph_Nat_0 nil) => nil
-23:07:29 [WARN] proved: (drop (len ?ts_ph_list_0) ?ts_ph_list_0) => nil
-23:07:29 [WARN] proved: (-2 ?ts_ph_Nat_0 (S ?ts_ph_Nat_0)) => Z
-23:07:29 [WARN] proved: (-2 (S ?ts_ph_Nat_0) ?ts_ph_Nat_0) => (S Z)
-23:07:29 [WARN] generalized case_split proof as: (++ ?ts_ph_list_0 (++ ?ts_ph_list_1 ?ts_ph_list_2)) -- (++ (++ ?ts_ph_list_0 ?ts_ph_list_1) ?ts_ph_list_2)
-23:07:29 [WARN] proved: (++ ?ts_ph_list_0 (++ ?ts_ph_list_1 ?ts_ph_list_2)) => (++ (++ ?ts_ph_list_0 ?ts_ph_list_1) ?ts_ph_list_2)
-23:07:29 [WARN] proved: (++ (++ ?ts_ph_list_0 ?ts_ph_list_1) ?ts_ph_list_2) => (++ ?ts_ph_list_0 (++ ?ts_ph_list_1 ?ts_ph_list_2))
-23:07:29 [WARN] proved: (drop (len ?ts_ph_list_0) (++ ?ts_ph_list_0 ?ts_ph_list_1)) => ?ts_ph_list_1
-23:07:29 [WARN] proved: (take (len ?ts_ph_list_0) (++ ?ts_ph_list_0 ?ts_ph_list_1)) => ?ts_ph_list_0
-23:07:29 [WARN] proved: (take (len ?ts_ph_list_0) (++ ?ts_ph_list_0 ?ts_ph_list_1)) => (take (len ?ts_ph_list_0) ?ts_ph_list_0)
-23:07:29 [WARN] proved: (take (S Z) ?ts_ph_list_0) => (take (S Z) (++ ?ts_ph_list_0 ?ts_ph_list_0))
-23:07:29 [WARN] proved: (take (S Z) (++ ?ts_ph_list_0 ?ts_ph_list_0)) => (take (S Z) ?ts_ph_list_0)
-23:07:29 [WARN] proved: (len (drop ?ts_ph_Nat_1 ?ts_ph_list_0)) => (-2 (len ?ts_ph_list_0) ?ts_ph_Nat_1)
-23:07:29 [WARN] proved: (-2 (len ?ts_ph_list_0) ?ts_ph_Nat_1) => (len (drop ?ts_ph_Nat_1 ?ts_ph_list_0))
-23:07:31 [WARN] proved: (drop ?ts_ph_Nat_1 (take ?ts_ph_Nat_1 ?ts_ph_list_0)) => nil
-23:07:37 [WARN] proved: (take ?ts_ph_Nat_1 (take ?ts_ph_Nat_1 ?ts_ph_list_0)) => (take ?ts_ph_Nat_1 ?ts_ph_list_0)
-23:07:37 [WARN] proved: (take ?ts_ph_Nat_1 ?ts_ph_list_0) => (take ?ts_ph_Nat_1 (take ?ts_ph_Nat_1 ?ts_ph_list_0))
-23:07:46 [WARN] proved: (rev (++ ?ts_ph_list_0 ?ts_ph_list_1)) => (++ (rev ?ts_ph_list_1) (rev ?ts_ph_list_0))
-23:07:46 [WARN] proved: (++ (rev ?ts_ph_list_1) (rev ?ts_ph_list_0)) => (rev (++ ?ts_ph_list_0 ?ts_ph_list_1))
-23:08:02 [WARN] proved: (rev (rev ?ts_ph_list_0)) => ?ts_ph_list_0
-23:08:43 [WARN] proved: (drop (len ?ts_ph_list_1) (take ?ts_ph_Nat_0 ?ts_ph_list_1)) => nil
-23:09:35 [WARN] proved: (drop (S ?ts_ph_Nat_1) (take ?ts_ph_Nat_1 ?ts_ph_list_0)) => nil
-23:10:38 [WARN] proved: (take (S ?ts_ph_Nat_1) (take ?ts_ph_Nat_1 ?ts_ph_list_0)) => (take ?ts_ph_Nat_1 ?ts_ph_list_0)
-23:10:38 [WARN] proved: (take ?ts_ph_Nat_1 ?ts_ph_list_0) => (take (S ?ts_ph_Nat_1) (take ?ts_ph_Nat_1 ?ts_ph_list_0))
-23:19:38 [WARN] proved: (drop (S Z) (drop ?ts_ph_Nat_0 ?ts_ph_list_1)) => (drop (S ?ts_ph_Nat_0) ?ts_ph_list_1)
-23:19:38 [WARN] proved: (drop (S ?ts_ph_Nat_0) ?ts_ph_list_1) => (drop (S Z) (drop ?ts_ph_Nat_0 ?ts_ph_list_1))
+13:07:52 [WARN] Collecting statistics
+13:07:52 [WARN]  ex is: nil
+13:07:52 [WARN]  ex is: (cons autovar_sk_0 nil)
+13:07:52 [WARN]  ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
+13:07:52 [WARN]  ex is: Z
+13:07:52 [WARN]  ex is: (S Z)
+13:07:52 [WARN]  ex is: (S (S Z))
+13:07:52 [WARN] Proof mode: false
+13:07:52 [WARN]  ex is: nil
+13:07:52 [WARN]  ex is: (cons autovar_sk_0 nil)
+13:07:52 [WARN]  ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
+13:07:52 [WARN]  ex is: Z
+13:07:52 [WARN]  ex is: (S Z)
+13:07:52 [WARN]  ex is: (S (S Z))
+13:07:52 [WARN] Proof mode: false
+13:07:53 [WARN] proved: (++ ?ts_ph_list_0 nil) => ?ts_ph_list_0
+13:07:53 [WARN] proved: (-2 ?ts_ph_Nat_0 Z) => ?ts_ph_Nat_0
+13:07:53 [WARN] proved: (take ?ts_ph_Nat_0 nil) => nil
+13:07:53 [WARN] proved: (drop ?ts_ph_Nat_0 nil) => nil
+13:07:53 [WARN] proved: (-2 ?ts_ph_Nat_0 ?ts_ph_Nat_0) => Z
+13:09:12 [WARN] proved: (take (len ?ts_ph_list_0) ?ts_ph_list_0) => ?ts_ph_list_0
+13:09:12 [WARN] proved: (take (len ?ts_ph_list_0) (++ ?ts_ph_list_0 ?ts_ph_list_1)) => ?ts_ph_list_0
+13:09:12 [WARN] proved: (take (S Z) (++ ?ts_ph_list_0 ?ts_ph_list_0)) => (take (S Z) ?ts_ph_list_0)
+13:09:12 [WARN] proved: (take (S Z) ?ts_ph_list_0) => (take (S Z) (++ ?ts_ph_list_0 ?ts_ph_list_0))
+13:09:12 [WARN] proved: (-2 (len ?ts_ph_list_0) ?ts_ph_Nat_0) => (len (drop ?ts_ph_Nat_0 ?ts_ph_list_0))
+13:09:12 [WARN] proved: (len (drop ?ts_ph_Nat_0 ?ts_ph_list_0)) => (-2 (len ?ts_ph_list_0) ?ts_ph_Nat_0)
+13:09:13 [WARN] proved: (drop (len ?ts_ph_list_0) ?ts_ph_list_0) => nil
+13:09:16 [WARN] proved: (-2 ?ts_ph_Nat_0 (S ?ts_ph_Nat_0)) => Z
+13:09:19 [WARN] proved: (-2 (S ?ts_ph_Nat_0) ?ts_ph_Nat_0) => (S Z)
+13:09:28 [WARN] proved: (++ (++ ?ts_ph_list_0 ?ts_ph_list_1) ?ts_ph_list_2) => (++ ?ts_ph_list_0 (++ ?ts_ph_list_1 ?ts_ph_list_2))
+13:09:28 [WARN] proved: (++ ?ts_ph_list_0 (++ ?ts_ph_list_1 ?ts_ph_list_2)) => (++ (++ ?ts_ph_list_0 ?ts_ph_list_1) ?ts_ph_list_2)
+13:09:56 [WARN] proved: (drop ?ts_ph_Nat_0 (take ?ts_ph_Nat_0 ?ts_ph_list_0)) => nil
+13:12:33 [WARN] proved: (take ?ts_ph_Nat_0 ?ts_ph_list_0) => (take ?ts_ph_Nat_0 (take ?ts_ph_Nat_0 ?ts_ph_list_0))
+13:12:33 [WARN] proved: (take ?ts_ph_Nat_0 (take ?ts_ph_Nat_0 ?ts_ph_list_0)) => (take ?ts_ph_Nat_0 ?ts_ph_list_0)
+13:36:41 [WARN] proved: (drop (len ?ts_ph_list_0) (++ ?ts_ph_list_0 ?ts_ph_list_1)) => ?ts_ph_list_1
+13:41:30 [WARN] proved: (drop (S Z) (drop ?ts_ph_Nat_0 ?ts_ph_list_1)) => (drop (S ?ts_ph_Nat_0) ?ts_ph_list_1)
+13:41:30 [WARN] proved: (drop (S ?ts_ph_Nat_0) ?ts_ph_list_1) => (drop (S Z) (drop ?ts_ph_Nat_0 ?ts_ph_list_1))

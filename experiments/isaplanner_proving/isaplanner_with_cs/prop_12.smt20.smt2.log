@@ -1,22 +1,22 @@
-22:18:51 [WARN] Collecting statistics
-22:18:51 [WARN]  ex is: nil
-22:18:51 [WARN]  ex is: (cons autovar_sk_0 nil)
-22:18:51 [WARN]  ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
-22:18:51 [WARN]  ex is: Z
-22:18:51 [WARN]  ex is: (S Z)
-22:18:51 [WARN]  ex is: (S (S Z))
-22:18:51 [WARN] Proof mode: false
-22:18:51 [WARN]  ex is: nil
-22:18:51 [WARN]  ex is: (cons autovar_sk_0 nil)
-22:18:51 [WARN]  ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
-22:18:51 [WARN]  ex is: Z
-22:18:51 [WARN]  ex is: (S Z)
-22:18:51 [WARN]  ex is: (S (S Z))
-22:18:51 [WARN] Proof mode: false
-22:18:51 [WARN] proved: (drop ?ts_ph_Nat_0 nil) => nil
-22:18:57 [WARN] proved: (map2 ?ts_ph_fun1_1 (drop ?ts_ph_Nat_1 ?ts_ph_list_0)) => (drop ?ts_ph_Nat_1 (map2 ?ts_ph_fun1_1 ?ts_ph_list_0))
-22:18:57 [WARN] proved: (drop ?ts_ph_Nat_1 (map2 ?ts_ph_fun1_1 ?ts_ph_list_0)) => (map2 ?ts_ph_fun1_1 (drop ?ts_ph_Nat_1 ?ts_ph_list_0))
-22:18:57 [WARN] proved: (drop (S ?ts_ph_Nat_1) ?ts_ph_list_0) => (drop (S Z) (drop ?ts_ph_Nat_1 ?ts_ph_list_0))
-22:18:57 [WARN] proved: (drop (S Z) (drop ?ts_ph_Nat_1 ?ts_ph_list_0)) => (drop (S ?ts_ph_Nat_1) ?ts_ph_list_0)
-22:18:58 [WARN] proved: (drop ?ts_ph_Nat_0 (drop ?ts_ph_Nat_1 ?ts_ph_list_1)) => (drop ?ts_ph_Nat_1 (drop ?ts_ph_Nat_0 ?ts_ph_list_1))
-22:18:58 [WARN] proved: (drop ?ts_ph_Nat_1 (drop ?ts_ph_Nat_0 ?ts_ph_list_1)) => (drop ?ts_ph_Nat_0 (drop ?ts_ph_Nat_1 ?ts_ph_list_1))
+13:07:32 [WARN] Collecting statistics
+13:07:32 [WARN]  ex is: nil
+13:07:32 [WARN]  ex is: (cons autovar_sk_0 nil)
+13:07:32 [WARN]  ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
+13:07:32 [WARN]  ex is: Z
+13:07:32 [WARN]  ex is: (S Z)
+13:07:32 [WARN]  ex is: (S (S Z))
+13:07:32 [WARN] Proof mode: false
+13:07:32 [WARN]  ex is: nil
+13:07:32 [WARN]  ex is: (cons autovar_sk_0 nil)
+13:07:32 [WARN]  ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
+13:07:32 [WARN]  ex is: Z
+13:07:32 [WARN]  ex is: (S Z)
+13:07:32 [WARN]  ex is: (S (S Z))
+13:07:32 [WARN] Proof mode: false
+13:07:32 [WARN] proved: (drop ?ts_ph_Nat_0 nil) => nil
+13:07:32 [WARN] proved: (map2 ?ts_ph_fun1_1 (drop ?ts_ph_Nat_1 ?ts_ph_list_0)) => (drop ?ts_ph_Nat_1 (map2 ?ts_ph_fun1_1 ?ts_ph_list_0))
+13:07:32 [WARN] proved: (drop ?ts_ph_Nat_1 (map2 ?ts_ph_fun1_1 ?ts_ph_list_0)) => (map2 ?ts_ph_fun1_1 (drop ?ts_ph_Nat_1 ?ts_ph_list_0))
+13:07:32 [WARN] proved: (drop (S Z) (drop ?ts_ph_Nat_0 ?ts_ph_list_1)) => (drop (S ?ts_ph_Nat_0) ?ts_ph_list_1)
+13:07:32 [WARN] proved: (drop (S ?ts_ph_Nat_0) ?ts_ph_list_1) => (drop (S Z) (drop ?ts_ph_Nat_0 ?ts_ph_list_1))
+13:07:32 [WARN] proved: (drop ?ts_ph_Nat_1 (drop ?ts_ph_Nat_0 ?ts_ph_list_1)) => (drop ?ts_ph_Nat_0 (drop ?ts_ph_Nat_1 ?ts_ph_list_1))
+13:07:32 [WARN] proved: (drop ?ts_ph_Nat_0 (drop ?ts_ph_Nat_1 ?ts_ph_list_1)) => (drop ?ts_ph_Nat_1 (drop ?ts_ph_Nat_0 ?ts_ph_list_1))

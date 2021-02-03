@@ -1,0 +1,12 @@
+20:13:18 [WARN] Collecting statistics
+20:13:18 [WARN]  ex is: nil2
+20:13:18 [WARN]  ex is: (cons2 autovar_sk_0 nil2)
+20:13:18 [WARN]  ex is: (cons2 autovar_sk_1 (cons2 autovar_sk_0 nil2))
+20:13:18 [WARN] Proof mode: false
+20:13:18 [WARN]  ex is: nil2
+20:13:18 [WARN]  ex is: (cons2 autovar_sk_0 nil2)
+20:13:18 [WARN]  ex is: (cons2 autovar_sk_1 (cons2 autovar_sk_0 nil2))
+20:13:18 [WARN] Proof mode: false
+20:13:18 [WARN] proved: (zip ?ts_ph_list2_0 nil2) => nil
+20:13:18 [WARN] proved: (zipConcat ?ts_ph_sk_1 ?ts_ph_list2_1 ?ts_ph_list2_0) => (zip (cons2 ?ts_ph_sk_1 ?ts_ph_list2_1) ?ts_ph_list2_0)
+20:13:18 [WARN] proved: (zip (cons2 ?ts_ph_sk_1 ?ts_ph_list2_1) ?ts_ph_list2_0) => (zipConcat ?ts_ph_sk_1 ?ts_ph_list2_1 ?ts_ph_list2_0)

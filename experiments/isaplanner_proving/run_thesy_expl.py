@@ -27,9 +27,9 @@ if __name__ == '__main__':
 
     # Default proof mode is false so we are doing exploration
     copy_tree_th_only(isaplanner_tests, thesy_no_cs)
-    run_all([thesy_no_cs], features='no_split')
+    run_all([thesy_no_cs], features='no_split', timeout=60)
     write_stats(thesy_no_cs)
     copy_tree_th_only(isaplanner_tests, thesy_with_cs)
-    run_all([thesy_with_cs])
+    run_all([thesy_with_cs], timeout=60)
     write_stats(thesy_with_cs)
 

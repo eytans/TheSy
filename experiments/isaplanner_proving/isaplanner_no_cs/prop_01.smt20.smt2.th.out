@@ -1,4 +1,4 @@
-20:13:14 [0m[33m[WARN] [0mCollecting statistics
+11:01:53 [0m[33m[WARN] [0mCollecting statistics
 (take Z ?y) => nil
 (take (S ?z) nil) => nil
 (take (S ?z) (cons ?x2 ?x3)) => (cons ?x2 (take ?z ?x3))
@@ -17,25 +17,25 @@ Searcher: (drop ?autovar7 nil)
 Searcher: (drop ?autovar7 (cons ?autovar3 ?autovar4))
 Searcher: (drop (S ?autovar5) ?autovar8)
 Searcher: (drop (S ?autovar6) ?autovar8)
-20:13:14 [0m[33m[WARN] [0m ex is: nil
-20:13:14 [0m[33m[WARN] [0m ex is: (cons autovar_sk_0 nil)
-20:13:14 [0m[33m[WARN] [0m ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
-20:13:14 [0m[33m[WARN] [0m ex is: Z
-20:13:14 [0m[33m[WARN] [0m ex is: (S Z)
-20:13:14 [0m[33m[WARN] [0m ex is: (S (S Z))
-20:13:14 [0m[33m[WARN] [0mProof mode: false
-20:13:14 [0m[33m[WARN] [0m ex is: nil
-20:13:14 [0m[33m[WARN] [0m ex is: (cons autovar_sk_0 nil)
-20:13:14 [0m[33m[WARN] [0m ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
-20:13:14 [0m[33m[WARN] [0m ex is: Z
-20:13:14 [0m[33m[WARN] [0m ex is: (S Z)
-20:13:14 [0m[33m[WARN] [0m ex is: (S (S Z))
-20:13:14 [0m[33m[WARN] [0mProof mode: false
-20:13:14 [0m[33m[WARN] [0mproved: (drop ?ts_ph_Nat_0 nil) => nil
-20:13:14 [0m[33m[WARN] [0mproved: (++ ?ts_ph_list_0 nil) => ?ts_ph_list_0
-20:13:14 [0m[33m[WARN] [0mproved: (take ?ts_ph_Nat_0 nil) => nil
-20:13:15 [0m[33m[WARN] [0mproved: (++ (++ ?ts_ph_list_0 ?ts_ph_list_1) ?ts_ph_list_2) => (++ ?ts_ph_list_0 (++ ?ts_ph_list_1 ?ts_ph_list_2))
-20:13:15 [0m[33m[WARN] [0mproved: (++ ?ts_ph_list_0 (++ ?ts_ph_list_1 ?ts_ph_list_2)) => (++ (++ ?ts_ph_list_0 ?ts_ph_list_1) ?ts_ph_list_2)
-20:13:17 [0m[33m[WARN] [0mproved: (take (S Z) (++ ?ts_ph_list_0 ?ts_ph_list_0)) => (take (S Z) ?ts_ph_list_0)
-20:13:17 [0m[33m[WARN] [0mproved: (take (S Z) ?ts_ph_list_0) => (take (S Z) (++ ?ts_ph_list_0 ?ts_ph_list_0))
-done in 7310
+11:01:53 [0m[33m[WARN] [0m ex is: nil
+11:01:53 [0m[33m[WARN] [0m ex is: (cons autovar_sk_0 nil)
+11:01:53 [0m[33m[WARN] [0m ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
+11:01:53 [0m[33m[WARN] [0m ex is: Z
+11:01:53 [0m[33m[WARN] [0m ex is: (S Z)
+11:01:53 [0m[33m[WARN] [0m ex is: (S (S Z))
+11:01:53 [0m[33m[WARN] [0mProof mode: false
+11:01:53 [0m[33m[WARN] [0m ex is: nil
+11:01:53 [0m[33m[WARN] [0m ex is: (cons autovar_sk_0 nil)
+11:01:53 [0m[33m[WARN] [0m ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
+11:01:53 [0m[33m[WARN] [0m ex is: Z
+11:01:53 [0m[33m[WARN] [0m ex is: (S Z)
+11:01:53 [0m[33m[WARN] [0m ex is: (S (S Z))
+11:01:54 [0m[33m[WARN] [0mProof mode: false
+11:01:54 [0m[33m[WARN] [0mproved: (take ?ts_ph_Nat_0 nil) => nil
+11:01:54 [0m[33m[WARN] [0mproved: (drop ?ts_ph_Nat_0 nil) => nil
+11:01:54 [0m[33m[WARN] [0mproved: (++ ?ts_ph_list_0 nil) => ?ts_ph_list_0
+11:01:55 [0m[33m[WARN] [0mproved: (++ (++ ?ts_ph_list_0 ?ts_ph_list_1) ?ts_ph_list_2) => (++ ?ts_ph_list_0 (++ ?ts_ph_list_1 ?ts_ph_list_2))
+11:01:55 [0m[33m[WARN] [0mproved: (++ ?ts_ph_list_0 (++ ?ts_ph_list_1 ?ts_ph_list_2)) => (++ (++ ?ts_ph_list_0 ?ts_ph_list_1) ?ts_ph_list_2)
+11:01:56 [0m[33m[WARN] [0mproved: (take (S Z) (++ ?ts_ph_list_0 ?ts_ph_list_0)) => (take (S Z) ?ts_ph_list_0)
+11:01:56 [0m[33m[WARN] [0mproved: (take (S Z) ?ts_ph_list_0) => (take (S Z) (++ ?ts_ph_list_0 ?ts_ph_list_0))
+done in 7287
