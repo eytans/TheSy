@@ -110,7 +110,9 @@ impl CaseSplit {
         for (s, c) in &mut self.splitter_rules {
             res.extend(c(egraph, s.search(egraph)));
         }
-        res.into_iter().unique().collect_vec()
+        let f = res.into_iter().unique().collect_vec();
+        info!("Found {} splitters", f.len());
+        f
     }
 
     fn merge_conclusions(egraph: &mut EGraph<SymbolLang, ()>, classes: &Vec<Id>, split_conclusions: Vec<HashMap<Id, Id>>) {
@@ -153,7 +155,7 @@ impl CaseSplit {
 
                 let temp = self.find_splitters(egraph);
                 let splitters: Vec<&Split> = temp.iter()
-                    // .filter(|s| !known_splits.contains(s))
+                    .filter(|s| !known_splits.contains(s))
                     .collect();
                 let mut new_known = known_splits.clone();
                 new_known.extend(splitters.iter().cloned().cloned());
