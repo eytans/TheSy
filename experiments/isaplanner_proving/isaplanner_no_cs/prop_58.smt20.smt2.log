@@ -1,26 +1,26 @@
-20:16:11 [WARN] Collecting statistics
-20:16:11 [WARN]  ex is: (pair2 autovar_sk_0 autovar_sk_1)
-20:16:11 [WARN]  ex is: nil2
-20:16:11 [WARN]  ex is: (cons2 autovar_sk_0 nil2)
-20:16:11 [WARN]  ex is: (cons2 autovar_sk_1 (cons2 autovar_sk_0 nil2))
-20:16:11 [WARN]  ex is: nil
-20:16:11 [WARN]  ex is: (cons autovar_pair_0 nil)
-20:16:11 [WARN]  ex is: (cons autovar_pair_1 (cons autovar_pair_0 nil))
-20:16:11 [WARN]  ex is: Z
-20:16:11 [WARN]  ex is: (S Z)
-20:16:11 [WARN]  ex is: (S (S Z))
-20:16:11 [WARN] Proof mode: false
-20:16:11 [WARN]  ex is: (pair2 autovar_sk_0 autovar_sk_1)
-20:16:11 [WARN]  ex is: nil2
-20:16:11 [WARN]  ex is: (cons2 autovar_sk_0 nil2)
-20:16:11 [WARN]  ex is: (cons2 autovar_sk_1 (cons2 autovar_sk_0 nil2))
-20:16:11 [WARN]  ex is: nil
-20:16:11 [WARN]  ex is: (cons autovar_pair_0 nil)
-20:16:11 [WARN]  ex is: (cons autovar_pair_1 (cons autovar_pair_0 nil))
-20:16:11 [WARN]  ex is: Z
-20:16:11 [WARN]  ex is: (S Z)
-20:16:11 [WARN]  ex is: (S (S Z))
-20:16:11 [WARN] Proof mode: false
-20:16:11 [WARN] proved: (drop2 ?ts_ph_Nat_0 nil2) => nil2
-20:16:11 [WARN] proved: (drop ?ts_ph_Nat_0 nil) => nil
-20:16:11 [WARN] proved: (zip ?ts_ph_list2_0 nil2) => nil
+11:34:33 [WARN] Collecting statistics
+11:34:33 [WARN]  ex is: (pair2 autovar_sk_0 autovar_sk_1)
+11:34:33 [WARN]  ex is: nil2
+11:34:33 [WARN]  ex is: (cons2 autovar_sk_0 nil2)
+11:34:33 [WARN]  ex is: (cons2 autovar_sk_1 (cons2 autovar_sk_0 nil2))
+11:34:33 [WARN]  ex is: nil
+11:34:33 [WARN]  ex is: (cons autovar_pair_0 nil)
+11:34:33 [WARN]  ex is: (cons autovar_pair_1 (cons autovar_pair_0 nil))
+11:34:33 [WARN]  ex is: Z
+11:34:33 [WARN]  ex is: (S Z)
+11:34:33 [WARN]  ex is: (S (S Z))
+11:34:33 [WARN] Proof mode: false
+11:34:33 [WARN]  ex is: (pair2 autovar_sk_0 autovar_sk_1)
+11:34:33 [WARN]  ex is: nil2
+11:34:33 [WARN]  ex is: (cons2 autovar_sk_0 nil2)
+11:34:33 [WARN]  ex is: (cons2 autovar_sk_1 (cons2 autovar_sk_0 nil2))
+11:34:33 [WARN]  ex is: nil
+11:34:33 [WARN]  ex is: (cons autovar_pair_0 nil)
+11:34:33 [WARN]  ex is: (cons autovar_pair_1 (cons autovar_pair_0 nil))
+11:34:33 [WARN]  ex is: Z
+11:34:33 [WARN]  ex is: (S Z)
+11:34:33 [WARN]  ex is: (S (S Z))
+11:34:33 [WARN] Proof mode: false
+11:34:33 [WARN] proved: (zip ?ts_ph_list2_0 nil2) => nil
+11:34:33 [WARN] proved: (drop ?ts_ph_Nat_0 nil) => nil
+11:34:33 [WARN] proved: (drop2 ?ts_ph_Nat_0 nil2) => nil2

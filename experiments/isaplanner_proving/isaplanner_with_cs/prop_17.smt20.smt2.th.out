@@ -1,4 +1,4 @@
-22:18:48 [0m[33m[WARN] [0mCollecting statistics
+12:08:44 [0m[33m[WARN] [0mCollecting statistics
 (== Z Z) => true
 (== Z (S ?z)) => false
 (== (S ?x2) Z) => false
@@ -20,26 +20,26 @@ Searcher: (<=2 ?autovar6 Z)
 Searcher: (<=2 ?autovar6 (S ?autovar3))
 Searcher: (<=2 (S ?autovar4) ?autovar7)
 Searcher: (<=2 (S ?autovar5) ?autovar7)
-22:18:48 [0m[33m[WARN] [0m ex is: Z
-22:18:48 [0m[33m[WARN] [0m ex is: (S Z)
-22:18:48 [0m[33m[WARN] [0m ex is: (S (S Z))
-22:18:48 [0m[33m[WARN] [0mProof mode: false
-22:18:48 [0m[33m[WARN] [0m ex is: Z
-22:18:48 [0m[33m[WARN] [0m ex is: (S Z)
-22:18:48 [0m[33m[WARN] [0m ex is: (S (S Z))
-22:18:48 [0m[33m[WARN] [0mProof mode: false
-22:18:48 [0m[33m[WARN] [0mproved: (== ?ts_ph_Nat_0 ?ts_ph_Nat_0) => true
-22:18:48 [0m[33m[WARN] [0mproved: (== ?ts_ph_Nat_0 Z) => (== Z ?ts_ph_Nat_0)
-22:18:48 [0m[33m[WARN] [0mproved: (== Z ?ts_ph_Nat_0) => (== ?ts_ph_Nat_0 Z)
-22:18:48 [0m[33m[WARN] [0mproved: (<=2 ?ts_ph_Nat_0 Z) => (== Z ?ts_ph_Nat_0)
-22:18:48 [0m[33m[WARN] [0mproved: (== Z ?ts_ph_Nat_0) => (<=2 ?ts_ph_Nat_0 Z)
-22:18:48 [0m[33m[WARN] [0mproved: (<=2 ?ts_ph_Nat_0 ?ts_ph_Nat_0) => true
-22:18:49 [0m[33m[WARN] [0mproved: (== (S Z) ?ts_ph_Nat_0) => (== ?ts_ph_Nat_0 (S Z))
-22:18:49 [0m[33m[WARN] [0mproved: (== ?ts_ph_Nat_0 (S Z)) => (== (S Z) ?ts_ph_Nat_0)
-22:18:49 [0m[33m[WARN] [0mproved: (<=2 (S ?ts_ph_Nat_0) ?ts_ph_Nat_0) => false
-22:18:49 [0m[33m[WARN] [0mproved: (== ?ts_ph_Nat_0 (S ?ts_ph_Nat_0)) => false
-22:18:49 [0m[33m[WARN] [0mproved: (== (S ?ts_ph_Nat_0) ?ts_ph_Nat_0) => false
-22:18:49 [0m[33m[WARN] [0mproved: (<=2 ?ts_ph_Nat_0 (S ?ts_ph_Nat_0)) => true
-22:18:49 [0m[33m[WARN] [0mproved: (== ?ts_ph_Nat_0 ?ts_ph_Nat_1) => (== ?ts_ph_Nat_1 ?ts_ph_Nat_0)
-22:18:49 [0m[33m[WARN] [0mproved: (== ?ts_ph_Nat_1 ?ts_ph_Nat_0) => (== ?ts_ph_Nat_0 ?ts_ph_Nat_1)
-done in 250
+12:08:44 [0m[33m[WARN] [0m ex is: Z
+12:08:44 [0m[33m[WARN] [0m ex is: (S Z)
+12:08:44 [0m[33m[WARN] [0m ex is: (S (S Z))
+12:08:44 [0m[33m[WARN] [0mProof mode: false
+12:08:44 [0m[33m[WARN] [0m ex is: Z
+12:08:44 [0m[33m[WARN] [0m ex is: (S Z)
+12:08:44 [0m[33m[WARN] [0m ex is: (S (S Z))
+12:08:44 [0m[33m[WARN] [0mProof mode: false
+12:08:44 [0m[33m[WARN] [0mproved: (== ?ts_ph_Nat_0 Z) => (== Z ?ts_ph_Nat_0)
+12:08:44 [0m[33m[WARN] [0mproved: (== Z ?ts_ph_Nat_0) => (== ?ts_ph_Nat_0 Z)
+12:08:44 [0m[33m[WARN] [0mproved: (<=2 ?ts_ph_Nat_0 Z) => (== Z ?ts_ph_Nat_0)
+12:08:44 [0m[33m[WARN] [0mproved: (== Z ?ts_ph_Nat_0) => (<=2 ?ts_ph_Nat_0 Z)
+12:08:44 [0m[33m[WARN] [0mproved: (<=2 ?ts_ph_Nat_0 ?ts_ph_Nat_0) => true
+12:08:44 [0m[33m[WARN] [0mproved: (== ?ts_ph_Nat_0 ?ts_ph_Nat_0) => true
+12:08:44 [0m[33m[WARN] [0mproved: (<=2 ?ts_ph_Nat_0 (S ?ts_ph_Nat_0)) => true
+12:08:44 [0m[33m[WARN] [0mproved: (== (S ?ts_ph_Nat_0) ?ts_ph_Nat_0) => false
+12:08:44 [0m[33m[WARN] [0mproved: (<=2 (S ?ts_ph_Nat_0) ?ts_ph_Nat_0) => false
+12:08:44 [0m[33m[WARN] [0mproved: (== ?ts_ph_Nat_0 (S ?ts_ph_Nat_0)) => false
+12:08:44 [0m[33m[WARN] [0mproved: (== (S Z) ?ts_ph_Nat_0) => (== ?ts_ph_Nat_0 (S Z))
+12:08:44 [0m[33m[WARN] [0mproved: (== ?ts_ph_Nat_0 (S Z)) => (== (S Z) ?ts_ph_Nat_0)
+12:08:44 [0m[33m[WARN] [0mproved: (== ?ts_ph_Nat_1 ?ts_ph_Nat_0) => (== ?ts_ph_Nat_0 ?ts_ph_Nat_1)
+12:08:44 [0m[33m[WARN] [0mproved: (== ?ts_ph_Nat_0 ?ts_ph_Nat_1) => (== ?ts_ph_Nat_1 ?ts_ph_Nat_0)
+done in 208

@@ -1,0 +1,36 @@
+21:19:16 [WARN] Collecting statistics
+21:19:16 [WARN]  ex is: (pair2 autovar_sk_0 autovar_sk_1)
+21:19:16 [WARN]  ex is: nil2
+21:19:16 [WARN]  ex is: (cons2 autovar_sk_0 nil2)
+21:19:16 [WARN]  ex is: (cons2 autovar_sk_1 (cons2 autovar_sk_0 nil2))
+21:19:16 [WARN]  ex is: nil
+21:19:16 [WARN]  ex is: (cons autovar_pair_0 nil)
+21:19:16 [WARN]  ex is: (cons autovar_pair_1 (cons autovar_pair_0 nil))
+21:19:16 [WARN]  ex is: Z
+21:19:16 [WARN]  ex is: (S Z)
+21:19:16 [WARN]  ex is: (S (S Z))
+21:19:16 [WARN] Proof mode: false
+21:19:16 [WARN]  ex is: (pair2 autovar_sk_0 autovar_sk_1)
+21:19:16 [WARN]  ex is: nil2
+21:19:16 [WARN]  ex is: (cons2 autovar_sk_0 nil2)
+21:19:16 [WARN]  ex is: (cons2 autovar_sk_1 (cons2 autovar_sk_0 nil2))
+21:19:16 [WARN]  ex is: nil
+21:19:16 [WARN]  ex is: (cons autovar_pair_0 nil)
+21:19:16 [WARN]  ex is: (cons autovar_pair_1 (cons autovar_pair_0 nil))
+21:19:16 [WARN]  ex is: Z
+21:19:16 [WARN]  ex is: (S Z)
+21:19:16 [WARN]  ex is: (S (S Z))
+21:19:16 [WARN] Proof mode: false
+21:19:16 [WARN] proved: (zip ?ts_ph_list2_0 nil2) => nil
+21:19:16 [WARN] proved: (drop2 ?ts_ph_Nat_0 nil2) => nil2
+21:19:16 [WARN] proved: (drop ?ts_ph_Nat_0 nil) => nil
+21:20:55 [WARN] proved: (drop (S ?ts_ph_Nat_0) ?ts_ph_list_1) => (drop (S Z) (drop ?ts_ph_Nat_0 ?ts_ph_list_1))
+21:20:55 [WARN] proved: (drop (S Z) (drop ?ts_ph_Nat_0 ?ts_ph_list_1)) => (drop (S ?ts_ph_Nat_0) ?ts_ph_list_1)
+21:20:56 [WARN] proved: (drop ?ts_ph_Nat_0 (drop ?ts_ph_Nat_1 ?ts_ph_list_1)) => (drop ?ts_ph_Nat_1 (drop ?ts_ph_Nat_0 ?ts_ph_list_1))
+21:20:56 [WARN] proved: (drop ?ts_ph_Nat_1 (drop ?ts_ph_Nat_0 ?ts_ph_list_1)) => (drop ?ts_ph_Nat_0 (drop ?ts_ph_Nat_1 ?ts_ph_list_1))
+21:20:56 [WARN] proved: (drop2 (S ?ts_ph_Nat_0) ?ts_ph_list2_1) => (drop2 (S Z) (drop2 ?ts_ph_Nat_0 ?ts_ph_list2_1))
+21:20:56 [WARN] proved: (drop2 (S Z) (drop2 ?ts_ph_Nat_0 ?ts_ph_list2_1)) => (drop2 (S ?ts_ph_Nat_0) ?ts_ph_list2_1)
+21:20:58 [WARN] proved: (drop2 ?ts_ph_Nat_0 (drop2 ?ts_ph_Nat_1 ?ts_ph_list2_1)) => (drop2 ?ts_ph_Nat_1 (drop2 ?ts_ph_Nat_0 ?ts_ph_list2_1))
+21:20:58 [WARN] proved: (drop2 ?ts_ph_Nat_1 (drop2 ?ts_ph_Nat_0 ?ts_ph_list2_1)) => (drop2 ?ts_ph_Nat_0 (drop2 ?ts_ph_Nat_1 ?ts_ph_list2_1))
+21:20:59 [WARN] proved: (zip (drop2 ?ts_ph_Nat_0 ?ts_ph_list2_1) (drop2 ?ts_ph_Nat_0 ?ts_ph_list2_1)) => (drop ?ts_ph_Nat_0 (zip ?ts_ph_list2_1 ?ts_ph_list2_1))
+21:20:59 [WARN] proved: (drop ?ts_ph_Nat_0 (zip ?ts_ph_list2_1 ?ts_ph_list2_1)) => (zip (drop2 ?ts_ph_Nat_0 ?ts_ph_list2_1) (drop2 ?ts_ph_Nat_0 ?ts_ph_list2_1))

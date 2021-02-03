@@ -1,4 +1,4 @@
-21:19:16 [0m[33m[WARN] [0mCollecting statistics
+12:07:57 [0m[33m[WARN] [0mCollecting statistics
 (zip nil2 ?y) => nil
 (zip (cons2 ?z ?x2) nil2) => nil
 (zip (cons2 ?z ?x2) (cons2 ?x3 ?x4)) => (cons (pair2 ?z ?x3) (zip ?x2 ?x4))
@@ -21,39 +21,39 @@ Searcher: (drop2 ?autovar7 nil2)
 Searcher: (drop2 ?autovar7 (cons2 ?autovar3 ?autovar4))
 Searcher: (drop2 (S ?autovar5) ?autovar8)
 Searcher: (drop2 (S ?autovar6) ?autovar8)
-21:19:16 [0m[33m[WARN] [0m ex is: (pair2 autovar_sk_0 autovar_sk_1)
-21:19:16 [0m[33m[WARN] [0m ex is: nil2
-21:19:16 [0m[33m[WARN] [0m ex is: (cons2 autovar_sk_0 nil2)
-21:19:16 [0m[33m[WARN] [0m ex is: (cons2 autovar_sk_1 (cons2 autovar_sk_0 nil2))
-21:19:16 [0m[33m[WARN] [0m ex is: nil
-21:19:16 [0m[33m[WARN] [0m ex is: (cons autovar_pair_0 nil)
-21:19:16 [0m[33m[WARN] [0m ex is: (cons autovar_pair_1 (cons autovar_pair_0 nil))
-21:19:16 [0m[33m[WARN] [0m ex is: Z
-21:19:16 [0m[33m[WARN] [0m ex is: (S Z)
-21:19:16 [0m[33m[WARN] [0m ex is: (S (S Z))
-21:19:16 [0m[33m[WARN] [0mProof mode: false
-21:19:16 [0m[33m[WARN] [0m ex is: (pair2 autovar_sk_0 autovar_sk_1)
-21:19:16 [0m[33m[WARN] [0m ex is: nil2
-21:19:16 [0m[33m[WARN] [0m ex is: (cons2 autovar_sk_0 nil2)
-21:19:16 [0m[33m[WARN] [0m ex is: (cons2 autovar_sk_1 (cons2 autovar_sk_0 nil2))
-21:19:16 [0m[33m[WARN] [0m ex is: nil
-21:19:16 [0m[33m[WARN] [0m ex is: (cons autovar_pair_0 nil)
-21:19:16 [0m[33m[WARN] [0m ex is: (cons autovar_pair_1 (cons autovar_pair_0 nil))
-21:19:16 [0m[33m[WARN] [0m ex is: Z
-21:19:16 [0m[33m[WARN] [0m ex is: (S Z)
-21:19:16 [0m[33m[WARN] [0m ex is: (S (S Z))
-21:19:16 [0m[33m[WARN] [0mProof mode: false
-21:19:16 [0m[33m[WARN] [0mproved: (zip ?ts_ph_list2_0 nil2) => nil
-21:19:16 [0m[33m[WARN] [0mproved: (drop2 ?ts_ph_Nat_0 nil2) => nil2
-21:19:16 [0m[33m[WARN] [0mproved: (drop ?ts_ph_Nat_0 nil) => nil
-21:20:55 [0m[33m[WARN] [0mproved: (drop (S ?ts_ph_Nat_0) ?ts_ph_list_1) => (drop (S Z) (drop ?ts_ph_Nat_0 ?ts_ph_list_1))
-21:20:55 [0m[33m[WARN] [0mproved: (drop (S Z) (drop ?ts_ph_Nat_0 ?ts_ph_list_1)) => (drop (S ?ts_ph_Nat_0) ?ts_ph_list_1)
-21:20:56 [0m[33m[WARN] [0mproved: (drop ?ts_ph_Nat_0 (drop ?ts_ph_Nat_1 ?ts_ph_list_1)) => (drop ?ts_ph_Nat_1 (drop ?ts_ph_Nat_0 ?ts_ph_list_1))
-21:20:56 [0m[33m[WARN] [0mproved: (drop ?ts_ph_Nat_1 (drop ?ts_ph_Nat_0 ?ts_ph_list_1)) => (drop ?ts_ph_Nat_0 (drop ?ts_ph_Nat_1 ?ts_ph_list_1))
-21:20:56 [0m[33m[WARN] [0mproved: (drop2 (S ?ts_ph_Nat_0) ?ts_ph_list2_1) => (drop2 (S Z) (drop2 ?ts_ph_Nat_0 ?ts_ph_list2_1))
-21:20:56 [0m[33m[WARN] [0mproved: (drop2 (S Z) (drop2 ?ts_ph_Nat_0 ?ts_ph_list2_1)) => (drop2 (S ?ts_ph_Nat_0) ?ts_ph_list2_1)
-21:20:58 [0m[33m[WARN] [0mproved: (drop2 ?ts_ph_Nat_0 (drop2 ?ts_ph_Nat_1 ?ts_ph_list2_1)) => (drop2 ?ts_ph_Nat_1 (drop2 ?ts_ph_Nat_0 ?ts_ph_list2_1))
-21:20:58 [0m[33m[WARN] [0mproved: (drop2 ?ts_ph_Nat_1 (drop2 ?ts_ph_Nat_0 ?ts_ph_list2_1)) => (drop2 ?ts_ph_Nat_0 (drop2 ?ts_ph_Nat_1 ?ts_ph_list2_1))
-21:20:59 [0m[33m[WARN] [0mproved: (zip (drop2 ?ts_ph_Nat_0 ?ts_ph_list2_1) (drop2 ?ts_ph_Nat_0 ?ts_ph_list2_1)) => (drop ?ts_ph_Nat_0 (zip ?ts_ph_list2_1 ?ts_ph_list2_1))
-21:20:59 [0m[33m[WARN] [0mproved: (drop ?ts_ph_Nat_0 (zip ?ts_ph_list2_1 ?ts_ph_list2_1)) => (zip (drop2 ?ts_ph_Nat_0 ?ts_ph_list2_1) (drop2 ?ts_ph_Nat_0 ?ts_ph_list2_1))
-done in 103378
+12:07:57 [0m[33m[WARN] [0m ex is: (pair2 autovar_sk_0 autovar_sk_1)
+12:07:57 [0m[33m[WARN] [0m ex is: nil2
+12:07:57 [0m[33m[WARN] [0m ex is: (cons2 autovar_sk_0 nil2)
+12:07:57 [0m[33m[WARN] [0m ex is: (cons2 autovar_sk_1 (cons2 autovar_sk_0 nil2))
+12:07:57 [0m[33m[WARN] [0m ex is: nil
+12:07:57 [0m[33m[WARN] [0m ex is: (cons autovar_pair_0 nil)
+12:07:57 [0m[33m[WARN] [0m ex is: (cons autovar_pair_1 (cons autovar_pair_0 nil))
+12:07:57 [0m[33m[WARN] [0m ex is: Z
+12:07:57 [0m[33m[WARN] [0m ex is: (S Z)
+12:07:57 [0m[33m[WARN] [0m ex is: (S (S Z))
+12:07:57 [0m[33m[WARN] [0mProof mode: false
+12:07:57 [0m[33m[WARN] [0m ex is: (pair2 autovar_sk_0 autovar_sk_1)
+12:07:57 [0m[33m[WARN] [0m ex is: nil2
+12:07:57 [0m[33m[WARN] [0m ex is: (cons2 autovar_sk_0 nil2)
+12:07:57 [0m[33m[WARN] [0m ex is: (cons2 autovar_sk_1 (cons2 autovar_sk_0 nil2))
+12:07:57 [0m[33m[WARN] [0m ex is: nil
+12:07:57 [0m[33m[WARN] [0m ex is: (cons autovar_pair_0 nil)
+12:07:57 [0m[33m[WARN] [0m ex is: (cons autovar_pair_1 (cons autovar_pair_0 nil))
+12:07:57 [0m[33m[WARN] [0m ex is: Z
+12:07:57 [0m[33m[WARN] [0m ex is: (S Z)
+12:07:57 [0m[33m[WARN] [0m ex is: (S (S Z))
+12:07:57 [0m[33m[WARN] [0mProof mode: false
+12:07:57 [0m[33m[WARN] [0mproved: (drop ?ts_ph_Nat_0 nil) => nil
+12:07:57 [0m[33m[WARN] [0mproved: (drop2 ?ts_ph_Nat_0 nil2) => nil2
+12:07:57 [0m[33m[WARN] [0mproved: (zip ?ts_ph_list2_0 nil2) => nil
+12:08:00 [0m[33m[WARN] [0mproved: (drop2 (S ?ts_ph_Nat_0) ?ts_ph_list2_1) => (drop2 (S Z) (drop2 ?ts_ph_Nat_0 ?ts_ph_list2_1))
+12:08:00 [0m[33m[WARN] [0mproved: (drop2 (S Z) (drop2 ?ts_ph_Nat_0 ?ts_ph_list2_1)) => (drop2 (S ?ts_ph_Nat_0) ?ts_ph_list2_1)
+12:08:00 [0m[33m[WARN] [0mproved: (drop2 ?ts_ph_Nat_0 (drop2 ?ts_ph_Nat_1 ?ts_ph_list2_1)) => (drop2 ?ts_ph_Nat_1 (drop2 ?ts_ph_Nat_0 ?ts_ph_list2_1))
+12:08:00 [0m[33m[WARN] [0mproved: (drop2 ?ts_ph_Nat_1 (drop2 ?ts_ph_Nat_0 ?ts_ph_list2_1)) => (drop2 ?ts_ph_Nat_0 (drop2 ?ts_ph_Nat_1 ?ts_ph_list2_1))
+12:08:00 [0m[33m[WARN] [0mproved: (drop (S ?ts_ph_Nat_1) ?ts_ph_list_0) => (drop (S Z) (drop ?ts_ph_Nat_1 ?ts_ph_list_0))
+12:08:00 [0m[33m[WARN] [0mproved: (drop (S Z) (drop ?ts_ph_Nat_1 ?ts_ph_list_0)) => (drop (S ?ts_ph_Nat_1) ?ts_ph_list_0)
+12:08:00 [0m[33m[WARN] [0mproved: (drop ?ts_ph_Nat_0 (drop ?ts_ph_Nat_1 ?ts_ph_list_1)) => (drop ?ts_ph_Nat_1 (drop ?ts_ph_Nat_0 ?ts_ph_list_1))
+12:08:00 [0m[33m[WARN] [0mproved: (drop ?ts_ph_Nat_1 (drop ?ts_ph_Nat_0 ?ts_ph_list_1)) => (drop ?ts_ph_Nat_0 (drop ?ts_ph_Nat_1 ?ts_ph_list_1))
+12:08:00 [0m[33m[WARN] [0mproved: (drop ?ts_ph_Nat_1 (zip ?ts_ph_list2_0 ?ts_ph_list2_0)) => (zip (drop2 ?ts_ph_Nat_1 ?ts_ph_list2_0) (drop2 ?ts_ph_Nat_1 ?ts_ph_list2_0))
+12:08:00 [0m[33m[WARN] [0mproved: (zip (drop2 ?ts_ph_Nat_1 ?ts_ph_list2_0) (drop2 ?ts_ph_Nat_1 ?ts_ph_list2_0)) => (drop ?ts_ph_Nat_1 (zip ?ts_ph_list2_0 ?ts_ph_list2_0))
+done in 5284

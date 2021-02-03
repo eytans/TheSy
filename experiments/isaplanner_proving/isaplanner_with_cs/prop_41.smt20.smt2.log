@@ -1,16 +1,16 @@
-21:18:48 [WARN] Collecting statistics
-21:18:48 [WARN]  ex is: nil
-21:18:48 [WARN]  ex is: (cons autovar_sk_0 nil)
-21:18:48 [WARN]  ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
-21:18:48 [WARN]  ex is: Z
-21:18:48 [WARN]  ex is: (S Z)
-21:18:48 [WARN]  ex is: (S (S Z))
-21:18:48 [WARN] Proof mode: false
-21:18:48 [WARN]  ex is: nil
-21:18:48 [WARN]  ex is: (cons autovar_sk_0 nil)
-21:18:48 [WARN]  ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
-21:18:48 [WARN]  ex is: Z
-21:18:48 [WARN]  ex is: (S Z)
-21:18:48 [WARN]  ex is: (S (S Z))
-21:18:48 [WARN] Proof mode: false
-21:18:51 [WARN] proved: (take ?ts_ph_Nat_0 nil) => nil
+12:07:30 [WARN] Collecting statistics
+12:07:30 [WARN]  ex is: nil
+12:07:30 [WARN]  ex is: (cons autovar_sk_0 nil)
+12:07:30 [WARN]  ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
+12:07:30 [WARN]  ex is: Z
+12:07:30 [WARN]  ex is: (S Z)
+12:07:30 [WARN]  ex is: (S (S Z))
+12:07:30 [WARN] Proof mode: false
+12:07:30 [WARN]  ex is: nil
+12:07:30 [WARN]  ex is: (cons autovar_sk_0 nil)
+12:07:30 [WARN]  ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
+12:07:30 [WARN]  ex is: Z
+12:07:30 [WARN]  ex is: (S Z)
+12:07:30 [WARN]  ex is: (S (S Z))
+12:07:30 [WARN] Proof mode: false
+12:07:30 [WARN] proved: (take ?ts_ph_Nat_0 nil) => nil

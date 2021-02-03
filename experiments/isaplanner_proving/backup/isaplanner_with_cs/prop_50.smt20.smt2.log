@@ -1,0 +1,32 @@
+22:18:49 [WARN] Collecting statistics
+22:18:49 [WARN]  ex is: nil
+22:18:49 [WARN]  ex is: (cons autovar_sk_0 nil)
+22:18:49 [WARN]  ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
+22:18:49 [WARN]  ex is: Z
+22:18:49 [WARN]  ex is: (S Z)
+22:18:49 [WARN]  ex is: (S (S Z))
+22:18:49 [WARN] Proof mode: false
+22:18:49 [WARN]  ex is: nil
+22:18:49 [WARN]  ex is: (cons autovar_sk_0 nil)
+22:18:49 [WARN]  ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
+22:18:49 [WARN]  ex is: Z
+22:18:49 [WARN]  ex is: (S Z)
+22:18:49 [WARN]  ex is: (S (S Z))
+22:18:49 [WARN] Proof mode: false
+22:18:51 [WARN] proved: (-2 ?ts_ph_Nat_0 Z) => ?ts_ph_Nat_0
+22:18:51 [WARN] proved: (take ?ts_ph_Nat_0 nil) => nil
+22:18:51 [WARN] proved: (-2 ?ts_ph_Nat_0 ?ts_ph_Nat_0) => Z
+22:29:35 [WARN] proved: (-2 ?ts_ph_Nat_0 (S ?ts_ph_Nat_0)) => Z
+22:29:35 [WARN] proved: (take (len ?ts_ph_list_0) (cons ?ts_ph_sk_1 ?ts_ph_list_0)) => (butlast (cons ?ts_ph_sk_1 ?ts_ph_list_0))
+22:29:35 [WARN] proved: (butlast (cons ?ts_ph_sk_1 ?ts_ph_list_0)) => (take (len ?ts_ph_list_0) (cons ?ts_ph_sk_1 ?ts_ph_list_0))
+22:29:35 [WARN] proved: (take (len ?ts_ph_list_0) ?ts_ph_list_0) => ?ts_ph_list_0
+22:29:36 [WARN] proved: (-2 (S ?ts_ph_Nat_0) ?ts_ph_Nat_0) => (S Z)
+22:29:38 [WARN] proved: (take ?ts_ph_Nat_1 (take ?ts_ph_Nat_1 ?ts_ph_list_0)) => (take ?ts_ph_Nat_1 ?ts_ph_list_0)
+22:29:38 [WARN] proved: (take ?ts_ph_Nat_1 ?ts_ph_list_0) => (take ?ts_ph_Nat_1 (take ?ts_ph_Nat_1 ?ts_ph_list_0))
+22:29:46 [WARN] proved: (take ?ts_ph_Nat_1 ?ts_ph_list_0) => (take (S ?ts_ph_Nat_1) (take ?ts_ph_Nat_1 ?ts_ph_list_0))
+22:29:46 [WARN] proved: (take (S ?ts_ph_Nat_1) (take ?ts_ph_Nat_1 ?ts_ph_list_0)) => (take ?ts_ph_Nat_1 ?ts_ph_list_0)
+22:32:28 [WARN] proved: (butlast ?ts_ph_list_0) => (take (len ?ts_ph_list_0) (butlast ?ts_ph_list_0))
+22:32:28 [WARN] proved: (take (len ?ts_ph_list_0) (butlast ?ts_ph_list_0)) => (butlast ?ts_ph_list_0)
+22:38:15 [WARN] proved: (-2 (-2 ?ts_ph_Nat_1 ?ts_ph_Nat_0) (S Z)) => (-2 ?ts_ph_Nat_1 (S ?ts_ph_Nat_0))
+22:38:15 [WARN] proved: (-2 ?ts_ph_Nat_1 (S ?ts_ph_Nat_0)) => (-2 (-2 ?ts_ph_Nat_1 ?ts_ph_Nat_0) (S Z))
+22:41:38 [WARN] proved: (-2 (-2 ?ts_ph_Nat_0 ?ts_ph_Nat_1) ?ts_ph_Nat_0) => Z

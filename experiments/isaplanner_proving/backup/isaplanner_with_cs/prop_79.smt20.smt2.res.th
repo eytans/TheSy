@@ -1,4 +1,0 @@
-(=> "(-2 ?ts_ph_Nat_0 Z) => ?ts_ph_Nat_0" (-2 ?ts_ph_Nat_0 Z) ?ts_ph_Nat_0)
-(=> "(-2 ?ts_ph_Nat_0 ?ts_ph_Nat_0) => Z" (-2 ?ts_ph_Nat_0 ?ts_ph_Nat_0) Z)
-(=> "(-2 ?ts_ph_Nat_0 (S ?ts_ph_Nat_0)) => Z" (-2 ?ts_ph_Nat_0 (S ?ts_ph_Nat_0)) Z)
-(=> "(-2 (S ?ts_ph_Nat_0) ?ts_ph_Nat_0) => (S Z)" (-2 (S ?ts_ph_Nat_0) ?ts_ph_Nat_0) (S Z))

@@ -1,4 +1,4 @@
-23:20:34 [0m[33m[WARN] [0mCollecting statistics
+12:35:20 [0m[33m[WARN] [0mCollecting statistics
 (takeWhile ?x nil) => nil
 (takeWhile ?x (cons ?z ?xs)) => (cons ?z (takeWhile ?x ?xs))
 (takeWhile ?x (cons ?z ?xs)) => (cons ?z (takeWhile ?x ?xs))
@@ -9,16 +9,15 @@
 (++ nil ?y) => ?y
 (++ (cons ?z ?xs) ?y) => (cons ?z (++ ?xs ?y))
 (cons ?z (++ ?xs ?y)) => (++ (cons ?z ?xs) ?y)
-23:20:34 [0m[33m[WARN] [0m ex is: nil
-23:20:34 [0m[33m[WARN] [0m ex is: (cons autovar_sk_0 nil)
-23:20:34 [0m[33m[WARN] [0m ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
-23:20:34 [0m[33m[WARN] [0mProof mode: false
-23:20:34 [0m[33m[WARN] [0m ex is: nil
-23:20:34 [0m[33m[WARN] [0m ex is: (cons autovar_sk_0 nil)
-23:20:34 [0m[33m[WARN] [0m ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
-23:20:34 [0m[33m[WARN] [0mProof mode: false
-23:20:34 [0m[33m[WARN] [0mproved: (++ ?ts_ph_list_0 nil) => ?ts_ph_list_0
-23:20:34 [0m[33m[WARN] [0mgeneralized case_split proof as: (++ (++ ?ts_ph_list_0 ?ts_ph_list_1) ?ts_ph_list_2) -- (++ ?ts_ph_list_0 (++ ?ts_ph_list_1 ?ts_ph_list_2))
-23:20:34 [0m[33m[WARN] [0mproved: (++ (++ ?ts_ph_list_0 ?ts_ph_list_1) ?ts_ph_list_2) => (++ ?ts_ph_list_0 (++ ?ts_ph_list_1 ?ts_ph_list_2))
-23:20:34 [0m[33m[WARN] [0mproved: (++ ?ts_ph_list_0 (++ ?ts_ph_list_1 ?ts_ph_list_2)) => (++ (++ ?ts_ph_list_0 ?ts_ph_list_1) ?ts_ph_list_2)
-done in 115
+12:35:20 [0m[33m[WARN] [0m ex is: nil
+12:35:20 [0m[33m[WARN] [0m ex is: (cons autovar_sk_0 nil)
+12:35:20 [0m[33m[WARN] [0m ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
+12:35:20 [0m[33m[WARN] [0mProof mode: false
+12:35:20 [0m[33m[WARN] [0m ex is: nil
+12:35:20 [0m[33m[WARN] [0m ex is: (cons autovar_sk_0 nil)
+12:35:20 [0m[33m[WARN] [0m ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
+12:35:20 [0m[33m[WARN] [0mProof mode: false
+12:35:20 [0m[33m[WARN] [0mproved: (++ ?ts_ph_list_0 nil) => ?ts_ph_list_0
+12:35:21 [0m[33m[WARN] [0mproved: (++ ?ts_ph_list_0 (++ ?ts_ph_list_1 ?ts_ph_list_2)) => (++ (++ ?ts_ph_list_0 ?ts_ph_list_1) ?ts_ph_list_2)
+12:35:21 [0m[33m[WARN] [0mproved: (++ (++ ?ts_ph_list_0 ?ts_ph_list_1) ?ts_ph_list_2) => (++ ?ts_ph_list_0 (++ ?ts_ph_list_1 ?ts_ph_list_2))
+done in 144

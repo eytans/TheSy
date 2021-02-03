@@ -1,4 +1,4 @@
-23:06:52 [0m[33m[WARN] [0mCollecting statistics
+13:07:31 [0m[33m[WARN] [0mCollecting statistics
 (== Z Z) => true
 (== Z (S ?z)) => false
 (== (S ?x2) Z) => false
@@ -19,28 +19,26 @@ Searcher: (== Z ?autovar8)
 Searcher: (== Z ?autovar8)
 Searcher: (== (S ?autovar5) ?autovar8)
 Searcher: (== (S ?autovar6) ?autovar8)
-23:06:52 [0m[33m[WARN] [0m ex is: Z
-23:06:52 [0m[33m[WARN] [0m ex is: (S Z)
-23:06:52 [0m[33m[WARN] [0m ex is: (S (S Z))
-23:06:52 [0m[33m[WARN] [0m ex is: nil
-23:06:52 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_0 nil)
-23:06:52 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
-23:06:52 [0m[33m[WARN] [0mProof mode: false
-23:06:52 [0m[33m[WARN] [0m ex is: Z
-23:06:52 [0m[33m[WARN] [0m ex is: (S Z)
-23:06:52 [0m[33m[WARN] [0m ex is: (S (S Z))
-23:06:52 [0m[33m[WARN] [0m ex is: nil
-23:06:52 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_0 nil)
-23:06:52 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
-23:06:52 [0m[33m[WARN] [0mProof mode: false
-23:06:52 [0m[33m[WARN] [0mproved: (== Z ?ts_ph_Nat_0) => (== ?ts_ph_Nat_0 Z)
-23:06:52 [0m[33m[WARN] [0mproved: (== ?ts_ph_Nat_0 Z) => (== Z ?ts_ph_Nat_0)
-23:06:52 [0m[33m[WARN] [0mproved: (== ?ts_ph_Nat_0 ?ts_ph_Nat_0) => true
-23:06:52 [0m[33m[WARN] [0mproved: (== (S ?ts_ph_Nat_0) ?ts_ph_Nat_0) => (== ?ts_ph_Nat_0 (S ?ts_ph_Nat_0))
-23:06:52 [0m[33m[WARN] [0mproved: (== ?ts_ph_Nat_0 (S ?ts_ph_Nat_0)) => (== (S ?ts_ph_Nat_0) ?ts_ph_Nat_0)
-23:06:52 [0m[33m[WARN] [0mproved: (== ?ts_ph_Nat_0 (S Z)) => (== (S Z) ?ts_ph_Nat_0)
-23:06:52 [0m[33m[WARN] [0mproved: (== (S Z) ?ts_ph_Nat_0) => (== ?ts_ph_Nat_0 (S Z))
-23:06:52 [0m[33m[WARN] [0mproved: (== ?ts_ph_Nat_1 ?ts_ph_Nat_0) => (== ?ts_ph_Nat_0 ?ts_ph_Nat_1)
-23:06:52 [0m[33m[WARN] [0mproved: (== ?ts_ph_Nat_0 ?ts_ph_Nat_1) => (== ?ts_ph_Nat_1 ?ts_ph_Nat_0)
-23:06:52 [0m[33m[WARN] [0mproved: (== ?ts_ph_Nat_0 (S ?ts_ph_Nat_0)) => false
-done in 404
+13:07:31 [0m[33m[WARN] [0m ex is: Z
+13:07:31 [0m[33m[WARN] [0m ex is: (S Z)
+13:07:31 [0m[33m[WARN] [0m ex is: (S (S Z))
+13:07:31 [0m[33m[WARN] [0m ex is: nil
+13:07:31 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_0 nil)
+13:07:31 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+13:07:31 [0m[33m[WARN] [0mProof mode: false
+13:07:31 [0m[33m[WARN] [0m ex is: Z
+13:07:31 [0m[33m[WARN] [0m ex is: (S Z)
+13:07:31 [0m[33m[WARN] [0m ex is: (S (S Z))
+13:07:31 [0m[33m[WARN] [0m ex is: nil
+13:07:31 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_0 nil)
+13:07:31 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+13:07:31 [0m[33m[WARN] [0mProof mode: false
+13:07:31 [0m[33m[WARN] [0mproved: (== Z ?ts_ph_Nat_0) => (== ?ts_ph_Nat_0 Z)
+13:07:31 [0m[33m[WARN] [0mproved: (== ?ts_ph_Nat_0 Z) => (== Z ?ts_ph_Nat_0)
+13:07:31 [0m[33m[WARN] [0mproved: (== ?ts_ph_Nat_0 ?ts_ph_Nat_0) => true
+13:07:31 [0m[33m[WARN] [0mproved: (== ?ts_ph_Nat_0 (S Z)) => (== (S Z) ?ts_ph_Nat_0)
+13:07:31 [0m[33m[WARN] [0mproved: (== (S Z) ?ts_ph_Nat_0) => (== ?ts_ph_Nat_0 (S Z))
+13:07:31 [0m[33m[WARN] [0mproved: (== ?ts_ph_Nat_1 ?ts_ph_Nat_0) => (== ?ts_ph_Nat_0 ?ts_ph_Nat_1)
+13:07:31 [0m[33m[WARN] [0mproved: (== ?ts_ph_Nat_0 ?ts_ph_Nat_1) => (== ?ts_ph_Nat_1 ?ts_ph_Nat_0)
+13:07:31 [0m[33m[WARN] [0mproved: (== ?ts_ph_Nat_0 (S ?ts_ph_Nat_0)) => false
+done in 335

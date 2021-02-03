@@ -1,4 +1,4 @@
-20:13:21 [0m[33m[WARN] [0mCollecting statistics
+11:02:01 [0m[33m[WARN] [0mCollecting statistics
 (sort nil) => nil
 nil => (sort nil)
 (<=2 Z ?y) => true
@@ -20,21 +20,21 @@ Searcher: (<=2 ?autovar6 Z)
 Searcher: (<=2 ?autovar6 (S ?autovar3))
 Searcher: (<=2 (S ?autovar4) ?autovar7)
 Searcher: (<=2 (S ?autovar5) ?autovar7)
-20:13:21 [0m[33m[WARN] [0m ex is: Z
-20:13:21 [0m[33m[WARN] [0m ex is: (S Z)
-20:13:21 [0m[33m[WARN] [0m ex is: (S (S Z))
-20:13:21 [0m[33m[WARN] [0m ex is: nil
-20:13:21 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_0 nil)
-20:13:21 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
-20:13:21 [0m[33m[WARN] [0mProof mode: false
-20:13:21 [0m[33m[WARN] [0m ex is: Z
-20:13:21 [0m[33m[WARN] [0m ex is: (S Z)
-20:13:21 [0m[33m[WARN] [0m ex is: (S (S Z))
-20:13:21 [0m[33m[WARN] [0m ex is: nil
-20:13:21 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_0 nil)
-20:13:21 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
-20:13:21 [0m[33m[WARN] [0mProof mode: false
-20:13:21 [0m[33m[WARN] [0mproved: (<=2 ?ts_ph_Nat_0 ?ts_ph_Nat_0) => true
-20:13:21 [0m[33m[WARN] [0mproved: (<=2 ?ts_ph_Nat_0 (S ?ts_ph_Nat_0)) => true
-20:13:21 [0m[33m[WARN] [0mproved: (<=2 (S ?ts_ph_Nat_0) ?ts_ph_Nat_0) => false
-done in 111
+11:02:01 [0m[33m[WARN] [0m ex is: Z
+11:02:01 [0m[33m[WARN] [0m ex is: (S Z)
+11:02:01 [0m[33m[WARN] [0m ex is: (S (S Z))
+11:02:01 [0m[33m[WARN] [0m ex is: nil
+11:02:01 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_0 nil)
+11:02:01 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+11:02:01 [0m[33m[WARN] [0mProof mode: false
+11:02:01 [0m[33m[WARN] [0m ex is: Z
+11:02:01 [0m[33m[WARN] [0m ex is: (S Z)
+11:02:01 [0m[33m[WARN] [0m ex is: (S (S Z))
+11:02:01 [0m[33m[WARN] [0m ex is: nil
+11:02:01 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_0 nil)
+11:02:01 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+11:02:01 [0m[33m[WARN] [0mProof mode: false
+11:02:01 [0m[33m[WARN] [0mproved: (<=2 ?ts_ph_Nat_0 ?ts_ph_Nat_0) => true
+11:02:01 [0m[33m[WARN] [0mproved: (<=2 ?ts_ph_Nat_0 (S ?ts_ph_Nat_0)) => true
+11:02:01 [0m[33m[WARN] [0mproved: (<=2 (S ?ts_ph_Nat_0) ?ts_ph_Nat_0) => false
+done in 113
