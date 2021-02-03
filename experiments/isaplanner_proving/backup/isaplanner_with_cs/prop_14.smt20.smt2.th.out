@@ -1,0 +1,20 @@
+18:01:26 [0m[33m[WARN] [0mCollecting statistics
+(filter ?x nil) => nil
+(filter ?x (cons ?z ?xs)) => (cons ?z (filter ?x ?xs))
+(filter ?x (cons ?z ?xs)) => (cons ?z (filter ?x ?xs))
+(filter ?x (cons ?z ?xs)) => (filter ?x ?xs)
+(++ nil ?y) => ?y
+(++ (cons ?z ?xs) ?y) => (cons ?z (++ ?xs ?y))
+(cons ?z (++ ?xs ?y)) => (++ (cons ?z ?xs) ?y)
+18:01:26 [0m[33m[WARN] [0m ex is: nil
+18:01:26 [0m[33m[WARN] [0m ex is: (cons autovar_sk_0 nil)
+18:01:26 [0m[33m[WARN] [0m ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
+18:01:26 [0m[33m[WARN] [0mProof mode: false
+18:01:26 [0m[33m[WARN] [0m ex is: nil
+18:01:26 [0m[33m[WARN] [0m ex is: (cons autovar_sk_0 nil)
+18:01:26 [0m[33m[WARN] [0m ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
+18:01:26 [0m[33m[WARN] [0mProof mode: false
+18:01:26 [0m[33m[WARN] [0mproved: (++ ?ts_ph_list_0 nil) => ?ts_ph_list_0
+18:01:26 [0m[33m[WARN] [0mproved: (++ ?ts_ph_list_0 (++ ?ts_ph_list_1 ?ts_ph_list_2)) => (++ (++ ?ts_ph_list_0 ?ts_ph_list_1) ?ts_ph_list_2)
+18:01:26 [0m[33m[WARN] [0mproved: (++ (++ ?ts_ph_list_0 ?ts_ph_list_1) ?ts_ph_list_2) => (++ ?ts_ph_list_0 (++ ?ts_ph_list_1 ?ts_ph_list_2))
+done in 60

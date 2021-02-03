@@ -1,4 +1,4 @@
-18:01:26 [0m[33m[WARN] [0mCollecting statistics
+22:18:49 [0m[33m[WARN] [0mCollecting statistics
 (last nil) => Z
 Z => (last nil)
 (last (cons ?y nil)) => ?y
@@ -21,27 +21,31 @@ Searcher: (<2 ?autovar5 (S ?autovar1))
 Searcher: (<2 ?autovar5 (S ?autovar3))
 Searcher: (<2 Z ?autovar6)
 Searcher: (<2 (S ?autovar4) ?autovar6)
-18:01:26 [0m[33m[WARN] [0m ex is: Z
-18:01:26 [0m[33m[WARN] [0m ex is: (S Z)
-18:01:26 [0m[33m[WARN] [0m ex is: (S (S Z))
-18:01:26 [0m[33m[WARN] [0m ex is: nil
-18:01:26 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_0 nil)
-18:01:26 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
-18:01:26 [0m[33m[WARN] [0mProof mode: false
-18:01:26 [0m[33m[WARN] [0m ex is: Z
-18:01:26 [0m[33m[WARN] [0m ex is: (S Z)
-18:01:26 [0m[33m[WARN] [0m ex is: (S (S Z))
-18:01:26 [0m[33m[WARN] [0m ex is: nil
-18:01:26 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_0 nil)
-18:01:26 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
-18:01:26 [0m[33m[WARN] [0mProof mode: false
-18:01:26 [0m[33m[WARN] [0mproved: (drop ?ts_ph_Nat_0 nil) => nil
-18:01:26 [0m[33m[WARN] [0mproved: (<2 ?ts_ph_Nat_0 ?ts_ph_Nat_0) => false
-18:01:26 [0m[33m[WARN] [0mproved: (<2 (S ?ts_ph_Nat_0) ?ts_ph_Nat_0) => false
-18:01:26 [0m[33m[WARN] [0mproved: (<2 ?ts_ph_Nat_0 (S ?ts_ph_Nat_0)) => true
-18:01:26 [0m[33m[WARN] [0mproved: (drop (len ?ts_ph_list_0) ?ts_ph_list_0) => nil
-18:01:26 [0m[33m[WARN] [0mproved: (last ?ts_ph_list_0) => (last (cons Z ?ts_ph_list_0))
-18:01:26 [0m[33m[WARN] [0mproved: (last (cons Z ?ts_ph_list_0)) => (last ?ts_ph_list_0)
-18:01:26 [0m[33m[WARN] [0mproved: (drop ?ts_ph_Nat_0 (cons ?ts_ph_Nat_0 ?ts_ph_list_1)) => (drop ?ts_ph_Nat_0 (cons Z ?ts_ph_list_1))
-18:01:26 [0m[33m[WARN] [0mproved: (drop ?ts_ph_Nat_0 (cons Z ?ts_ph_list_1)) => (drop ?ts_ph_Nat_0 (cons ?ts_ph_Nat_0 ?ts_ph_list_1))
-done in 153
+22:18:49 [0m[33m[WARN] [0m ex is: Z
+22:18:49 [0m[33m[WARN] [0m ex is: (S Z)
+22:18:49 [0m[33m[WARN] [0m ex is: (S (S Z))
+22:18:49 [0m[33m[WARN] [0m ex is: nil
+22:18:49 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_0 nil)
+22:18:49 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+22:18:49 [0m[33m[WARN] [0mProof mode: false
+22:18:49 [0m[33m[WARN] [0m ex is: Z
+22:18:49 [0m[33m[WARN] [0m ex is: (S Z)
+22:18:49 [0m[33m[WARN] [0m ex is: (S (S Z))
+22:18:49 [0m[33m[WARN] [0m ex is: nil
+22:18:49 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_0 nil)
+22:18:49 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+22:18:49 [0m[33m[WARN] [0mProof mode: false
+22:18:49 [0m[33m[WARN] [0mproved: (<2 ?ts_ph_Nat_0 ?ts_ph_Nat_0) => false
+22:18:49 [0m[33m[WARN] [0mproved: (drop ?ts_ph_Nat_0 nil) => nil
+22:19:17 [0m[33m[WARN] [0mproved: (<2 ?ts_ph_Nat_0 (S ?ts_ph_Nat_0)) => true
+22:19:17 [0m[33m[WARN] [0mproved: (last ?ts_ph_list_0) => (last (cons Z ?ts_ph_list_0))
+22:19:17 [0m[33m[WARN] [0mproved: (last (cons Z ?ts_ph_list_0)) => (last ?ts_ph_list_0)
+22:19:17 [0m[33m[WARN] [0mproved: (drop (len ?ts_ph_list_0) ?ts_ph_list_0) => nil
+22:19:17 [0m[33m[WARN] [0mproved: (drop ?ts_ph_Nat_0 (cons Z ?ts_ph_list_1)) => (drop ?ts_ph_Nat_0 (cons ?ts_ph_Nat_0 ?ts_ph_list_1))
+22:19:17 [0m[33m[WARN] [0mproved: (drop ?ts_ph_Nat_0 (cons ?ts_ph_Nat_0 ?ts_ph_list_1)) => (drop ?ts_ph_Nat_0 (cons Z ?ts_ph_list_1))
+22:19:17 [0m[33m[WARN] [0mproved: (<2 (S ?ts_ph_Nat_0) ?ts_ph_Nat_0) => false
+22:19:17 [0m[33m[WARN] [0mproved: (drop (S ?ts_ph_Nat_0) ?ts_ph_list_1) => (drop (S Z) (drop ?ts_ph_Nat_0 ?ts_ph_list_1))
+22:19:17 [0m[33m[WARN] [0mproved: (drop (S Z) (drop ?ts_ph_Nat_0 ?ts_ph_list_1)) => (drop (S ?ts_ph_Nat_0) ?ts_ph_list_1)
+22:19:19 [0m[33m[WARN] [0mproved: (drop ?ts_ph_Nat_1 (drop ?ts_ph_Nat_0 ?ts_ph_list_1)) => (drop ?ts_ph_Nat_0 (drop ?ts_ph_Nat_1 ?ts_ph_list_1))
+22:19:19 [0m[33m[WARN] [0mproved: (drop ?ts_ph_Nat_0 (drop ?ts_ph_Nat_1 ?ts_ph_list_1)) => (drop ?ts_ph_Nat_1 (drop ?ts_ph_Nat_0 ?ts_ph_list_1))
+done in 30519

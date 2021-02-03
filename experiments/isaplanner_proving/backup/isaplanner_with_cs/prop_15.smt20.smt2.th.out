@@ -1,0 +1,36 @@
+18:01:28 [0m[33m[WARN] [0mCollecting statistics
+(<2 ?x Z) => false
+(<2 Z (S ?z)) => true
+(<2 (S ?x2) (S ?z)) => (<2 ?x2 ?z)
+(<2 ?x2 ?z) => (<2 (S ?x2) (S ?z))
+(ins ?x nil) => (cons ?x nil)
+(cons ?x nil) => (ins ?x nil)
+(ins ?x (cons ?z ?xs)) => (cons ?z (ins ?x ?xs))
+(ins ?x (cons ?z ?xs)) => (cons ?z (ins ?x ?xs))
+(ins ?x (cons ?z ?xs)) => (cons ?x (cons ?z ?xs))
+(ins ?x (cons ?z ?xs)) => (cons ?x (cons ?z ?xs))
+(len nil) => Z
+Z => (len nil)
+(len (cons ?y ?xs)) => (S (len ?xs))
+Searcher: (<2 ?autovar5 (S ?autovar1))
+Searcher: (<2 ?autovar5 (S ?autovar3))
+Searcher: (<2 Z ?autovar6)
+Searcher: (<2 (S ?autovar4) ?autovar6)
+18:01:28 [0m[33m[WARN] [0m ex is: Z
+18:01:28 [0m[33m[WARN] [0m ex is: (S Z)
+18:01:28 [0m[33m[WARN] [0m ex is: (S (S Z))
+18:01:28 [0m[33m[WARN] [0m ex is: nil
+18:01:28 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_0 nil)
+18:01:28 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+18:01:28 [0m[33m[WARN] [0mProof mode: false
+18:01:28 [0m[33m[WARN] [0m ex is: Z
+18:01:28 [0m[33m[WARN] [0m ex is: (S Z)
+18:01:28 [0m[33m[WARN] [0m ex is: (S (S Z))
+18:01:28 [0m[33m[WARN] [0m ex is: nil
+18:01:28 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_0 nil)
+18:01:28 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+18:01:28 [0m[33m[WARN] [0mProof mode: false
+18:01:28 [0m[33m[WARN] [0mproved: (<2 ?ts_ph_Nat_0 ?ts_ph_Nat_0) => false
+18:01:28 [0m[33m[WARN] [0mproved: (<2 ?ts_ph_Nat_0 (S ?ts_ph_Nat_0)) => true
+18:01:29 [0m[33m[WARN] [0mproved: (<2 (S ?ts_ph_Nat_0) ?ts_ph_Nat_0) => false
+done in 85

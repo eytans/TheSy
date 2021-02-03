@@ -1,0 +1,41 @@
+18:01:26 [0m[33m[WARN] [0mCollecting statistics
+(take Z ?y) => nil
+(take (S ?z) nil) => nil
+(take (S ?z) (cons ?x2 ?x3)) => (cons ?x2 (take ?z ?x3))
+(cons ?x2 (take ?z ?x3)) => (take (S ?z) (cons ?x2 ?x3))
+(drop Z ?y) => ?y
+(drop (S ?z) nil) => nil
+(drop (S ?z) (cons ?x2 ?x3)) => (drop ?z ?x3)
+(++ nil ?y) => ?y
+(++ (cons ?z0 ?xs) ?y) => (cons ?z0 (++ ?xs ?y))
+(cons ?z0 (++ ?xs ?y)) => (++ (cons ?z0 ?xs) ?y)
+Searcher: (take ?autovar7 nil)
+Searcher: (take ?autovar7 (cons ?autovar3 ?autovar4))
+Searcher: (take (S ?autovar5) ?autovar8)
+Searcher: (take (S ?autovar6) ?autovar8)
+Searcher: (drop ?autovar7 nil)
+Searcher: (drop ?autovar7 (cons ?autovar3 ?autovar4))
+Searcher: (drop (S ?autovar5) ?autovar8)
+Searcher: (drop (S ?autovar6) ?autovar8)
+18:01:26 [0m[33m[WARN] [0m ex is: nil
+18:01:26 [0m[33m[WARN] [0m ex is: (cons autovar_sk_0 nil)
+18:01:26 [0m[33m[WARN] [0m ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
+18:01:26 [0m[33m[WARN] [0m ex is: Z
+18:01:26 [0m[33m[WARN] [0m ex is: (S Z)
+18:01:26 [0m[33m[WARN] [0m ex is: (S (S Z))
+18:01:26 [0m[33m[WARN] [0mProof mode: false
+18:01:26 [0m[33m[WARN] [0m ex is: nil
+18:01:26 [0m[33m[WARN] [0m ex is: (cons autovar_sk_0 nil)
+18:01:26 [0m[33m[WARN] [0m ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
+18:01:26 [0m[33m[WARN] [0m ex is: Z
+18:01:26 [0m[33m[WARN] [0m ex is: (S Z)
+18:01:26 [0m[33m[WARN] [0m ex is: (S (S Z))
+18:01:26 [0m[33m[WARN] [0mProof mode: false
+18:01:26 [0m[33m[WARN] [0mproved: (++ ?ts_ph_list_0 nil) => ?ts_ph_list_0
+18:01:26 [0m[33m[WARN] [0mproved: (take ?ts_ph_Nat_0 nil) => nil
+18:01:26 [0m[33m[WARN] [0mproved: (drop ?ts_ph_Nat_0 nil) => nil
+18:01:27 [0m[33m[WARN] [0mproved: (++ ?ts_ph_list_0 (++ ?ts_ph_list_1 ?ts_ph_list_2)) => (++ (++ ?ts_ph_list_0 ?ts_ph_list_1) ?ts_ph_list_2)
+18:01:27 [0m[33m[WARN] [0mproved: (++ (++ ?ts_ph_list_0 ?ts_ph_list_1) ?ts_ph_list_2) => (++ ?ts_ph_list_0 (++ ?ts_ph_list_1 ?ts_ph_list_2))
+18:01:29 [0m[33m[WARN] [0mproved: (take (S Z) ?ts_ph_list_0) => (take (S Z) (++ ?ts_ph_list_0 ?ts_ph_list_0))
+18:01:29 [0m[33m[WARN] [0mproved: (take (S Z) (++ ?ts_ph_list_0 ?ts_ph_list_0)) => (take (S Z) ?ts_ph_list_0)
+done in 7425

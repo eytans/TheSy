@@ -1,5 +1,5 @@
-(=> "(max ?ts_ph_Nat_0 ?ts_ph_Nat_0) => ?ts_ph_Nat_0" (max ?ts_ph_Nat_0 ?ts_ph_Nat_0) ?ts_ph_Nat_0)
 (=> "(max ?ts_ph_Nat_0 Z) => ?ts_ph_Nat_0" (max ?ts_ph_Nat_0 Z) ?ts_ph_Nat_0)
+(=> "(max ?ts_ph_Nat_0 ?ts_ph_Nat_0) => ?ts_ph_Nat_0" (max ?ts_ph_Nat_0 ?ts_ph_Nat_0) ?ts_ph_Nat_0)
 (=> "(S ?ts_ph_Nat_0) => (max (S ?ts_ph_Nat_0) ?ts_ph_Nat_0)" (S ?ts_ph_Nat_0) (max (S ?ts_ph_Nat_0) ?ts_ph_Nat_0))
 (=> "(max (S ?ts_ph_Nat_0) ?ts_ph_Nat_0) => (S ?ts_ph_Nat_0)" (max (S ?ts_ph_Nat_0) ?ts_ph_Nat_0) (S ?ts_ph_Nat_0))
 (=> "(S ?ts_ph_Nat_0) => (max ?ts_ph_Nat_0 (S ?ts_ph_Nat_0))" (S ?ts_ph_Nat_0) (max ?ts_ph_Nat_0 (S ?ts_ph_Nat_0)))

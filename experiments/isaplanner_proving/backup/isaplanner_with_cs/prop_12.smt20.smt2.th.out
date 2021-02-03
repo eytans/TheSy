@@ -1,0 +1,27 @@
+18:01:26 [0m[33m[WARN] [0mCollecting statistics
+(map2 ?x nil) => nil
+(map2 ?x (cons ?z ?xs)) => (cons (apply1 ?x ?z) (map2 ?x ?xs))
+(cons (apply1 ?x ?z) (map2 ?x ?xs)) => (map2 ?x (cons ?z ?xs))
+(drop Z ?y) => ?y
+(drop (S ?z0) nil) => nil
+(drop (S ?z1) (cons ?x2 ?x3)) => (drop ?z1 ?x3)
+Searcher: (drop ?autovar7 nil)
+Searcher: (drop ?autovar7 (cons ?autovar3 ?autovar4))
+Searcher: (drop (S ?autovar5) ?autovar8)
+Searcher: (drop (S ?autovar6) ?autovar8)
+18:01:26 [0m[33m[WARN] [0m ex is: nil
+18:01:26 [0m[33m[WARN] [0m ex is: (cons autovar_sk_0 nil)
+18:01:26 [0m[33m[WARN] [0m ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
+18:01:26 [0m[33m[WARN] [0m ex is: Z
+18:01:26 [0m[33m[WARN] [0m ex is: (S Z)
+18:01:26 [0m[33m[WARN] [0m ex is: (S (S Z))
+18:01:26 [0m[33m[WARN] [0mProof mode: false
+18:01:26 [0m[33m[WARN] [0m ex is: nil
+18:01:26 [0m[33m[WARN] [0m ex is: (cons autovar_sk_0 nil)
+18:01:26 [0m[33m[WARN] [0m ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
+18:01:26 [0m[33m[WARN] [0m ex is: Z
+18:01:26 [0m[33m[WARN] [0m ex is: (S Z)
+18:01:26 [0m[33m[WARN] [0m ex is: (S (S Z))
+18:01:26 [0m[33m[WARN] [0mProof mode: false
+18:01:26 [0m[33m[WARN] [0mproved: (drop ?ts_ph_Nat_0 nil) => nil
+done in 8

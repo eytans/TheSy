@@ -1,0 +1,25 @@
+18:01:26 [0m[33m[WARN] [0mCollecting statistics
+(take Z ?y) => nil
+(take (S ?z) nil) => nil
+(take (S ?z) (cons ?x2 ?x3)) => (cons ?x2 (take ?z ?x3))
+(cons ?x2 (take ?z ?x3)) => (take (S ?z) (cons ?x2 ?x3))
+Searcher: (take ?autovar7 nil)
+Searcher: (take ?autovar7 (cons ?autovar3 ?autovar4))
+Searcher: (take (S ?autovar5) ?autovar8)
+Searcher: (take (S ?autovar6) ?autovar8)
+18:01:26 [0m[33m[WARN] [0m ex is: nil
+18:01:26 [0m[33m[WARN] [0m ex is: (cons autovar_sk_0 nil)
+18:01:26 [0m[33m[WARN] [0m ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
+18:01:26 [0m[33m[WARN] [0m ex is: Z
+18:01:26 [0m[33m[WARN] [0m ex is: (S Z)
+18:01:26 [0m[33m[WARN] [0m ex is: (S (S Z))
+18:01:26 [0m[33m[WARN] [0mProof mode: false
+18:01:26 [0m[33m[WARN] [0m ex is: nil
+18:01:26 [0m[33m[WARN] [0m ex is: (cons autovar_sk_0 nil)
+18:01:26 [0m[33m[WARN] [0m ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
+18:01:26 [0m[33m[WARN] [0m ex is: Z
+18:01:26 [0m[33m[WARN] [0m ex is: (S Z)
+18:01:26 [0m[33m[WARN] [0m ex is: (S (S Z))
+18:01:26 [0m[33m[WARN] [0mProof mode: false
+18:01:26 [0m[33m[WARN] [0mproved: (take ?ts_ph_Nat_0 nil) => nil
+done in 212

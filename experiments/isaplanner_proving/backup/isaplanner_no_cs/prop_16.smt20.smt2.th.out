@@ -1,23 +1,22 @@
-16:57:44 [0m[33m[WARN] [0mCollecting statistics
-16:57:44 [0m[33m[WARN] [0mproof mode false
+17:00:45 [0m[33m[WARN] [0mCollecting statistics
 (last nil) => Z
 Z => (last nil)
 (last (cons ?y nil)) => ?y
 (last (cons ?y (cons ?x2 ?x3))) => (last (cons ?x2 ?x3))
-16:57:44 [0m[33m[WARN] [0m ex is: Z
-16:57:44 [0m[33m[WARN] [0m ex is: (S Z)
-16:57:44 [0m[33m[WARN] [0m ex is: (S (S Z))
-16:57:44 [0m[33m[WARN] [0m ex is: nil
-16:57:44 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_0 nil)
-16:57:44 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
-16:57:44 [0m[33m[WARN] [0mProof mode: false
-16:57:44 [0m[33m[WARN] [0m ex is: Z
-16:57:44 [0m[33m[WARN] [0m ex is: (S Z)
-16:57:44 [0m[33m[WARN] [0m ex is: (S (S Z))
-16:57:44 [0m[33m[WARN] [0m ex is: nil
-16:57:44 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_0 nil)
-16:57:44 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
-16:57:44 [0m[33m[WARN] [0mProof mode: false
-16:57:44 [0m[33m[WARN] [0mproved: (last (cons Z ?ts_ph_list_0)) => (last ?ts_ph_list_0)
-16:57:44 [0m[33m[WARN] [0mproved: (last ?ts_ph_list_0) => (last (cons Z ?ts_ph_list_0))
+17:00:45 [0m[33m[WARN] [0m ex is: Z
+17:00:45 [0m[33m[WARN] [0m ex is: (S Z)
+17:00:45 [0m[33m[WARN] [0m ex is: (S (S Z))
+17:00:45 [0m[33m[WARN] [0m ex is: nil
+17:00:45 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_0 nil)
+17:00:45 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+17:00:45 [0m[33m[WARN] [0mProof mode: false
+17:00:45 [0m[33m[WARN] [0m ex is: Z
+17:00:45 [0m[33m[WARN] [0m ex is: (S Z)
+17:00:45 [0m[33m[WARN] [0m ex is: (S (S Z))
+17:00:45 [0m[33m[WARN] [0m ex is: nil
+17:00:45 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_0 nil)
+17:00:45 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+17:00:45 [0m[33m[WARN] [0mProof mode: false
+17:00:45 [0m[33m[WARN] [0mproved: (last (cons Z ?ts_ph_list_0)) => (last ?ts_ph_list_0)
+17:00:45 [0m[33m[WARN] [0mproved: (last ?ts_ph_list_0) => (last (cons Z ?ts_ph_list_0))
 done in 6

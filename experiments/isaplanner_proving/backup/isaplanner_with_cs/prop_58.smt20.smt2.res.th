@@ -1,0 +1,3 @@
+(=> "(zip ?ts_ph_list2_0 nil2) => nil" (zip ?ts_ph_list2_0 nil2) nil)
+(=> "(drop2 ?ts_ph_Nat_0 nil2) => nil2" (drop2 ?ts_ph_Nat_0 nil2) nil2)
+(=> "(drop ?ts_ph_Nat_0 nil) => nil" (drop ?ts_ph_Nat_0 nil) nil)

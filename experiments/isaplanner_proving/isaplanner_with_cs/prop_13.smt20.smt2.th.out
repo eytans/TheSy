@@ -1,4 +1,4 @@
-18:01:27 [0m[33m[WARN] [0mCollecting statistics
+21:18:48 [0m[33m[WARN] [0mCollecting statistics
 (drop Z ?y) => ?y
 (drop (S ?z) nil) => nil
 (drop (S ?z) (cons ?x2 ?x3)) => (drop ?z ?x3)
@@ -6,19 +6,23 @@ Searcher: (drop ?autovar7 nil)
 Searcher: (drop ?autovar7 (cons ?autovar3 ?autovar4))
 Searcher: (drop (S ?autovar5) ?autovar8)
 Searcher: (drop (S ?autovar6) ?autovar8)
-18:01:27 [0m[33m[WARN] [0m ex is: nil
-18:01:27 [0m[33m[WARN] [0m ex is: (cons autovar_sk_0 nil)
-18:01:27 [0m[33m[WARN] [0m ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
-18:01:27 [0m[33m[WARN] [0m ex is: Z
-18:01:27 [0m[33m[WARN] [0m ex is: (S Z)
-18:01:27 [0m[33m[WARN] [0m ex is: (S (S Z))
-18:01:27 [0m[33m[WARN] [0mProof mode: false
-18:01:27 [0m[33m[WARN] [0m ex is: nil
-18:01:27 [0m[33m[WARN] [0m ex is: (cons autovar_sk_0 nil)
-18:01:27 [0m[33m[WARN] [0m ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
-18:01:27 [0m[33m[WARN] [0m ex is: Z
-18:01:27 [0m[33m[WARN] [0m ex is: (S Z)
-18:01:27 [0m[33m[WARN] [0m ex is: (S (S Z))
-18:01:27 [0m[33m[WARN] [0mProof mode: false
-18:01:27 [0m[33m[WARN] [0mproved: (drop ?ts_ph_Nat_0 nil) => nil
-done in 4
+21:18:48 [0m[33m[WARN] [0m ex is: nil
+21:18:48 [0m[33m[WARN] [0m ex is: (cons autovar_sk_0 nil)
+21:18:48 [0m[33m[WARN] [0m ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
+21:18:48 [0m[33m[WARN] [0m ex is: Z
+21:18:48 [0m[33m[WARN] [0m ex is: (S Z)
+21:18:48 [0m[33m[WARN] [0m ex is: (S (S Z))
+21:18:48 [0m[33m[WARN] [0mProof mode: false
+21:18:48 [0m[33m[WARN] [0m ex is: nil
+21:18:48 [0m[33m[WARN] [0m ex is: (cons autovar_sk_0 nil)
+21:18:48 [0m[33m[WARN] [0m ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
+21:18:48 [0m[33m[WARN] [0m ex is: Z
+21:18:48 [0m[33m[WARN] [0m ex is: (S Z)
+21:18:48 [0m[33m[WARN] [0m ex is: (S (S Z))
+21:18:48 [0m[33m[WARN] [0mProof mode: false
+21:18:48 [0m[33m[WARN] [0mproved: (drop ?ts_ph_Nat_0 nil) => nil
+21:18:49 [0m[33m[WARN] [0mproved: (drop (S Z) (drop ?ts_ph_Nat_1 ?ts_ph_list_0)) => (drop (S ?ts_ph_Nat_1) ?ts_ph_list_0)
+21:18:49 [0m[33m[WARN] [0mproved: (drop (S ?ts_ph_Nat_1) ?ts_ph_list_0) => (drop (S Z) (drop ?ts_ph_Nat_1 ?ts_ph_list_0))
+21:18:51 [0m[33m[WARN] [0mproved: (drop ?ts_ph_Nat_0 (drop ?ts_ph_Nat_1 ?ts_ph_list_1)) => (drop ?ts_ph_Nat_1 (drop ?ts_ph_Nat_0 ?ts_ph_list_1))
+21:18:51 [0m[33m[WARN] [0mproved: (drop ?ts_ph_Nat_1 (drop ?ts_ph_Nat_0 ?ts_ph_list_1)) => (drop ?ts_ph_Nat_0 (drop ?ts_ph_Nat_1 ?ts_ph_list_1))
+done in 2695

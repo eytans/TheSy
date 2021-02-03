@@ -1,0 +1,47 @@
+18:01:26 [0m[33m[WARN] [0mCollecting statistics
+(last nil) => Z
+Z => (last nil)
+(last (cons ?y nil)) => ?y
+(last (cons ?y (cons ?x2 ?x3))) => (last (cons ?x2 ?x3))
+(<2 ?x Z) => false
+(<2 Z (S ?z)) => true
+(<2 (S ?x2) (S ?z)) => (<2 ?x2 ?z)
+(<2 ?x2 ?z) => (<2 (S ?x2) (S ?z))
+(len nil) => Z
+Z => (len nil)
+(len (cons ?y ?xs)) => (S (len ?xs))
+(drop Z ?y0) => ?y0
+(drop (S ?z) nil) => nil
+(drop (S ?z) (cons ?x2 ?x3)) => (drop ?z ?x3)
+Searcher: (drop ?autovar7 nil)
+Searcher: (drop ?autovar7 (cons ?autovar3 ?autovar4))
+Searcher: (drop (S ?autovar5) ?autovar8)
+Searcher: (drop (S ?autovar6) ?autovar8)
+Searcher: (<2 ?autovar5 (S ?autovar1))
+Searcher: (<2 ?autovar5 (S ?autovar3))
+Searcher: (<2 Z ?autovar6)
+Searcher: (<2 (S ?autovar4) ?autovar6)
+18:01:26 [0m[33m[WARN] [0m ex is: Z
+18:01:26 [0m[33m[WARN] [0m ex is: (S Z)
+18:01:26 [0m[33m[WARN] [0m ex is: (S (S Z))
+18:01:26 [0m[33m[WARN] [0m ex is: nil
+18:01:26 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_0 nil)
+18:01:26 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+18:01:26 [0m[33m[WARN] [0mProof mode: false
+18:01:26 [0m[33m[WARN] [0m ex is: Z
+18:01:26 [0m[33m[WARN] [0m ex is: (S Z)
+18:01:26 [0m[33m[WARN] [0m ex is: (S (S Z))
+18:01:26 [0m[33m[WARN] [0m ex is: nil
+18:01:26 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_0 nil)
+18:01:26 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+18:01:26 [0m[33m[WARN] [0mProof mode: false
+18:01:26 [0m[33m[WARN] [0mproved: (drop ?ts_ph_Nat_0 nil) => nil
+18:01:26 [0m[33m[WARN] [0mproved: (<2 ?ts_ph_Nat_0 ?ts_ph_Nat_0) => false
+18:01:26 [0m[33m[WARN] [0mproved: (<2 (S ?ts_ph_Nat_0) ?ts_ph_Nat_0) => false
+18:01:26 [0m[33m[WARN] [0mproved: (<2 ?ts_ph_Nat_0 (S ?ts_ph_Nat_0)) => true
+18:01:26 [0m[33m[WARN] [0mproved: (drop (len ?ts_ph_list_0) ?ts_ph_list_0) => nil
+18:01:26 [0m[33m[WARN] [0mproved: (last ?ts_ph_list_0) => (last (cons Z ?ts_ph_list_0))
+18:01:26 [0m[33m[WARN] [0mproved: (last (cons Z ?ts_ph_list_0)) => (last ?ts_ph_list_0)
+18:01:26 [0m[33m[WARN] [0mproved: (drop ?ts_ph_Nat_0 (cons ?ts_ph_Nat_0 ?ts_ph_list_1)) => (drop ?ts_ph_Nat_0 (cons Z ?ts_ph_list_1))
+18:01:26 [0m[33m[WARN] [0mproved: (drop ?ts_ph_Nat_0 (cons Z ?ts_ph_list_1)) => (drop ?ts_ph_Nat_0 (cons ?ts_ph_Nat_0 ?ts_ph_list_1))
+done in 153

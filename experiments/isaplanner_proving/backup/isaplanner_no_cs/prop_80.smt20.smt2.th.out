@@ -1,0 +1,51 @@
+17:00:45 [0m[33m[WARN] [0mCollecting statistics
+(-2 Z ?y) => Z
+(-2 (S ?z) Z) => (S ?z)
+(S ?z) => (-2 (S ?z) Z)
+(-2 (S ?z) (S ?x2)) => (-2 ?z ?x2)
+(-2 ?z ?x2) => (-2 (S ?z) (S ?x2))
+(take Z ?y0) => nil
+(take (S ?z) nil) => nil
+(take (S ?z) (cons ?x21 ?x3)) => (cons ?x21 (take ?z ?x3))
+(cons ?x21 (take ?z ?x3)) => (take (S ?z) (cons ?x21 ?x3))
+(len nil) => Z
+Z => (len nil)
+(len (cons ?y2 ?xs)) => (S (len ?xs))
+(++ nil ?y3) => ?y3
+(++ (cons ?z5 ?xs) ?y4) => (cons ?z5 (++ ?xs ?y4))
+(cons ?z5 (++ ?xs ?y4)) => (++ (cons ?z5 ?xs) ?y4)
+Searcher: (take ?autovar7 nil)
+Searcher: (take ?autovar7 (cons ?autovar3 ?autovar4))
+Searcher: (take (S ?autovar5) ?autovar8)
+Searcher: (take (S ?autovar6) ?autovar8)
+Searcher: (-2 ?autovar6 Z)
+Searcher: (-2 ?autovar6 (S ?autovar3))
+Searcher: (-2 (S ?autovar4) ?autovar7)
+Searcher: (-2 (S ?autovar5) ?autovar7)
+17:00:45 [0m[33m[WARN] [0m ex is: nil
+17:00:45 [0m[33m[WARN] [0m ex is: (cons autovar_sk_0 nil)
+17:00:45 [0m[33m[WARN] [0m ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
+17:00:45 [0m[33m[WARN] [0m ex is: Z
+17:00:45 [0m[33m[WARN] [0m ex is: (S Z)
+17:00:45 [0m[33m[WARN] [0m ex is: (S (S Z))
+17:00:45 [0m[33m[WARN] [0mProof mode: false
+17:00:45 [0m[33m[WARN] [0m ex is: nil
+17:00:45 [0m[33m[WARN] [0m ex is: (cons autovar_sk_0 nil)
+17:00:45 [0m[33m[WARN] [0m ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
+17:00:45 [0m[33m[WARN] [0m ex is: Z
+17:00:45 [0m[33m[WARN] [0m ex is: (S Z)
+17:00:45 [0m[33m[WARN] [0m ex is: (S (S Z))
+17:00:45 [0m[33m[WARN] [0mProof mode: false
+17:00:45 [0m[33m[WARN] [0mproved: (++ ?ts_ph_list_0 nil) => ?ts_ph_list_0
+17:00:45 [0m[33m[WARN] [0mproved: (-2 ?ts_ph_Nat_0 Z) => ?ts_ph_Nat_0
+17:00:45 [0m[33m[WARN] [0mproved: (take ?ts_ph_Nat_0 nil) => nil
+17:00:45 [0m[33m[WARN] [0mproved: (-2 ?ts_ph_Nat_0 ?ts_ph_Nat_0) => Z
+17:00:47 [0m[33m[WARN] [0mproved: (-2 ?ts_ph_Nat_0 (S ?ts_ph_Nat_0)) => Z
+17:00:48 [0m[33m[WARN] [0mproved: (take (len ?ts_ph_list_0) ?ts_ph_list_0) => ?ts_ph_list_0
+17:00:52 [0m[33m[WARN] [0mproved: (-2 (S ?ts_ph_Nat_0) ?ts_ph_Nat_0) => (S Z)
+17:00:54 [0m[33m[WARN] [0mproved: (++ ?ts_ph_list_0 (++ ?ts_ph_list_1 ?ts_ph_list_2)) => (++ (++ ?ts_ph_list_0 ?ts_ph_list_1) ?ts_ph_list_2)
+17:00:54 [0m[33m[WARN] [0mproved: (++ (++ ?ts_ph_list_0 ?ts_ph_list_1) ?ts_ph_list_2) => (++ ?ts_ph_list_0 (++ ?ts_ph_list_1 ?ts_ph_list_2))
+17:00:59 [0m[33m[WARN] [0mproved: (take (len ?ts_ph_list_0) (++ ?ts_ph_list_0 ?ts_ph_list_1)) => ?ts_ph_list_0
+17:01:07 [0m[33m[WARN] [0mproved: (take (S Z) ?ts_ph_list_0) => (take (S Z) (++ ?ts_ph_list_0 ?ts_ph_list_0))
+17:01:07 [0m[33m[WARN] [0mproved: (take (S Z) (++ ?ts_ph_list_0 ?ts_ph_list_0)) => (take (S Z) ?ts_ph_list_0)
+done in 38408

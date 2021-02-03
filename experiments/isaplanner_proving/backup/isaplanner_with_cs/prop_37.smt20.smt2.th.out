@@ -1,0 +1,43 @@
+18:01:26 [0m[33m[WARN] [0mCollecting statistics
+(== Z Z) => true
+(== Z (S ?z)) => false
+(== (S ?x2) Z) => false
+(== (S ?x2) (S ?y2)) => (== ?x2 ?y2)
+(== ?x2 ?y2) => (== (S ?x2) (S ?y2))
+(delete ?x nil) => nil
+(delete ?x (cons ?z ?xs)) => (cons ?z (delete ?x ?xs))
+(delete ?x (cons ?z ?xs)) => (cons ?z (delete ?x ?xs))
+(delete ?x (cons ?z ?xs)) => (delete ?x ?xs)
+(elem ?x nil) => false
+(elem ?x (cons ?z ?xs)) => (elem ?x ?xs)
+(elem ?x (cons ?z ?xs)) => true
+Searcher: (== ?autovar7 Z)
+Searcher: (== ?autovar7 (S ?autovar1))
+Searcher: (== ?autovar7 Z)
+Searcher: (== ?autovar7 (S ?autovar4))
+Searcher: (== Z ?autovar8)
+Searcher: (== Z ?autovar8)
+Searcher: (== (S ?autovar5) ?autovar8)
+Searcher: (== (S ?autovar6) ?autovar8)
+18:01:26 [0m[33m[WARN] [0m ex is: Z
+18:01:26 [0m[33m[WARN] [0m ex is: (S Z)
+18:01:26 [0m[33m[WARN] [0m ex is: (S (S Z))
+18:01:26 [0m[33m[WARN] [0m ex is: nil
+18:01:26 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_0 nil)
+18:01:26 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+18:01:26 [0m[33m[WARN] [0mProof mode: false
+18:01:26 [0m[33m[WARN] [0m ex is: Z
+18:01:26 [0m[33m[WARN] [0m ex is: (S Z)
+18:01:26 [0m[33m[WARN] [0m ex is: (S (S Z))
+18:01:26 [0m[33m[WARN] [0m ex is: nil
+18:01:26 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_0 nil)
+18:01:26 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+18:01:26 [0m[33m[WARN] [0mProof mode: false
+18:01:26 [0m[33m[WARN] [0mproved: (== ?ts_ph_Nat_0 ?ts_ph_Nat_0) => true
+18:01:26 [0m[33m[WARN] [0mproved: (== Z ?ts_ph_Nat_0) => (== ?ts_ph_Nat_0 Z)
+18:01:26 [0m[33m[WARN] [0mproved: (== ?ts_ph_Nat_0 Z) => (== Z ?ts_ph_Nat_0)
+18:01:26 [0m[33m[WARN] [0mproved: (== (S Z) ?ts_ph_Nat_0) => (== ?ts_ph_Nat_0 (S Z))
+18:01:26 [0m[33m[WARN] [0mproved: (== ?ts_ph_Nat_0 (S Z)) => (== (S Z) ?ts_ph_Nat_0)
+18:01:26 [0m[33m[WARN] [0mproved: (== (S ?ts_ph_Nat_0) ?ts_ph_Nat_0) => false
+18:01:26 [0m[33m[WARN] [0mproved: (== ?ts_ph_Nat_0 (S ?ts_ph_Nat_0)) => false
+done in 119

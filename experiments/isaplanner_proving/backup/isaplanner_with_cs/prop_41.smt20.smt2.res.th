@@ -1,0 +1,1 @@
+(=> "(take ?ts_ph_Nat_0 nil) => nil" (take ?ts_ph_Nat_0 nil) nil)

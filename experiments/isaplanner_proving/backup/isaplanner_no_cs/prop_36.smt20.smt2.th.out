@@ -1,0 +1,15 @@
+17:01:24 [0m[33m[WARN] [0mCollecting statistics
+(takeWhile ?x nil) => nil
+(takeWhile ?x (cons ?z ?xs)) => (cons ?z (takeWhile ?x ?xs))
+(takeWhile ?x (cons ?z ?xs)) => (cons ?z (takeWhile ?x ?xs))
+(takeWhile ?x (cons ?z ?xs)) => nil
+(apply12 lam ?x0) => true
+17:01:24 [0m[33m[WARN] [0m ex is: nil
+17:01:24 [0m[33m[WARN] [0m ex is: (cons autovar_sk_0 nil)
+17:01:24 [0m[33m[WARN] [0m ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
+17:01:24 [0m[33m[WARN] [0mProof mode: false
+17:01:24 [0m[33m[WARN] [0m ex is: nil
+17:01:24 [0m[33m[WARN] [0m ex is: (cons autovar_sk_0 nil)
+17:01:24 [0m[33m[WARN] [0m ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
+17:01:24 [0m[33m[WARN] [0mProof mode: false
+done in 2
