@@ -1,0 +1,56 @@
+11:04:54 [WARN] Collecting statistics
+11:04:54 [WARN]  ex is: zero
+11:04:54 [WARN]  ex is: (succ zero)
+11:04:54 [WARN]  ex is: (succ (succ zero))
+11:04:54 [WARN]  ex is: nil
+11:04:54 [WARN]  ex is: (cons autovar_Nat_0 nil)
+11:04:54 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+11:04:54 [WARN]  ex is: (mkpair autovar_Nat_0 autovar_Nat_1)
+11:04:54 [WARN]  ex is: znil
+11:04:54 [WARN]  ex is: (zcons autovar_Pair_0 znil)
+11:04:54 [WARN]  ex is: (zcons autovar_Pair_1 (zcons autovar_Pair_0 znil))
+11:04:54 [WARN] Proof mode: false
+11:04:54 [WARN]  ex is: zero
+11:04:54 [WARN]  ex is: (succ zero)
+11:04:54 [WARN]  ex is: (succ (succ zero))
+11:04:54 [WARN]  ex is: nil
+11:04:54 [WARN]  ex is: (cons autovar_Nat_0 nil)
+11:04:54 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+11:04:54 [WARN]  ex is: (mkpair autovar_Nat_0 autovar_Nat_1)
+11:04:54 [WARN]  ex is: znil
+11:04:54 [WARN]  ex is: (zcons autovar_Pair_0 znil)
+11:04:54 [WARN]  ex is: (zcons autovar_Pair_1 (zcons autovar_Pair_0 znil))
+11:04:54 [WARN] Proof mode: false
+11:04:57 [WARN] proved: (leq zero ?ts_ph_Nat_0) => true
+11:04:57 [WARN] proved: (append ?ts_ph_Lst_0 nil) => ?ts_ph_Lst_0
+11:04:57 [WARN] proved: (zappend ?ts_ph_ZLst_0 znil) => ?ts_ph_ZLst_0
+11:12:27 [WARN] proved: (drop (len ?ts_ph_Lst_0) ?ts_ph_Lst_0) => nil
+11:12:27 [WARN] generalized case_split proof as: (zappend (zappend ?ts_ph_ZLst_0 ?ts_ph_ZLst_1) ?ts_ph_ZLst_2) -- (zappend ?ts_ph_ZLst_0 (zappend ?ts_ph_ZLst_1 ?ts_ph_ZLst_2))
+11:12:27 [WARN] proved: (zappend (zappend ?ts_ph_ZLst_0 ?ts_ph_ZLst_1) ?ts_ph_ZLst_2) => (zappend ?ts_ph_ZLst_0 (zappend ?ts_ph_ZLst_1 ?ts_ph_ZLst_2))
+11:12:27 [WARN] proved: (zappend ?ts_ph_ZLst_0 (zappend ?ts_ph_ZLst_1 ?ts_ph_ZLst_2)) => (zappend (zappend ?ts_ph_ZLst_0 ?ts_ph_ZLst_1) ?ts_ph_ZLst_2)
+11:12:27 [WARN] proved: (drop ?ts_ph_Nat_0 (cons zero ?ts_ph_Lst_1)) => (drop ?ts_ph_Nat_0 (cons ?ts_ph_Nat_0 ?ts_ph_Lst_1))
+11:12:27 [WARN] proved: (drop ?ts_ph_Nat_0 (cons ?ts_ph_Nat_0 ?ts_ph_Lst_1)) => (drop ?ts_ph_Nat_0 (cons zero ?ts_ph_Lst_1))
+11:12:27 [WARN] proved: (zip ?ts_ph_Lst_0 (append ?ts_ph_Lst_0 ?ts_ph_Lst_1)) => (zip ?ts_ph_Lst_0 ?ts_ph_Lst_0)
+11:12:27 [WARN] proved: (zip (append ?ts_ph_Lst_0 ?ts_ph_Lst_1) ?ts_ph_Lst_0) => (zip ?ts_ph_Lst_0 (append ?ts_ph_Lst_0 ?ts_ph_Lst_1))
+11:12:27 [WARN] proved: (zip ?ts_ph_Lst_0 (append ?ts_ph_Lst_0 ?ts_ph_Lst_1)) => (zip (append ?ts_ph_Lst_0 ?ts_ph_Lst_1) ?ts_ph_Lst_0)
+11:12:27 [WARN] proved: (leq (succ zero) (succ ?ts_ph_Nat_0)) => true
+11:12:27 [WARN] proved: (take (len ?ts_ph_Lst_0) (append ?ts_ph_Lst_0 ?ts_ph_Lst_1)) => ?ts_ph_Lst_0
+11:12:27 [WARN] proved: (take (len ?ts_ph_Lst_0) (append ?ts_ph_Lst_0 ?ts_ph_Lst_1)) => (take (len ?ts_ph_Lst_0) ?ts_ph_Lst_0)
+11:12:27 [WARN] proved: (take (succ zero) (append ?ts_ph_Lst_0 ?ts_ph_Lst_0)) => (take (succ zero) ?ts_ph_Lst_0)
+11:12:27 [WARN] proved: (take (succ zero) ?ts_ph_Lst_0) => (take (succ zero) (append ?ts_ph_Lst_0 ?ts_ph_Lst_0))
+11:12:27 [WARN] proved: (zip (append ?ts_ph_Lst_0 ?ts_ph_Lst_0) (cons ?ts_ph_Nat_1 nil)) => (zip ?ts_ph_Lst_0 (cons ?ts_ph_Nat_1 nil))
+11:12:27 [WARN] proved: (zip ?ts_ph_Lst_0 (cons ?ts_ph_Nat_1 nil)) => (zip (append ?ts_ph_Lst_0 ?ts_ph_Lst_0) (cons ?ts_ph_Nat_1 nil))
+11:12:27 [WARN] proved: (zip (cons ?ts_ph_Nat_1 nil) (append ?ts_ph_Lst_0 ?ts_ph_Lst_0)) => (zip (cons ?ts_ph_Nat_1 nil) ?ts_ph_Lst_0)
+11:12:27 [WARN] proved: (zip (cons ?ts_ph_Nat_1 nil) ?ts_ph_Lst_0) => (zip (cons ?ts_ph_Nat_1 nil) (append ?ts_ph_Lst_0 ?ts_ph_Lst_0))
+11:12:27 [WARN] proved: (drop ?ts_ph_Nat_1 (take ?ts_ph_Nat_1 ?ts_ph_Lst_0)) => nil
+11:12:29 [WARN] proved: (take ?ts_ph_Nat_1 ?ts_ph_Lst_0) => (take ?ts_ph_Nat_1 (take ?ts_ph_Nat_1 ?ts_ph_Lst_0))
+11:12:29 [WARN] proved: (take ?ts_ph_Nat_1 (take ?ts_ph_Nat_1 ?ts_ph_Lst_0)) => (take ?ts_ph_Nat_1 ?ts_ph_Lst_0)
+11:12:32 [WARN] proved: (append (append ?ts_ph_Lst_0 ?ts_ph_Lst_1) ?ts_ph_Lst_2) => (append ?ts_ph_Lst_0 (append ?ts_ph_Lst_1 ?ts_ph_Lst_2))
+11:12:32 [WARN] proved: (append ?ts_ph_Lst_0 (append ?ts_ph_Lst_1 ?ts_ph_Lst_2)) => (append (append ?ts_ph_Lst_0 ?ts_ph_Lst_1) ?ts_ph_Lst_2)
+11:12:38 [WARN] proved: (zip (take ?ts_ph_Nat_1 ?ts_ph_Lst_0) ?ts_ph_Lst_0) => (zip ?ts_ph_Lst_0 (take ?ts_ph_Nat_1 ?ts_ph_Lst_0))
+11:12:38 [WARN] proved: (zip ?ts_ph_Lst_0 (take ?ts_ph_Nat_1 ?ts_ph_Lst_0)) => (zip (take ?ts_ph_Nat_1 ?ts_ph_Lst_0) ?ts_ph_Lst_0)
+11:13:07 [WARN] proved: (drop (succ ?ts_ph_Nat_1) (take ?ts_ph_Nat_1 ?ts_ph_Lst_0)) => nil
+11:42:08 [WARN] proved: (take ?ts_ph_Nat_1 ?ts_ph_Lst_0) => (take (succ ?ts_ph_Nat_1) (take ?ts_ph_Nat_1 ?ts_ph_Lst_0))
+11:42:08 [WARN] proved: (take (succ ?ts_ph_Nat_1) (take ?ts_ph_Nat_1 ?ts_ph_Lst_0)) => (take ?ts_ph_Nat_1 ?ts_ph_Lst_0)
+11:45:04 [WARN] proved: (drop (succ ?ts_ph_Nat_0) ?ts_ph_Lst_1) => (drop (succ zero) (drop ?ts_ph_Nat_0 ?ts_ph_Lst_1))
+11:45:04 [WARN] proved: (drop (succ zero) (drop ?ts_ph_Nat_0 ?ts_ph_Lst_1)) => (drop (succ ?ts_ph_Nat_0) ?ts_ph_Lst_1)

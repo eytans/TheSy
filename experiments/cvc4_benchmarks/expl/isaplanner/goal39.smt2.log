@@ -1,0 +1,30 @@
+11:02:05 [WARN] Collecting statistics
+11:02:05 [WARN]  ex is: zero
+11:02:05 [WARN]  ex is: (succ zero)
+11:02:05 [WARN]  ex is: (succ (succ zero))
+11:02:05 [WARN]  ex is: nil
+11:02:05 [WARN]  ex is: (cons autovar_Nat_0 nil)
+11:02:05 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+11:02:05 [WARN] Proof mode: false
+11:02:05 [WARN]  ex is: zero
+11:02:05 [WARN]  ex is: (succ zero)
+11:02:05 [WARN]  ex is: (succ (succ zero))
+11:02:05 [WARN]  ex is: nil
+11:02:05 [WARN]  ex is: (cons autovar_Nat_0 nil)
+11:02:05 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+11:02:05 [WARN] Proof mode: false
+11:02:05 [WARN] proved: (plus ?ts_ph_Nat_0 zero) => ?ts_ph_Nat_0
+11:02:05 [WARN] proved: (leq zero ?ts_ph_Nat_0) => true
+11:09:10 [WARN] proved: (succ (succ ?ts_ph_Nat_0)) => (succ (plus ?ts_ph_Nat_0 (succ zero)))
+11:09:10 [WARN] proved: (succ (plus ?ts_ph_Nat_0 (succ zero))) => (succ (succ ?ts_ph_Nat_0))
+11:09:10 [WARN] proved: (leq (succ zero) (succ ?ts_ph_Nat_0)) => true
+11:09:10 [WARN] proved: (succ (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1)) => (plus ?ts_ph_Nat_0 (succ ?ts_ph_Nat_1))
+11:09:10 [WARN] proved: (plus ?ts_ph_Nat_0 (succ ?ts_ph_Nat_1)) => (succ (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1))
+11:09:10 [WARN] proved: (plus ?ts_ph_Nat_1 ?ts_ph_Nat_0) => (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1)
+11:09:10 [WARN] proved: (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1) => (plus ?ts_ph_Nat_1 ?ts_ph_Nat_0)
+11:09:10 [WARN] proved: (plus ?ts_ph_Nat_0 (plus ?ts_ph_Nat_1 ?ts_ph_Nat_2)) => (plus ?ts_ph_Nat_1 (plus ?ts_ph_Nat_0 ?ts_ph_Nat_2))
+11:09:10 [WARN] proved: (plus ?ts_ph_Nat_1 (plus ?ts_ph_Nat_0 ?ts_ph_Nat_2)) => (plus ?ts_ph_Nat_0 (plus ?ts_ph_Nat_1 ?ts_ph_Nat_2))
+11:09:10 [WARN] proved: (count (succ ?ts_ph_Nat_0) ?ts_ph_Lst_1) => (count (succ ?ts_ph_Nat_0) (cons ?ts_ph_Nat_0 ?ts_ph_Lst_1))
+11:09:10 [WARN] proved: (count (succ ?ts_ph_Nat_0) (cons ?ts_ph_Nat_0 ?ts_ph_Lst_1)) => (count (succ ?ts_ph_Nat_0) ?ts_ph_Lst_1)
+11:09:10 [WARN] proved: (leq (succ zero) ?ts_ph_Nat_0) => (leq (succ zero) (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0))
+11:09:10 [WARN] proved: (leq (succ zero) (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0)) => (leq (succ zero) ?ts_ph_Nat_0)

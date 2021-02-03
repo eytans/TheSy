@@ -1,0 +1,2 @@
+(=> "(len (sort ?ts_ph_Lst_0)) => (len ?ts_ph_Lst_0)" (len (sort ?ts_ph_Lst_0)) (len ?ts_ph_Lst_0))
+(=> "(len ?ts_ph_Lst_0) => (len (sort ?ts_ph_Lst_0))" (len ?ts_ph_Lst_0) (len (sort ?ts_ph_Lst_0)))

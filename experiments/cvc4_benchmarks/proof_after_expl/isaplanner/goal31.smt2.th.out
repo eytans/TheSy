@@ -1,0 +1,34 @@
+20:11:12 [0m[33m[WARN] [0mCollecting statistics
+(leq ?__x0 ?__y1) => (or (= ?__x0 ?__y1) (less ?__x0 ?__y1))
+(or (= ?__x0 ?__y1) (less ?__x0 ?__y1)) => (leq ?__x0 ?__y1)
+(less ?x zero) => false
+(less zero (succ ?x)) => true
+(less (succ ?x) (succ ?y)) => (less ?x ?y)
+(less ?x ?y) => (less (succ ?x) (succ ?y))
+(nmin ?n ?m) => (ite (less ?n ?m) ?n ?m)
+(ite (less ?n ?m) ?n ?m) => (nmin ?n ?m)
+(nmin zero ?ts_ph_Nat_0) => zero
+(leq zero ?ts_ph_Nat_0) => true
+(nmin ?ts_ph_Nat_0 ?ts_ph_Nat_0) => ?ts_ph_Nat_0
+(less ?ts_ph_Nat_0 ?ts_ph_Nat_0) => false
+(less (succ ?ts_ph_Nat_0) ?ts_ph_Nat_0) => false
+(less ?ts_ph_Nat_0 (succ ?ts_ph_Nat_0)) => true
+(nmin (succ zero) ?ts_ph_Nat_0) => (nmin ?ts_ph_Nat_0 (succ zero))
+(nmin ?ts_ph_Nat_0 (succ zero)) => (nmin (succ zero) ?ts_ph_Nat_0)
+(leq (succ zero) (succ ?ts_ph_Nat_0)) => true
+Searcher: (less ?autovar5 (succ ?autovar1))
+Searcher: (less ?autovar5 (succ ?autovar3))
+Searcher: (less zero ?autovar6)
+Searcher: (less (succ ?autovar4) ?autovar6)
+Searcher: (leq ?autovar2 (succ ?autovar1))
+20:11:12 [0m[33m[WARN] [0m ex is: zero
+20:11:12 [0m[33m[WARN] [0m ex is: (succ zero)
+20:11:12 [0m[33m[WARN] [0m ex is: (succ (succ zero))
+20:11:12 [0m[33m[WARN] [0mRunning exploration without proof mode, but goals were given
+20:11:12 [0m[33m[WARN] [0mProof mode: true
+20:11:12 [0m[33m[WARN] [0m ex is: zero
+20:11:12 [0m[33m[WARN] [0m ex is: (succ zero)
+20:11:12 [0m[33m[WARN] [0m ex is: (succ (succ zero))
+20:11:12 [0m[33m[WARN] [0mRunning exploration without proof mode, but goals were given
+20:11:12 [0m[33m[WARN] [0mProof mode: true
+done in 50570

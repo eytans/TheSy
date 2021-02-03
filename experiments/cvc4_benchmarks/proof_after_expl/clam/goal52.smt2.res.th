@@ -1,0 +1,1 @@
+(=> "(len (append ?ts_ph_Lst_0 (cons ?ts_ph_Nat_1 ?ts_ph_Lst_2))) => (succ (len (append ?ts_ph_Lst_0 ?ts_ph_Lst_2)))" (len (append ?ts_ph_Lst_0 (cons ?ts_ph_Nat_1 ?ts_ph_Lst_2))) (succ (len (append ?ts_ph_Lst_0 ?ts_ph_Lst_2))))

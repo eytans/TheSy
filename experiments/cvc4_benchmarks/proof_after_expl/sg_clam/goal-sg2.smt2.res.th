@@ -1,0 +1,2 @@
+(=> "(len (append ?ts_ph_Lst_0 ?ts_ph_Lst_2)) => (len (append ?ts_ph_Lst_2 ?ts_ph_Lst_0))" (len (append ?ts_ph_Lst_0 ?ts_ph_Lst_2)) (len (append ?ts_ph_Lst_2 ?ts_ph_Lst_0)))
+(=> "(len (append ?ts_ph_Lst_2 ?ts_ph_Lst_0)) => (len (append ?ts_ph_Lst_0 ?ts_ph_Lst_2))" (len (append ?ts_ph_Lst_2 ?ts_ph_Lst_0)) (len (append ?ts_ph_Lst_0 ?ts_ph_Lst_2)))

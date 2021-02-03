@@ -1,0 +1,9 @@
+11:22:36 [WARN] Collecting statistics
+11:22:36 [WARN]  ex is: zero
+11:22:36 [WARN]  ex is: (succ zero)
+11:22:36 [WARN]  ex is: (succ (succ zero))
+11:22:36 [WARN] Proof mode: false
+11:22:36 [WARN]  ex is: zero
+11:22:36 [WARN]  ex is: (succ zero)
+11:22:36 [WARN]  ex is: (succ (succ zero))
+11:22:36 [WARN] Proof mode: false

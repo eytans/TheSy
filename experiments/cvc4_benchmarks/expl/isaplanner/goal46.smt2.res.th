@@ -1,0 +1,2 @@
+(=> "(leq zero ?ts_ph_Nat_0) => true" (leq zero ?ts_ph_Nat_0) true)
+(=> "(leq (succ zero) (succ ?ts_ph_Nat_0)) => true" (leq (succ zero) (succ ?ts_ph_Nat_0)) true)

@@ -1,0 +1,1 @@
+(=> "(even (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0)) => true" (even (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0)) true)

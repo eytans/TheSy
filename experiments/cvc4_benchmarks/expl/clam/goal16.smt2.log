@@ -1,0 +1,25 @@
+14:57:53 [WARN] Collecting statistics
+14:57:53 [WARN]  ex is: zero
+14:57:53 [WARN]  ex is: (succ zero)
+14:57:53 [WARN]  ex is: (succ (succ zero))
+14:57:53 [WARN] Proof mode: false
+14:57:53 [WARN]  ex is: zero
+14:57:53 [WARN]  ex is: (succ zero)
+14:57:53 [WARN]  ex is: (succ (succ zero))
+14:57:53 [WARN] Proof mode: false
+14:57:53 [WARN] proved: (plus ?ts_ph_Nat_0 zero) => ?ts_ph_Nat_0
+14:57:53 [WARN] proved: (leq zero ?ts_ph_Nat_0) => true
+14:57:56 [WARN] proved: (plus ?ts_ph_Nat_0 (succ ?ts_ph_Nat_1)) => (succ (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1))
+14:57:56 [WARN] proved: (succ (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1)) => (plus ?ts_ph_Nat_0 (succ ?ts_ph_Nat_1))
+14:57:56 [WARN] proved: (even (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0)) => true
+14:57:56 [WARN] proved: (leq ?ts_ph_Nat_0 (succ ?ts_ph_Nat_0)) => (even (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0))
+14:57:56 [WARN] proved: (even (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0)) => (leq ?ts_ph_Nat_0 (succ ?ts_ph_Nat_0))
+14:57:56 [WARN] proved: (plus (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0) ?ts_ph_Nat_1) => (plus ?ts_ph_Nat_0 (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1))
+14:57:56 [WARN] proved: (plus ?ts_ph_Nat_0 (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1)) => (plus (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0) ?ts_ph_Nat_1)
+14:57:56 [WARN] proved: (leq (succ zero) (succ ?ts_ph_Nat_0)) => true
+14:57:56 [WARN] proved: (leq (succ zero) (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0)) => (leq (succ zero) ?ts_ph_Nat_0)
+14:57:56 [WARN] proved: (leq (succ zero) ?ts_ph_Nat_0) => (leq (succ zero) (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0))
+14:57:56 [WARN] proved: (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1) => (plus ?ts_ph_Nat_1 ?ts_ph_Nat_0)
+14:57:56 [WARN] proved: (plus ?ts_ph_Nat_1 ?ts_ph_Nat_0) => (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1)
+14:57:57 [WARN] proved: (plus (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1) (plus ?ts_ph_Nat_0 ?ts_ph_Nat_2)) => (plus ?ts_ph_Nat_0 (plus ?ts_ph_Nat_0 (plus ?ts_ph_Nat_1 ?ts_ph_Nat_2)))
+14:57:57 [WARN] proved: (plus ?ts_ph_Nat_0 (plus ?ts_ph_Nat_0 (plus ?ts_ph_Nat_1 ?ts_ph_Nat_2))) => (plus (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1) (plus ?ts_ph_Nat_0 ?ts_ph_Nat_2))

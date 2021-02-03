@@ -1,0 +1,38 @@
+19:38:45 [0m[33m[WARN] [0mCollecting statistics
+(leq ?__x0 ?__y1) => (or (= ?__x0 ?__y1) (less ?__x0 ?__y1))
+(or (= ?__x0 ?__y1) (less ?__x0 ?__y1)) => (leq ?__x0 ?__y1)
+(lst-mem ?n ?x) => (mem ?n ?x)
+(mem ?n ?x) => (lst-mem ?n ?x)
+(lst-subset nil ?x) => true
+(lst-subset (cons ?n ?x) ?y) => (and (lst-subset ?x ?y) (lst-mem ?n ?y))
+(and (lst-subset ?x ?y) (lst-mem ?n ?y)) => (lst-subset (cons ?n ?x) ?y)
+(lst-eq ?x ?y) => (and (lst-subset ?x ?y) (lst-subset ?y ?x))
+(and (lst-subset ?x ?y) (lst-subset ?y ?x)) => (lst-eq ?x ?y)
+(lst-union nil ?x) => ?x
+(lst-union (cons ?n ?x) ?y) => (ite (lst-mem ?n ?y) (lst-union ?x ?y) (cons ?n (lst-union ?x ?y)))
+(ite (lst-mem ?n ?y) (lst-union ?x ?y) (cons ?n (lst-union ?x ?y))) => (lst-union (cons ?n ?x) ?y)
+19:38:45 [0m[33m[WARN] [0m ex is: zero
+19:38:45 [0m[33m[WARN] [0m ex is: (succ zero)
+19:38:45 [0m[33m[WARN] [0m ex is: (succ (succ zero))
+19:38:45 [0m[33m[WARN] [0m ex is: nil
+19:38:45 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_0 nil)
+19:38:45 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+19:38:45 [0m[33m[WARN] [0mRunning exploration without proof mode, but goals were given
+19:38:45 [0m[33m[WARN] [0mProof mode: true
+19:38:45 [0m[33m[WARN] [0m ex is: zero
+19:38:45 [0m[33m[WARN] [0m ex is: (succ zero)
+19:38:45 [0m[33m[WARN] [0m ex is: (succ (succ zero))
+19:38:45 [0m[33m[WARN] [0m ex is: nil
+19:38:45 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_0 nil)
+19:38:45 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+19:38:45 [0m[33m[WARN] [0mRunning exploration without proof mode, but goals were given
+19:38:45 [0m[33m[WARN] [0mProof mode: true
+19:38:45 [0m[33m[WARN] [0mproved: (leq zero ?ts_ph_Nat_0) => true
+19:39:15 [0m[33m[WARN] [0mproved: (leq (succ zero) (succ ?ts_ph_Nat_0)) => true
+19:39:15 [0m[33m[WARN] [0mproved: (lst-eq (lst-union ?ts_ph_Lst_0 ?ts_ph_Lst_1) ?ts_ph_Lst_1) => (lst-eq ?ts_ph_Lst_1 (lst-union ?ts_ph_Lst_0 ?ts_ph_Lst_1))
+19:39:15 [0m[33m[WARN] [0mproved: (lst-eq ?ts_ph_Lst_1 (lst-union ?ts_ph_Lst_0 ?ts_ph_Lst_1)) => (lst-eq (lst-union ?ts_ph_Lst_0 ?ts_ph_Lst_1) ?ts_ph_Lst_1)
+19:39:15 [0m[33m[WARN] [0mproved: (lst-subset (lst-union ?ts_ph_Lst_0 nil) nil) => (lst-subset ?ts_ph_Lst_0 nil)
+19:39:15 [0m[33m[WARN] [0mproved: (lst-subset ?ts_ph_Lst_0 nil) => (lst-subset (lst-union ?ts_ph_Lst_0 nil) nil)
+19:39:15 [0m[33m[WARN] [0mproved: (lst-union (lst-union ?ts_ph_Lst_0 nil) nil) => (lst-union ?ts_ph_Lst_0 nil)
+19:39:15 [0m[33m[WARN] [0mproved: (lst-union ?ts_ph_Lst_0 nil) => (lst-union (lst-union ?ts_ph_Lst_0 nil) nil)
+done in 30011

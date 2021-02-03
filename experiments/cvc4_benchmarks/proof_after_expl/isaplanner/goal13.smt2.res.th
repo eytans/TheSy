@@ -1,0 +1,1 @@
+(=> "(drop (succ ?ts_ph_Nat_0) (cons ?ts_ph_Nat_2 ?ts_ph_Lst_1)) => (drop ?ts_ph_Nat_0 ?ts_ph_Lst_1)" (drop (succ ?ts_ph_Nat_0) (cons ?ts_ph_Nat_2 ?ts_ph_Lst_1)) (drop ?ts_ph_Nat_0 ?ts_ph_Lst_1))

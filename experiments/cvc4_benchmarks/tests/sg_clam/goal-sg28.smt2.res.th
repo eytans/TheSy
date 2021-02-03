@@ -1,0 +1,2 @@
+(=> "(revflat ?ts_ph_Tree_0) => (qrevaflat ?ts_ph_Tree_0 nil)" (revflat ?ts_ph_Tree_0) (qrevaflat ?ts_ph_Tree_0 nil))
+(=> "(qrevaflat ?ts_ph_Tree_0 nil) => (revflat ?ts_ph_Tree_0)" (qrevaflat ?ts_ph_Tree_0 nil) (revflat ?ts_ph_Tree_0))

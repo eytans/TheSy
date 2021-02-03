@@ -1,0 +1,16 @@
+19:44:21 [WARN] Collecting statistics
+19:44:21 [WARN]  ex is: zero
+19:44:21 [WARN]  ex is: (succ zero)
+19:44:21 [WARN]  ex is: (succ (succ zero))
+19:44:21 [WARN] Running exploration without proof mode, but goals were given
+19:44:21 [WARN] Proof mode: true
+19:44:21 [WARN]  ex is: zero
+19:44:21 [WARN]  ex is: (succ zero)
+19:44:21 [WARN]  ex is: (succ (succ zero))
+19:44:21 [WARN] Running exploration without proof mode, but goals were given
+19:44:21 [WARN] Proof mode: true
+19:44:21 [WARN] proved: (mult ?ts_ph_Nat_0 zero) => zero
+19:44:21 [WARN] proved: (plus ?ts_ph_Nat_0 zero) => ?ts_ph_Nat_0
+19:44:21 [WARN] proved: (plus ?ts_ph_Nat_0 (succ ?ts_ph_Nat_1)) => (succ (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1))
+19:44:21 [WARN] proved: (succ (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1)) => (plus ?ts_ph_Nat_0 (succ ?ts_ph_Nat_1))
+19:44:21 [WARN] Found all lemmas

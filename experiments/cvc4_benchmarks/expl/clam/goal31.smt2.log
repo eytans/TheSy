@@ -1,0 +1,24 @@
+15:13:12 [WARN] Collecting statistics
+15:13:12 [WARN]  ex is: zero
+15:13:12 [WARN]  ex is: (succ zero)
+15:13:12 [WARN]  ex is: (succ (succ zero))
+15:13:12 [WARN]  ex is: nil
+15:13:12 [WARN]  ex is: (cons autovar_Nat_0 nil)
+15:13:12 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+15:13:12 [WARN] Proof mode: false
+15:13:12 [WARN]  ex is: zero
+15:13:12 [WARN]  ex is: (succ zero)
+15:13:12 [WARN]  ex is: (succ (succ zero))
+15:13:12 [WARN]  ex is: nil
+15:13:12 [WARN]  ex is: (cons autovar_Nat_0 nil)
+15:13:12 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+15:13:12 [WARN] Proof mode: false
+15:13:12 [WARN] proved: (append ?ts_ph_Lst_0 nil) => ?ts_ph_Lst_0
+15:13:12 [WARN] proved: (leq zero ?ts_ph_Nat_0) => true
+15:13:15 [WARN] proved: (leq (succ zero) (succ ?ts_ph_Nat_0)) => true
+15:13:16 [WARN] proved: (append ?ts_ph_Lst_0 (append ?ts_ph_Lst_1 ?ts_ph_Lst_2)) => (append (append ?ts_ph_Lst_0 ?ts_ph_Lst_1) ?ts_ph_Lst_2)
+15:13:16 [WARN] proved: (append (append ?ts_ph_Lst_0 ?ts_ph_Lst_1) ?ts_ph_Lst_2) => (append ?ts_ph_Lst_0 (append ?ts_ph_Lst_1 ?ts_ph_Lst_2))
+15:13:16 [WARN] proved: (append (rev ?ts_ph_Lst_0) ?ts_ph_Lst_1) => (qreva ?ts_ph_Lst_0 ?ts_ph_Lst_1)
+15:13:16 [WARN] proved: (qreva ?ts_ph_Lst_0 ?ts_ph_Lst_1) => (append (rev ?ts_ph_Lst_0) ?ts_ph_Lst_1)
+15:13:16 [WARN] proved: (qreva ?ts_ph_Lst_1 ?ts_ph_Lst_0) => (rev (qreva ?ts_ph_Lst_0 ?ts_ph_Lst_1))
+15:13:16 [WARN] proved: (rev (qreva ?ts_ph_Lst_0 ?ts_ph_Lst_1)) => (qreva ?ts_ph_Lst_1 ?ts_ph_Lst_0)

@@ -1,0 +1,2 @@
+(=> "(rev ?ts_ph_Lst_0) => (qreva ?ts_ph_Lst_0 nil)" (rev ?ts_ph_Lst_0) (qreva ?ts_ph_Lst_0 nil))
+(=> "(qreva ?ts_ph_Lst_0 nil) => (rev ?ts_ph_Lst_0)" (qreva ?ts_ph_Lst_0 nil) (rev ?ts_ph_Lst_0))

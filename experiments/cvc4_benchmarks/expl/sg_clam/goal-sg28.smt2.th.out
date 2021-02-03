@@ -1,0 +1,65 @@
+11:21:39 [0m[33m[WARN] [0mCollecting statistics
+(leq ?__x0 ?__y1) => (or (= ?__x0 ?__y1) (less ?__x0 ?__y1))
+(or (= ?__x0 ?__y1) (less ?__x0 ?__y1)) => (leq ?__x0 ?__y1)
+(qrevaflat leaf ?x) => ?x
+(qrevaflat (node ?d ?l ?r) ?x) => (qrevaflat ?l (cons ?d (qrevaflat ?r ?x)))
+(qrevaflat ?l (cons ?d (qrevaflat ?r ?x))) => (qrevaflat (node ?d ?l ?r) ?x)
+(append nil ?x) => ?x
+(append (cons ?x2 ?y) ?z) => (cons ?x2 (append ?y ?z))
+(cons ?x2 (append ?y ?z)) => (append (cons ?x2 ?y) ?z)
+(rev nil) => nil
+nil => (rev nil)
+(rev (cons ?x3 ?y)) => (append (rev ?y) (cons ?x3 nil))
+(append (rev ?y) (cons ?x3 nil)) => (rev (cons ?x3 ?y))
+(qreva nil ?x) => ?x
+(qreva (cons ?z4 ?x) ?y) => (qreva ?x (cons ?z4 ?y))
+(qreva ?x (cons ?z4 ?y)) => (qreva (cons ?z4 ?x) ?y)
+(revflat leaf) => nil
+nil => (revflat leaf)
+(revflat (node ?d ?l ?r)) => (append (revflat ?l) (cons ?d (revflat ?r)))
+(append (revflat ?l) (cons ?d (revflat ?r))) => (revflat (node ?d ?l ?r))
+(append (revflat ?x5) ?y) => (qrevaflat ?x5 ?y)
+(qrevaflat ?x5 ?y) => (append (revflat ?x5) ?y)
+11:21:39 [0m[33m[WARN] [0m ex is: zero
+11:21:39 [0m[33m[WARN] [0m ex is: (succ zero)
+11:21:39 [0m[33m[WARN] [0m ex is: (succ (succ zero))
+11:21:39 [0m[33m[WARN] [0m ex is: nil
+11:21:39 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_0 nil)
+11:21:39 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+11:21:39 [0m[33m[WARN] [0m ex is: leaf
+11:21:39 [0m[33m[WARN] [0m ex is: (node autovar_Nat_0 leaf leaf)
+11:21:39 [0m[33m[WARN] [0m ex is: (node autovar_Nat_1 (node autovar_Nat_0 leaf leaf) (node autovar_Nat_0 leaf leaf))
+11:21:39 [0m[33m[WARN] [0mProof mode: false
+11:21:39 [0m[33m[WARN] [0m ex is: zero
+11:21:39 [0m[33m[WARN] [0m ex is: (succ zero)
+11:21:39 [0m[33m[WARN] [0m ex is: (succ (succ zero))
+11:21:39 [0m[33m[WARN] [0m ex is: nil
+11:21:39 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_0 nil)
+11:21:39 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+11:21:39 [0m[33m[WARN] [0m ex is: leaf
+11:21:39 [0m[33m[WARN] [0m ex is: (node autovar_Nat_0 leaf leaf)
+11:21:39 [0m[33m[WARN] [0m ex is: (node autovar_Nat_1 (node autovar_Nat_0 leaf leaf) (node autovar_Nat_0 leaf leaf))
+11:21:39 [0m[33m[WARN] [0mProof mode: false
+11:21:39 [0m[33m[WARN] [0mproved: (append ?ts_ph_Lst_0 nil) => ?ts_ph_Lst_0
+11:21:39 [0m[33m[WARN] [0mproved: (leq zero ?ts_ph_Nat_0) => true
+11:22:31 [0m[33m[WARN] [0mproved: (append (qrevaflat ?ts_ph_Tree_0 ?ts_ph_Lst_1) ?ts_ph_Lst_0) => (qrevaflat ?ts_ph_Tree_0 (append ?ts_ph_Lst_1 ?ts_ph_Lst_0))
+11:22:31 [0m[33m[WARN] [0mproved: (qrevaflat ?ts_ph_Tree_0 (append ?ts_ph_Lst_1 ?ts_ph_Lst_0)) => (append (qrevaflat ?ts_ph_Tree_0 ?ts_ph_Lst_1) ?ts_ph_Lst_0)
+11:22:31 [0m[33m[WARN] [0mgeneralized case_split proof as: (append ?ts_ph_Lst_0 (append ?ts_ph_Lst_1 ?ts_ph_Lst_2)) -- (append (append ?ts_ph_Lst_0 ?ts_ph_Lst_1) ?ts_ph_Lst_2)
+11:22:31 [0m[33m[WARN] [0mproved: (append ?ts_ph_Lst_0 (append ?ts_ph_Lst_1 ?ts_ph_Lst_2)) => (append (append ?ts_ph_Lst_0 ?ts_ph_Lst_1) ?ts_ph_Lst_2)
+11:22:31 [0m[33m[WARN] [0mproved: (append (append ?ts_ph_Lst_0 ?ts_ph_Lst_1) ?ts_ph_Lst_2) => (append ?ts_ph_Lst_0 (append ?ts_ph_Lst_1 ?ts_ph_Lst_2))
+11:22:31 [0m[33m[WARN] [0mproved: (append (qreva ?ts_ph_Lst_0 nil) ?ts_ph_Lst_1) => (qreva ?ts_ph_Lst_0 ?ts_ph_Lst_1)
+11:22:31 [0m[33m[WARN] [0mproved: (qreva ?ts_ph_Lst_0 ?ts_ph_Lst_1) => (append (qreva ?ts_ph_Lst_0 nil) ?ts_ph_Lst_1)
+11:22:31 [0m[33m[WARN] [0mproved: (qreva (append ?ts_ph_Lst_0 ?ts_ph_Lst_1) nil) => (qreva ?ts_ph_Lst_1 (rev ?ts_ph_Lst_0))
+11:22:31 [0m[33m[WARN] [0mproved: (qreva ?ts_ph_Lst_1 (rev ?ts_ph_Lst_0)) => (qreva (append ?ts_ph_Lst_0 ?ts_ph_Lst_1) nil)
+11:22:31 [0m[33m[WARN] [0mproved: (qreva (rev ?ts_ph_Lst_0) (revflat ?ts_ph_Tree_1)) => (append ?ts_ph_Lst_0 (revflat ?ts_ph_Tree_1))
+11:22:31 [0m[33m[WARN] [0mproved: (append ?ts_ph_Lst_0 (revflat ?ts_ph_Tree_1)) => (qreva (rev ?ts_ph_Lst_0) (revflat ?ts_ph_Tree_1))
+11:22:31 [0m[33m[WARN] [0mproved: (cons ?ts_ph_Nat_1 (qreva ?ts_ph_Lst_0 nil)) => (cons ?ts_ph_Nat_1 (rev ?ts_ph_Lst_0))
+11:22:31 [0m[33m[WARN] [0mproved: (cons ?ts_ph_Nat_1 (rev ?ts_ph_Lst_0)) => (cons ?ts_ph_Nat_1 (qreva ?ts_ph_Lst_0 nil))
+11:22:31 [0m[33m[WARN] [0mproved: (rev (cons ?ts_ph_Nat_1 ?ts_ph_Lst_0)) => (qreva ?ts_ph_Lst_0 (cons ?ts_ph_Nat_1 nil))
+11:22:31 [0m[33m[WARN] [0mproved: (qreva ?ts_ph_Lst_0 (cons ?ts_ph_Nat_1 nil)) => (rev (cons ?ts_ph_Nat_1 ?ts_ph_Lst_0))
+11:22:31 [0m[33m[WARN] [0mproved: (qreva ?ts_ph_Lst_1 ?ts_ph_Lst_0) => (qreva (qreva ?ts_ph_Lst_0 ?ts_ph_Lst_1) nil)
+11:22:31 [0m[33m[WARN] [0mproved: (qreva (qreva ?ts_ph_Lst_0 ?ts_ph_Lst_1) nil) => (qreva ?ts_ph_Lst_1 ?ts_ph_Lst_0)
+11:22:31 [0m[33m[WARN] [0mproved: (append (rev ?ts_ph_Lst_0) (rev ?ts_ph_Lst_0)) => (rev (append ?ts_ph_Lst_0 ?ts_ph_Lst_0))
+11:22:31 [0m[33m[WARN] [0mproved: (rev (append ?ts_ph_Lst_0 ?ts_ph_Lst_0)) => (append (rev ?ts_ph_Lst_0) (rev ?ts_ph_Lst_0))
+11:22:31 [0m[33m[WARN] [0mproved: (leq (succ zero) (succ ?ts_ph_Nat_0)) => true
+done in 54432

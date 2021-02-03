@@ -1,0 +1,28 @@
+16:14:13 [WARN] Collecting statistics
+16:14:13 [WARN]  ex is: zero
+16:14:13 [WARN]  ex is: (succ zero)
+16:14:13 [WARN]  ex is: (succ (succ zero))
+16:14:13 [WARN] Proof mode: false
+16:14:13 [WARN]  ex is: zero
+16:14:13 [WARN]  ex is: (succ zero)
+16:14:13 [WARN]  ex is: (succ (succ zero))
+16:14:13 [WARN] Proof mode: false
+16:14:13 [WARN] proved: (leq zero ?ts_ph_Nat_0) => true
+16:14:13 [WARN] proved: (plus ?ts_ph_Nat_0 zero) => ?ts_ph_Nat_0
+16:14:15 [WARN] proved: (leq (succ zero) (succ ?ts_ph_Nat_0)) => true
+16:14:15 [WARN] proved: (plus (double ?ts_ph_Nat_0) (succ zero)) => (succ (double ?ts_ph_Nat_0))
+16:14:15 [WARN] proved: (succ (double ?ts_ph_Nat_0)) => (plus (double ?ts_ph_Nat_0) (succ zero))
+16:14:15 [WARN] proved: (leq (succ zero) (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0)) => (leq (succ zero) (double ?ts_ph_Nat_0))
+16:14:15 [WARN] proved: (leq (succ zero) (double ?ts_ph_Nat_0)) => (leq (succ zero) (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0))
+16:14:15 [WARN] proved: (succ (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1)) => (plus ?ts_ph_Nat_0 (succ ?ts_ph_Nat_1))
+16:14:15 [WARN] proved: (plus ?ts_ph_Nat_0 (succ ?ts_ph_Nat_1)) => (succ (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1))
+16:14:15 [WARN] proved: (plus ?ts_ph_Nat_1 ?ts_ph_Nat_0) => (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1)
+16:14:15 [WARN] proved: (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1) => (plus ?ts_ph_Nat_1 ?ts_ph_Nat_0)
+16:14:15 [WARN] proved: (double ?ts_ph_Nat_0) => (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0)
+16:14:15 [WARN] proved: (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0) => (double ?ts_ph_Nat_0)
+16:14:15 [WARN] proved: (plus ?ts_ph_Nat_0 (double ?ts_ph_Nat_1)) => (plus ?ts_ph_Nat_1 (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1))
+16:14:15 [WARN] proved: (plus ?ts_ph_Nat_1 (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1)) => (plus ?ts_ph_Nat_0 (double ?ts_ph_Nat_1))
+16:14:15 [WARN] proved: (double (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1)) => (plus (double ?ts_ph_Nat_0) (double ?ts_ph_Nat_1))
+16:14:15 [WARN] proved: (plus (double ?ts_ph_Nat_0) (double ?ts_ph_Nat_1)) => (double (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1))
+16:14:15 [WARN] proved: (leq (succ zero) (double ?ts_ph_Nat_0)) => (leq (succ zero) ?ts_ph_Nat_0)
+16:14:15 [WARN] proved: (leq (succ zero) ?ts_ph_Nat_0) => (leq (succ zero) (double ?ts_ph_Nat_0))

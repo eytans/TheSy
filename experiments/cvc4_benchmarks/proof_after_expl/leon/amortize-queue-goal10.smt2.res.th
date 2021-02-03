@@ -1,0 +1,2 @@
+(=> "(qreva (qreva ?ts_ph_Lst_0 ?ts_ph_Lst_1) ?ts_ph_Lst_3) => (qreva ?ts_ph_Lst_1 (append ?ts_ph_Lst_0 ?ts_ph_Lst_3))" (qreva (qreva ?ts_ph_Lst_0 ?ts_ph_Lst_1) ?ts_ph_Lst_3) (qreva ?ts_ph_Lst_1 (append ?ts_ph_Lst_0 ?ts_ph_Lst_3)))
+(=> "(qreva ?ts_ph_Lst_1 (append ?ts_ph_Lst_0 ?ts_ph_Lst_3)) => (qreva (qreva ?ts_ph_Lst_0 ?ts_ph_Lst_1) ?ts_ph_Lst_3)" (qreva ?ts_ph_Lst_1 (append ?ts_ph_Lst_0 ?ts_ph_Lst_3)) (qreva (qreva ?ts_ph_Lst_0 ?ts_ph_Lst_1) ?ts_ph_Lst_3))

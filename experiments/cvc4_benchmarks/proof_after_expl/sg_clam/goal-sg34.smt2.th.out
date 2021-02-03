@@ -1,0 +1,37 @@
+20:11:15 [0m[33m[WARN] [0mCollecting statistics
+(leq ?__x0 ?__y1) => (or (= ?__x0 ?__y1) (less ?__x0 ?__y1))
+(or (= ?__x0 ?__y1) (less ?__x0 ?__y1)) => (leq ?__x0 ?__y1)
+(plus zero ?n) => ?n
+(plus (succ ?n) ?m) => (succ (plus ?n ?m))
+(succ (plus ?n ?m)) => (plus (succ ?n) ?m)
+(mult zero ?n) => zero
+(mult (succ ?n) ?m) => (plus (mult ?n ?m) ?m)
+(plus (mult ?n ?m) ?m) => (mult (succ ?n) ?m)
+(qmult zero ?n ?m) => ?m
+(qmult (succ ?n) ?m ?p) => (qmult ?n ?m (plus ?p ?m))
+(qmult ?n ?m (plus ?p ?m)) => (qmult (succ ?n) ?m ?p)
+(plus (mult ?x ?y) ?z) => (qmult ?x ?y ?z)
+(qmult ?x ?y ?z) => (plus (mult ?x ?y) ?z)
+(mult ?ts_ph_Nat_0 zero) => zero
+(qmult ?ts_ph_Nat_0 ?ts_ph_Nat_0 zero) => (mult ?ts_ph_Nat_0 ?ts_ph_Nat_0)
+(mult ?ts_ph_Nat_0 ?ts_ph_Nat_0) => (qmult ?ts_ph_Nat_0 ?ts_ph_Nat_0 zero)
+(leq zero ?ts_ph_Nat_0) => true
+(mult ?ts_ph_Nat_0 ?ts_ph_Nat_1) => (qmult ?ts_ph_Nat_0 ?ts_ph_Nat_1 zero)
+(qmult ?ts_ph_Nat_0 ?ts_ph_Nat_1 zero) => (mult ?ts_ph_Nat_0 ?ts_ph_Nat_1)
+(leq (succ zero) (succ ?ts_ph_Nat_0)) => true
+(leq (succ zero) (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0)) => (leq (succ zero) ?ts_ph_Nat_0)
+(leq (succ zero) ?ts_ph_Nat_0) => (leq (succ zero) (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0))
+Searcher: (leq ?autovar3 (succ ?autovar1))
+Searcher: (leq ?autovar3 (plus ?autovar2 ?autovar2))
+20:11:15 [0m[33m[WARN] [0m ex is: zero
+20:11:15 [0m[33m[WARN] [0m ex is: (succ zero)
+20:11:15 [0m[33m[WARN] [0m ex is: (succ (succ zero))
+20:11:15 [0m[33m[WARN] [0mRunning exploration without proof mode, but goals were given
+20:11:15 [0m[33m[WARN] [0mProof mode: true
+20:11:15 [0m[33m[WARN] [0m ex is: zero
+20:11:15 [0m[33m[WARN] [0m ex is: (succ zero)
+20:11:15 [0m[33m[WARN] [0m ex is: (succ (succ zero))
+20:11:15 [0m[33m[WARN] [0mRunning exploration without proof mode, but goals were given
+20:11:15 [0m[33m[WARN] [0mProof mode: true
+20:11:15 [0m[33m[WARN] [0mFound all lemmas
+done in 1

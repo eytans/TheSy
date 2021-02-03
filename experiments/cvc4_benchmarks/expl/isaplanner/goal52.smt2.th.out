@@ -1,0 +1,38 @@
+11:07:05 [0m[33m[WARN] [0mCollecting statistics
+(leq ?__x0 ?__y1) => (or (= ?__x0 ?__y1) (less ?__x0 ?__y1))
+(or (= ?__x0 ?__y1) (less ?__x0 ?__y1)) => (leq ?__x0 ?__y1)
+(append nil ?x) => ?x
+(append (cons ?x2 ?y) ?z) => (cons ?x2 (append ?y ?z))
+(cons ?x2 (append ?y ?z)) => (append (cons ?x2 ?y) ?z)
+(count ?x3 nil) => zero
+(count ?x4 (cons ?y5 ?z)) => (ite (= ?x4 ?y5) (succ (count ?x4 ?z)) (count ?x4 ?z))
+(ite (= ?x4 ?y5) (succ (count ?x4 ?z)) (count ?x4 ?z)) => (count ?x4 (cons ?y5 ?z))
+(rev nil) => nil
+nil => (rev nil)
+(rev (cons ?x6 ?y)) => (append (rev ?y) (cons ?x6 nil))
+(append (rev ?y) (cons ?x6 nil)) => (rev (cons ?x6 ?y))
+11:07:05 [0m[33m[WARN] [0m ex is: zero
+11:07:05 [0m[33m[WARN] [0m ex is: (succ zero)
+11:07:05 [0m[33m[WARN] [0m ex is: (succ (succ zero))
+11:07:05 [0m[33m[WARN] [0m ex is: nil
+11:07:05 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_0 nil)
+11:07:05 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+11:07:05 [0m[33m[WARN] [0mProof mode: false
+11:07:05 [0m[33m[WARN] [0m ex is: zero
+11:07:05 [0m[33m[WARN] [0m ex is: (succ zero)
+11:07:05 [0m[33m[WARN] [0m ex is: (succ (succ zero))
+11:07:05 [0m[33m[WARN] [0m ex is: nil
+11:07:05 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_0 nil)
+11:07:05 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+11:07:05 [0m[33m[WARN] [0mProof mode: false
+11:07:05 [0m[33m[WARN] [0mproved: (leq zero ?ts_ph_Nat_0) => true
+11:07:05 [0m[33m[WARN] [0mproved: (append ?ts_ph_Lst_0 nil) => ?ts_ph_Lst_0
+11:10:27 [0m[33m[WARN] [0mproved: (leq (succ zero) (succ ?ts_ph_Nat_0)) => true
+11:10:27 [0m[33m[WARN] [0mproved: (append (append ?ts_ph_Lst_0 ?ts_ph_Lst_1) ?ts_ph_Lst_2) => (append ?ts_ph_Lst_0 (append ?ts_ph_Lst_1 ?ts_ph_Lst_2))
+11:10:27 [0m[33m[WARN] [0mproved: (append ?ts_ph_Lst_0 (append ?ts_ph_Lst_1 ?ts_ph_Lst_2)) => (append (append ?ts_ph_Lst_0 ?ts_ph_Lst_1) ?ts_ph_Lst_2)
+11:10:27 [0m[33m[WARN] [0mproved: (rev (append ?ts_ph_Lst_0 ?ts_ph_Lst_1)) => (append (rev ?ts_ph_Lst_1) (rev ?ts_ph_Lst_0))
+11:10:27 [0m[33m[WARN] [0mproved: (append (rev ?ts_ph_Lst_1) (rev ?ts_ph_Lst_0)) => (rev (append ?ts_ph_Lst_0 ?ts_ph_Lst_1))
+11:10:27 [0m[33m[WARN] [0mproved: (rev (rev ?ts_ph_Lst_0)) => ?ts_ph_Lst_0
+11:10:28 [0m[33m[WARN] [0mproved: (count (succ ?ts_ph_Nat_0) (cons ?ts_ph_Nat_0 ?ts_ph_Lst_1)) => (count (succ ?ts_ph_Nat_0) ?ts_ph_Lst_1)
+11:10:28 [0m[33m[WARN] [0mproved: (count (succ ?ts_ph_Nat_0) ?ts_ph_Lst_1) => (count (succ ?ts_ph_Nat_0) (cons ?ts_ph_Nat_0 ?ts_ph_Lst_1))
+done in 203071

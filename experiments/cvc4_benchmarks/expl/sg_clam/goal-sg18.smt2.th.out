@@ -1,0 +1,38 @@
+12:24:20 [0m[33m[WARN] [0mCollecting statistics
+(leq ?__x0 ?__y1) => (or (= ?__x0 ?__y1) (less ?__x0 ?__y1))
+(or (= ?__x0 ?__y1) (less ?__x0 ?__y1)) => (leq ?__x0 ?__y1)
+(append nil ?x) => ?x
+(append (cons ?x2 ?y) ?z) => (cons ?x2 (append ?y ?z))
+(cons ?x2 (append ?y ?z)) => (append (cons ?x2 ?y) ?z)
+(rev nil) => nil
+nil => (rev nil)
+(rev (cons ?x3 ?y)) => (append (rev ?y) (cons ?x3 nil))
+(append (rev ?y) (cons ?x3 nil)) => (rev (cons ?x3 ?y))
+(append (append ?x (cons ?y4 nil)) ?z) => (append ?x (cons ?y4 ?z))
+(append ?x (cons ?y4 ?z)) => (append (append ?x (cons ?y4 nil)) ?z)
+(append (append ?x ?y) (cons ?z5 nil)) => (append ?x (append ?y (cons ?z5 nil)))
+(append ?x (append ?y (cons ?z5 nil))) => (append (append ?x ?y) (cons ?z5 nil))
+12:24:20 [0m[33m[WARN] [0m ex is: zero
+12:24:20 [0m[33m[WARN] [0m ex is: (succ zero)
+12:24:20 [0m[33m[WARN] [0m ex is: (succ (succ zero))
+12:24:20 [0m[33m[WARN] [0m ex is: nil
+12:24:20 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_0 nil)
+12:24:20 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+12:24:20 [0m[33m[WARN] [0mProof mode: false
+12:24:20 [0m[33m[WARN] [0m ex is: zero
+12:24:20 [0m[33m[WARN] [0m ex is: (succ zero)
+12:24:20 [0m[33m[WARN] [0m ex is: (succ (succ zero))
+12:24:20 [0m[33m[WARN] [0m ex is: nil
+12:24:20 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_0 nil)
+12:24:20 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+12:24:20 [0m[33m[WARN] [0mProof mode: false
+12:24:20 [0m[33m[WARN] [0mproved: (append ?ts_ph_Lst_0 nil) => ?ts_ph_Lst_0
+12:24:20 [0m[33m[WARN] [0mproved: (leq zero ?ts_ph_Nat_0) => true
+12:24:23 [0m[33m[WARN] [0mgeneralized case_split proof as: (append (append ?ts_ph_Lst_0 ?ts_ph_Lst_1) ?ts_ph_Lst_2) -- (append ?ts_ph_Lst_0 (append ?ts_ph_Lst_1 ?ts_ph_Lst_2))
+12:24:23 [0m[33m[WARN] [0mproved: (append (append ?ts_ph_Lst_0 ?ts_ph_Lst_1) ?ts_ph_Lst_2) => (append ?ts_ph_Lst_0 (append ?ts_ph_Lst_1 ?ts_ph_Lst_2))
+12:24:23 [0m[33m[WARN] [0mproved: (append ?ts_ph_Lst_0 (append ?ts_ph_Lst_1 ?ts_ph_Lst_2)) => (append (append ?ts_ph_Lst_0 ?ts_ph_Lst_1) ?ts_ph_Lst_2)
+12:24:23 [0m[33m[WARN] [0mproved: (leq (succ zero) (succ ?ts_ph_Nat_0)) => true
+12:24:23 [0m[33m[WARN] [0mproved: (rev (append ?ts_ph_Lst_0 ?ts_ph_Lst_1)) => (append (rev ?ts_ph_Lst_1) (rev ?ts_ph_Lst_0))
+12:24:23 [0m[33m[WARN] [0mproved: (append (rev ?ts_ph_Lst_1) (rev ?ts_ph_Lst_0)) => (rev (append ?ts_ph_Lst_0 ?ts_ph_Lst_1))
+12:24:23 [0m[33m[WARN] [0mproved: (rev (rev ?ts_ph_Lst_0)) => ?ts_ph_Lst_0
+done in 2743

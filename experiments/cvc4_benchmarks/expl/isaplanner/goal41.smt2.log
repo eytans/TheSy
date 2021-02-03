@@ -1,0 +1,23 @@
+12:01:38 [WARN] Collecting statistics
+12:01:38 [WARN]  ex is: zero
+12:01:38 [WARN]  ex is: (succ zero)
+12:01:38 [WARN]  ex is: (succ (succ zero))
+12:01:38 [WARN]  ex is: nil
+12:01:38 [WARN]  ex is: (cons autovar_Nat_0 nil)
+12:01:38 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+12:01:38 [WARN] Proof mode: false
+12:01:38 [WARN]  ex is: zero
+12:01:38 [WARN]  ex is: (succ zero)
+12:01:38 [WARN]  ex is: (succ (succ zero))
+12:01:38 [WARN]  ex is: nil
+12:01:38 [WARN]  ex is: (cons autovar_Nat_0 nil)
+12:01:38 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+12:01:38 [WARN] Proof mode: false
+12:01:42 [WARN] proved: (leq zero ?ts_ph_Nat_0) => true
+12:14:06 [WARN] proved: (leq (succ zero) (succ ?ts_ph_Nat_0)) => true
+12:14:07 [WARN] proved: (take ?ts_ph_Nat_1 (lmap ?ts_ph_Lst_0)) => (lmap (take ?ts_ph_Nat_1 ?ts_ph_Lst_0))
+12:14:07 [WARN] proved: (lmap (take ?ts_ph_Nat_1 ?ts_ph_Lst_0)) => (take ?ts_ph_Nat_1 (lmap ?ts_ph_Lst_0))
+12:14:09 [WARN] proved: (take ?ts_ph_Nat_1 ?ts_ph_Lst_0) => (take ?ts_ph_Nat_1 (take ?ts_ph_Nat_1 ?ts_ph_Lst_0))
+12:14:09 [WARN] proved: (take ?ts_ph_Nat_1 (take ?ts_ph_Nat_1 ?ts_ph_Lst_0)) => (take ?ts_ph_Nat_1 ?ts_ph_Lst_0)
+12:14:13 [WARN] proved: (take (succ ?ts_ph_Nat_1) (take ?ts_ph_Nat_1 ?ts_ph_Lst_0)) => (take ?ts_ph_Nat_1 ?ts_ph_Lst_0)
+12:14:13 [WARN] proved: (take ?ts_ph_Nat_1 ?ts_ph_Lst_0) => (take (succ ?ts_ph_Nat_1) (take ?ts_ph_Nat_1 ?ts_ph_Lst_0))

@@ -1,0 +1,1 @@
+(=> "(rev (append (rev ?ts_ph_Lst_0) nil)) => ?ts_ph_Lst_0" (rev (append (rev ?ts_ph_Lst_0) nil)) ?ts_ph_Lst_0)

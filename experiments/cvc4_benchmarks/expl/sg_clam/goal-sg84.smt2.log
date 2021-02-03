@@ -1,0 +1,12 @@
+12:44:57 [WARN] Collecting statistics
+12:44:57 [WARN]  ex is: zero
+12:44:57 [WARN]  ex is: (succ zero)
+12:44:57 [WARN]  ex is: (succ (succ zero))
+12:44:57 [WARN] Proof mode: false
+12:44:57 [WARN]  ex is: zero
+12:44:57 [WARN]  ex is: (succ zero)
+12:44:57 [WARN]  ex is: (succ (succ zero))
+12:44:57 [WARN] Proof mode: false
+13:37:08 [WARN] proved: (qfac ?ts_ph_Nat_0 zero) => zero
+13:37:09 [WARN] proved: (mult ?ts_ph_Nat_0 zero) => zero
+13:40:54 [WARN] proved: (plus ?ts_ph_Nat_0 zero) => ?ts_ph_Nat_0

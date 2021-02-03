@@ -1,0 +1,33 @@
+19:18:32 [0m[33m[WARN] [0mCollecting statistics
+(leq ?__x0 ?__y1) => (or (= ?__x0 ?__y1) (less ?__x0 ?__y1))
+(or (= ?__x0 ?__y1) (less ?__x0 ?__y1)) => (leq ?__x0 ?__y1)
+(less ?x zero) => false
+(less zero (succ ?x)) => true
+(less (succ ?x) (succ ?y)) => (less ?x ?y)
+(less ?x ?y) => (less (succ ?x) (succ ?y))
+(nmin ?n ?m) => (ite (less ?n ?m) ?n ?m)
+(ite (less ?n ?m) ?n ?m) => (nmin ?n ?m)
+Searcher: (less ?autovar5 (succ ?autovar1))
+Searcher: (less ?autovar5 (succ ?autovar3))
+Searcher: (less zero ?autovar6)
+Searcher: (less (succ ?autovar4) ?autovar6)
+19:18:32 [0m[33m[WARN] [0m ex is: zero
+19:18:32 [0m[33m[WARN] [0m ex is: (succ zero)
+19:18:32 [0m[33m[WARN] [0m ex is: (succ (succ zero))
+19:18:32 [0m[33m[WARN] [0mRunning exploration without proof mode, but goals were given
+19:18:32 [0m[33m[WARN] [0mProof mode: true
+19:18:32 [0m[33m[WARN] [0m ex is: zero
+19:18:32 [0m[33m[WARN] [0m ex is: (succ zero)
+19:18:32 [0m[33m[WARN] [0m ex is: (succ (succ zero))
+19:18:32 [0m[33m[WARN] [0mRunning exploration without proof mode, but goals were given
+19:18:32 [0m[33m[WARN] [0mProof mode: true
+19:18:32 [0m[33m[WARN] [0mproved: (nmin zero ?ts_ph_Nat_0) => zero
+19:18:32 [0m[33m[WARN] [0mproved: (nmin ?ts_ph_Nat_0 ?ts_ph_Nat_0) => ?ts_ph_Nat_0
+19:18:32 [0m[33m[WARN] [0mproved: (less ?ts_ph_Nat_0 ?ts_ph_Nat_0) => false
+19:18:32 [0m[33m[WARN] [0mproved: (leq zero ?ts_ph_Nat_0) => true
+19:19:27 [0m[33m[WARN] [0mproved: (less ?ts_ph_Nat_0 (succ ?ts_ph_Nat_0)) => true
+19:19:27 [0m[33m[WARN] [0mproved: (nmin (succ zero) ?ts_ph_Nat_0) => (nmin ?ts_ph_Nat_0 (succ zero))
+19:19:27 [0m[33m[WARN] [0mproved: (nmin ?ts_ph_Nat_0 (succ zero)) => (nmin (succ zero) ?ts_ph_Nat_0)
+19:19:27 [0m[33m[WARN] [0mproved: (less (succ ?ts_ph_Nat_0) ?ts_ph_Nat_0) => false
+19:19:27 [0m[33m[WARN] [0mproved: (leq (succ zero) (succ ?ts_ph_Nat_0)) => true
+done in 56575

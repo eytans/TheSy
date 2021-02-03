@@ -1,0 +1,45 @@
+20:08:31 [0m[33m[WARN] [0mCollecting statistics
+(leq ?__x0 ?__y1) => (or (= ?__x0 ?__y1) (less ?__x0 ?__y1))
+(or (= ?__x0 ?__y1) (less ?__x0 ?__y1)) => (leq ?__x0 ?__y1)
+(plus zero ?n) => ?n
+(plus (succ ?n) ?m) => (succ (plus ?n ?m))
+(succ (plus ?n ?m)) => (plus (succ ?n) ?m)
+(count ?x nil) => zero
+(count ?x (cons ?y ?z)) => (ite (= ?x ?y) (succ (count ?x ?z)) (count ?x ?z))
+(ite (= ?x ?y) (succ (count ?x ?z)) (count ?x ?z)) => (count ?x (cons ?y ?z))
+(plus ?ts_ph_Nat_0 zero) => ?ts_ph_Nat_0
+(leq zero ?ts_ph_Nat_0) => true
+(succ ?ts_ph_Nat_0) => (plus ?ts_ph_Nat_0 (succ zero))
+(plus ?ts_ph_Nat_0 (succ zero)) => (succ ?ts_ph_Nat_0)
+(leq (succ zero) (succ ?ts_ph_Nat_0)) => true
+(succ (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1)) => (plus ?ts_ph_Nat_0 (succ ?ts_ph_Nat_1))
+(plus ?ts_ph_Nat_0 (succ ?ts_ph_Nat_1)) => (succ (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1))
+(plus ?ts_ph_Nat_0 ?ts_ph_Nat_1) => (plus ?ts_ph_Nat_1 ?ts_ph_Nat_0)
+(plus ?ts_ph_Nat_1 ?ts_ph_Nat_0) => (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1)
+(plus ?ts_ph_Nat_0 (plus ?ts_ph_Nat_1 ?ts_ph_Nat_2)) => (plus ?ts_ph_Nat_1 (plus ?ts_ph_Nat_0 ?ts_ph_Nat_2))
+(plus ?ts_ph_Nat_1 (plus ?ts_ph_Nat_0 ?ts_ph_Nat_2)) => (plus ?ts_ph_Nat_0 (plus ?ts_ph_Nat_1 ?ts_ph_Nat_2))
+(count (succ ?ts_ph_Nat_0) ?ts_ph_Lst_1) => (count (succ ?ts_ph_Nat_0) (cons ?ts_ph_Nat_0 ?ts_ph_Lst_1))
+(count (succ ?ts_ph_Nat_0) (cons ?ts_ph_Nat_0 ?ts_ph_Lst_1)) => (count (succ ?ts_ph_Nat_0) ?ts_ph_Lst_1)
+(leq (succ zero) ?ts_ph_Nat_0) => (leq (succ zero) (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0))
+(leq (succ zero) (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0)) => (leq (succ zero) ?ts_ph_Nat_0)
+Searcher: (count (succ ?autovar1) ?autovar2)
+Searcher: (leq ?autovar3 (succ ?autovar1))
+Searcher: (leq ?autovar3 (plus ?autovar2 ?autovar2))
+20:08:31 [0m[33m[WARN] [0m ex is: zero
+20:08:31 [0m[33m[WARN] [0m ex is: (succ zero)
+20:08:31 [0m[33m[WARN] [0m ex is: (succ (succ zero))
+20:08:31 [0m[33m[WARN] [0m ex is: nil
+20:08:31 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_0 nil)
+20:08:31 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+20:08:31 [0m[33m[WARN] [0mRunning exploration without proof mode, but goals were given
+20:08:31 [0m[33m[WARN] [0mProof mode: true
+20:08:31 [0m[33m[WARN] [0m ex is: zero
+20:08:31 [0m[33m[WARN] [0m ex is: (succ zero)
+20:08:31 [0m[33m[WARN] [0m ex is: (succ (succ zero))
+20:08:31 [0m[33m[WARN] [0m ex is: nil
+20:08:31 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_0 nil)
+20:08:31 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+20:08:31 [0m[33m[WARN] [0mRunning exploration without proof mode, but goals were given
+20:08:31 [0m[33m[WARN] [0mProof mode: true
+20:08:31 [0m[33m[WARN] [0mFound all lemmas
+done in 3

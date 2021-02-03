@@ -1,0 +1,2 @@
+(=> "(less ?ts_ph_Nat_0 (len ?ts_ph_Lst_1)) |> (last (drop ?ts_ph_Nat_0 ?ts_ph_Lst_1)) => (last ?ts_ph_Lst_1)" (=> (less ?ts_ph_Nat_0 (len ?ts_ph_Lst_1)) (= (last (drop ?ts_ph_Nat_0 ?ts_ph_Lst_1)) (last ?ts_ph_Lst_1))))
+(=> "(less ?ts_ph_Nat_0 (len ?ts_ph_Lst_1)) |> (last ?ts_ph_Lst_1) => (last (drop ?ts_ph_Nat_0 ?ts_ph_Lst_1))" (=> (less ?ts_ph_Nat_0 (len ?ts_ph_Lst_1)) (= (last ?ts_ph_Lst_1) (last (drop ?ts_ph_Nat_0 ?ts_ph_Lst_1)))))

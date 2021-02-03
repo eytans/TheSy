@@ -1,0 +1,26 @@
+15:58:08 [WARN] Collecting statistics
+15:58:08 [WARN]  ex is: zero
+15:58:08 [WARN]  ex is: (succ zero)
+15:58:08 [WARN]  ex is: (succ (succ zero))
+15:58:08 [WARN] Proof mode: false
+15:58:08 [WARN]  ex is: zero
+15:58:08 [WARN]  ex is: (succ zero)
+15:58:08 [WARN]  ex is: (succ (succ zero))
+15:58:08 [WARN] Proof mode: false
+15:58:08 [WARN] proved: (mult ?ts_ph_Nat_0 zero) => zero
+15:58:08 [WARN] proved: (plus ?ts_ph_Nat_0 zero) => ?ts_ph_Nat_0
+15:58:08 [WARN] proved: (plus ?ts_ph_Nat_0 (succ ?ts_ph_Nat_1)) => (succ (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1))
+15:58:08 [WARN] proved: (succ (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1)) => (plus ?ts_ph_Nat_0 (succ ?ts_ph_Nat_1))
+15:58:08 [WARN] proved: (plus (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0) ?ts_ph_Nat_1) => (plus ?ts_ph_Nat_0 (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1))
+15:58:08 [WARN] proved: (plus ?ts_ph_Nat_0 (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1)) => (plus (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0) ?ts_ph_Nat_1)
+15:58:08 [WARN] proved: (plus (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1) ?ts_ph_Nat_0) => (plus ?ts_ph_Nat_0 (plus ?ts_ph_Nat_1 ?ts_ph_Nat_0))
+15:58:08 [WARN] proved: (plus ?ts_ph_Nat_0 (plus ?ts_ph_Nat_1 ?ts_ph_Nat_0)) => (plus (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1) ?ts_ph_Nat_0)
+15:58:08 [WARN] proved: (plus ?ts_ph_Nat_1 ?ts_ph_Nat_0) => (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1)
+15:58:08 [WARN] proved: (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1) => (plus ?ts_ph_Nat_1 ?ts_ph_Nat_0)
+15:58:08 [WARN] proved: (mult ?ts_ph_Nat_0 (succ zero)) => ?ts_ph_Nat_0
+15:58:09 [WARN] proved: (mult (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0) ?ts_ph_Nat_1) => (mult ?ts_ph_Nat_0 (plus ?ts_ph_Nat_1 ?ts_ph_Nat_1))
+15:58:09 [WARN] proved: (mult ?ts_ph_Nat_0 (plus ?ts_ph_Nat_1 ?ts_ph_Nat_1)) => (mult (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0) ?ts_ph_Nat_1)
+15:58:09 [WARN] proved: (plus (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1) (plus ?ts_ph_Nat_0 ?ts_ph_Nat_2)) => (plus (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0) (plus ?ts_ph_Nat_1 ?ts_ph_Nat_2))
+15:58:09 [WARN] proved: (plus (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0) (plus ?ts_ph_Nat_1 ?ts_ph_Nat_2)) => (plus (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1) (plus ?ts_ph_Nat_0 ?ts_ph_Nat_2))
+15:58:11 [WARN] proved: (mult ?ts_ph_Nat_0 (plus ?ts_ph_Nat_1 ?ts_ph_Nat_1)) => (plus (mult ?ts_ph_Nat_0 ?ts_ph_Nat_1) (mult ?ts_ph_Nat_0 ?ts_ph_Nat_1))
+15:58:11 [WARN] proved: (plus (mult ?ts_ph_Nat_0 ?ts_ph_Nat_1) (mult ?ts_ph_Nat_0 ?ts_ph_Nat_1)) => (mult ?ts_ph_Nat_0 (plus ?ts_ph_Nat_1 ?ts_ph_Nat_1))

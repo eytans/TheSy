@@ -1,0 +1,20 @@
+15:17:12 [WARN] Collecting statistics
+15:17:12 [WARN]  ex is: zero
+15:17:12 [WARN]  ex is: (succ zero)
+15:17:12 [WARN]  ex is: (succ (succ zero))
+15:17:12 [WARN]  ex is: nil
+15:17:12 [WARN]  ex is: (cons autovar_Nat_0 nil)
+15:17:12 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+15:17:12 [WARN] Proof mode: false
+15:17:12 [WARN]  ex is: zero
+15:17:12 [WARN]  ex is: (succ zero)
+15:17:12 [WARN]  ex is: (succ (succ zero))
+15:17:12 [WARN]  ex is: nil
+15:17:12 [WARN]  ex is: (cons autovar_Nat_0 nil)
+15:17:12 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+15:17:12 [WARN] Proof mode: false
+15:17:12 [WARN] proved: (leq zero ?ts_ph_Nat_0) => true
+15:17:46 [WARN] proved: (leq (succ zero) (succ ?ts_ph_Nat_0)) => true
+15:17:46 [WARN] proved: (lst-subset (lst-intersection ?ts_ph_Lst_0 ?ts_ph_Lst_1) ?ts_ph_Lst_1) => true
+15:17:46 [WARN] proved: (lst-intersection ?ts_ph_Lst_0 ?ts_ph_Lst_1) => (lst-intersection (lst-intersection ?ts_ph_Lst_0 ?ts_ph_Lst_1) ?ts_ph_Lst_1)
+15:17:46 [WARN] proved: (lst-intersection (lst-intersection ?ts_ph_Lst_0 ?ts_ph_Lst_1) ?ts_ph_Lst_1) => (lst-intersection ?ts_ph_Lst_0 ?ts_ph_Lst_1)

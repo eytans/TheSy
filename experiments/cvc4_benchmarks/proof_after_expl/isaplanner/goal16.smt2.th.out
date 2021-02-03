@@ -1,0 +1,26 @@
+19:56:11 [0m[33m[WARN] [0mCollecting statistics
+(leq ?__x0 ?__y1) => (or (= ?__x0 ?__y1) (less ?__x0 ?__y1))
+(or (= ?__x0 ?__y1) (less ?__x0 ?__y1)) => (leq ?__x0 ?__y1)
+(last (cons ?x ?y)) => (ite (= ?y nil) ?x (last ?y))
+(ite (= ?y nil) ?x (last ?y)) => (last (cons ?x ?y))
+(leq zero ?ts_ph_Nat_0) => true
+(leq (succ zero) (succ ?ts_ph_Nat_0)) => true
+Searcher: (leq ?autovar2 (succ ?autovar1))
+19:56:11 [0m[33m[WARN] [0m ex is: zero
+19:56:11 [0m[33m[WARN] [0m ex is: (succ zero)
+19:56:11 [0m[33m[WARN] [0m ex is: (succ (succ zero))
+19:56:11 [0m[33m[WARN] [0m ex is: nil
+19:56:11 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_0 nil)
+19:56:11 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+19:56:11 [0m[33m[WARN] [0mRunning exploration without proof mode, but goals were given
+19:56:11 [0m[33m[WARN] [0mProof mode: true
+19:56:11 [0m[33m[WARN] [0m ex is: zero
+19:56:11 [0m[33m[WARN] [0m ex is: (succ zero)
+19:56:11 [0m[33m[WARN] [0m ex is: (succ (succ zero))
+19:56:11 [0m[33m[WARN] [0m ex is: nil
+19:56:11 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_0 nil)
+19:56:11 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+19:56:11 [0m[33m[WARN] [0mRunning exploration without proof mode, but goals were given
+19:56:11 [0m[33m[WARN] [0mProof mode: true
+19:56:11 [0m[33m[WARN] [0mFound all lemmas
+done in 1

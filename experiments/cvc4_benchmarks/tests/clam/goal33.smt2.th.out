@@ -1,0 +1,49 @@
+19:35:44 [0m[33m[WARN] [0mCollecting statistics
+(leq ?__x0 ?__y1) => (or (= ?__x0 ?__y1) (less ?__x0 ?__y1))
+(or (= ?__x0 ?__y1) (less ?__x0 ?__y1)) => (leq ?__x0 ?__y1)
+(plus zero ?n) => ?n
+(plus (succ ?n) ?m) => (succ (plus ?n ?m))
+(succ (plus ?n ?m)) => (plus (succ ?n) ?m)
+(mult zero ?n) => zero
+(mult (succ ?n) ?m) => (plus (mult ?n ?m) ?m)
+(plus (mult ?n ?m) ?m) => (mult (succ ?n) ?m)
+(fac zero) => (succ zero)
+(succ zero) => (fac zero)
+(fac (succ ?n)) => (mult (fac ?n) ?n)
+(mult (fac ?n) ?n) => (fac (succ ?n))
+(qfac zero ?n) => ?n
+(qfac (succ ?n) ?m) => (qfac ?n (mult ?m ?n))
+(qfac ?n (mult ?m ?n)) => (qfac (succ ?n) ?m)
+19:35:44 [0m[33m[WARN] [0m ex is: zero
+19:35:44 [0m[33m[WARN] [0m ex is: (succ zero)
+19:35:44 [0m[33m[WARN] [0m ex is: (succ (succ zero))
+19:35:44 [0m[33m[WARN] [0mRunning exploration without proof mode, but goals were given
+19:35:44 [0m[33m[WARN] [0mProof mode: true
+19:35:44 [0m[33m[WARN] [0m ex is: zero
+19:35:44 [0m[33m[WARN] [0m ex is: (succ zero)
+19:35:44 [0m[33m[WARN] [0m ex is: (succ (succ zero))
+19:35:44 [0m[33m[WARN] [0mRunning exploration without proof mode, but goals were given
+19:35:44 [0m[33m[WARN] [0mProof mode: true
+19:35:44 [0m[33m[WARN] [0mproved: (plus ?ts_ph_Nat_0 zero) => ?ts_ph_Nat_0
+19:35:44 [0m[33m[WARN] [0mproved: (leq zero ?ts_ph_Nat_0) => true
+19:35:44 [0m[33m[WARN] [0mproved: (mult ?ts_ph_Nat_0 zero) => zero
+19:35:44 [0m[33m[WARN] [0mproved: (qfac ?ts_ph_Nat_0 zero) => zero
+19:36:24 [0m[33m[WARN] [0mproved: (qfac (succ ?ts_ph_Nat_0) ?ts_ph_Nat_1) => (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_0)
+19:36:25 [0m[33m[WARN] [0mproved: (plus ?ts_ph_Nat_0 (succ ?ts_ph_Nat_1)) => (succ (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1))
+19:36:25 [0m[33m[WARN] [0mproved: (succ (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1)) => (plus ?ts_ph_Nat_0 (succ ?ts_ph_Nat_1))
+19:36:25 [0m[33m[WARN] [0mproved: (succ (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_0)) => (fac (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_0))
+19:36:25 [0m[33m[WARN] [0mproved: (fac (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_0)) => (succ (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_0))
+19:36:25 [0m[33m[WARN] [0mproved: (qfac ?ts_ph_Nat_0 (mult ?ts_ph_Nat_0 ?ts_ph_Nat_1)) => (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_0)
+19:36:25 [0m[33m[WARN] [0mproved: (plus (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_1) ?ts_ph_Nat_0) => (plus ?ts_ph_Nat_0 (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_1))
+19:36:25 [0m[33m[WARN] [0mproved: (plus ?ts_ph_Nat_0 (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_1)) => (plus (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_1) ?ts_ph_Nat_0)
+19:36:25 [0m[33m[WARN] [0mproved: (mult ?ts_ph_Nat_1 (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_0)) => (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_0)
+19:36:25 [0m[33m[WARN] [0mproved: (qfac ?ts_ph_Nat_1 (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_0)) => (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_0)
+19:36:25 [0m[33m[WARN] [0mproved: (mult ?ts_ph_Nat_0 (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_1)) => (qfac ?ts_ph_Nat_1 (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_0))
+19:36:25 [0m[33m[WARN] [0mproved: (qfac ?ts_ph_Nat_1 (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_0)) => (mult ?ts_ph_Nat_0 (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_1))
+19:36:25 [0m[33m[WARN] [0mproved: (qfac ?ts_ph_Nat_0 (qfac ?ts_ph_Nat_1 ?ts_ph_Nat_0)) => (qfac (succ ?ts_ph_Nat_0) (fac ?ts_ph_Nat_1))
+19:36:25 [0m[33m[WARN] [0mproved: (qfac (succ ?ts_ph_Nat_0) (fac ?ts_ph_Nat_1)) => (qfac ?ts_ph_Nat_0 (qfac ?ts_ph_Nat_1 ?ts_ph_Nat_0))
+19:36:25 [0m[33m[WARN] [0mproved: (qfac (succ ?ts_ph_Nat_0) (succ ?ts_ph_Nat_1)) => zero
+19:36:25 [0m[33m[WARN] [0mproved: (qfac ?ts_ph_Nat_0 (qfac ?ts_ph_Nat_1 ?ts_ph_Nat_0)) => zero
+19:36:25 [0m[33m[WARN] [0mproved: (mult (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_1) ?ts_ph_Nat_0) => (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_0)
+19:36:25 [0m[33m[WARN] [0mFound all lemmas
+done in 41122

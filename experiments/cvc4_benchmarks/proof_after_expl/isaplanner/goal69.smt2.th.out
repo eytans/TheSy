@@ -1,0 +1,49 @@
+19:56:11 [0m[33m[WARN] [0mCollecting statistics
+(leq ?__x0 ?__y1) => (or (= ?__x0 ?__y1) (less ?__x0 ?__y1))
+(or (= ?__x0 ?__y1) (less ?__x0 ?__y1)) => (leq ?__x0 ?__y1)
+(less ?x zero) => false
+(less zero (succ ?x)) => true
+(less (succ ?x) (succ ?y)) => (less ?x ?y)
+(less ?x ?y) => (less (succ ?x) (succ ?y))
+(len nil) => zero
+zero => (len nil)
+(len (cons ?x ?y2)) => (succ (len ?y2))
+(delete ?x nil) => nil
+(delete ?x (cons ?y ?z)) => (ite (= ?x ?y) (delete ?x ?z) (cons ?y (delete ?x ?z)))
+(ite (= ?x ?y) (delete ?x ?z) (cons ?y (delete ?x ?z))) => (delete ?x (cons ?y ?z))
+(leq zero ?ts_ph_Nat_0) => true
+(less ?ts_ph_Nat_0 ?ts_ph_Nat_0) => false
+(less (succ ?ts_ph_Nat_0) ?ts_ph_Nat_0) => false
+(leq (succ zero) (succ ?ts_ph_Nat_0)) => true
+(leq (succ zero) (succ ?ts_ph_Nat_0)) => (less ?ts_ph_Nat_0 (succ ?ts_ph_Nat_0))
+(less ?ts_ph_Nat_0 (succ ?ts_ph_Nat_0)) => (leq (succ zero) (succ ?ts_ph_Nat_0))
+(leq (succ zero) ?ts_ph_Nat_0) => (less zero ?ts_ph_Nat_0)
+(less zero ?ts_ph_Nat_0) => (leq (succ zero) ?ts_ph_Nat_0)
+(delete ?ts_ph_Nat_1 (delete ?ts_ph_Nat_1 ?ts_ph_Lst_0)) => (delete ?ts_ph_Nat_1 ?ts_ph_Lst_0)
+(delete ?ts_ph_Nat_1 ?ts_ph_Lst_0) => (delete ?ts_ph_Nat_1 (delete ?ts_ph_Nat_1 ?ts_ph_Lst_0))
+(delete (succ ?ts_ph_Nat_0) (cons ?ts_ph_Nat_0 nil)) => (cons ?ts_ph_Nat_0 nil)
+(cons ?ts_ph_Nat_0 nil) => (delete (succ ?ts_ph_Nat_0) (cons ?ts_ph_Nat_0 nil))
+Searcher: (less ?autovar5 (succ ?autovar1))
+Searcher: (less ?autovar5 (succ ?autovar3))
+Searcher: (less zero ?autovar6)
+Searcher: (less (succ ?autovar4) ?autovar6)
+Searcher: (delete (succ ?autovar1) ?autovar2)
+Searcher: (leq ?autovar3 (succ ?autovar1))
+Searcher: (leq ?autovar3 (succ ?autovar2))
+19:56:11 [0m[33m[WARN] [0m ex is: zero
+19:56:11 [0m[33m[WARN] [0m ex is: (succ zero)
+19:56:11 [0m[33m[WARN] [0m ex is: (succ (succ zero))
+19:56:11 [0m[33m[WARN] [0m ex is: nil
+19:56:11 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_0 nil)
+19:56:11 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+19:56:11 [0m[33m[WARN] [0mRunning exploration without proof mode, but goals were given
+19:56:11 [0m[33m[WARN] [0mProof mode: true
+19:56:11 [0m[33m[WARN] [0m ex is: zero
+19:56:11 [0m[33m[WARN] [0m ex is: (succ zero)
+19:56:11 [0m[33m[WARN] [0m ex is: (succ (succ zero))
+19:56:11 [0m[33m[WARN] [0m ex is: nil
+19:56:11 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_0 nil)
+19:56:11 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+19:56:11 [0m[33m[WARN] [0mRunning exploration without proof mode, but goals were given
+19:56:11 [0m[33m[WARN] [0mProof mode: true
+done in 269034

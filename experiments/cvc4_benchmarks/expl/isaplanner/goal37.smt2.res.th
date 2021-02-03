@@ -1,0 +1,6 @@
+(=> "(leq zero ?ts_ph_Nat_0) => true" (leq zero ?ts_ph_Nat_0) true)
+(=> "(leq (succ zero) (succ ?ts_ph_Nat_0)) => true" (leq (succ zero) (succ ?ts_ph_Nat_0)) true)
+(=> "(delete ?ts_ph_Nat_1 ?ts_ph_Lst_0) => (delete ?ts_ph_Nat_1 (delete ?ts_ph_Nat_1 ?ts_ph_Lst_0))" (delete ?ts_ph_Nat_1 ?ts_ph_Lst_0) (delete ?ts_ph_Nat_1 (delete ?ts_ph_Nat_1 ?ts_ph_Lst_0)))
+(=> "(delete ?ts_ph_Nat_1 (delete ?ts_ph_Nat_1 ?ts_ph_Lst_0)) => (delete ?ts_ph_Nat_1 ?ts_ph_Lst_0)" (delete ?ts_ph_Nat_1 (delete ?ts_ph_Nat_1 ?ts_ph_Lst_0)) (delete ?ts_ph_Nat_1 ?ts_ph_Lst_0))
+(=> "(cons ?ts_ph_Nat_0 nil) => (delete (succ ?ts_ph_Nat_0) (cons ?ts_ph_Nat_0 nil))" (cons ?ts_ph_Nat_0 nil) (delete (succ ?ts_ph_Nat_0) (cons ?ts_ph_Nat_0 nil)))
+(=> "(delete (succ ?ts_ph_Nat_0) (cons ?ts_ph_Nat_0 nil)) => (cons ?ts_ph_Nat_0 nil)" (delete (succ ?ts_ph_Nat_0) (cons ?ts_ph_Nat_0 nil)) (cons ?ts_ph_Nat_0 nil))

@@ -1,0 +1,29 @@
+16:49:01 [WARN] Collecting statistics
+16:49:01 [WARN]  ex is: zero
+16:49:01 [WARN]  ex is: (succ zero)
+16:49:01 [WARN]  ex is: (succ (succ zero))
+16:49:01 [WARN]  ex is: nil
+16:49:01 [WARN]  ex is: (cons autovar_Nat_0 nil)
+16:49:01 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+16:49:01 [WARN]  ex is: leaf
+16:49:01 [WARN]  ex is: (node autovar_Nat_0 leaf leaf)
+16:49:01 [WARN]  ex is: (node autovar_Nat_1 (node autovar_Nat_0 leaf leaf) (node autovar_Nat_0 leaf leaf))
+16:49:01 [WARN] Proof mode: false
+16:49:01 [WARN]  ex is: zero
+16:49:01 [WARN]  ex is: (succ zero)
+16:49:01 [WARN]  ex is: (succ (succ zero))
+16:49:01 [WARN]  ex is: nil
+16:49:01 [WARN]  ex is: (cons autovar_Nat_0 nil)
+16:49:01 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+16:49:01 [WARN]  ex is: leaf
+16:49:01 [WARN]  ex is: (node autovar_Nat_0 leaf leaf)
+16:49:01 [WARN]  ex is: (node autovar_Nat_1 (node autovar_Nat_0 leaf leaf) (node autovar_Nat_0 leaf leaf))
+16:49:01 [WARN] Proof mode: false
+17:13:46 [WARN] proved: (append ?ts_ph_Lst_0 nil) => ?ts_ph_Lst_0
+17:13:46 [WARN] proved: (leq zero ?ts_ph_Nat_0) => true
+17:13:46 [WARN] proved: (plus ?ts_ph_Nat_0 zero) => ?ts_ph_Nat_0
+17:13:46 [WARN] proved: (nmax zero ?ts_ph_Nat_0) => ?ts_ph_Nat_0
+17:13:46 [WARN] proved: (nmax ?ts_ph_Nat_0 ?ts_ph_Nat_0) => (plus ?ts_ph_Nat_0 zero)
+17:13:46 [WARN] proved: (plus ?ts_ph_Nat_0 zero) => (nmax ?ts_ph_Nat_0 ?ts_ph_Nat_0)
+17:13:46 [WARN] proved: (less ?ts_ph_Nat_0 ?ts_ph_Nat_0) => false
+17:13:56 [WARN] proved: (tremove-all leaf ?ts_ph_Lst_0) => leaf

@@ -1,0 +1,25 @@
+20:08:31 [WARN] Collecting statistics
+20:08:31 [WARN]  ex is: zero
+20:08:31 [WARN]  ex is: (succ zero)
+20:08:31 [WARN]  ex is: (succ (succ zero))
+20:08:31 [WARN]  ex is: nil
+20:08:31 [WARN]  ex is: (cons autovar_Nat_0 nil)
+20:08:31 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+20:08:31 [WARN]  ex is: (mkpair autovar_Nat_0 autovar_Nat_1)
+20:08:31 [WARN]  ex is: znil
+20:08:31 [WARN]  ex is: (zcons autovar_Pair_0 znil)
+20:08:31 [WARN]  ex is: (zcons autovar_Pair_1 (zcons autovar_Pair_0 znil))
+20:08:31 [WARN] Running exploration without proof mode, but goals were given
+20:08:31 [WARN] Proof mode: true
+20:08:31 [WARN]  ex is: zero
+20:08:31 [WARN]  ex is: (succ zero)
+20:08:31 [WARN]  ex is: (succ (succ zero))
+20:08:31 [WARN]  ex is: nil
+20:08:31 [WARN]  ex is: (cons autovar_Nat_0 nil)
+20:08:31 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+20:08:31 [WARN]  ex is: (mkpair autovar_Nat_0 autovar_Nat_1)
+20:08:31 [WARN]  ex is: znil
+20:08:31 [WARN]  ex is: (zcons autovar_Pair_0 znil)
+20:08:31 [WARN]  ex is: (zcons autovar_Pair_1 (zcons autovar_Pair_0 znil))
+20:08:31 [WARN] Running exploration without proof mode, but goals were given
+20:08:31 [WARN] Proof mode: true

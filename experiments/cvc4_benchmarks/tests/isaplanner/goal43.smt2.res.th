@@ -1,0 +1,1 @@
+(=> "(append (takeWhile ?ts_ph_Lst_0) (dropWhile ?ts_ph_Lst_0)) => ?ts_ph_Lst_0" (append (takeWhile ?ts_ph_Lst_0) (dropWhile ?ts_ph_Lst_0)) ?ts_ph_Lst_0)
