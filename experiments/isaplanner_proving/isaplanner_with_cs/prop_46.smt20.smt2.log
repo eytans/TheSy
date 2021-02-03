@@ -1,0 +1,23 @@
+00:18:49 [WARN] Collecting statistics
+00:18:49 [WARN]  ex is: nil4
+00:18:49 [WARN]  ex is: (cons4 autovar_sk_0 nil4)
+00:18:49 [WARN]  ex is: (cons4 autovar_sk_1 (cons4 autovar_sk_0 nil4))
+00:18:49 [WARN]  ex is: zero
+00:18:49 [WARN]  ex is: (succ zero)
+00:18:49 [WARN]  ex is: (succ (succ zero))
+00:18:49 [WARN]  ex is: nil3
+00:18:49 [WARN]  ex is: (cons3 autovar_Nat_0 nil3)
+00:18:49 [WARN]  ex is: (cons3 autovar_Nat_1 (cons3 autovar_Nat_0 nil3))
+00:18:49 [WARN] Proof mode: false
+00:18:49 [WARN]  ex is: nil4
+00:18:49 [WARN]  ex is: (cons4 autovar_sk_0 nil4)
+00:18:49 [WARN]  ex is: (cons4 autovar_sk_1 (cons4 autovar_sk_0 nil4))
+00:18:49 [WARN]  ex is: zero
+00:18:49 [WARN]  ex is: (succ zero)
+00:18:49 [WARN]  ex is: (succ (succ zero))
+00:18:49 [WARN]  ex is: nil3
+00:18:49 [WARN]  ex is: (cons3 autovar_Nat_0 nil3)
+00:18:49 [WARN]  ex is: (cons3 autovar_Nat_1 (cons3 autovar_Nat_0 nil3))
+00:18:49 [WARN] Proof mode: false
+00:18:49 [WARN] proved: (zip2 ?ts_ph_list4_0 nil4) => nil2
+00:18:49 [WARN] proved: (zip ?ts_ph_list3_0 nil4) => nil

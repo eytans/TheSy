@@ -1,0 +1,20 @@
+21:18:48 [WARN] Collecting statistics
+21:18:48 [WARN]  ex is: nil
+21:18:48 [WARN]  ex is: (cons autovar_sk_0 nil)
+21:18:48 [WARN]  ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
+21:18:48 [WARN]  ex is: Z
+21:18:48 [WARN]  ex is: (S Z)
+21:18:48 [WARN]  ex is: (S (S Z))
+21:18:48 [WARN] Proof mode: false
+21:18:48 [WARN]  ex is: nil
+21:18:48 [WARN]  ex is: (cons autovar_sk_0 nil)
+21:18:48 [WARN]  ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
+21:18:48 [WARN]  ex is: Z
+21:18:48 [WARN]  ex is: (S Z)
+21:18:48 [WARN]  ex is: (S (S Z))
+21:18:48 [WARN] Proof mode: false
+21:18:50 [WARN] proved: (take ?ts_ph_Nat_0 nil) => nil
+21:32:51 [WARN] proved: (take ?ts_ph_Nat_1 (take ?ts_ph_Nat_1 ?ts_ph_list_0)) => (take ?ts_ph_Nat_1 ?ts_ph_list_0)
+21:32:51 [WARN] proved: (take ?ts_ph_Nat_1 ?ts_ph_list_0) => (take ?ts_ph_Nat_1 (take ?ts_ph_Nat_1 ?ts_ph_list_0))
+21:32:52 [WARN] proved: (take ?ts_ph_Nat_1 ?ts_ph_list_0) => (take (S ?ts_ph_Nat_1) (take ?ts_ph_Nat_1 ?ts_ph_list_0))
+21:32:52 [WARN] proved: (take (S ?ts_ph_Nat_1) (take ?ts_ph_Nat_1 ?ts_ph_list_0)) => (take ?ts_ph_Nat_1 ?ts_ph_list_0)
