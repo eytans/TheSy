@@ -1,0 +1,55 @@
+19:18:51 [0m[33m[WARN] [0mCollecting statistics
+(leq ?__x0 ?__y1) => (or (= ?__x0 ?__y1) (less ?__x0 ?__y1))
+(or (= ?__x0 ?__y1) (less ?__x0 ?__y1)) => (leq ?__x0 ?__y1)
+(append nil ?x) => ?x
+(append (cons ?x2 ?y) ?z) => (cons ?x2 (append ?y ?z))
+(cons ?x2 (append ?y ?z)) => (append (cons ?x2 ?y) ?z)
+(len nil) => zero
+zero => (len nil)
+(len (cons ?x3 ?y)) => (succ (len ?y))
+(drop ?x4 nil) => nil
+(drop zero ?x) => ?x
+(drop (succ ?x5) (cons ?y6 ?z)) => (drop ?x5 ?z)
+(take ?x7 nil) => nil
+(take zero ?x) => nil
+(take (succ ?x8) (cons ?y9 ?z)) => (cons ?y9 (take ?x8 ?z))
+(cons ?y9 (take ?x8 ?z)) => (take (succ ?x8) (cons ?y9 ?z))
+(zip nil ?x) => znil
+(zip ?x nil) => znil
+(zip (cons ?x10 ?y) (cons ?z11 ?w)) => (zcons (mkpair ?x10 ?z11) (zip ?y ?w))
+(zcons (mkpair ?x10 ?z11) (zip ?y ?w)) => (zip (cons ?x10 ?y) (cons ?z11 ?w))
+(zappend znil ?x12) => ?x12
+(zappend (zcons ?x13 ?y14) ?z15) => (zcons ?x13 (zappend ?y14 ?z15))
+(zcons ?x13 (zappend ?y14 ?z15)) => (zappend (zcons ?x13 ?y14) ?z15)
+Searcher: (drop ?autovar5 (cons ?autovar2 ?autovar3))
+Searcher: (drop (succ ?autovar4) ?autovar6)
+Searcher: (take ?autovar5 (cons ?autovar2 ?autovar3))
+Searcher: (take (succ ?autovar4) ?autovar6)
+Searcher: (zip ?autovar7 (cons ?autovar3 ?autovar4))
+Searcher: (zip (cons ?autovar5 ?autovar6) ?autovar8)
+19:18:51 [0m[33m[WARN] [0m ex is: zero
+19:18:51 [0m[33m[WARN] [0m ex is: (succ zero)
+19:18:51 [0m[33m[WARN] [0m ex is: (succ (succ zero))
+19:18:51 [0m[33m[WARN] [0m ex is: nil
+19:18:51 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_0 nil)
+19:18:51 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+19:18:51 [0m[33m[WARN] [0m ex is: (mkpair autovar_Nat_0 autovar_Nat_1)
+19:18:51 [0m[33m[WARN] [0m ex is: znil
+19:18:51 [0m[33m[WARN] [0m ex is: (zcons autovar_Pair_0 znil)
+19:18:51 [0m[33m[WARN] [0m ex is: (zcons autovar_Pair_1 (zcons autovar_Pair_0 znil))
+19:18:51 [0m[33m[WARN] [0mRunning exploration without proof mode, but goals were given
+19:18:51 [0m[33m[WARN] [0mProof mode: true
+19:18:51 [0m[33m[WARN] [0m ex is: zero
+19:18:51 [0m[33m[WARN] [0m ex is: (succ zero)
+19:18:51 [0m[33m[WARN] [0m ex is: (succ (succ zero))
+19:18:51 [0m[33m[WARN] [0m ex is: nil
+19:18:51 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_0 nil)
+19:18:51 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+19:18:51 [0m[33m[WARN] [0m ex is: (mkpair autovar_Nat_0 autovar_Nat_1)
+19:18:51 [0m[33m[WARN] [0m ex is: znil
+19:18:51 [0m[33m[WARN] [0m ex is: (zcons autovar_Pair_0 znil)
+19:18:51 [0m[33m[WARN] [0m ex is: (zcons autovar_Pair_1 (zcons autovar_Pair_0 znil))
+19:18:51 [0m[33m[WARN] [0mRunning exploration without proof mode, but goals were given
+19:18:51 [0m[33m[WARN] [0mProof mode: true
+19:18:51 [0m[33m[WARN] [0mFound all lemmas
+done in 7

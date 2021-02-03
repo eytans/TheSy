@@ -1,0 +1,1 @@
+(=> "(mem ?ts_ph_Nat_1 (append ?ts_ph_Lst_0 (cons ?ts_ph_Nat_1 nil))) => true" (mem ?ts_ph_Nat_1 (append ?ts_ph_Lst_0 (cons ?ts_ph_Nat_1 nil))) true)

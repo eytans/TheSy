@@ -1,24 +1,23 @@
-21:52:02 [WARN] Collecting statistics
-21:52:02 [WARN]  ex is: nil2
-21:52:02 [WARN]  ex is: (cons2 autovar_sk_0 nil2)
-21:52:02 [WARN]  ex is: (cons2 autovar_sk_1 (cons2 autovar_sk_0 nil2))
-21:52:02 [WARN] Proof mode: false
-21:52:02 [WARN]  ex is: nil2
-21:52:02 [WARN]  ex is: (cons2 autovar_sk_0 nil2)
-21:52:02 [WARN]  ex is: (cons2 autovar_sk_1 (cons2 autovar_sk_0 nil2))
-21:52:02 [WARN] Proof mode: false
-21:52:02 [WARN] proved: (++ ?ts_ph_list2_0 nil2) => ?ts_ph_list2_0
-21:52:02 [WARN] proved: (zip ?ts_ph_list2_0 nil2) => nil
-21:52:14 [WARN] generalized case_split proof as: (++ ?ts_ph_list2_0 (++ ?ts_ph_list2_1 ?ts_ph_list2_2)) -- (++ (++ ?ts_ph_list2_0 ?ts_ph_list2_1) ?ts_ph_list2_2)
-21:52:14 [WARN] proved: (++ ?ts_ph_list2_0 (++ ?ts_ph_list2_1 ?ts_ph_list2_2)) => (++ (++ ?ts_ph_list2_0 ?ts_ph_list2_1) ?ts_ph_list2_2)
-21:52:14 [WARN] proved: (++ (++ ?ts_ph_list2_0 ?ts_ph_list2_1) ?ts_ph_list2_2) => (++ ?ts_ph_list2_0 (++ ?ts_ph_list2_1 ?ts_ph_list2_2))
-21:52:14 [WARN] proved: (zip ?ts_ph_list2_0 (++ ?ts_ph_list2_0 ?ts_ph_list2_1)) => (zip ?ts_ph_list2_0 ?ts_ph_list2_0)
-21:52:14 [WARN] proved: (zip (++ ?ts_ph_list2_0 ?ts_ph_list2_1) ?ts_ph_list2_0) => (zip ?ts_ph_list2_0 (++ ?ts_ph_list2_0 ?ts_ph_list2_1))
-21:52:14 [WARN] proved: (zip ?ts_ph_list2_0 (++ ?ts_ph_list2_0 ?ts_ph_list2_1)) => (zip (++ ?ts_ph_list2_0 ?ts_ph_list2_1) ?ts_ph_list2_0)
-21:52:14 [WARN] proved: (zip ?ts_ph_list2_0 (cons2 ?ts_ph_sk_1 nil2)) => (zip (++ ?ts_ph_list2_0 ?ts_ph_list2_0) (cons2 ?ts_ph_sk_1 nil2))
-21:52:14 [WARN] proved: (zip (++ ?ts_ph_list2_0 ?ts_ph_list2_0) (cons2 ?ts_ph_sk_1 nil2)) => (zip ?ts_ph_list2_0 (cons2 ?ts_ph_sk_1 nil2))
-21:52:14 [WARN] proved: (zip (cons2 ?ts_ph_sk_1 nil2) (++ ?ts_ph_list2_0 ?ts_ph_list2_0)) => (zip (cons2 ?ts_ph_sk_1 nil2) ?ts_ph_list2_0)
-21:52:14 [WARN] proved: (zip (cons2 ?ts_ph_sk_1 nil2) ?ts_ph_list2_0) => (zip (cons2 ?ts_ph_sk_1 nil2) (++ ?ts_ph_list2_0 ?ts_ph_list2_0))
-21:52:14 [WARN] proved: (++ (rev2 ?ts_ph_list2_1) (rev2 ?ts_ph_list2_0)) => (rev2 (++ ?ts_ph_list2_0 ?ts_ph_list2_1))
-21:52:14 [WARN] proved: (rev2 (++ ?ts_ph_list2_0 ?ts_ph_list2_1)) => (++ (rev2 ?ts_ph_list2_1) (rev2 ?ts_ph_list2_0))
-21:52:14 [WARN] proved: (rev2 (rev2 ?ts_ph_list2_0)) => ?ts_ph_list2_0
+12:08:00 [WARN] Collecting statistics
+12:08:00 [WARN]  ex is: nil2
+12:08:00 [WARN]  ex is: (cons2 autovar_sk_0 nil2)
+12:08:00 [WARN]  ex is: (cons2 autovar_sk_1 (cons2 autovar_sk_0 nil2))
+12:08:00 [WARN] Proof mode: false
+12:08:00 [WARN]  ex is: nil2
+12:08:00 [WARN]  ex is: (cons2 autovar_sk_0 nil2)
+12:08:00 [WARN]  ex is: (cons2 autovar_sk_1 (cons2 autovar_sk_0 nil2))
+12:08:00 [WARN] Proof mode: false
+12:08:00 [WARN] proved: (++ ?ts_ph_list2_0 nil2) => ?ts_ph_list2_0
+12:08:00 [WARN] proved: (zip ?ts_ph_list2_0 nil2) => nil
+12:08:01 [WARN] generalized case_split proof as: (++ (++ ?ts_ph_list2_0 ?ts_ph_list2_1) ?ts_ph_list2_2) -- (++ ?ts_ph_list2_0 (++ ?ts_ph_list2_1 ?ts_ph_list2_2))
+12:08:01 [WARN] proved: (++ (++ ?ts_ph_list2_0 ?ts_ph_list2_1) ?ts_ph_list2_2) => (++ ?ts_ph_list2_0 (++ ?ts_ph_list2_1 ?ts_ph_list2_2))
+12:08:01 [WARN] proved: (++ ?ts_ph_list2_0 (++ ?ts_ph_list2_1 ?ts_ph_list2_2)) => (++ (++ ?ts_ph_list2_0 ?ts_ph_list2_1) ?ts_ph_list2_2)
+12:08:01 [WARN] proved: (zip (++ ?ts_ph_list2_0 ?ts_ph_list2_1) ?ts_ph_list2_0) => (zip (++ ?ts_ph_list2_0 ?ts_ph_list2_0) ?ts_ph_list2_0)
+12:08:01 [WARN] proved: (zip ?ts_ph_list2_0 (++ ?ts_ph_list2_0 ?ts_ph_list2_1)) => (zip (++ ?ts_ph_list2_0 ?ts_ph_list2_0) ?ts_ph_list2_0)
+12:08:01 [WARN] proved: (zip (cons2 ?ts_ph_sk_1 nil2) ?ts_ph_list2_0) => (zip (cons2 ?ts_ph_sk_1 nil2) (++ ?ts_ph_list2_0 ?ts_ph_list2_0))
+12:08:01 [WARN] proved: (zip (cons2 ?ts_ph_sk_1 nil2) (++ ?ts_ph_list2_0 ?ts_ph_list2_0)) => (zip (cons2 ?ts_ph_sk_1 nil2) ?ts_ph_list2_0)
+12:08:01 [WARN] proved: (zip (++ ?ts_ph_list2_0 ?ts_ph_list2_0) (cons2 ?ts_ph_sk_1 nil2)) => (zip ?ts_ph_list2_0 (cons2 ?ts_ph_sk_1 nil2))
+12:08:01 [WARN] proved: (zip ?ts_ph_list2_0 (cons2 ?ts_ph_sk_1 nil2)) => (zip (++ ?ts_ph_list2_0 ?ts_ph_list2_0) (cons2 ?ts_ph_sk_1 nil2))
+12:08:01 [WARN] proved: (++ (rev2 ?ts_ph_list2_1) (rev2 ?ts_ph_list2_0)) => (rev2 (++ ?ts_ph_list2_0 ?ts_ph_list2_1))
+12:08:01 [WARN] proved: (rev2 (++ ?ts_ph_list2_0 ?ts_ph_list2_1)) => (++ (rev2 ?ts_ph_list2_1) (rev2 ?ts_ph_list2_0))
+12:08:02 [WARN] proved: (rev2 (rev2 ?ts_ph_list2_0)) => ?ts_ph_list2_0

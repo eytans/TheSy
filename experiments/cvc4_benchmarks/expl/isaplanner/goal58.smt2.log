@@ -1,0 +1,31 @@
+11:13:47 [WARN] Collecting statistics
+11:13:47 [WARN]  ex is: zero
+11:13:47 [WARN]  ex is: (succ zero)
+11:13:47 [WARN]  ex is: (succ (succ zero))
+11:13:47 [WARN]  ex is: nil
+11:13:47 [WARN]  ex is: (cons autovar_Nat_0 nil)
+11:13:47 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+11:13:47 [WARN] Proof mode: false
+11:13:47 [WARN]  ex is: zero
+11:13:47 [WARN]  ex is: (succ zero)
+11:13:47 [WARN]  ex is: (succ (succ zero))
+11:13:47 [WARN]  ex is: nil
+11:13:47 [WARN]  ex is: (cons autovar_Nat_0 nil)
+11:13:47 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+11:13:47 [WARN] Proof mode: false
+11:13:49 [WARN] proved: (leq zero ?ts_ph_Nat_0) => true
+11:13:49 [WARN] proved: (minus ?ts_ph_Nat_0 ?ts_ph_Nat_0) => zero
+11:17:26 [WARN] proved: (minus ?ts_ph_Nat_0 (succ ?ts_ph_Nat_0)) => zero
+11:17:26 [WARN] proved: (minus (succ ?ts_ph_Nat_0) ?ts_ph_Nat_0) => (succ zero)
+11:17:26 [WARN] proved: (drop ?ts_ph_Nat_0 (cons zero ?ts_ph_Lst_1)) => (drop ?ts_ph_Nat_0 (cons ?ts_ph_Nat_0 ?ts_ph_Lst_1))
+11:17:26 [WARN] proved: (drop ?ts_ph_Nat_0 (cons ?ts_ph_Nat_0 ?ts_ph_Lst_1)) => (drop ?ts_ph_Nat_0 (cons zero ?ts_ph_Lst_1))
+11:17:26 [WARN] proved: (leq (succ zero) (succ ?ts_ph_Nat_0)) => true
+11:17:26 [WARN] proved: (drop ?ts_ph_Nat_0 (take ?ts_ph_Nat_0 ?ts_ph_Lst_0)) => nil
+11:17:26 [WARN] proved: (take ?ts_ph_Nat_0 ?ts_ph_Lst_0) => (take ?ts_ph_Nat_0 (take ?ts_ph_Nat_0 ?ts_ph_Lst_0))
+11:17:26 [WARN] proved: (take ?ts_ph_Nat_0 (take ?ts_ph_Nat_0 ?ts_ph_Lst_0)) => (take ?ts_ph_Nat_0 ?ts_ph_Lst_0)
+11:17:29 [WARN] proved: (drop (succ zero) (drop ?ts_ph_Nat_0 ?ts_ph_Lst_1)) => (drop (succ ?ts_ph_Nat_0) ?ts_ph_Lst_1)
+11:17:29 [WARN] proved: (drop (succ ?ts_ph_Nat_0) ?ts_ph_Lst_1) => (drop (succ zero) (drop ?ts_ph_Nat_0 ?ts_ph_Lst_1))
+11:17:32 [WARN] proved: (minus (minus ?ts_ph_Nat_1 ?ts_ph_Nat_0) (succ zero)) => (minus ?ts_ph_Nat_1 (succ ?ts_ph_Nat_0))
+11:17:32 [WARN] proved: (minus ?ts_ph_Nat_1 (succ ?ts_ph_Nat_0)) => (minus (minus ?ts_ph_Nat_1 ?ts_ph_Nat_0) (succ zero))
+11:17:55 [WARN] proved: (take ?ts_ph_Nat_0 ?ts_ph_Lst_0) => (take (succ ?ts_ph_Nat_0) (take ?ts_ph_Nat_0 ?ts_ph_Lst_0))
+11:17:55 [WARN] proved: (take (succ ?ts_ph_Nat_0) (take ?ts_ph_Nat_0 ?ts_ph_Lst_0)) => (take ?ts_ph_Nat_0 ?ts_ph_Lst_0)

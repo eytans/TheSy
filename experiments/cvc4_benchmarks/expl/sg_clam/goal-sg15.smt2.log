@@ -1,0 +1,21 @@
+11:43:54 [WARN] Collecting statistics
+11:43:54 [WARN]  ex is: zero
+11:43:54 [WARN]  ex is: (succ zero)
+11:43:54 [WARN]  ex is: (succ (succ zero))
+11:43:54 [WARN] Proof mode: false
+11:43:54 [WARN]  ex is: zero
+11:43:54 [WARN]  ex is: (succ zero)
+11:43:54 [WARN]  ex is: (succ (succ zero))
+11:43:54 [WARN] Proof mode: false
+11:43:54 [WARN] proved: (plus ?ts_ph_Nat_0 zero) => ?ts_ph_Nat_0
+11:43:54 [WARN] proved: (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1) => (plus ?ts_ph_Nat_1 ?ts_ph_Nat_0)
+11:43:54 [WARN] proved: (plus ?ts_ph_Nat_1 ?ts_ph_Nat_0) => (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1)
+11:43:54 [WARN] proved: (leq zero ?ts_ph_Nat_0) => true
+11:43:54 [WARN] proved: (plus ?ts_ph_Nat_1 (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0)) => (plus ?ts_ph_Nat_0 (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1))
+11:43:54 [WARN] proved: (plus ?ts_ph_Nat_0 (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1)) => (plus ?ts_ph_Nat_1 (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0))
+11:43:54 [WARN] proved: (leq (succ zero) (succ ?ts_ph_Nat_0)) => true
+11:43:54 [WARN] proved: (leq (succ zero) ?ts_ph_Nat_0) => (leq (succ zero) (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0))
+11:43:54 [WARN] proved: (leq (succ zero) (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0)) => (leq (succ zero) ?ts_ph_Nat_0)
+11:43:56 [WARN] generalized case_split proof as: (plus (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1) (plus ?ts_ph_Nat_0 ?ts_ph_Nat_2)) -- (plus (plus ?ts_ph_Nat_1 ?ts_ph_Nat_2) (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0))
+11:43:56 [WARN] proved: (plus (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1) (plus ?ts_ph_Nat_0 ?ts_ph_Nat_2)) => (plus (plus ?ts_ph_Nat_1 ?ts_ph_Nat_2) (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0))
+11:43:56 [WARN] proved: (plus (plus ?ts_ph_Nat_1 ?ts_ph_Nat_2) (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0)) => (plus (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1) (plus ?ts_ph_Nat_0 ?ts_ph_Nat_2))

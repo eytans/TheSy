@@ -1,4 +1,4 @@
-20:13:15 [0m[33m[WARN] [0mCollecting statistics
+11:01:54 [0m[33m[WARN] [0mCollecting statistics
 (butlast nil) => nil
 nil => (butlast nil)
 (butlast (cons ?y nil)) => nil
@@ -11,25 +11,25 @@ nil => (butlast nil)
 (butlast ?x) => (butlastConcat ?x nil)
 (butlastConcat ?x (cons ?z ?x22)) => (++ ?x (butlast (cons ?z ?x22)))
 (++ ?x (butlast (cons ?z ?x22))) => (butlastConcat ?x (cons ?z ?x22))
-20:13:15 [0m[33m[WARN] [0m ex is: nil
-20:13:15 [0m[33m[WARN] [0m ex is: (cons autovar_sk_0 nil)
-20:13:15 [0m[33m[WARN] [0m ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
-20:13:15 [0m[33m[WARN] [0mProof mode: false
-20:13:15 [0m[33m[WARN] [0m ex is: nil
-20:13:15 [0m[33m[WARN] [0m ex is: (cons autovar_sk_0 nil)
-20:13:15 [0m[33m[WARN] [0m ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
-20:13:15 [0m[33m[WARN] [0mProof mode: false
-20:13:15 [0m[33m[WARN] [0mproved: (++ ?ts_ph_list_0 nil) => ?ts_ph_list_0
-20:13:15 [0m[33m[WARN] [0mproved: (butlast ?ts_ph_list_0) => (butlastConcat nil ?ts_ph_list_0)
-20:13:15 [0m[33m[WARN] [0mproved: (butlastConcat nil ?ts_ph_list_0) => (butlast ?ts_ph_list_0)
-20:13:15 [0m[33m[WARN] [0mproved: (++ ?ts_ph_list_0 (butlast ?ts_ph_list_0)) => (butlastConcat ?ts_ph_list_0 ?ts_ph_list_0)
-20:13:15 [0m[33m[WARN] [0mproved: (butlastConcat ?ts_ph_list_0 ?ts_ph_list_0) => (++ ?ts_ph_list_0 (butlast ?ts_ph_list_0))
-20:13:15 [0m[33m[WARN] [0mproved: (++ ?ts_ph_list_0 (++ ?ts_ph_list_1 ?ts_ph_list_2)) => (++ (++ ?ts_ph_list_0 ?ts_ph_list_1) ?ts_ph_list_2)
-20:13:15 [0m[33m[WARN] [0mproved: (++ (++ ?ts_ph_list_0 ?ts_ph_list_1) ?ts_ph_list_2) => (++ ?ts_ph_list_0 (++ ?ts_ph_list_1 ?ts_ph_list_2))
-20:13:16 [0m[33m[WARN] [0mproved: (butlastConcat (cons ?ts_ph_sk_1 nil) ?ts_ph_list_0) => (butlast (cons ?ts_ph_sk_1 ?ts_ph_list_0))
-20:13:16 [0m[33m[WARN] [0mproved: (butlast (cons ?ts_ph_sk_1 ?ts_ph_list_0)) => (butlastConcat (cons ?ts_ph_sk_1 nil) ?ts_ph_list_0)
-20:13:20 [0m[33m[WARN] [0mproved: (butlastConcat (++ ?ts_ph_list_0 ?ts_ph_list_1) ?ts_ph_list_0) => (++ ?ts_ph_list_0 (butlastConcat ?ts_ph_list_1 ?ts_ph_list_0))
-20:13:20 [0m[33m[WARN] [0mproved: (++ ?ts_ph_list_0 (butlastConcat ?ts_ph_list_1 ?ts_ph_list_0)) => (butlastConcat (++ ?ts_ph_list_0 ?ts_ph_list_1) ?ts_ph_list_0)
-20:13:27 [0m[33m[WARN] [0mproved: (++ (butlast ?ts_ph_list_0) (butlast ?ts_ph_list_0)) => (butlastConcat (butlast ?ts_ph_list_0) ?ts_ph_list_0)
-20:13:27 [0m[33m[WARN] [0mproved: (butlastConcat (butlast ?ts_ph_list_0) ?ts_ph_list_0) => (++ (butlast ?ts_ph_list_0) (butlast ?ts_ph_list_0))
-done in 39513
+11:01:54 [0m[33m[WARN] [0m ex is: nil
+11:01:54 [0m[33m[WARN] [0m ex is: (cons autovar_sk_0 nil)
+11:01:54 [0m[33m[WARN] [0m ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
+11:01:54 [0m[33m[WARN] [0mProof mode: false
+11:01:54 [0m[33m[WARN] [0m ex is: nil
+11:01:54 [0m[33m[WARN] [0m ex is: (cons autovar_sk_0 nil)
+11:01:54 [0m[33m[WARN] [0m ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
+11:01:54 [0m[33m[WARN] [0mProof mode: false
+11:01:54 [0m[33m[WARN] [0mproved: (++ ?ts_ph_list_0 nil) => ?ts_ph_list_0
+11:01:54 [0m[33m[WARN] [0mproved: (butlast ?ts_ph_list_0) => (butlastConcat nil ?ts_ph_list_0)
+11:01:54 [0m[33m[WARN] [0mproved: (butlastConcat nil ?ts_ph_list_0) => (butlast ?ts_ph_list_0)
+11:01:55 [0m[33m[WARN] [0mproved: (butlastConcat ?ts_ph_list_0 ?ts_ph_list_0) => (++ ?ts_ph_list_0 (butlast ?ts_ph_list_0))
+11:01:55 [0m[33m[WARN] [0mproved: (++ ?ts_ph_list_0 (butlast ?ts_ph_list_0)) => (butlastConcat ?ts_ph_list_0 ?ts_ph_list_0)
+11:01:55 [0m[33m[WARN] [0mproved: (++ (++ ?ts_ph_list_0 ?ts_ph_list_1) ?ts_ph_list_2) => (++ ?ts_ph_list_0 (++ ?ts_ph_list_1 ?ts_ph_list_2))
+11:01:55 [0m[33m[WARN] [0mproved: (++ ?ts_ph_list_0 (++ ?ts_ph_list_1 ?ts_ph_list_2)) => (++ (++ ?ts_ph_list_0 ?ts_ph_list_1) ?ts_ph_list_2)
+11:01:55 [0m[33m[WARN] [0mproved: (butlastConcat (++ ?ts_ph_list_0 ?ts_ph_list_1) ?ts_ph_list_0) => (++ ?ts_ph_list_0 (butlastConcat ?ts_ph_list_1 ?ts_ph_list_0))
+11:01:55 [0m[33m[WARN] [0mproved: (++ ?ts_ph_list_0 (butlastConcat ?ts_ph_list_1 ?ts_ph_list_0)) => (butlastConcat (++ ?ts_ph_list_0 ?ts_ph_list_1) ?ts_ph_list_0)
+11:02:00 [0m[33m[WARN] [0mproved: (butlastConcat (cons ?ts_ph_sk_1 nil) ?ts_ph_list_0) => (butlast (cons ?ts_ph_sk_1 ?ts_ph_list_0))
+11:02:00 [0m[33m[WARN] [0mproved: (butlast (cons ?ts_ph_sk_1 ?ts_ph_list_0)) => (butlastConcat (cons ?ts_ph_sk_1 nil) ?ts_ph_list_0)
+11:02:06 [0m[33m[WARN] [0mproved: (butlastConcat (butlast ?ts_ph_list_0) ?ts_ph_list_0) => (++ (butlast ?ts_ph_list_0) (butlast ?ts_ph_list_0))
+11:02:06 [0m[33m[WARN] [0mproved: (++ (butlast ?ts_ph_list_0) (butlast ?ts_ph_list_0)) => (butlastConcat (butlast ?ts_ph_list_0) ?ts_ph_list_0)
+done in 39088

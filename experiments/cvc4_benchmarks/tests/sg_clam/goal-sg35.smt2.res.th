@@ -1,0 +1,2 @@
+(=> "(exp ?ts_ph_Nat_2 ?ts_ph_Nat_0) => (qexp ?ts_ph_Nat_2 ?ts_ph_Nat_0 (succ zero))" (exp ?ts_ph_Nat_2 ?ts_ph_Nat_0) (qexp ?ts_ph_Nat_2 ?ts_ph_Nat_0 (succ zero)))
+(=> "(qexp ?ts_ph_Nat_2 ?ts_ph_Nat_0 (succ zero)) => (exp ?ts_ph_Nat_2 ?ts_ph_Nat_0)" (qexp ?ts_ph_Nat_2 ?ts_ph_Nat_0 (succ zero)) (exp ?ts_ph_Nat_2 ?ts_ph_Nat_0))

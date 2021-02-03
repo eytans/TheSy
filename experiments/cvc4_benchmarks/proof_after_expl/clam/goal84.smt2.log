@@ -1,0 +1,44 @@
+20:36:52 [WARN] Collecting statistics
+20:36:52 [WARN]  ex is: zero
+20:36:52 [WARN]  ex is: (succ zero)
+20:36:52 [WARN]  ex is: (succ (succ zero))
+20:36:52 [WARN] Running exploration without proof mode, but goals were given
+20:36:52 [WARN] Proof mode: true
+20:36:52 [WARN]  ex is: zero
+20:36:52 [WARN]  ex is: (succ zero)
+20:36:52 [WARN]  ex is: (succ (succ zero))
+20:36:52 [WARN] Running exploration without proof mode, but goals were given
+20:36:52 [WARN] Proof mode: true
+20:36:52 [WARN] proved: (qfac ?ts_ph_Nat_0 zero) => zero
+20:36:52 [WARN] proved: (leq zero ?ts_ph_Nat_0) => true
+20:36:52 [WARN] proved: (plus ?ts_ph_Nat_0 zero) => ?ts_ph_Nat_0
+20:36:52 [WARN] proved: (mult ?ts_ph_Nat_0 zero) => zero
+20:37:33 [WARN] proved: (qfac (succ ?ts_ph_Nat_0) ?ts_ph_Nat_1) => zero
+20:37:33 [WARN] proved: (succ (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_0)) => (succ zero)
+20:37:33 [WARN] proved: (succ (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_0)) => (fac (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_0))
+20:37:33 [WARN] proved: (fac (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_0)) => (succ (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_0))
+20:37:33 [WARN] generalized case_split proof as: (plus ?ts_ph_Nat_1 (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_1)) -- (plus (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_1) ?ts_ph_Nat_1)
+20:37:33 [WARN] proved: (plus ?ts_ph_Nat_1 (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_1)) => (plus (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_1) ?ts_ph_Nat_1)
+20:37:33 [WARN] proved: (plus (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_1) ?ts_ph_Nat_1) => (plus ?ts_ph_Nat_1 (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_1))
+20:37:33 [WARN] generalized case_split proof as: (mult (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_1) ?ts_ph_Nat_2) -- (qfac ?ts_ph_Nat_0 (mult ?ts_ph_Nat_1 ?ts_ph_Nat_2))
+20:37:33 [WARN] proved: (mult (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_1) ?ts_ph_Nat_2) => (qfac ?ts_ph_Nat_0 (mult ?ts_ph_Nat_1 ?ts_ph_Nat_2))
+20:37:33 [WARN] proved: (qfac ?ts_ph_Nat_0 (mult ?ts_ph_Nat_1 ?ts_ph_Nat_2)) => (mult (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_1) ?ts_ph_Nat_2)
+20:37:33 [WARN] proved: (mult ?ts_ph_Nat_0 (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_1)) => zero
+20:37:33 [WARN] proved: (mult ?ts_ph_Nat_0 (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_1)) => (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_0)
+20:37:33 [WARN] proved: (mult ?ts_ph_Nat_0 (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_1)) => (fac (succ ?ts_ph_Nat_0))
+20:37:33 [WARN] proved: (qfac ?ts_ph_Nat_0 (mult ?ts_ph_Nat_0 ?ts_ph_Nat_1)) => (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_0)
+20:37:33 [WARN] generalized case_split proof as: (qfac (succ ?ts_ph_Nat_1) (fac ?ts_ph_Nat_0)) -- (qfac ?ts_ph_Nat_0 (qfac ?ts_ph_Nat_1 ?ts_ph_Nat_1))
+20:37:33 [WARN] proved: (qfac (succ ?ts_ph_Nat_1) (fac ?ts_ph_Nat_0)) => (qfac ?ts_ph_Nat_0 (qfac ?ts_ph_Nat_1 ?ts_ph_Nat_1))
+20:37:33 [WARN] proved: (qfac ?ts_ph_Nat_0 (qfac ?ts_ph_Nat_1 ?ts_ph_Nat_1)) => (qfac (succ ?ts_ph_Nat_1) (fac ?ts_ph_Nat_0))
+20:37:34 [WARN] generalized case_split proof as: (qfac (succ ?ts_ph_Nat_1) (fac ?ts_ph_Nat_0)) -- (qfac ?ts_ph_Nat_1 (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_1))
+20:37:34 [WARN] proved: (qfac (succ ?ts_ph_Nat_1) (fac ?ts_ph_Nat_0)) => (qfac ?ts_ph_Nat_1 (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_1))
+20:37:34 [WARN] proved: (qfac ?ts_ph_Nat_1 (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_1)) => (qfac (succ ?ts_ph_Nat_1) (fac ?ts_ph_Nat_0))
+20:37:34 [WARN] proved: (leq ?ts_ph_Nat_1 (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_0)) => (leq ?ts_ph_Nat_1 zero)
+20:37:34 [WARN] proved: (plus (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_0) ?ts_ph_Nat_1) => (plus ?ts_ph_Nat_1 (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_0))
+20:37:34 [WARN] proved: (plus ?ts_ph_Nat_1 (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_0)) => (plus (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_0) ?ts_ph_Nat_1)
+20:37:34 [WARN] proved: (plus (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_0) ?ts_ph_Nat_1) => ?ts_ph_Nat_1
+20:37:34 [WARN] proved: (qfac (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_0) ?ts_ph_Nat_1) => ?ts_ph_Nat_1
+20:37:34 [WARN] proved: (mult ?ts_ph_Nat_0 (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_1)) => (mult ?ts_ph_Nat_0 (fac ?ts_ph_Nat_0))
+20:37:34 [WARN] proved: (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_1) => (qfac ?ts_ph_Nat_0 (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_1))
+20:37:34 [WARN] proved: (qfac ?ts_ph_Nat_0 (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_1)) => (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_1)
+20:37:34 [WARN] Found all lemmas

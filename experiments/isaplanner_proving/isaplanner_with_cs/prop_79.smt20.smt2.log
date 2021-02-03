@@ -1,18 +1,16 @@
-21:18:48 [WARN] Collecting statistics
-21:18:48 [WARN]  ex is: Z
-21:18:48 [WARN]  ex is: (S Z)
-21:18:48 [WARN]  ex is: (S (S Z))
-21:18:48 [WARN] Proof mode: false
-21:18:48 [WARN]  ex is: Z
-21:18:48 [WARN]  ex is: (S Z)
-21:18:48 [WARN]  ex is: (S (S Z))
-21:18:48 [WARN] Proof mode: false
-21:18:48 [WARN] proved: (-2 ?ts_ph_Nat_0 Z) => ?ts_ph_Nat_0
-21:18:48 [WARN] proved: (-2 ?ts_ph_Nat_0 ?ts_ph_Nat_0) => Z
-21:18:51 [WARN] proved: (-2 ?ts_ph_Nat_0 (S ?ts_ph_Nat_0)) => Z
-21:18:51 [WARN] proved: (-2 (S ?ts_ph_Nat_0) ?ts_ph_Nat_0) => (S Z)
-21:18:55 [WARN] proved: (-2 ?ts_ph_Nat_1 (S ?ts_ph_Nat_0)) => (-2 (-2 ?ts_ph_Nat_1 ?ts_ph_Nat_0) (S Z))
-21:18:55 [WARN] proved: (-2 (-2 ?ts_ph_Nat_1 ?ts_ph_Nat_0) (S Z)) => (-2 ?ts_ph_Nat_1 (S ?ts_ph_Nat_0))
-21:19:52 [WARN] proved: (-2 (-2 ?ts_ph_Nat_1 ?ts_ph_Nat_0) ?ts_ph_Nat_1) => Z
-21:25:37 [WARN] proved: (-2 ?ts_ph_Nat_0 ?ts_ph_Nat_1) => (-2 (-2 ?ts_ph_Nat_0 ?ts_ph_Nat_1) (-2 ?ts_ph_Nat_1 ?ts_ph_Nat_0))
-21:25:37 [WARN] proved: (-2 (-2 ?ts_ph_Nat_0 ?ts_ph_Nat_1) (-2 ?ts_ph_Nat_1 ?ts_ph_Nat_0)) => (-2 ?ts_ph_Nat_0 ?ts_ph_Nat_1)
+12:07:30 [WARN] Collecting statistics
+12:07:30 [WARN]  ex is: Z
+12:07:30 [WARN]  ex is: (S Z)
+12:07:30 [WARN]  ex is: (S (S Z))
+12:07:30 [WARN] Proof mode: false
+12:07:30 [WARN]  ex is: Z
+12:07:30 [WARN]  ex is: (S Z)
+12:07:30 [WARN]  ex is: (S (S Z))
+12:07:30 [WARN] Proof mode: false
+12:07:30 [WARN] proved: (-2 ?ts_ph_Nat_0 Z) => ?ts_ph_Nat_0
+12:07:30 [WARN] proved: (-2 ?ts_ph_Nat_0 ?ts_ph_Nat_0) => Z
+12:07:30 [WARN] proved: (-2 ?ts_ph_Nat_0 (S ?ts_ph_Nat_0)) => Z
+12:07:30 [WARN] proved: (-2 (S ?ts_ph_Nat_0) ?ts_ph_Nat_0) => (S Z)
+12:07:30 [WARN] proved: (-2 ?ts_ph_Nat_1 (S ?ts_ph_Nat_0)) => (-2 (-2 ?ts_ph_Nat_1 ?ts_ph_Nat_0) (S Z))
+12:07:30 [WARN] proved: (-2 (-2 ?ts_ph_Nat_1 ?ts_ph_Nat_0) (S Z)) => (-2 ?ts_ph_Nat_1 (S ?ts_ph_Nat_0))
+12:07:32 [WARN] proved: (-2 (-2 ?ts_ph_Nat_1 ?ts_ph_Nat_0) ?ts_ph_Nat_1) => Z

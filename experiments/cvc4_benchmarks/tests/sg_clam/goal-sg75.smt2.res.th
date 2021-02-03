@@ -1,0 +1,2 @@
+(=> "(append (rev ?ts_ph_Lst_0) ?ts_ph_Lst_2) => (qreva ?ts_ph_Lst_0 ?ts_ph_Lst_2)" (append (rev ?ts_ph_Lst_0) ?ts_ph_Lst_2) (qreva ?ts_ph_Lst_0 ?ts_ph_Lst_2))
+(=> "(qreva ?ts_ph_Lst_0 ?ts_ph_Lst_2) => (append (rev ?ts_ph_Lst_0) ?ts_ph_Lst_2)" (qreva ?ts_ph_Lst_0 ?ts_ph_Lst_2) (append (rev ?ts_ph_Lst_0) ?ts_ph_Lst_2))

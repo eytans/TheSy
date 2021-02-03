@@ -1,0 +1,26 @@
+11:01:35 [0m[33m[WARN] [0mCollecting statistics
+(leq ?__x0 ?__y1) => (or (= ?__x0 ?__y1) (less ?__x0 ?__y1))
+(or (= ?__x0 ?__y1) (less ?__x0 ?__y1)) => (leq ?__x0 ?__y1)
+(minus zero ?n) => zero
+(minus ?n zero) => ?n
+(minus (succ ?n) (succ ?m)) => (minus ?n ?m)
+(minus ?n ?m) => (minus (succ ?n) (succ ?m))
+Searcher: (minus ?autovar4 (succ ?autovar2))
+Searcher: (minus (succ ?autovar3) ?autovar5)
+11:01:35 [0m[33m[WARN] [0m ex is: zero
+11:01:35 [0m[33m[WARN] [0m ex is: (succ zero)
+11:01:35 [0m[33m[WARN] [0m ex is: (succ (succ zero))
+11:01:35 [0m[33m[WARN] [0mProof mode: false
+11:01:35 [0m[33m[WARN] [0m ex is: zero
+11:01:35 [0m[33m[WARN] [0m ex is: (succ zero)
+11:01:35 [0m[33m[WARN] [0m ex is: (succ (succ zero))
+11:01:35 [0m[33m[WARN] [0mProof mode: false
+11:01:35 [0m[33m[WARN] [0mproved: (minus ?ts_ph_Nat_0 ?ts_ph_Nat_0) => zero
+11:01:35 [0m[33m[WARN] [0mproved: (leq zero ?ts_ph_Nat_0) => true
+11:01:40 [0m[33m[WARN] [0mproved: (minus ?ts_ph_Nat_0 (succ ?ts_ph_Nat_0)) => zero
+11:01:40 [0m[33m[WARN] [0mproved: (leq (succ zero) (succ ?ts_ph_Nat_0)) => true
+11:01:40 [0m[33m[WARN] [0mproved: (minus (succ ?ts_ph_Nat_0) ?ts_ph_Nat_0) => (succ zero)
+11:01:41 [0m[33m[WARN] [0mproved: (minus ?ts_ph_Nat_1 (succ ?ts_ph_Nat_0)) => (minus (minus ?ts_ph_Nat_1 ?ts_ph_Nat_0) (succ zero))
+11:01:41 [0m[33m[WARN] [0mproved: (minus (minus ?ts_ph_Nat_1 ?ts_ph_Nat_0) (succ zero)) => (minus ?ts_ph_Nat_1 (succ ?ts_ph_Nat_0))
+11:01:42 [0m[33m[WARN] [0mproved: (minus (minus ?ts_ph_Nat_1 ?ts_ph_Nat_0) ?ts_ph_Nat_1) => zero
+done in 6732

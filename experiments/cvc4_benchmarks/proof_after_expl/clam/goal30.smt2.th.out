@@ -1,0 +1,38 @@
+20:31:47 [0m[33m[WARN] [0mCollecting statistics
+(leq ?__x0 ?__y1) => (or (= ?__x0 ?__y1) (less ?__x0 ?__y1))
+(or (= ?__x0 ?__y1) (less ?__x0 ?__y1)) => (leq ?__x0 ?__y1)
+(append nil ?x) => ?x
+(append (cons ?x2 ?y) ?z) => (cons ?x2 (append ?y ?z))
+(cons ?x2 (append ?y ?z)) => (append (cons ?x2 ?y) ?z)
+(rev nil) => nil
+nil => (rev nil)
+(rev (cons ?x3 ?y)) => (append (rev ?y) (cons ?x3 nil))
+(append (rev ?y) (cons ?x3 nil)) => (rev (cons ?x3 ?y))
+(leq zero ?ts_ph_Nat_0) => true
+(append ?ts_ph_Lst_0 nil) => ?ts_ph_Lst_0
+(leq (succ zero) (succ ?ts_ph_Nat_0)) => true
+(append ?ts_ph_Lst_0 (append ?ts_ph_Lst_1 ?ts_ph_Lst_2)) => (append (append ?ts_ph_Lst_0 ?ts_ph_Lst_1) ?ts_ph_Lst_2)
+(append (append ?ts_ph_Lst_0 ?ts_ph_Lst_1) ?ts_ph_Lst_2) => (append ?ts_ph_Lst_0 (append ?ts_ph_Lst_1 ?ts_ph_Lst_2))
+(append (rev ?ts_ph_Lst_1) (rev ?ts_ph_Lst_0)) => (rev (append ?ts_ph_Lst_0 ?ts_ph_Lst_1))
+(rev (append ?ts_ph_Lst_0 ?ts_ph_Lst_1)) => (append (rev ?ts_ph_Lst_1) (rev ?ts_ph_Lst_0))
+(rev (rev ?ts_ph_Lst_0)) => ?ts_ph_Lst_0
+Searcher: (append (rev ?autovar1) ?autovar2)
+Searcher: (leq ?autovar2 (succ ?autovar1))
+20:31:47 [0m[33m[WARN] [0m ex is: zero
+20:31:47 [0m[33m[WARN] [0m ex is: (succ zero)
+20:31:47 [0m[33m[WARN] [0m ex is: (succ (succ zero))
+20:31:47 [0m[33m[WARN] [0m ex is: nil
+20:31:47 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_0 nil)
+20:31:47 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+20:31:47 [0m[33m[WARN] [0mRunning exploration without proof mode, but goals were given
+20:31:47 [0m[33m[WARN] [0mProof mode: true
+20:31:47 [0m[33m[WARN] [0m ex is: zero
+20:31:47 [0m[33m[WARN] [0m ex is: (succ zero)
+20:31:47 [0m[33m[WARN] [0m ex is: (succ (succ zero))
+20:31:47 [0m[33m[WARN] [0m ex is: nil
+20:31:47 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_0 nil)
+20:31:47 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+20:31:47 [0m[33m[WARN] [0mRunning exploration without proof mode, but goals were given
+20:31:47 [0m[33m[WARN] [0mProof mode: true
+20:31:47 [0m[33m[WARN] [0mFound all lemmas
+done in 40

@@ -1,0 +1,8 @@
+(=> "(less ?ts_ph_Nat_0 ?ts_ph_Nat_0) => false" (less ?ts_ph_Nat_0 ?ts_ph_Nat_0) false)
+(=> "(leq zero ?ts_ph_Nat_0) => true" (leq zero ?ts_ph_Nat_0) true)
+(=> "(leq (succ zero) (succ ?ts_ph_Nat_0)) => true" (leq (succ zero) (succ ?ts_ph_Nat_0)) true)
+(=> "(less ?ts_ph_Nat_0 (succ ?ts_ph_Nat_0)) => (leq (succ zero) (succ ?ts_ph_Nat_0))" (less ?ts_ph_Nat_0 (succ ?ts_ph_Nat_0)) (leq (succ zero) (succ ?ts_ph_Nat_0)))
+(=> "(leq (succ zero) (succ ?ts_ph_Nat_0)) => (less ?ts_ph_Nat_0 (succ ?ts_ph_Nat_0))" (leq (succ zero) (succ ?ts_ph_Nat_0)) (less ?ts_ph_Nat_0 (succ ?ts_ph_Nat_0)))
+(=> "(filter (filter ?ts_ph_Lst_0)) => (filter ?ts_ph_Lst_0)" (filter (filter ?ts_ph_Lst_0)) (filter ?ts_ph_Lst_0))
+(=> "(filter ?ts_ph_Lst_0) => (filter (filter ?ts_ph_Lst_0))" (filter ?ts_ph_Lst_0) (filter (filter ?ts_ph_Lst_0)))
+(=> "(less (succ ?ts_ph_Nat_0) ?ts_ph_Nat_0) => false" (less (succ ?ts_ph_Nat_0) ?ts_ph_Nat_0) false)

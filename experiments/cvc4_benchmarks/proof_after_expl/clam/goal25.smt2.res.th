@@ -1,0 +1,2 @@
+(=> "(even (len (append ?ts_ph_Lst_2 ?ts_ph_Lst_0))) => (even (plus (len ?ts_ph_Lst_2) (len ?ts_ph_Lst_0)))" (even (len (append ?ts_ph_Lst_2 ?ts_ph_Lst_0))) (even (plus (len ?ts_ph_Lst_2) (len ?ts_ph_Lst_0))))
+(=> "(even (plus (len ?ts_ph_Lst_2) (len ?ts_ph_Lst_0))) => (even (len (append ?ts_ph_Lst_2 ?ts_ph_Lst_0)))" (even (plus (len ?ts_ph_Lst_2) (len ?ts_ph_Lst_0))) (even (len (append ?ts_ph_Lst_2 ?ts_ph_Lst_0))))

@@ -1,0 +1,34 @@
+19:34:03 [0m[33m[WARN] [0mCollecting statistics
+(leq ?__x0 ?__y1) => (or (= ?__x0 ?__y1) (less ?__x0 ?__y1))
+(or (= ?__x0 ?__y1) (less ?__x0 ?__y1)) => (leq ?__x0 ?__y1)
+(plus zero ?n) => ?n
+(plus (succ ?n) ?m) => (succ (plus ?n ?m))
+(succ (plus ?n ?m)) => (plus (succ ?n) ?m)
+(even zero) => true
+true => (even zero)
+(even (succ ?n)) => (not (even ?n))
+(not (even ?n)) => (even (succ ?n))
+(append nil ?x) => ?x
+(append (cons ?x2 ?y) ?z) => (cons ?x2 (append ?y ?z))
+(cons ?x2 (append ?y ?z)) => (append (cons ?x2 ?y) ?z)
+(len nil) => zero
+zero => (len nil)
+(len (cons ?x3 ?y)) => (succ (len ?y))
+19:34:03 [0m[33m[WARN] [0m ex is: zero
+19:34:03 [0m[33m[WARN] [0m ex is: (succ zero)
+19:34:03 [0m[33m[WARN] [0m ex is: (succ (succ zero))
+19:34:03 [0m[33m[WARN] [0m ex is: nil
+19:34:03 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_0 nil)
+19:34:03 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+19:34:03 [0m[33m[WARN] [0mRunning exploration without proof mode, but goals were given
+19:34:03 [0m[33m[WARN] [0mProof mode: true
+19:34:03 [0m[33m[WARN] [0m ex is: zero
+19:34:03 [0m[33m[WARN] [0m ex is: (succ zero)
+19:34:03 [0m[33m[WARN] [0m ex is: (succ (succ zero))
+19:34:03 [0m[33m[WARN] [0m ex is: nil
+19:34:03 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_0 nil)
+19:34:03 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+19:34:03 [0m[33m[WARN] [0mRunning exploration without proof mode, but goals were given
+19:34:03 [0m[33m[WARN] [0mProof mode: true
+19:34:03 [0m[33m[WARN] [0mFound all lemmas
+done in 1

@@ -1,0 +1,2 @@
+(=> "(filter (append ?ts_ph_Lst_0 ?ts_ph_Lst_1)) => (append (filter ?ts_ph_Lst_0) (filter ?ts_ph_Lst_1))" (filter (append ?ts_ph_Lst_0 ?ts_ph_Lst_1)) (append (filter ?ts_ph_Lst_0) (filter ?ts_ph_Lst_1)))
+(=> "(append (filter ?ts_ph_Lst_0) (filter ?ts_ph_Lst_1)) => (filter (append ?ts_ph_Lst_0 ?ts_ph_Lst_1))" (append (filter ?ts_ph_Lst_0) (filter ?ts_ph_Lst_1)) (filter (append ?ts_ph_Lst_0 ?ts_ph_Lst_1)))

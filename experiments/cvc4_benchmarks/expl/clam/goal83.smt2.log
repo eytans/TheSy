@@ -1,0 +1,28 @@
+15:42:45 [WARN] Collecting statistics
+15:42:45 [WARN]  ex is: zero
+15:42:45 [WARN]  ex is: (succ zero)
+15:42:45 [WARN]  ex is: (succ (succ zero))
+15:42:45 [WARN]  ex is: nil
+15:42:45 [WARN]  ex is: (cons autovar_Nat_0 nil)
+15:42:45 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+15:42:45 [WARN] Proof mode: false
+15:42:45 [WARN]  ex is: zero
+15:42:45 [WARN]  ex is: (succ zero)
+15:42:45 [WARN]  ex is: (succ (succ zero))
+15:42:45 [WARN]  ex is: nil
+15:42:45 [WARN]  ex is: (cons autovar_Nat_0 nil)
+15:42:45 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+15:42:45 [WARN] Proof mode: false
+15:42:46 [WARN] proved: (leq zero ?ts_ph_Nat_0) => true
+15:42:46 [WARN] proved: (rotate ?ts_ph_Nat_0 nil) => nil
+15:42:46 [WARN] proved: (append ?ts_ph_Lst_0 nil) => ?ts_ph_Lst_0
+15:43:06 [WARN] proved: (rotate ?ts_ph_Nat_0 (cons ?ts_ph_Nat_1 nil)) => (cons ?ts_ph_Nat_1 nil)
+15:43:06 [WARN] proved: (leq (succ zero) (succ ?ts_ph_Nat_0)) => true
+15:43:06 [WARN] proved: (append ?ts_ph_Lst_0 (append ?ts_ph_Lst_1 ?ts_ph_Lst_2)) => (append (append ?ts_ph_Lst_0 ?ts_ph_Lst_1) ?ts_ph_Lst_2)
+15:43:06 [WARN] proved: (append (append ?ts_ph_Lst_0 ?ts_ph_Lst_1) ?ts_ph_Lst_2) => (append ?ts_ph_Lst_0 (append ?ts_ph_Lst_1 ?ts_ph_Lst_2))
+15:43:07 [WARN] proved: (append ?ts_ph_Lst_1 ?ts_ph_Lst_0) => (rotate (len ?ts_ph_Lst_0) (append ?ts_ph_Lst_0 ?ts_ph_Lst_1))
+15:43:07 [WARN] proved: (rotate (len ?ts_ph_Lst_0) (append ?ts_ph_Lst_0 ?ts_ph_Lst_1)) => (append ?ts_ph_Lst_1 ?ts_ph_Lst_0)
+15:43:07 [WARN] proved: (rotate (succ zero) (rotate ?ts_ph_Nat_0 ?ts_ph_Lst_1)) => (rotate (succ ?ts_ph_Nat_0) ?ts_ph_Lst_1)
+15:43:07 [WARN] proved: (rotate (succ ?ts_ph_Nat_0) ?ts_ph_Lst_1) => (rotate (succ zero) (rotate ?ts_ph_Nat_0 ?ts_ph_Lst_1))
+15:43:07 [WARN] proved: (rotate ?ts_ph_Nat_1 (rotate ?ts_ph_Nat_0 ?ts_ph_Lst_1)) => (rotate ?ts_ph_Nat_0 (rotate ?ts_ph_Nat_1 ?ts_ph_Lst_1))
+15:43:07 [WARN] proved: (rotate ?ts_ph_Nat_0 (rotate ?ts_ph_Nat_1 ?ts_ph_Lst_1)) => (rotate ?ts_ph_Nat_1 (rotate ?ts_ph_Nat_0 ?ts_ph_Lst_1))

@@ -1,0 +1,18 @@
+12:07:09 [WARN] Collecting statistics
+12:07:09 [WARN]  ex is: zero
+12:07:09 [WARN]  ex is: (succ zero)
+12:07:09 [WARN]  ex is: (succ (succ zero))
+12:07:09 [WARN] Proof mode: false
+12:07:09 [WARN]  ex is: zero
+12:07:09 [WARN]  ex is: (succ zero)
+12:07:09 [WARN]  ex is: (succ (succ zero))
+12:07:09 [WARN] Proof mode: false
+12:07:09 [WARN] proved: (mult ?ts_ph_Nat_0 zero) => zero
+12:07:09 [WARN] proved: (qmult ?ts_ph_Nat_0 ?ts_ph_Nat_0 zero) => (mult ?ts_ph_Nat_0 ?ts_ph_Nat_0)
+12:07:09 [WARN] proved: (mult ?ts_ph_Nat_0 ?ts_ph_Nat_0) => (qmult ?ts_ph_Nat_0 ?ts_ph_Nat_0 zero)
+12:07:09 [WARN] proved: (leq zero ?ts_ph_Nat_0) => true
+12:07:09 [WARN] proved: (mult ?ts_ph_Nat_0 ?ts_ph_Nat_1) => (qmult ?ts_ph_Nat_0 ?ts_ph_Nat_1 zero)
+12:07:09 [WARN] proved: (qmult ?ts_ph_Nat_0 ?ts_ph_Nat_1 zero) => (mult ?ts_ph_Nat_0 ?ts_ph_Nat_1)
+12:42:37 [WARN] proved: (leq (succ zero) (succ ?ts_ph_Nat_0)) => true
+12:42:37 [WARN] proved: (leq (succ zero) (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0)) => (leq (succ zero) ?ts_ph_Nat_0)
+12:42:37 [WARN] proved: (leq (succ zero) ?ts_ph_Nat_0) => (leq (succ zero) (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0))

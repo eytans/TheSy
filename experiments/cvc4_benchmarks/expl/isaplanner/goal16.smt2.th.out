@@ -1,0 +1,22 @@
+10:59:51 [0m[33m[WARN] [0mCollecting statistics
+(leq ?__x0 ?__y1) => (or (= ?__x0 ?__y1) (less ?__x0 ?__y1))
+(or (= ?__x0 ?__y1) (less ?__x0 ?__y1)) => (leq ?__x0 ?__y1)
+(last (cons ?x ?y)) => (ite (= ?y nil) ?x (last ?y))
+(ite (= ?y nil) ?x (last ?y)) => (last (cons ?x ?y))
+10:59:51 [0m[33m[WARN] [0m ex is: zero
+10:59:51 [0m[33m[WARN] [0m ex is: (succ zero)
+10:59:51 [0m[33m[WARN] [0m ex is: (succ (succ zero))
+10:59:51 [0m[33m[WARN] [0m ex is: nil
+10:59:51 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_0 nil)
+10:59:51 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+10:59:51 [0m[33m[WARN] [0mProof mode: false
+10:59:51 [0m[33m[WARN] [0m ex is: zero
+10:59:51 [0m[33m[WARN] [0m ex is: (succ zero)
+10:59:51 [0m[33m[WARN] [0m ex is: (succ (succ zero))
+10:59:51 [0m[33m[WARN] [0m ex is: nil
+10:59:51 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_0 nil)
+10:59:51 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+10:59:51 [0m[33m[WARN] [0mProof mode: false
+10:59:51 [0m[33m[WARN] [0mproved: (leq zero ?ts_ph_Nat_0) => true
+10:59:51 [0m[33m[WARN] [0mproved: (leq (succ zero) (succ ?ts_ph_Nat_0)) => true
+done in 530

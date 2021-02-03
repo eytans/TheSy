@@ -1,0 +1,2 @@
+(=> "(mult ?ts_ph_Nat_0 ?ts_ph_Nat_2) => (qmult ?ts_ph_Nat_0 ?ts_ph_Nat_2 zero)" (mult ?ts_ph_Nat_0 ?ts_ph_Nat_2) (qmult ?ts_ph_Nat_0 ?ts_ph_Nat_2 zero))
+(=> "(qmult ?ts_ph_Nat_0 ?ts_ph_Nat_2 zero) => (mult ?ts_ph_Nat_0 ?ts_ph_Nat_2)" (qmult ?ts_ph_Nat_0 ?ts_ph_Nat_2 zero) (mult ?ts_ph_Nat_0 ?ts_ph_Nat_2))

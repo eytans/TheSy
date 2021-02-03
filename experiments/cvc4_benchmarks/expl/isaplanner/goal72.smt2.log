@@ -1,0 +1,23 @@
+11:08:27 [WARN] Collecting statistics
+11:08:27 [WARN]  ex is: zero
+11:08:27 [WARN]  ex is: (succ zero)
+11:08:27 [WARN]  ex is: (succ (succ zero))
+11:08:27 [WARN]  ex is: nil
+11:08:27 [WARN]  ex is: (cons autovar_Nat_0 nil)
+11:08:27 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+11:08:27 [WARN] Proof mode: false
+11:08:27 [WARN]  ex is: zero
+11:08:27 [WARN]  ex is: (succ zero)
+11:08:27 [WARN]  ex is: (succ (succ zero))
+11:08:27 [WARN]  ex is: nil
+11:08:27 [WARN]  ex is: (cons autovar_Nat_0 nil)
+11:08:27 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+11:08:27 [WARN] Proof mode: false
+11:08:31 [WARN] proved: (leq zero ?ts_ph_Nat_0) => true
+11:08:31 [WARN] proved: (cons zero ?ts_ph_Lst_0) => (insort zero ?ts_ph_Lst_0)
+11:08:31 [WARN] proved: (insort zero ?ts_ph_Lst_0) => (cons zero ?ts_ph_Lst_0)
+11:08:31 [WARN] proved: (less ?ts_ph_Nat_0 ?ts_ph_Nat_0) => false
+11:20:34 [WARN] proved: (less (succ ?ts_ph_Nat_0) ?ts_ph_Nat_0) => false
+11:20:34 [WARN] proved: (leq (succ zero) (succ ?ts_ph_Nat_0)) => true
+11:20:34 [WARN] proved: (less ?ts_ph_Nat_0 (succ ?ts_ph_Nat_0)) => (leq (succ zero) (succ ?ts_ph_Nat_0))
+11:20:34 [WARN] proved: (leq (succ zero) (succ ?ts_ph_Nat_0)) => (less ?ts_ph_Nat_0 (succ ?ts_ph_Nat_0))

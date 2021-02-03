@@ -1,0 +1,10 @@
+20:11:13 [0m[33m[WARN] [0mCollecting statistics
+(leq ?__x0 ?__y1) => (or (= ?__x0 ?__y1) (less ?__x0 ?__y1))
+(or (= ?__x0 ?__y1) (less ?__x0 ?__y1)) => (leq ?__x0 ?__y1)
+(drop ?x nil) => nil
+(drop zero ?x2) => ?x2
+(drop (succ ?x) (cons ?y ?z)) => (drop ?x ?z)
+(dropWhile nil) => nil
+nil => (dropWhile nil)
+(dropWhile (cons ?x ?y3)) => (ite (P ?x) (dropWhile ?y3) (cons ?x ?y3))
+(ite (P ?x) (dropWhile ?y3) (cons ?x ?y3)) => (dropWhile (cons ?x ?y3))

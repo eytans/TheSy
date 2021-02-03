@@ -1,0 +1,45 @@
+11:11:12 [0m[33m[WARN] [0mCollecting statistics
+(leq ?__x0 ?__y1) => (or (= ?__x0 ?__y1) (less ?__x0 ?__y1))
+(or (= ?__x0 ?__y1) (less ?__x0 ?__y1)) => (leq ?__x0 ?__y1)
+(less ?x zero) => false
+(less zero (succ ?x)) => true
+(less (succ ?x) (succ ?y)) => (less ?x ?y)
+(less ?x ?y) => (less (succ ?x) (succ ?y))
+(append nil ?x2) => ?x2
+(append (cons ?x ?y3) ?z) => (cons ?x (append ?y3 ?z))
+(cons ?x (append ?y3 ?z)) => (append (cons ?x ?y3) ?z)
+(count ?x nil) => zero
+(count ?x (cons ?y ?z)) => (ite (= ?x ?y) (succ (count ?x ?z)) (count ?x ?z))
+(ite (= ?x ?y) (succ (count ?x ?z)) (count ?x ?z)) => (count ?x (cons ?y ?z))
+Searcher: (less ?autovar5 (succ ?autovar1))
+Searcher: (less ?autovar5 (succ ?autovar3))
+Searcher: (less zero ?autovar6)
+Searcher: (less (succ ?autovar4) ?autovar6)
+11:11:12 [0m[33m[WARN] [0m ex is: zero
+11:11:12 [0m[33m[WARN] [0m ex is: (succ zero)
+11:11:12 [0m[33m[WARN] [0m ex is: (succ (succ zero))
+11:11:12 [0m[33m[WARN] [0m ex is: nil
+11:11:12 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_0 nil)
+11:11:12 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+11:11:12 [0m[33m[WARN] [0mProof mode: false
+11:11:12 [0m[33m[WARN] [0m ex is: zero
+11:11:12 [0m[33m[WARN] [0m ex is: (succ zero)
+11:11:12 [0m[33m[WARN] [0m ex is: (succ (succ zero))
+11:11:12 [0m[33m[WARN] [0m ex is: nil
+11:11:12 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_0 nil)
+11:11:12 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+11:11:12 [0m[33m[WARN] [0mProof mode: false
+11:11:13 [0m[33m[WARN] [0mproved: (append ?ts_ph_Lst_0 nil) => ?ts_ph_Lst_0
+11:11:13 [0m[33m[WARN] [0mproved: (leq zero ?ts_ph_Nat_0) => true
+11:11:13 [0m[33m[WARN] [0mproved: (less ?ts_ph_Nat_0 ?ts_ph_Nat_0) => false
+11:20:03 [0m[33m[WARN] [0mproved: (leq (succ zero) (succ ?ts_ph_Nat_0)) => true
+11:20:03 [0m[33m[WARN] [0mproved: (less ?ts_ph_Nat_0 (succ ?ts_ph_Nat_0)) => (leq (succ zero) (succ ?ts_ph_Nat_0))
+11:20:03 [0m[33m[WARN] [0mproved: (leq (succ zero) (succ ?ts_ph_Nat_0)) => (less ?ts_ph_Nat_0 (succ ?ts_ph_Nat_0))
+11:20:04 [0m[33m[WARN] [0mproved: (less zero ?ts_ph_Nat_0) => (leq (succ zero) ?ts_ph_Nat_0)
+11:20:04 [0m[33m[WARN] [0mproved: (leq (succ zero) ?ts_ph_Nat_0) => (less zero ?ts_ph_Nat_0)
+11:20:04 [0m[33m[WARN] [0mproved: (less (succ ?ts_ph_Nat_0) ?ts_ph_Nat_0) => false
+11:20:04 [0m[33m[WARN] [0mproved: (append (append ?ts_ph_Lst_0 ?ts_ph_Lst_1) ?ts_ph_Lst_2) => (append ?ts_ph_Lst_0 (append ?ts_ph_Lst_1 ?ts_ph_Lst_2))
+11:20:04 [0m[33m[WARN] [0mproved: (append ?ts_ph_Lst_0 (append ?ts_ph_Lst_1 ?ts_ph_Lst_2)) => (append (append ?ts_ph_Lst_0 ?ts_ph_Lst_1) ?ts_ph_Lst_2)
+11:20:04 [0m[33m[WARN] [0mproved: (count (succ ?ts_ph_Nat_0) ?ts_ph_Lst_1) => (count (succ ?ts_ph_Nat_0) (cons ?ts_ph_Nat_0 ?ts_ph_Lst_1))
+11:20:04 [0m[33m[WARN] [0mproved: (count (succ ?ts_ph_Nat_0) (cons ?ts_ph_Nat_0 ?ts_ph_Lst_1)) => (count (succ ?ts_ph_Nat_0) ?ts_ph_Lst_1)
+done in 532219

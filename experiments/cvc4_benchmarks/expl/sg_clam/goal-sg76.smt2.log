@@ -1,0 +1,39 @@
+13:44:58 [WARN] Collecting statistics
+13:44:58 [WARN]  ex is: zero
+13:44:58 [WARN]  ex is: (succ zero)
+13:44:58 [WARN]  ex is: (succ (succ zero))
+13:44:58 [WARN]  ex is: nil
+13:44:58 [WARN]  ex is: (cons autovar_Nat_0 nil)
+13:44:58 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+13:44:58 [WARN]  ex is: leaf
+13:44:58 [WARN]  ex is: (node autovar_Nat_0 leaf leaf)
+13:44:58 [WARN]  ex is: (node autovar_Nat_1 (node autovar_Nat_0 leaf leaf) (node autovar_Nat_0 leaf leaf))
+13:44:58 [WARN] Proof mode: false
+13:44:58 [WARN]  ex is: zero
+13:44:58 [WARN]  ex is: (succ zero)
+13:44:58 [WARN]  ex is: (succ (succ zero))
+13:44:58 [WARN]  ex is: nil
+13:44:58 [WARN]  ex is: (cons autovar_Nat_0 nil)
+13:44:58 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+13:44:58 [WARN]  ex is: leaf
+13:44:58 [WARN]  ex is: (node autovar_Nat_0 leaf leaf)
+13:44:58 [WARN]  ex is: (node autovar_Nat_1 (node autovar_Nat_0 leaf leaf) (node autovar_Nat_0 leaf leaf))
+13:44:58 [WARN] Proof mode: false
+13:44:58 [WARN] proved: (leq zero ?ts_ph_Nat_0) => true
+13:44:58 [WARN] proved: (append ?ts_ph_Lst_0 nil) => ?ts_ph_Lst_0
+13:45:46 [WARN] proved: (qreva ?ts_ph_Lst_0 ?ts_ph_Lst_1) => (append (rev ?ts_ph_Lst_0) ?ts_ph_Lst_1)
+13:45:46 [WARN] proved: (append (rev ?ts_ph_Lst_0) ?ts_ph_Lst_1) => (qreva ?ts_ph_Lst_0 ?ts_ph_Lst_1)
+13:45:46 [WARN] proved: (append (rev ?ts_ph_Lst_1) ?ts_ph_Lst_0) => (rev (qreva ?ts_ph_Lst_0 ?ts_ph_Lst_1))
+13:45:46 [WARN] proved: (rev (qreva ?ts_ph_Lst_0 ?ts_ph_Lst_1)) => (append (rev ?ts_ph_Lst_1) ?ts_ph_Lst_0)
+13:45:46 [WARN] proved: (qrevaflat ?ts_ph_Tree_0 ?ts_ph_Lst_0) => (append (revflat ?ts_ph_Tree_0) ?ts_ph_Lst_0)
+13:45:46 [WARN] proved: (append (revflat ?ts_ph_Tree_0) ?ts_ph_Lst_0) => (qrevaflat ?ts_ph_Tree_0 ?ts_ph_Lst_0)
+13:45:46 [WARN] proved: (qreva (rev ?ts_ph_Lst_0) ?ts_ph_Lst_0) => (append ?ts_ph_Lst_0 ?ts_ph_Lst_0)
+13:45:46 [WARN] proved: (append ?ts_ph_Lst_0 ?ts_ph_Lst_0) => (qreva (rev ?ts_ph_Lst_0) ?ts_ph_Lst_0)
+13:45:46 [WARN] proved: (rev (append ?ts_ph_Lst_0 ?ts_ph_Lst_1)) => (append (rev ?ts_ph_Lst_1) (rev ?ts_ph_Lst_0))
+13:45:46 [WARN] proved: (append (rev ?ts_ph_Lst_1) (rev ?ts_ph_Lst_0)) => (rev (append ?ts_ph_Lst_0 ?ts_ph_Lst_1))
+13:45:46 [WARN] proved: (append ?ts_ph_Lst_0 (revflat ?ts_ph_Tree_0)) => (qreva (rev ?ts_ph_Lst_0) (revflat ?ts_ph_Tree_0))
+13:45:46 [WARN] proved: (qreva (rev ?ts_ph_Lst_0) (revflat ?ts_ph_Tree_0)) => (append ?ts_ph_Lst_0 (revflat ?ts_ph_Tree_0))
+13:45:46 [WARN] proved: (leq (succ zero) (succ ?ts_ph_Nat_0)) => true
+13:45:46 [WARN] generalized case_split proof as: (qreva (rev ?ts_ph_Lst_0) (append ?ts_ph_Lst_1 ?ts_ph_Lst_2)) -- (append ?ts_ph_Lst_0 (append ?ts_ph_Lst_1 ?ts_ph_Lst_2))
+13:45:46 [WARN] proved: (qreva (rev ?ts_ph_Lst_0) (append ?ts_ph_Lst_1 ?ts_ph_Lst_2)) => (append ?ts_ph_Lst_0 (append ?ts_ph_Lst_1 ?ts_ph_Lst_2))
+13:45:46 [WARN] proved: (append ?ts_ph_Lst_0 (append ?ts_ph_Lst_1 ?ts_ph_Lst_2)) => (qreva (rev ?ts_ph_Lst_0) (append ?ts_ph_Lst_1 ?ts_ph_Lst_2))

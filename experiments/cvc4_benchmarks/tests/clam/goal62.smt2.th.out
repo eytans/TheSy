@@ -1,0 +1,51 @@
+19:34:36 [0m[33m[WARN] [0mCollecting statistics
+(leq ?__x0 ?__y1) => (or (= ?__x0 ?__y1) (less ?__x0 ?__y1))
+(or (= ?__x0 ?__y1) (less ?__x0 ?__y1)) => (leq ?__x0 ?__y1)
+(less ?x zero) => false
+(less zero (succ ?x)) => true
+(less (succ ?x) (succ ?y)) => (less ?x ?y)
+(less ?x ?y) => (less (succ ?x) (succ ?y))
+(insort ?i nil) => (cons ?i nil)
+(cons ?i nil) => (insort ?i nil)
+(insort ?i (cons ?x ?y2)) => (ite (less ?i ?x) (cons ?i (cons ?x ?y2)) (cons ?x (insort ?i ?y2)))
+(ite (less ?i ?x) (cons ?i (cons ?x ?y2)) (cons ?x (insort ?i ?y2))) => (insort ?i (cons ?x ?y2))
+(sorted nil) => true
+true => (sorted nil)
+(sorted (cons ?x nil)) => true
+(sorted (cons ?x (cons ?z ?y3))) => (and (sorted (cons ?z ?y3)) (or (= ?x ?z) (less ?x ?z)))
+(and (sorted (cons ?z ?y3)) (or (= ?x ?z) (less ?x ?z))) => (sorted (cons ?x (cons ?z ?y3)))
+(sort nil) => nil
+nil => (sort nil)
+(sort (cons ?x ?y4)) => (insort ?x (sort ?y4))
+(insort ?x (sort ?y4)) => (sort (cons ?x ?y4))
+Searcher: (less ?autovar5 (succ ?autovar1))
+Searcher: (less ?autovar5 (succ ?autovar3))
+Searcher: (less zero ?autovar6)
+Searcher: (less (succ ?autovar4) ?autovar6)
+19:34:36 [0m[33m[WARN] [0m ex is: zero
+19:34:36 [0m[33m[WARN] [0m ex is: (succ zero)
+19:34:36 [0m[33m[WARN] [0m ex is: (succ (succ zero))
+19:34:36 [0m[33m[WARN] [0m ex is: nil
+19:34:36 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_0 nil)
+19:34:36 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+19:34:36 [0m[33m[WARN] [0mRunning exploration without proof mode, but goals were given
+19:34:36 [0m[33m[WARN] [0mProof mode: true
+19:34:36 [0m[33m[WARN] [0m ex is: zero
+19:34:36 [0m[33m[WARN] [0m ex is: (succ zero)
+19:34:36 [0m[33m[WARN] [0m ex is: (succ (succ zero))
+19:34:36 [0m[33m[WARN] [0m ex is: nil
+19:34:36 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_0 nil)
+19:34:36 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+19:34:36 [0m[33m[WARN] [0mRunning exploration without proof mode, but goals were given
+19:34:36 [0m[33m[WARN] [0mProof mode: true
+19:34:37 [0m[33m[WARN] [0mproved: (leq zero ?ts_ph_Nat_0) => true
+19:34:37 [0m[33m[WARN] [0mproved: (less ?ts_ph_Nat_0 ?ts_ph_Nat_0) => false
+19:34:37 [0m[33m[WARN] [0mproved: (insort zero ?ts_ph_Lst_0) => (cons zero ?ts_ph_Lst_0)
+19:34:37 [0m[33m[WARN] [0mproved: (cons zero ?ts_ph_Lst_0) => (insort zero ?ts_ph_Lst_0)
+19:36:26 [0m[33m[WARN] [0mproved: (less (succ ?ts_ph_Nat_0) ?ts_ph_Nat_0) => false
+19:36:26 [0m[33m[WARN] [0mproved: (leq (succ zero) (succ ?ts_ph_Nat_0)) => true
+19:36:26 [0m[33m[WARN] [0mproved: (less ?ts_ph_Nat_0 (succ ?ts_ph_Nat_0)) => (leq (succ zero) (succ ?ts_ph_Nat_0))
+19:36:26 [0m[33m[WARN] [0mproved: (leq (succ zero) (succ ?ts_ph_Nat_0)) => (less ?ts_ph_Nat_0 (succ ?ts_ph_Nat_0))
+19:36:26 [0m[33m[WARN] [0mproved: (sorted (cons zero ?ts_ph_Lst_0)) => (sorted ?ts_ph_Lst_0)
+19:36:26 [0m[33m[WARN] [0mproved: (sorted ?ts_ph_Lst_0) => (sorted (cons zero ?ts_ph_Lst_0))
+done in 110130

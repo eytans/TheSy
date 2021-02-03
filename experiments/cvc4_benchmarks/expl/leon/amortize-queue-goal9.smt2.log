@@ -1,0 +1,17 @@
+12:22:37 [WARN] Collecting statistics
+12:22:37 [WARN]  ex is: zero
+12:22:37 [WARN]  ex is: (succ zero)
+12:22:37 [WARN]  ex is: (succ (succ zero))
+12:22:37 [WARN]  ex is: nil
+12:22:37 [WARN]  ex is: (cons autovar_Nat_0 nil)
+12:22:37 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+12:22:37 [WARN]  ex is: (queue autovar_Lst_0 autovar_Lst_1)
+12:22:37 [WARN] Proof mode: false
+12:22:37 [WARN]  ex is: zero
+12:22:37 [WARN]  ex is: (succ zero)
+12:22:37 [WARN]  ex is: (succ (succ zero))
+12:22:37 [WARN]  ex is: nil
+12:22:37 [WARN]  ex is: (cons autovar_Nat_0 nil)
+12:22:37 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+12:22:37 [WARN]  ex is: (queue autovar_Lst_0 autovar_Lst_1)
+12:22:37 [WARN] Proof mode: false

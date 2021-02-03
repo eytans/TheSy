@@ -1,0 +1,37 @@
+19:19:16 [0m[33m[WARN] [0mCollecting statistics
+(leq ?__x0 ?__y1) => (or (= ?__x0 ?__y1) (less ?__x0 ?__y1))
+(or (= ?__x0 ?__y1) (less ?__x0 ?__y1)) => (leq ?__x0 ?__y1)
+(append nil ?x) => ?x
+(append (cons ?x2 ?y) ?z) => (cons ?x2 (append ?y ?z))
+(cons ?x2 (append ?y ?z)) => (append (cons ?x2 ?y) ?z)
+(len nil) => zero
+zero => (len nil)
+(len (cons ?x3 ?y)) => (succ (len ?y))
+(rotate zero ?x) => ?x
+(rotate (succ ?n) nil) => nil
+(rotate (succ ?n) (cons ?y4 ?x)) => (rotate ?n (append ?x (cons ?y4 nil)))
+(rotate ?n (append ?x (cons ?y4 nil))) => (rotate (succ ?n) (cons ?y4 ?x))
+(rotate (len ?x) (append ?x ?y)) => (append ?y ?x)
+(append ?y ?x) => (rotate (len ?x) (append ?x ?y))
+Searcher: (rotate ?autovar7 nil)
+Searcher: (rotate ?autovar7 (cons ?autovar3 ?autovar4))
+Searcher: (rotate (succ ?autovar5) ?autovar8)
+Searcher: (rotate (succ ?autovar6) ?autovar8)
+19:19:16 [0m[33m[WARN] [0m ex is: zero
+19:19:16 [0m[33m[WARN] [0m ex is: (succ zero)
+19:19:16 [0m[33m[WARN] [0m ex is: (succ (succ zero))
+19:19:16 [0m[33m[WARN] [0m ex is: nil
+19:19:16 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_0 nil)
+19:19:16 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+19:19:16 [0m[33m[WARN] [0mRunning exploration without proof mode, but goals were given
+19:19:16 [0m[33m[WARN] [0mProof mode: true
+19:19:16 [0m[33m[WARN] [0m ex is: zero
+19:19:16 [0m[33m[WARN] [0m ex is: (succ zero)
+19:19:16 [0m[33m[WARN] [0m ex is: (succ (succ zero))
+19:19:16 [0m[33m[WARN] [0m ex is: nil
+19:19:16 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_0 nil)
+19:19:16 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+19:19:16 [0m[33m[WARN] [0mRunning exploration without proof mode, but goals were given
+19:19:16 [0m[33m[WARN] [0mProof mode: true
+19:19:16 [0m[33m[WARN] [0mFound all lemmas
+done in 1

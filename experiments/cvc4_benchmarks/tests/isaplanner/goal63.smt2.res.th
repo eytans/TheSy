@@ -1,0 +1,1 @@
+(=> "(not (= ?ts_ph_Lst_1 nil)) |> (last (cons ?ts_ph_Nat_0 ?ts_ph_Lst_1)) => (last ?ts_ph_Lst_1)" (=> (not (= ?ts_ph_Lst_1 nil)) (= (last (cons ?ts_ph_Nat_0 ?ts_ph_Lst_1)) (last ?ts_ph_Lst_1))))

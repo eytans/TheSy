@@ -1,0 +1,24 @@
+14:01:51 [WARN] Collecting statistics
+14:01:51 [WARN]  ex is: zero
+14:01:51 [WARN]  ex is: (succ zero)
+14:01:51 [WARN]  ex is: (succ (succ zero))
+14:01:51 [WARN]  ex is: nil
+14:01:51 [WARN]  ex is: (cons autovar_Nat_0 nil)
+14:01:51 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+14:01:51 [WARN]  ex is: hleaf
+14:01:51 [WARN]  ex is: (heap autovar_Nat_0 autovar_Nat_1 hleaf hleaf)
+14:01:51 [WARN]  ex is: (heap autovar_Nat_2 autovar_Nat_3 (heap autovar_Nat_0 autovar_Nat_1 hleaf hleaf) (heap autovar_Nat_0 autovar_Nat_1 hleaf hleaf))
+14:01:51 [WARN] Proof mode: false
+14:01:51 [WARN]  ex is: zero
+14:01:51 [WARN]  ex is: (succ zero)
+14:01:51 [WARN]  ex is: (succ (succ zero))
+14:01:51 [WARN]  ex is: nil
+14:01:51 [WARN]  ex is: (cons autovar_Nat_0 nil)
+14:01:51 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+14:01:51 [WARN]  ex is: hleaf
+14:01:51 [WARN]  ex is: (heap autovar_Nat_0 autovar_Nat_1 hleaf hleaf)
+14:01:51 [WARN]  ex is: (heap autovar_Nat_2 autovar_Nat_3 (heap autovar_Nat_0 autovar_Nat_1 hleaf hleaf) (heap autovar_Nat_0 autovar_Nat_1 hleaf hleaf))
+14:01:51 [WARN] Proof mode: false
+14:03:39 [WARN] proved: (leq zero ?ts_ph_Nat_0) => true
+14:03:39 [WARN] proved: (less ?ts_ph_Nat_0 ?ts_ph_Nat_0) => false
+14:03:39 [WARN] proved: (plus ?ts_ph_Nat_0 zero) => ?ts_ph_Nat_0

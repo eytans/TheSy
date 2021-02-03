@@ -1,0 +1,44 @@
+20:44:28 [0m[33m[WARN] [0mCollecting statistics
+(plus zero ?n) => ?n
+(plus (succ ?n) ?m) => (succ (plus ?n ?m))
+(succ (plus ?n ?m)) => (plus (succ ?n) ?m)
+(mult zero ?n) => zero
+(mult (succ ?n) ?m) => (plus (mult ?n ?m) ?m)
+(plus (mult ?n ?m) ?m) => (mult (succ ?n) ?m)
+(tri zero) => zero
+zero => (tri zero)
+(tri (succ ?n)) => (plus (tri ?n) (succ ?n))
+(plus (tri ?n) (succ ?n)) => (tri (succ ?n))
+(cubes zero) => zero
+zero => (cubes zero)
+(cubes (succ ?n)) => (plus (cubes ?n) (mult (succ ?n) (mult (succ ?n) (succ ?n))))
+(plus (cubes ?n) (mult (succ ?n) (mult (succ ?n) (succ ?n)))) => (cubes (succ ?n))
+20:44:28 [0m[33m[WARN] [0m ex is: zero
+20:44:28 [0m[33m[WARN] [0m ex is: (succ zero)
+20:44:28 [0m[33m[WARN] [0m ex is: (succ (succ zero))
+20:44:28 [0m[33m[WARN] [0mRunning exploration without proof mode, but goals were given
+20:44:28 [0m[33m[WARN] [0mProof mode: true
+20:44:28 [0m[33m[WARN] [0m ex is: zero
+20:44:28 [0m[33m[WARN] [0m ex is: (succ zero)
+20:44:28 [0m[33m[WARN] [0m ex is: (succ (succ zero))
+20:44:28 [0m[33m[WARN] [0mRunning exploration without proof mode, but goals were given
+20:44:28 [0m[33m[WARN] [0mProof mode: true
+20:44:28 [0m[33m[WARN] [0mproved: (plus ?ts_ph_Nat_0 zero) => ?ts_ph_Nat_0
+20:44:28 [0m[33m[WARN] [0mproved: (mult ?ts_ph_Nat_0 zero) => zero
+20:44:28 [0m[33m[WARN] [0mgeneralized case_split proof as: (plus (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1) ?ts_ph_Nat_2) -- (plus ?ts_ph_Nat_0 (plus ?ts_ph_Nat_1 ?ts_ph_Nat_2))
+20:44:28 [0m[33m[WARN] [0mproved: (plus (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1) ?ts_ph_Nat_2) => (plus ?ts_ph_Nat_0 (plus ?ts_ph_Nat_1 ?ts_ph_Nat_2))
+20:44:28 [0m[33m[WARN] [0mproved: (plus ?ts_ph_Nat_0 (plus ?ts_ph_Nat_1 ?ts_ph_Nat_2)) => (plus (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1) ?ts_ph_Nat_2)
+20:44:28 [0m[33m[WARN] [0mproved: (plus (succ ?ts_ph_Nat_0) (succ zero)) => (succ (succ ?ts_ph_Nat_0))
+20:44:28 [0m[33m[WARN] [0mproved: (succ (succ ?ts_ph_Nat_0)) => (plus (succ ?ts_ph_Nat_0) (succ zero))
+20:44:28 [0m[33m[WARN] [0mproved: (succ ?ts_ph_Nat_0) => (mult (succ ?ts_ph_Nat_0) (succ zero))
+20:44:28 [0m[33m[WARN] [0mproved: (mult (succ ?ts_ph_Nat_0) (succ zero)) => (succ ?ts_ph_Nat_0)
+20:44:28 [0m[33m[WARN] [0mproved: (plus ?ts_ph_Nat_0 (succ zero)) => (mult (succ ?ts_ph_Nat_0) (succ zero))
+20:44:28 [0m[33m[WARN] [0mproved: (mult (succ ?ts_ph_Nat_0) (succ zero)) => (plus ?ts_ph_Nat_0 (succ zero))
+20:44:29 [0m[33m[WARN] [0mproved: (plus (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0) (tri ?ts_ph_Nat_0)) => (plus (tri ?ts_ph_Nat_0) (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0))
+20:44:29 [0m[33m[WARN] [0mproved: (plus (tri ?ts_ph_Nat_0) (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0)) => (plus (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0) (tri ?ts_ph_Nat_0))
+20:44:29 [0m[33m[WARN] [0mproved: (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0) => (mult (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0) (succ zero))
+20:44:29 [0m[33m[WARN] [0mproved: (mult (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0) (succ zero)) => (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0)
+20:44:30 [0m[33m[WARN] [0mproved: (plus ?ts_ph_Nat_1 ?ts_ph_Nat_0) => (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1)
+20:44:30 [0m[33m[WARN] [0mproved: (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1) => (plus ?ts_ph_Nat_1 ?ts_ph_Nat_0)
+20:44:30 [0m[33m[WARN] [0mFound all lemmas
+done in 1937

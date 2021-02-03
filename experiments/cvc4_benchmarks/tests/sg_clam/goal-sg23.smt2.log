@@ -1,0 +1,23 @@
+19:23:42 [WARN] Collecting statistics
+19:23:42 [WARN]  ex is: zero
+19:23:42 [WARN]  ex is: (succ zero)
+19:23:42 [WARN]  ex is: (succ (succ zero))
+19:23:42 [WARN]  ex is: nil
+19:23:42 [WARN]  ex is: (cons autovar_Nat_0 nil)
+19:23:42 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+19:23:42 [WARN] Running exploration without proof mode, but goals were given
+19:23:42 [WARN] Proof mode: true
+19:23:42 [WARN]  ex is: zero
+19:23:42 [WARN]  ex is: (succ zero)
+19:23:42 [WARN]  ex is: (succ (succ zero))
+19:23:42 [WARN]  ex is: nil
+19:23:42 [WARN]  ex is: (cons autovar_Nat_0 nil)
+19:23:42 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+19:23:42 [WARN] Running exploration without proof mode, but goals were given
+19:23:42 [WARN] Proof mode: true
+19:23:42 [WARN] proved: (append ?ts_ph_Lst_0 nil) => ?ts_ph_Lst_0
+19:23:42 [WARN] proved: (leq zero ?ts_ph_Nat_0) => true
+19:23:44 [WARN] generalized case_split proof as: (append (append ?ts_ph_Lst_0 ?ts_ph_Lst_1) ?ts_ph_Lst_2) -- (append ?ts_ph_Lst_0 (append ?ts_ph_Lst_1 ?ts_ph_Lst_2))
+19:23:44 [WARN] proved: (append (append ?ts_ph_Lst_0 ?ts_ph_Lst_1) ?ts_ph_Lst_2) => (append ?ts_ph_Lst_0 (append ?ts_ph_Lst_1 ?ts_ph_Lst_2))
+19:23:44 [WARN] proved: (append ?ts_ph_Lst_0 (append ?ts_ph_Lst_1 ?ts_ph_Lst_2)) => (append (append ?ts_ph_Lst_0 ?ts_ph_Lst_1) ?ts_ph_Lst_2)
+19:23:44 [WARN] proved: (leq (succ zero) (succ ?ts_ph_Nat_0)) => true

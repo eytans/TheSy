@@ -1,0 +1,2 @@
+(=> "(count ?ts_ph_Nat_1 (append ?ts_ph_Lst_0 (cons ?ts_ph_Nat_1 nil))) => (succ (count ?ts_ph_Nat_1 ?ts_ph_Lst_0))" (count ?ts_ph_Nat_1 (append ?ts_ph_Lst_0 (cons ?ts_ph_Nat_1 nil))) (succ (count ?ts_ph_Nat_1 ?ts_ph_Lst_0)))
+(=> "(succ (count ?ts_ph_Nat_1 ?ts_ph_Lst_0)) => (count ?ts_ph_Nat_1 (append ?ts_ph_Lst_0 (cons ?ts_ph_Nat_1 nil)))" (succ (count ?ts_ph_Nat_1 ?ts_ph_Lst_0)) (count ?ts_ph_Nat_1 (append ?ts_ph_Lst_0 (cons ?ts_ph_Nat_1 nil))))

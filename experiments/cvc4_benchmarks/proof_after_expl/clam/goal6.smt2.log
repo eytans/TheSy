@@ -1,0 +1,36 @@
+20:33:34 [WARN] Collecting statistics
+20:33:34 [WARN]  ex is: zero
+20:33:34 [WARN]  ex is: (succ zero)
+20:33:34 [WARN]  ex is: (succ (succ zero))
+20:33:34 [WARN]  ex is: nil
+20:33:34 [WARN]  ex is: (cons autovar_Nat_0 nil)
+20:33:34 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+20:33:34 [WARN] Running exploration without proof mode, but goals were given
+20:33:34 [WARN] Proof mode: true
+20:33:34 [WARN]  ex is: zero
+20:33:34 [WARN]  ex is: (succ zero)
+20:33:34 [WARN]  ex is: (succ (succ zero))
+20:33:34 [WARN]  ex is: nil
+20:33:34 [WARN]  ex is: (cons autovar_Nat_0 nil)
+20:33:34 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+20:33:34 [WARN] Running exploration without proof mode, but goals were given
+20:33:34 [WARN] Proof mode: true
+20:33:34 [WARN] proved: (plus ?ts_ph_Nat_0 zero) => ?ts_ph_Nat_0
+20:33:34 [WARN] proved: (leq zero ?ts_ph_Nat_0) => true
+20:33:34 [WARN] proved: (append ?ts_ph_Lst_0 nil) => ?ts_ph_Lst_0
+20:33:46 [WARN] proved: (succ (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1)) => (plus ?ts_ph_Nat_0 (succ ?ts_ph_Nat_1))
+20:33:46 [WARN] proved: (plus ?ts_ph_Nat_0 (succ ?ts_ph_Nat_1)) => (succ (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1))
+20:33:46 [WARN] generalized case_split proof as: (append (append ?ts_ph_Lst_0 ?ts_ph_Lst_1) ?ts_ph_Lst_2) -- (append ?ts_ph_Lst_0 (append ?ts_ph_Lst_1 ?ts_ph_Lst_2))
+20:33:46 [WARN] proved: (append (append ?ts_ph_Lst_0 ?ts_ph_Lst_1) ?ts_ph_Lst_2) => (append ?ts_ph_Lst_0 (append ?ts_ph_Lst_1 ?ts_ph_Lst_2))
+20:33:46 [WARN] proved: (append ?ts_ph_Lst_0 (append ?ts_ph_Lst_1 ?ts_ph_Lst_2)) => (append (append ?ts_ph_Lst_0 ?ts_ph_Lst_1) ?ts_ph_Lst_2)
+20:33:46 [WARN] generalized case_split proof as: (plus (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1) ?ts_ph_Nat_2) -- (plus ?ts_ph_Nat_0 (plus ?ts_ph_Nat_1 ?ts_ph_Nat_2))
+20:33:46 [WARN] proved: (plus (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1) ?ts_ph_Nat_2) => (plus ?ts_ph_Nat_0 (plus ?ts_ph_Nat_1 ?ts_ph_Nat_2))
+20:33:46 [WARN] proved: (plus ?ts_ph_Nat_0 (plus ?ts_ph_Nat_1 ?ts_ph_Nat_2)) => (plus (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1) ?ts_ph_Nat_2)
+20:33:46 [WARN] proved: (plus (len ?ts_ph_Lst_0) (len ?ts_ph_Lst_1)) => (len (append ?ts_ph_Lst_0 ?ts_ph_Lst_1))
+20:33:46 [WARN] proved: (len (append ?ts_ph_Lst_0 ?ts_ph_Lst_1)) => (plus (len ?ts_ph_Lst_0) (len ?ts_ph_Lst_1))
+20:33:46 [WARN] proved: (leq (succ zero) (succ ?ts_ph_Nat_0)) => true
+20:33:46 [WARN] proved: (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1) => (plus ?ts_ph_Nat_1 ?ts_ph_Nat_0)
+20:33:46 [WARN] proved: (plus ?ts_ph_Nat_1 ?ts_ph_Nat_0) => (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1)
+20:33:50 [WARN] proved: (len (rev ?ts_ph_Lst_0)) => (len ?ts_ph_Lst_0)
+20:33:50 [WARN] proved: (len ?ts_ph_Lst_0) => (len (rev ?ts_ph_Lst_0))
+20:33:50 [WARN] Found all lemmas

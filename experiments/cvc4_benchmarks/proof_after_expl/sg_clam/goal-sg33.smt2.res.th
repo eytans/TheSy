@@ -1,0 +1,2 @@
+(=> "(fac ?ts_ph_Nat_0) => (qfac ?ts_ph_Nat_0 (succ zero))" (fac ?ts_ph_Nat_0) (qfac ?ts_ph_Nat_0 (succ zero)))
+(=> "(qfac ?ts_ph_Nat_0 (succ zero)) => (fac ?ts_ph_Nat_0)" (qfac ?ts_ph_Nat_0 (succ zero)) (fac ?ts_ph_Nat_0))

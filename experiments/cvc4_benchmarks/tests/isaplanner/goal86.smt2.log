@@ -1,0 +1,26 @@
+19:18:51 [WARN] Collecting statistics
+19:18:51 [WARN]  ex is: zero
+19:18:51 [WARN]  ex is: (succ zero)
+19:18:51 [WARN]  ex is: (succ (succ zero))
+19:18:51 [WARN]  ex is: nil
+19:18:51 [WARN]  ex is: (cons autovar_Nat_0 nil)
+19:18:51 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+19:18:51 [WARN]  ex is: (mkpair autovar_Nat_0 autovar_Nat_1)
+19:18:51 [WARN]  ex is: znil
+19:18:51 [WARN]  ex is: (zcons autovar_Pair_0 znil)
+19:18:51 [WARN]  ex is: (zcons autovar_Pair_1 (zcons autovar_Pair_0 znil))
+19:18:51 [WARN] Running exploration without proof mode, but goals were given
+19:18:51 [WARN] Proof mode: true
+19:18:51 [WARN]  ex is: zero
+19:18:51 [WARN]  ex is: (succ zero)
+19:18:51 [WARN]  ex is: (succ (succ zero))
+19:18:51 [WARN]  ex is: nil
+19:18:51 [WARN]  ex is: (cons autovar_Nat_0 nil)
+19:18:51 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+19:18:51 [WARN]  ex is: (mkpair autovar_Nat_0 autovar_Nat_1)
+19:18:51 [WARN]  ex is: znil
+19:18:51 [WARN]  ex is: (zcons autovar_Pair_0 znil)
+19:18:51 [WARN]  ex is: (zcons autovar_Pair_1 (zcons autovar_Pair_0 znil))
+19:18:51 [WARN] Running exploration without proof mode, but goals were given
+19:18:51 [WARN] Proof mode: true
+19:18:51 [WARN] Found all lemmas

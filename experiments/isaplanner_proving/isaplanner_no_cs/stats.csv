@@ -1,83 +1,83 @@
 ,time,stop_reasons,success,lemma_count,proofs_later_filtered,file_name
-0,0.092363868,['IterationLimit'],False,3,0,prop_15.smt20.smt2.stats.json
-1,0.251195073,['IterationLimit'],False,9,0,prop_71.smt20.smt2.stats.json
-2,0.030932935,"['IterationLimit', 'Saturated']",False,2,0,prop_46.smt20.smt2.stats.json
-3,1.0722116800000001,['IterationLimit'],False,13,0,prop_08.smt20.smt2.stats.json
-4,0.219440296,['IterationLimit'],False,1,0,prop_42.smt20.smt2.stats.json
-5,0.17155339,['IterationLimit'],False,7,0,prop_63.smt20.smt2.stats.json
-6,0.108094674,"['IterationLimit', 'Saturated']",False,3,0,prop_64.smt20.smt2.stats.json
-7,0.164876813,['IterationLimit'],False,6,0,prop_19.smt20.smt2.stats.json
-8,0.035490235,['IterationLimit'],False,5,0,prop_32.smt20.smt2.stats.json
-9,0.010931684,"['IterationLimit', 'Saturated']",False,1,0,prop_45.smt20.smt2.stats.json
-10,0.001889901,['Saturated'],False,0,0,prop_35.smt20.smt2.stats.json
-11,177.531455549,"['IterationLimit', 'NodeLimit', 'Saturated']",False,17,25,prop_61.smt20.smt2.stats.json
-12,0.431589616,['IterationLimit'],False,14,0,prop_25.smt20.smt2.stats.json
-13,7.304939542,['IterationLimit'],False,5,0,prop_01.smt20.smt2.stats.json
-14,0.8773811420000001,['IterationLimit'],False,11,0,prop_03.smt20.smt2.stats.json
-15,2.9395982060000003,['IterationLimit'],False,7,0,prop_50.smt20.smt2.stats.json
-16,0.415014107,['IterationLimit'],False,4,0,prop_67.smt20.smt2.stats.json
-17,38.504325385,['IterationLimit'],False,14,0,prop_21.smt20.smt2.stats.json
-18,0.218580983,['IterationLimit'],False,2,0,prop_51.smt20.smt2.stats.json
-19,0.09772035800000001,['IterationLimit'],False,9,0,prop_17.smt20.smt2.stats.json
-20,0.003595743,['Saturated'],False,1,0,prop_13.smt20.smt2.stats.json
-21,0.179043856,['IterationLimit'],False,5,0,prop_04.smt20.smt2.stats.json
-22,5.990174834,['IterationLimit'],False,17,0,prop_02.smt20.smt2.stats.json
-23,0.705095849,"['IterationLimit', 'Saturated']",False,9,0,prop_85.smt20.smt2.stats.json
-24,0.046175362000000005,['IterationLimit'],False,3,0,prop_66.smt20.smt2.stats.json
-25,0.009160379,['Saturated'],False,5,0,prop_22.smt20.smt2.stats.json
-26,0.006603589,"['IterationLimit', 'Saturated']",False,1,0,prop_16.smt20.smt2.stats.json
-27,0.26236401800000003,['IterationLimit'],False,7,0,prop_27.smt20.smt2.stats.json
-28,0.198833896,['IterationLimit'],False,5,0,prop_52.smt20.smt2.stats.json
-29,0.10987305300000001,['IterationLimit'],False,3,0,prop_20.smt20.smt2.stats.json
-30,38.535289391,['IterationLimit'],False,14,0,prop_65.smt20.smt2.stats.json
-31,0.10424490700000001,"['IterationLimit', 'Saturated']",False,2,0,prop_43.smt20.smt2.stats.json
-32,0.07622996800000001,['IterationLimit'],False,4,0,prop_79.smt20.smt2.stats.json
-33,38.4222997,['IterationLimit'],False,14,0,prop_18.smt20.smt2.stats.json
-34,0.19978194400000002,"['IterationLimit', 'Saturated']",False,4,0,prop_73.smt20.smt2.stats.json
-35,0.46838040400000003,['IterationLimit'],False,7,0,prop_38.smt20.smt2.stats.json
-36,0.035405534,['IterationLimit'],False,5,0,prop_31.smt20.smt2.stats.json
-37,320.701669111,"['IterationLimit', 'NodeLimit']",False,13,50,prop_72.smt20.smt2.stats.json
-38,38.13631797,"['IterationLimit', 'NodeLimit']",False,10,21,prop_80.smt20.smt2.stats.json
-39,0.007758494,['Saturated'],False,1,0,prop_12.smt20.smt2.stats.json
-40,0.12598462200000002,['IterationLimit'],False,5,0,prop_29.smt20.smt2.stats.json
-41,0.00918732,['Saturated'],False,5,0,prop_23.smt20.smt2.stats.json
-42,0.43830137100000005,['IterationLimit'],False,9,0,prop_55.smt20.smt2.stats.json
-43,1.176080171,['IterationLimit'],False,13,0,prop_06.smt20.smt2.stats.json
-44,0.6864702730000001,['IterationLimit'],False,9,0,prop_53.smt20.smt2.stats.json
-45,0.045355423000000006,"['IterationLimit', 'Saturated']",False,6,0,prop_56.smt20.smt2.stats.json
-46,0.7962636750000001,['IterationLimit'],False,6,0,prop_57.smt20.smt2.stats.json
-47,39.512340498,"['IterationLimit', 'NodeLimit']",False,7,6,prop_49.smt20.smt2.stats.json
-48,0.022076053,['IterationLimit'],False,3,0,prop_70.smt20.smt2.stats.json
-49,0.11570115900000001,"['IterationLimit', 'Saturated']",False,3,0,prop_59.smt20.smt2.stats.json
-50,0.24775211000000003,['IterationLimit'],False,9,0,prop_68.smt20.smt2.stats.json
-51,5.025696499,['IterationLimit'],False,15,0,prop_75.smt20.smt2.stats.json
-52,0.00197818,['Saturated'],False,0,0,prop_36.smt20.smt2.stats.json
-53,0.006683110000000001,"['IterationLimit', 'Saturated']",False,1,0,prop_62.smt20.smt2.stats.json
-54,322.527657074,"['IterationLimit', 'NodeLimit']",False,13,49,prop_74.smt20.smt2.stats.json
-55,0.249230469,['IterationLimit'],False,9,0,prop_30.smt20.smt2.stats.json
-56,0.32152118100000004,['IterationLimit'],False,14,0,prop_34.smt20.smt2.stats.json
-57,0.257138868,['IterationLimit'],False,7,0,prop_28.smt20.smt2.stats.json
-58,1.145605077,['IterationLimit'],False,13,0,prop_54.smt20.smt2.stats.json
-59,0.115432719,"['IterationLimit', 'Saturated']",False,3,0,prop_60.smt20.smt2.stats.json
-60,0.06337382600000001,"['IterationLimit', 'Saturated']",False,2,0,prop_14.smt20.smt2.stats.json
-61,0.41107708400000004,['IterationLimit'],False,1,0,prop_41.smt20.smt2.stats.json
-62,8.509232697,"['IterationLimit', 'NodeLimit']",False,8,2,prop_81.smt20.smt2.stats.json
-63,1.183324587,['IterationLimit'],False,13,0,prop_07.smt20.smt2.stats.json
-64,0.465260726,['IterationLimit'],False,7,0,prop_76.smt20.smt2.stats.json
-65,0.422798149,"['IterationLimit', 'Saturated']",False,6,0,prop_47.smt20.smt2.stats.json
-66,40.122152674,['IterationLimit'],False,14,0,prop_69.smt20.smt2.stats.json
-67,0.123678068,['IterationLimit'],False,5,0,prop_37.smt20.smt2.stats.json
-68,0.44021483800000005,['IterationLimit'],False,14,0,prop_24.smt20.smt2.stats.json
-69,5.131677884,['IterationLimit'],False,15,0,prop_39.smt20.smt2.stats.json
-70,0.003611173,['Saturated'],False,1,0,prop_11.smt20.smt2.stats.json
-71,0.294758572,['IterationLimit'],False,14,0,prop_33.smt20.smt2.stats.json
-72,1.039298341,['IterationLimit'],False,3,0,prop_82.smt20.smt2.stats.json
-73,0.177571308,['IterationLimit'],False,5,0,prop_05.smt20.smt2.stats.json
-74,0.252241041,['IterationLimit'],False,7,0,prop_26.smt20.smt2.stats.json
-75,3.253751304,"['IterationLimit', 'NodeLimit']",False,3,4,prop_48.smt20.smt2.stats.json
-76,0.07603180100000001,['IterationLimit'],False,4,0,prop_10.smt20.smt2.stats.json
-77,0.056198378,"['IterationLimit', 'Saturated']",False,3,0,prop_58.smt20.smt2.stats.json
-78,1.238681459,['IterationLimit'],False,13,0,prop_09.smt20.smt2.stats.json
-79,0.25514437900000003,['IterationLimit'],False,9,0,prop_86.smt20.smt2.stats.json
-80,0.21995360200000003,['IterationLimit'],False,1,0,prop_40.smt20.smt2.stats.json
-81,0.07318026300000001,"['IterationLimit', 'Saturated']",False,2,0,prop_44.smt20.smt2.stats.json
+0,0.094995013,['IterationLimit'],False,3,0,prop_15.smt20.smt2.stats.json
+1,0.25928821700000004,['IterationLimit'],False,9,0,prop_71.smt20.smt2.stats.json
+2,0.030557360000000002,"['IterationLimit', 'Saturated']",False,2,0,prop_46.smt20.smt2.stats.json
+3,1.1263070609999999,['IterationLimit'],False,13,0,prop_08.smt20.smt2.stats.json
+4,0.21911466300000002,['IterationLimit'],False,1,0,prop_42.smt20.smt2.stats.json
+5,0.179574583,['IterationLimit'],False,7,0,prop_63.smt20.smt2.stats.json
+6,0.10697005000000001,"['IterationLimit', 'Saturated']",False,3,0,prop_64.smt20.smt2.stats.json
+7,0.165128872,['IterationLimit'],False,6,0,prop_19.smt20.smt2.stats.json
+8,0.035549095,['IterationLimit'],False,5,0,prop_32.smt20.smt2.stats.json
+9,0.010763955,"['IterationLimit', 'Saturated']",False,1,0,prop_45.smt20.smt2.stats.json
+10,0.0019420510000000002,['Saturated'],False,0,0,prop_35.smt20.smt2.stats.json
+11,1958.927593727,"['IterationLimit', 'NodeLimit', 'Saturated']",False,18,49,prop_61.smt20.smt2.stats.json
+12,0.485137468,['IterationLimit'],False,14,0,prop_25.smt20.smt2.stats.json
+13,7.281719546,['IterationLimit'],False,5,0,prop_01.smt20.smt2.stats.json
+14,0.867422431,['IterationLimit'],False,11,0,prop_03.smt20.smt2.stats.json
+15,2.960833403,['IterationLimit'],False,7,0,prop_50.smt20.smt2.stats.json
+16,0.413602648,['IterationLimit'],False,4,0,prop_67.smt20.smt2.stats.json
+17,38.017453635,['IterationLimit'],False,14,0,prop_21.smt20.smt2.stats.json
+18,0.21783993100000001,['IterationLimit'],False,2,0,prop_51.smt20.smt2.stats.json
+19,0.105480209,['IterationLimit'],False,9,0,prop_17.smt20.smt2.stats.json
+20,0.003611543,['Saturated'],False,1,0,prop_13.smt20.smt2.stats.json
+21,0.183222155,['IterationLimit'],False,5,0,prop_04.smt20.smt2.stats.json
+22,5.794761583,['IterationLimit'],False,17,0,prop_02.smt20.smt2.stats.json
+23,0.7263259900000001,"['IterationLimit', 'Saturated']",False,9,0,prop_85.smt20.smt2.stats.json
+24,0.046464609000000004,['IterationLimit'],False,3,0,prop_66.smt20.smt2.stats.json
+25,0.008983462000000001,['Saturated'],False,5,0,prop_22.smt20.smt2.stats.json
+26,0.006547222,"['IterationLimit', 'Saturated']",False,1,0,prop_16.smt20.smt2.stats.json
+27,0.258262728,['IterationLimit'],False,7,0,prop_27.smt20.smt2.stats.json
+28,0.201614267,['IterationLimit'],False,5,0,prop_52.smt20.smt2.stats.json
+29,0.112257297,['IterationLimit'],False,3,0,prop_20.smt20.smt2.stats.json
+30,38.455203725,['IterationLimit'],False,14,0,prop_65.smt20.smt2.stats.json
+31,0.102834991,"['IterationLimit', 'Saturated']",False,2,0,prop_43.smt20.smt2.stats.json
+32,0.076163085,['IterationLimit'],False,4,0,prop_79.smt20.smt2.stats.json
+33,38.371367612,['IterationLimit'],False,14,0,prop_18.smt20.smt2.stats.json
+34,0.197223209,"['IterationLimit', 'Saturated']",False,4,0,prop_73.smt20.smt2.stats.json
+35,0.467628054,['IterationLimit'],False,7,0,prop_38.smt20.smt2.stats.json
+36,0.035152672,['IterationLimit'],False,5,0,prop_31.smt20.smt2.stats.json
+37,382.025564865,"['IterationLimit', 'NodeLimit']",False,13,50,prop_72.smt20.smt2.stats.json
+38,38.213003928,"['IterationLimit', 'NodeLimit']",False,10,24,prop_80.smt20.smt2.stats.json
+39,0.00780402,['Saturated'],False,1,0,prop_12.smt20.smt2.stats.json
+40,0.129145592,['IterationLimit'],False,5,0,prop_29.smt20.smt2.stats.json
+41,0.008545119,['Saturated'],False,5,0,prop_23.smt20.smt2.stats.json
+42,0.43893808300000003,['IterationLimit'],False,9,0,prop_55.smt20.smt2.stats.json
+43,1.174766931,['IterationLimit'],False,13,0,prop_06.smt20.smt2.stats.json
+44,0.691833743,['IterationLimit'],False,9,0,prop_53.smt20.smt2.stats.json
+45,0.043848297,"['IterationLimit', 'Saturated']",False,6,0,prop_56.smt20.smt2.stats.json
+46,0.785497116,['IterationLimit'],False,6,0,prop_57.smt20.smt2.stats.json
+47,39.087829333,"['IterationLimit', 'NodeLimit']",False,7,6,prop_49.smt20.smt2.stats.json
+48,0.022057517000000002,['IterationLimit'],False,3,0,prop_70.smt20.smt2.stats.json
+49,0.115216041,"['IterationLimit', 'Saturated']",False,3,0,prop_59.smt20.smt2.stats.json
+50,0.252177945,['IterationLimit'],False,9,0,prop_68.smt20.smt2.stats.json
+51,5.135825106,['IterationLimit'],False,15,0,prop_75.smt20.smt2.stats.json
+52,0.001975054,['Saturated'],False,0,0,prop_36.smt20.smt2.stats.json
+53,0.00660931,"['IterationLimit', 'Saturated']",False,1,0,prop_62.smt20.smt2.stats.json
+54,324.394166649,"['IterationLimit', 'NodeLimit']",False,13,45,prop_74.smt20.smt2.stats.json
+55,0.26408507200000003,['IterationLimit'],False,9,0,prop_30.smt20.smt2.stats.json
+56,0.304061211,['IterationLimit'],False,14,0,prop_34.smt20.smt2.stats.json
+57,0.258497715,['IterationLimit'],False,7,0,prop_28.smt20.smt2.stats.json
+58,1.124789187,['IterationLimit'],False,13,0,prop_54.smt20.smt2.stats.json
+59,0.10904329900000001,"['IterationLimit', 'Saturated']",False,3,0,prop_60.smt20.smt2.stats.json
+60,0.063039728,"['IterationLimit', 'Saturated']",False,2,0,prop_14.smt20.smt2.stats.json
+61,0.36386154200000004,['IterationLimit'],False,1,0,prop_41.smt20.smt2.stats.json
+62,8.50849958,"['IterationLimit', 'NodeLimit']",False,8,2,prop_81.smt20.smt2.stats.json
+63,1.160575824,['IterationLimit'],False,13,0,prop_07.smt20.smt2.stats.json
+64,0.464227202,['IterationLimit'],False,7,0,prop_76.smt20.smt2.stats.json
+65,0.383061419,"['IterationLimit', 'Saturated']",False,6,0,prop_47.smt20.smt2.stats.json
+66,40.236025431,['IterationLimit'],False,14,0,prop_69.smt20.smt2.stats.json
+67,0.130098993,['IterationLimit'],False,5,0,prop_37.smt20.smt2.stats.json
+68,0.465651409,['IterationLimit'],False,14,0,prop_24.smt20.smt2.stats.json
+69,5.097593151,['IterationLimit'],False,15,0,prop_39.smt20.smt2.stats.json
+70,0.0035707750000000004,['Saturated'],False,1,0,prop_11.smt20.smt2.stats.json
+71,0.30861222,['IterationLimit'],False,14,0,prop_33.smt20.smt2.stats.json
+72,1.033091049,['IterationLimit'],False,3,0,prop_82.smt20.smt2.stats.json
+73,0.18283422800000002,['IterationLimit'],False,5,0,prop_05.smt20.smt2.stats.json
+74,0.254905047,['IterationLimit'],False,7,0,prop_26.smt20.smt2.stats.json
+75,3.221936759,"['IterationLimit', 'NodeLimit']",False,3,4,prop_48.smt20.smt2.stats.json
+76,0.076609535,['IterationLimit'],False,4,0,prop_10.smt20.smt2.stats.json
+77,0.055242775,"['IterationLimit', 'Saturated']",False,3,0,prop_58.smt20.smt2.stats.json
+78,1.168009741,['IterationLimit'],False,13,0,prop_09.smt20.smt2.stats.json
+79,0.24839786200000002,['IterationLimit'],False,9,0,prop_86.smt20.smt2.stats.json
+80,0.22167239400000002,['IterationLimit'],False,1,0,prop_40.smt20.smt2.stats.json
+81,0.073137958,"['IterationLimit', 'Saturated']",False,2,0,prop_44.smt20.smt2.stats.json

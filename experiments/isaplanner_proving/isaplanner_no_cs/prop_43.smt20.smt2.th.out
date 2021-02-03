@@ -1,4 +1,4 @@
-20:13:19 [0m[33m[WARN] [0mCollecting statistics
+11:01:58 [0m[33m[WARN] [0mCollecting statistics
 (takeWhile ?x nil) => nil
 (takeWhile ?x (cons ?z ?xs)) => (cons ?z (takeWhile ?x ?xs))
 (takeWhile ?x (cons ?z ?xs)) => (cons ?z (takeWhile ?x ?xs))
@@ -9,15 +9,15 @@
 (++ nil ?y) => ?y
 (++ (cons ?z ?xs) ?y) => (cons ?z (++ ?xs ?y))
 (cons ?z (++ ?xs ?y)) => (++ (cons ?z ?xs) ?y)
-20:13:19 [0m[33m[WARN] [0m ex is: nil
-20:13:19 [0m[33m[WARN] [0m ex is: (cons autovar_sk_0 nil)
-20:13:19 [0m[33m[WARN] [0m ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
-20:13:19 [0m[33m[WARN] [0mProof mode: false
-20:13:19 [0m[33m[WARN] [0m ex is: nil
-20:13:19 [0m[33m[WARN] [0m ex is: (cons autovar_sk_0 nil)
-20:13:19 [0m[33m[WARN] [0m ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
-20:13:19 [0m[33m[WARN] [0mProof mode: false
-20:13:19 [0m[33m[WARN] [0mproved: (++ ?ts_ph_list_0 nil) => ?ts_ph_list_0
-20:13:19 [0m[33m[WARN] [0mproved: (++ (++ ?ts_ph_list_0 ?ts_ph_list_1) ?ts_ph_list_2) => (++ ?ts_ph_list_0 (++ ?ts_ph_list_1 ?ts_ph_list_2))
-20:13:19 [0m[33m[WARN] [0mproved: (++ ?ts_ph_list_0 (++ ?ts_ph_list_1 ?ts_ph_list_2)) => (++ (++ ?ts_ph_list_0 ?ts_ph_list_1) ?ts_ph_list_2)
-done in 105
+11:01:58 [0m[33m[WARN] [0m ex is: nil
+11:01:58 [0m[33m[WARN] [0m ex is: (cons autovar_sk_0 nil)
+11:01:58 [0m[33m[WARN] [0m ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
+11:01:58 [0m[33m[WARN] [0mProof mode: false
+11:01:58 [0m[33m[WARN] [0m ex is: nil
+11:01:58 [0m[33m[WARN] [0m ex is: (cons autovar_sk_0 nil)
+11:01:58 [0m[33m[WARN] [0m ex is: (cons autovar_sk_1 (cons autovar_sk_0 nil))
+11:01:58 [0m[33m[WARN] [0mProof mode: false
+11:01:58 [0m[33m[WARN] [0mproved: (++ ?ts_ph_list_0 nil) => ?ts_ph_list_0
+11:01:58 [0m[33m[WARN] [0mproved: (++ ?ts_ph_list_0 (++ ?ts_ph_list_1 ?ts_ph_list_2)) => (++ (++ ?ts_ph_list_0 ?ts_ph_list_1) ?ts_ph_list_2)
+11:01:58 [0m[33m[WARN] [0mproved: (++ (++ ?ts_ph_list_0 ?ts_ph_list_1) ?ts_ph_list_2) => (++ ?ts_ph_list_0 (++ ?ts_ph_list_1 ?ts_ph_list_2))
+done in 103
