@@ -1,0 +1,10 @@
+22:06:16 [WARN] Collecting statistics
+22:06:16 [WARN]  ex is: nil2
+22:06:16 [WARN]  ex is: (cons2 autovar_sk_0 nil2)
+22:06:16 [WARN]  ex is: (cons2 autovar_sk_1 (cons2 autovar_sk_0 nil2))
+22:06:16 [WARN] Proof mode: false
+22:06:16 [WARN]  ex is: nil2
+22:06:16 [WARN]  ex is: (cons2 autovar_sk_0 nil2)
+22:06:16 [WARN]  ex is: (cons2 autovar_sk_1 (cons2 autovar_sk_0 nil2))
+22:06:16 [WARN] Proof mode: false
+22:06:16 [WARN] proved: (zip ?ts_ph_list2_0 nil2) => nil

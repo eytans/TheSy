@@ -1,0 +1,26 @@
+22:18:48 [WARN] Collecting statistics
+22:18:48 [WARN]  ex is: (pair2 autovar_sk_0 autovar_sk_1)
+22:18:48 [WARN]  ex is: nil2
+22:18:48 [WARN]  ex is: (cons2 autovar_sk_0 nil2)
+22:18:48 [WARN]  ex is: (cons2 autovar_sk_1 (cons2 autovar_sk_0 nil2))
+22:18:48 [WARN]  ex is: nil
+22:18:48 [WARN]  ex is: (cons autovar_pair_0 nil)
+22:18:48 [WARN]  ex is: (cons autovar_pair_1 (cons autovar_pair_0 nil))
+22:18:48 [WARN]  ex is: Z
+22:18:48 [WARN]  ex is: (S Z)
+22:18:48 [WARN]  ex is: (S (S Z))
+22:18:48 [WARN] Proof mode: false
+22:18:48 [WARN]  ex is: (pair2 autovar_sk_0 autovar_sk_1)
+22:18:48 [WARN]  ex is: nil2
+22:18:48 [WARN]  ex is: (cons2 autovar_sk_0 nil2)
+22:18:48 [WARN]  ex is: (cons2 autovar_sk_1 (cons2 autovar_sk_0 nil2))
+22:18:48 [WARN]  ex is: nil
+22:18:48 [WARN]  ex is: (cons autovar_pair_0 nil)
+22:18:48 [WARN]  ex is: (cons autovar_pair_1 (cons autovar_pair_0 nil))
+22:18:48 [WARN]  ex is: Z
+22:18:48 [WARN]  ex is: (S Z)
+22:18:48 [WARN]  ex is: (S (S Z))
+22:18:48 [WARN] Proof mode: false
+22:18:56 [WARN] proved: (zip ?ts_ph_list2_0 nil2) => nil
+22:18:56 [WARN] proved: (take2 ?ts_ph_Nat_0 nil2) => nil2
+22:18:56 [WARN] proved: (take ?ts_ph_Nat_0 nil) => nil
