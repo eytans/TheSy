@@ -107,6 +107,9 @@ def show_all_results(results, opts):
         stats[d]['goals'] += len(item['goals'])
         stats[d]['proved'] += len(item['proved'])
 
+    def format_time(v):
+        return "%7.2f" % v if v else 't/o'
+
     print('Benchmark    Hipster < TheSy          TheSy < Hipster     TheSy Time     Hipster Time')
         
     for k, v in results.d.items():
@@ -119,10 +122,10 @@ def show_all_results(results, opts):
                 cells += ['??']
         
         thesy_time = get_time_from_json(os.path.join(opts.thesy_dir, THESY_STATS % k))
-        cells += [thesy_time or 't/o']
+        cells += [format_time(thesy_time)]
 
         hipster_time = get_time_from_hms(os.path.join(opts.hipster_dir, HIPSTER_TIME % k))
-        cells += [hipster_time or 't/o']
+        cells += [format_time(hipster_time)]
 
         print(f"Prop_{k}        {' '.join('%12s' % s for s in cells)}")
 
