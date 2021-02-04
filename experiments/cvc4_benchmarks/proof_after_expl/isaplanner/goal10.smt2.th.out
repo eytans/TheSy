@@ -1,0 +1,31 @@
+20:12:05 [0m[33m[WARN] [0mCollecting statistics
+(leq ?__x0 ?__y1) => (or (= ?__x0 ?__y1) (less ?__x0 ?__y1))
+(or (= ?__x0 ?__y1) (less ?__x0 ?__y1)) => (leq ?__x0 ?__y1)
+(minus zero ?n) => zero
+(minus ?n zero) => ?n
+(minus (succ ?n) (succ ?m)) => (minus ?n ?m)
+(minus ?n ?m) => (minus (succ ?n) (succ ?m))
+(minus ?ts_ph_Nat_0 ?ts_ph_Nat_0) => zero
+(leq zero ?ts_ph_Nat_0) => true
+(minus (succ ?ts_ph_Nat_0) ?ts_ph_Nat_0) => (succ zero)
+(leq (succ zero) (succ ?ts_ph_Nat_0)) => true
+(minus ?ts_ph_Nat_0 (succ ?ts_ph_Nat_0)) => zero
+(minus ?ts_ph_Nat_1 (succ ?ts_ph_Nat_0)) => (minus (minus ?ts_ph_Nat_1 ?ts_ph_Nat_0) (succ zero))
+(minus (minus ?ts_ph_Nat_1 ?ts_ph_Nat_0) (succ zero)) => (minus ?ts_ph_Nat_1 (succ ?ts_ph_Nat_0))
+(minus (minus ?ts_ph_Nat_1 ?ts_ph_Nat_0) ?ts_ph_Nat_1) => zero
+Searcher: (minus ?autovar6 (succ ?autovar2))
+Searcher: (minus (succ ?autovar3) ?autovar7)
+Searcher: (minus (minus ?autovar4 ?autovar5) ?autovar7)
+Searcher: (leq ?autovar2 (succ ?autovar1))
+20:12:05 [0m[33m[WARN] [0m ex is: zero
+20:12:05 [0m[33m[WARN] [0m ex is: (succ zero)
+20:12:05 [0m[33m[WARN] [0m ex is: (succ (succ zero))
+20:12:05 [0m[33m[WARN] [0mRunning exploration without proof mode, but goals were given
+20:12:05 [0m[33m[WARN] [0mProof mode: true
+20:12:05 [0m[33m[WARN] [0m ex is: zero
+20:12:05 [0m[33m[WARN] [0m ex is: (succ zero)
+20:12:05 [0m[33m[WARN] [0m ex is: (succ (succ zero))
+20:12:05 [0m[33m[WARN] [0mRunning exploration without proof mode, but goals were given
+20:12:05 [0m[33m[WARN] [0mProof mode: true
+20:12:13 [0m[33m[WARN] [0mFound all lemmas
+done in 7457

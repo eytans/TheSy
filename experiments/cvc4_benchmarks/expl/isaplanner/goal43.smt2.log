@@ -1,0 +1,31 @@
+11:04:57 [WARN] Collecting statistics
+11:04:57 [WARN]  ex is: zero
+11:04:57 [WARN]  ex is: (succ zero)
+11:04:57 [WARN]  ex is: (succ (succ zero))
+11:04:57 [WARN]  ex is: nil
+11:04:57 [WARN]  ex is: (cons autovar_Nat_0 nil)
+11:04:57 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+11:04:57 [WARN] Proof mode: false
+11:04:57 [WARN]  ex is: zero
+11:04:57 [WARN]  ex is: (succ zero)
+11:04:57 [WARN]  ex is: (succ (succ zero))
+11:04:57 [WARN]  ex is: nil
+11:04:57 [WARN]  ex is: (cons autovar_Nat_0 nil)
+11:04:57 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+11:04:57 [WARN] Proof mode: false
+11:05:01 [WARN] proved: (leq zero ?ts_ph_Nat_0) => true
+11:05:01 [WARN] proved: (append ?ts_ph_Lst_0 nil) => ?ts_ph_Lst_0
+11:12:34 [WARN] generalized case_split proof as: (append ?ts_ph_Lst_0 (append ?ts_ph_Lst_1 ?ts_ph_Lst_2)) -- (append (append ?ts_ph_Lst_0 ?ts_ph_Lst_1) ?ts_ph_Lst_2)
+11:12:34 [WARN] proved: (append ?ts_ph_Lst_0 (append ?ts_ph_Lst_1 ?ts_ph_Lst_2)) => (append (append ?ts_ph_Lst_0 ?ts_ph_Lst_1) ?ts_ph_Lst_2)
+11:12:34 [WARN] proved: (append (append ?ts_ph_Lst_0 ?ts_ph_Lst_1) ?ts_ph_Lst_2) => (append ?ts_ph_Lst_0 (append ?ts_ph_Lst_1 ?ts_ph_Lst_2))
+11:12:34 [WARN] proved: (drop ?ts_ph_Nat_0 (cons ?ts_ph_Nat_0 ?ts_ph_Lst_1)) => (drop ?ts_ph_Nat_0 (cons zero ?ts_ph_Lst_1))
+11:12:34 [WARN] proved: (drop ?ts_ph_Nat_0 (cons zero ?ts_ph_Lst_1)) => (drop ?ts_ph_Nat_0 (cons ?ts_ph_Nat_0 ?ts_ph_Lst_1))
+11:12:34 [WARN] proved: (leq (succ zero) (succ ?ts_ph_Nat_0)) => true
+11:12:34 [WARN] proved: (take (succ zero) ?ts_ph_Lst_0) => (take (succ zero) (append ?ts_ph_Lst_0 ?ts_ph_Lst_0))
+11:12:34 [WARN] proved: (take (succ zero) (append ?ts_ph_Lst_0 ?ts_ph_Lst_0)) => (take (succ zero) ?ts_ph_Lst_0)
+11:12:35 [WARN] proved: (dropWhile (takeWhile ?ts_ph_Lst_0)) => nil
+11:12:38 [WARN] proved: (takeWhile (dropWhile ?ts_ph_Lst_0)) => nil
+11:12:46 [WARN] proved: (dropWhile (dropWhile ?ts_ph_Lst_0)) => (dropWhile ?ts_ph_Lst_0)
+11:12:46 [WARN] proved: (dropWhile ?ts_ph_Lst_0) => (dropWhile (dropWhile ?ts_ph_Lst_0))
+11:13:08 [WARN] proved: (takeWhile (takeWhile ?ts_ph_Lst_0)) => (takeWhile ?ts_ph_Lst_0)
+11:13:08 [WARN] proved: (takeWhile ?ts_ph_Lst_0) => (takeWhile (takeWhile ?ts_ph_Lst_0))

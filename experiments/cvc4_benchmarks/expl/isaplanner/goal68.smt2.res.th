@@ -1,0 +1,8 @@
+(=> "(leq zero ?ts_ph_Nat_0) => true" (leq zero ?ts_ph_Nat_0) true)
+(=> "(minus ?ts_ph_Nat_0 ?ts_ph_Nat_0) => zero" (minus ?ts_ph_Nat_0 ?ts_ph_Nat_0) zero)
+(=> "(leq (succ zero) (succ ?ts_ph_Nat_0)) => true" (leq (succ zero) (succ ?ts_ph_Nat_0)) true)
+(=> "(minus ?ts_ph_Nat_0 (succ ?ts_ph_Nat_0)) => zero" (minus ?ts_ph_Nat_0 (succ ?ts_ph_Nat_0)) zero)
+(=> "(minus (succ ?ts_ph_Nat_0) ?ts_ph_Nat_0) => (succ zero)" (minus (succ ?ts_ph_Nat_0) ?ts_ph_Nat_0) (succ zero))
+(=> "(minus ?ts_ph_Nat_1 (succ ?ts_ph_Nat_0)) => (minus (minus ?ts_ph_Nat_1 ?ts_ph_Nat_0) (succ zero))" (minus ?ts_ph_Nat_1 (succ ?ts_ph_Nat_0)) (minus (minus ?ts_ph_Nat_1 ?ts_ph_Nat_0) (succ zero)))
+(=> "(minus (minus ?ts_ph_Nat_1 ?ts_ph_Nat_0) (succ zero)) => (minus ?ts_ph_Nat_1 (succ ?ts_ph_Nat_0))" (minus (minus ?ts_ph_Nat_1 ?ts_ph_Nat_0) (succ zero)) (minus ?ts_ph_Nat_1 (succ ?ts_ph_Nat_0)))
+(=> "(minus (minus ?ts_ph_Nat_1 ?ts_ph_Nat_0) ?ts_ph_Nat_1) => zero" (minus (minus ?ts_ph_Nat_1 ?ts_ph_Nat_0) ?ts_ph_Nat_1) zero)

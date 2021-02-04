@@ -1,0 +1,30 @@
+16:15:27 [0m[33m[WARN] [0mCollecting statistics
+(leq ?__x0 ?__y1) => (or (= ?__x0 ?__y1) (less ?__x0 ?__y1))
+(or (= ?__x0 ?__y1) (less ?__x0 ?__y1)) => (leq ?__x0 ?__y1)
+(plus zero ?n) => ?n
+(plus (succ ?n) ?m) => (succ (plus ?n ?m))
+(succ (plus ?n ?m)) => (plus (succ ?n) ?m)
+16:15:27 [0m[33m[WARN] [0m ex is: zero
+16:15:27 [0m[33m[WARN] [0m ex is: (succ zero)
+16:15:27 [0m[33m[WARN] [0m ex is: (succ (succ zero))
+16:15:27 [0m[33m[WARN] [0mProof mode: false
+16:15:27 [0m[33m[WARN] [0m ex is: zero
+16:15:27 [0m[33m[WARN] [0m ex is: (succ zero)
+16:15:27 [0m[33m[WARN] [0m ex is: (succ (succ zero))
+16:15:27 [0m[33m[WARN] [0mProof mode: false
+16:15:27 [0m[33m[WARN] [0mproved: (plus ?ts_ph_Nat_0 zero) => ?ts_ph_Nat_0
+16:15:27 [0m[33m[WARN] [0mproved: (leq zero ?ts_ph_Nat_0) => true
+16:15:28 [0m[33m[WARN] [0mproved: (leq (succ zero) (succ ?ts_ph_Nat_0)) => true
+16:15:28 [0m[33m[WARN] [0mproved: (plus (succ ?ts_ph_Nat_0) (succ zero)) => (succ (succ ?ts_ph_Nat_0))
+16:15:28 [0m[33m[WARN] [0mproved: (succ (succ ?ts_ph_Nat_0)) => (plus (succ ?ts_ph_Nat_0) (succ zero))
+16:15:28 [0m[33m[WARN] [0mproved: (succ (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0)) => (plus (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0) (succ zero))
+16:15:28 [0m[33m[WARN] [0mproved: (plus (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0) (succ zero)) => (succ (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0))
+16:15:28 [0m[33m[WARN] [0mproved: (leq (succ zero) ?ts_ph_Nat_0) => (leq (succ zero) (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0))
+16:15:28 [0m[33m[WARN] [0mproved: (leq (succ zero) (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0)) => (leq (succ zero) ?ts_ph_Nat_0)
+16:15:28 [0m[33m[WARN] [0mproved: (plus ?ts_ph_Nat_0 (succ ?ts_ph_Nat_1)) => (succ (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1))
+16:15:28 [0m[33m[WARN] [0mproved: (succ (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1)) => (plus ?ts_ph_Nat_0 (succ ?ts_ph_Nat_1))
+16:15:28 [0m[33m[WARN] [0mproved: (plus ?ts_ph_Nat_1 ?ts_ph_Nat_0) => (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1)
+16:15:28 [0m[33m[WARN] [0mproved: (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1) => (plus ?ts_ph_Nat_1 ?ts_ph_Nat_0)
+16:15:29 [0m[33m[WARN] [0mproved: (plus ?ts_ph_Nat_0 (plus ?ts_ph_Nat_1 ?ts_ph_Nat_2)) => (plus ?ts_ph_Nat_1 (plus ?ts_ph_Nat_0 ?ts_ph_Nat_2))
+16:15:29 [0m[33m[WARN] [0mproved: (plus ?ts_ph_Nat_1 (plus ?ts_ph_Nat_0 ?ts_ph_Nat_2)) => (plus ?ts_ph_Nat_0 (plus ?ts_ph_Nat_1 ?ts_ph_Nat_2))
+done in 4446

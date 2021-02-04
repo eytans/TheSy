@@ -1,0 +1,21 @@
+12:14:51 [WARN] Collecting statistics
+12:14:51 [WARN]  ex is: zero
+12:14:51 [WARN]  ex is: (succ zero)
+12:14:51 [WARN]  ex is: (succ (succ zero))
+12:14:51 [WARN]  ex is: nil
+12:14:51 [WARN]  ex is: (cons autovar_Nat_0 nil)
+12:14:51 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+12:14:51 [WARN]  ex is: leaf
+12:14:51 [WARN]  ex is: (node autovar_Nat_0 leaf leaf)
+12:14:51 [WARN]  ex is: (node autovar_Nat_1 (node autovar_Nat_0 leaf leaf) (node autovar_Nat_0 leaf leaf))
+12:14:51 [WARN] Proof mode: false
+12:14:51 [WARN]  ex is: zero
+12:14:51 [WARN]  ex is: (succ zero)
+12:14:51 [WARN]  ex is: (succ (succ zero))
+12:14:51 [WARN]  ex is: nil
+12:14:51 [WARN]  ex is: (cons autovar_Nat_0 nil)
+12:14:51 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+12:14:51 [WARN]  ex is: leaf
+12:14:51 [WARN]  ex is: (node autovar_Nat_0 leaf leaf)
+12:14:51 [WARN]  ex is: (node autovar_Nat_1 (node autovar_Nat_0 leaf leaf) (node autovar_Nat_0 leaf leaf))
+12:14:51 [WARN] Proof mode: false

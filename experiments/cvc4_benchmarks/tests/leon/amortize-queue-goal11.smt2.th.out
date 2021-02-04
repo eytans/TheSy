@@ -1,0 +1,84 @@
+19:33:45 [0m[33m[WARN] [0mCollecting statistics
+(less zero zero) => false
+(less zero (succ ?x)) => true
+(less (succ ?x) (succ ?y)) => (less ?x ?y)
+(less ?x ?y) => (less (succ ?x) (succ ?y))
+(leq ?__x0 ?__y1) => (or (= ?__x0 ?__y1) (less ?__x0 ?__y1))
+(or (= ?__x0 ?__y1) (less ?__x0 ?__y1)) => (leq ?__x0 ?__y1)
+(plus zero ?n) => ?n
+(plus (succ ?n) ?m) => (succ (plus ?n ?m))
+(succ (plus ?n ?m)) => (plus (succ ?n) ?m)
+(append nil ?x2) => ?x2
+(append (cons ?x ?y3) ?z) => (cons ?x (append ?y3 ?z))
+(cons ?x (append ?y3 ?z)) => (append (cons ?x ?y3) ?z)
+(len nil) => zero
+zero => (len nil)
+(len (cons ?x ?y4)) => (succ (len ?y4))
+(butlast nil) => nil
+nil => (butlast nil)
+(butlast (cons ?x ?y5)) => (ite (= ?y5 nil) nil (cons ?x (butlast ?y5)))
+(ite (= ?y5 nil) nil (cons ?x (butlast ?y5))) => (butlast (cons ?x ?y5))
+(qreva nil ?x6) => ?x6
+(qreva (cons ?z9 ?x7) ?y8) => (qreva ?x7 (cons ?z9 ?y8))
+(qreva ?x7 (cons ?z9 ?y8)) => (qreva (cons ?z9 ?x7) ?y8)
+(qrev ?x10) => (qreva ?x10 nil)
+(qreva ?x10 nil) => (qrev ?x10)
+(queue-to-lst (queue ?x11 ?y12)) => (append ?x11 (qrev ?y12))
+(append ?x11 (qrev ?y12)) => (queue-to-lst (queue ?x11 ?y12))
+(qlen (queue ?x13 ?y14)) => (plus (len ?x13) (len ?y14))
+(plus (len ?x13) (len ?y14)) => (qlen (queue ?x13 ?y14))
+(isAmortized (queue ?x15 ?y16)) => (or (= (len ?y16) (len ?x15)) (less (len ?y16) (len ?x15)))
+(or (= (len ?y16) (len ?x15)) (less (len ?y16) (len ?x15))) => (isAmortized (queue ?x15 ?y16))
+(isEmpty (queue ?x17 ?y18)) => (and (= ?x17 nil) (= ?y18 nil))
+(and (= ?x17 nil) (= ?y18 nil)) => (isEmpty (queue ?x17 ?y18))
+(amortizeQueue ?x19 ?y20) => (ite (or (= (len ?y20) (len ?x19)) (less (len ?y20) (len ?x19))) (queue ?x19 ?y20) (queue (append ?x19 (qrev ?y20)) nil))
+(ite (or (= (len ?y20) (len ?x19)) (less (len ?y20) (len ?x19))) (queue ?x19 ?y20) (queue (append ?x19 (qrev ?y20)) nil)) => (amortizeQueue ?x19 ?y20)
+(enqueue (queue ?x21 ?y22) ?n) => (amortizeQueue ?x21 (cons ?n ?y22))
+(amortizeQueue ?x21 (cons ?n ?y22)) => (enqueue (queue ?x21 ?y22) ?n)
+(qpop (queue ?x23 (cons ?n ?y24))) => (queue ?x23 ?y24)
+(qpop (queue ?x25 nil)) => (queue (butlast ?x25) nil)
+(queue (butlast ?x25) nil) => (qpop (queue ?x25 nil))
+(len (append ?x26 ?y27)) => (plus (len ?x26) (len ?y27))
+(plus (len ?x26) (len ?y27)) => (len (append ?x26 ?y27))
+(len (qreva ?x28 ?y29)) => (plus (len ?x28) (len ?y29))
+(plus (len ?x28) (len ?y29)) => (len (qreva ?x28 ?y29))
+(len (qrev ?x30)) => (len ?x30)
+(len ?x30) => (len (qrev ?x30))
+(plus (len ?x31) (len ?y32)) => (qlen (queue ?x31 ?y32))
+(qlen (queue ?x31 ?y32)) => (plus (len ?x31) (len ?y32))
+(succ (len (butlast (cons ?y ?x33)))) => (len (cons ?y ?x33))
+(len (cons ?y ?x33)) => (succ (len (butlast (cons ?y ?x33))))
+(qlen (enqueue ?q ?n)) => (succ (qlen ?q))
+(succ (qlen (qpop ?q))) => (qlen ?q)
+(succ (qlen (qpop ?q))) => (qlen ?q)
+(append ?x34 nil) => ?x34
+(butlast (append ?x35 (cons ?n ?y36))) => (append ?x35 (butlast (cons ?n ?y36)))
+(append ?x35 (butlast (cons ?n ?y36))) => (butlast (append ?x35 (cons ?n ?y36)))
+(qreva (qreva ?x37 ?y38) ?z) => (qreva ?y38 (append ?x37 ?z))
+(qreva ?y38 (append ?x37 ?z)) => (qreva (qreva ?x37 ?y38) ?z)
+Searcher: (less ?autovar5 zero)
+Searcher: (less ?autovar5 (succ ?autovar1))
+Searcher: (less ?autovar5 (succ ?autovar3))
+Searcher: (less zero ?autovar6)
+Searcher: (less zero ?autovar6)
+Searcher: (less (succ ?autovar4) ?autovar6)
+19:33:45 [0m[33m[WARN] [0m ex is: zero
+19:33:45 [0m[33m[WARN] [0m ex is: (succ zero)
+19:33:45 [0m[33m[WARN] [0m ex is: (succ (succ zero))
+19:33:45 [0m[33m[WARN] [0m ex is: nil
+19:33:45 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_0 nil)
+19:33:45 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+19:33:45 [0m[33m[WARN] [0m ex is: (queue autovar_Lst_0 autovar_Lst_1)
+19:33:45 [0m[33m[WARN] [0mRunning exploration without proof mode, but goals were given
+19:33:45 [0m[33m[WARN] [0mProof mode: true
+19:33:45 [0m[33m[WARN] [0m ex is: zero
+19:33:45 [0m[33m[WARN] [0m ex is: (succ zero)
+19:33:45 [0m[33m[WARN] [0m ex is: (succ (succ zero))
+19:33:45 [0m[33m[WARN] [0m ex is: nil
+19:33:45 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_0 nil)
+19:33:45 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+19:33:45 [0m[33m[WARN] [0m ex is: (queue autovar_Lst_0 autovar_Lst_1)
+19:33:45 [0m[33m[WARN] [0mRunning exploration without proof mode, but goals were given
+19:33:45 [0m[33m[WARN] [0mProof mode: true
+19:33:45 [0m[33m[WARN] [0mFound all lemmas
+done in 3

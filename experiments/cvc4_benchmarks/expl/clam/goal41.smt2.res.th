@@ -1,0 +1,5 @@
+(=> "(leq zero ?ts_ph_Nat_0) => true" (leq zero ?ts_ph_Nat_0) true)
+(=> "(leq (succ zero) (succ ?ts_ph_Nat_0)) => true" (leq (succ zero) (succ ?ts_ph_Nat_0)) true)
+(=> "(lst-subset (lst-intersection ?ts_ph_Lst_0 ?ts_ph_Lst_1) ?ts_ph_Lst_1) => true" (lst-subset (lst-intersection ?ts_ph_Lst_0 ?ts_ph_Lst_1) ?ts_ph_Lst_1) true)
+(=> "(lst-intersection ?ts_ph_Lst_0 ?ts_ph_Lst_1) => (lst-intersection (lst-intersection ?ts_ph_Lst_0 ?ts_ph_Lst_1) ?ts_ph_Lst_1)" (lst-intersection ?ts_ph_Lst_0 ?ts_ph_Lst_1) (lst-intersection (lst-intersection ?ts_ph_Lst_0 ?ts_ph_Lst_1) ?ts_ph_Lst_1))
+(=> "(lst-intersection (lst-intersection ?ts_ph_Lst_0 ?ts_ph_Lst_1) ?ts_ph_Lst_1) => (lst-intersection ?ts_ph_Lst_0 ?ts_ph_Lst_1)" (lst-intersection (lst-intersection ?ts_ph_Lst_0 ?ts_ph_Lst_1) ?ts_ph_Lst_1) (lst-intersection ?ts_ph_Lst_0 ?ts_ph_Lst_1))

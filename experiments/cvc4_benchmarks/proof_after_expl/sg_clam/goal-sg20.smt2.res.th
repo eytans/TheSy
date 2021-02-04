@@ -1,0 +1,1 @@
+(=> "(even (len (append ?ts_ph_Lst_0 ?ts_ph_Lst_0))) => true" (even (len (append ?ts_ph_Lst_0 ?ts_ph_Lst_0))) true)

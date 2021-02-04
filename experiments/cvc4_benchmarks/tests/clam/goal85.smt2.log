@@ -1,0 +1,16 @@
+19:36:10 [WARN] Collecting statistics
+19:36:10 [WARN]  ex is: zero
+19:36:10 [WARN]  ex is: (succ zero)
+19:36:10 [WARN]  ex is: (succ (succ zero))
+19:36:10 [WARN] Running exploration without proof mode, but goals were given
+19:36:10 [WARN] Proof mode: true
+19:36:10 [WARN]  ex is: zero
+19:36:10 [WARN]  ex is: (succ zero)
+19:36:10 [WARN]  ex is: (succ (succ zero))
+19:36:10 [WARN] Running exploration without proof mode, but goals were given
+19:36:10 [WARN] Proof mode: true
+19:36:10 [WARN] proved: (mult ?ts_ph_Nat_0 zero) => zero
+19:36:10 [WARN] proved: (leq zero ?ts_ph_Nat_0) => true
+19:36:11 [WARN] proved: (qmult ?ts_ph_Nat_0 zero zero) => zero
+19:36:11 [WARN] proved: (plus ?ts_ph_Nat_0 zero) => ?ts_ph_Nat_0
+19:36:11 [WARN] proved: (qmult ?ts_ph_Nat_0 zero ?ts_ph_Nat_1) => ?ts_ph_Nat_1

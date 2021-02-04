@@ -1,0 +1,2 @@
+(=> "(double ?ts_ph_Nat_0) => (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0)" (double ?ts_ph_Nat_0) (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0))
+(=> "(plus ?ts_ph_Nat_0 ?ts_ph_Nat_0) => (double ?ts_ph_Nat_0)" (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0) (double ?ts_ph_Nat_0))

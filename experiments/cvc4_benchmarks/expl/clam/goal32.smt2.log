@@ -1,0 +1,30 @@
+14:08:46 [WARN] Collecting statistics
+14:08:46 [WARN]  ex is: zero
+14:08:46 [WARN]  ex is: (succ zero)
+14:08:46 [WARN]  ex is: (succ (succ zero))
+14:08:46 [WARN]  ex is: nil
+14:08:46 [WARN]  ex is: (cons autovar_Nat_0 nil)
+14:08:46 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+14:08:46 [WARN] Proof mode: false
+14:08:46 [WARN]  ex is: zero
+14:08:46 [WARN]  ex is: (succ zero)
+14:08:46 [WARN]  ex is: (succ (succ zero))
+14:08:46 [WARN]  ex is: nil
+14:08:46 [WARN]  ex is: (cons autovar_Nat_0 nil)
+14:08:46 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+14:08:46 [WARN] Proof mode: false
+14:08:47 [WARN] proved: (leq zero ?ts_ph_Nat_0) => true
+14:08:47 [WARN] proved: (rotate ?ts_ph_Nat_0 nil) => nil
+14:08:47 [WARN] proved: (append ?ts_ph_Lst_0 nil) => ?ts_ph_Lst_0
+14:09:08 [WARN] proved: (leq (succ zero) (succ ?ts_ph_Nat_0)) => true
+14:09:08 [WARN] proved: (rotate ?ts_ph_Nat_0 (cons zero nil)) => (cons zero nil)
+14:09:08 [WARN] proved: (rotate (len ?ts_ph_Lst_0) (cons ?ts_ph_Nat_0 nil)) => (cons ?ts_ph_Nat_0 nil)
+14:09:08 [WARN] proved: (append ?ts_ph_Lst_0 (append ?ts_ph_Lst_1 ?ts_ph_Lst_2)) => (append (append ?ts_ph_Lst_0 ?ts_ph_Lst_1) ?ts_ph_Lst_2)
+14:09:08 [WARN] proved: (append (append ?ts_ph_Lst_0 ?ts_ph_Lst_1) ?ts_ph_Lst_2) => (append ?ts_ph_Lst_0 (append ?ts_ph_Lst_1 ?ts_ph_Lst_2))
+14:09:08 [WARN] proved: (rotate ?ts_ph_Nat_0 (cons ?ts_ph_Nat_1 nil)) => (cons ?ts_ph_Nat_1 nil)
+14:09:08 [WARN] proved: (rotate (len ?ts_ph_Lst_0) (append ?ts_ph_Lst_0 ?ts_ph_Lst_1)) => (append ?ts_ph_Lst_1 ?ts_ph_Lst_0)
+14:09:08 [WARN] proved: (append ?ts_ph_Lst_1 ?ts_ph_Lst_0) => (rotate (len ?ts_ph_Lst_0) (append ?ts_ph_Lst_0 ?ts_ph_Lst_1))
+14:09:08 [WARN] proved: (rotate (succ ?ts_ph_Nat_0) ?ts_ph_Lst_1) => (rotate (succ zero) (rotate ?ts_ph_Nat_0 ?ts_ph_Lst_1))
+14:09:08 [WARN] proved: (rotate (succ zero) (rotate ?ts_ph_Nat_0 ?ts_ph_Lst_1)) => (rotate (succ ?ts_ph_Nat_0) ?ts_ph_Lst_1)
+14:09:08 [WARN] proved: (rotate ?ts_ph_Nat_0 (rotate ?ts_ph_Nat_1 ?ts_ph_Lst_1)) => (rotate ?ts_ph_Nat_1 (rotate ?ts_ph_Nat_0 ?ts_ph_Lst_1))
+14:09:08 [WARN] proved: (rotate ?ts_ph_Nat_1 (rotate ?ts_ph_Nat_0 ?ts_ph_Lst_1)) => (rotate ?ts_ph_Nat_0 (rotate ?ts_ph_Nat_1 ?ts_ph_Lst_1))

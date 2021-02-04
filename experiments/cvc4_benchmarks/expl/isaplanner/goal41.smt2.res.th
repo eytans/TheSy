@@ -1,0 +1,8 @@
+(=> "(leq zero ?ts_ph_Nat_0) => true" (leq zero ?ts_ph_Nat_0) true)
+(=> "(leq (succ zero) (succ ?ts_ph_Nat_0)) => true" (leq (succ zero) (succ ?ts_ph_Nat_0)) true)
+(=> "(take ?ts_ph_Nat_1 (lmap ?ts_ph_Lst_0)) => (lmap (take ?ts_ph_Nat_1 ?ts_ph_Lst_0))" (take ?ts_ph_Nat_1 (lmap ?ts_ph_Lst_0)) (lmap (take ?ts_ph_Nat_1 ?ts_ph_Lst_0)))
+(=> "(lmap (take ?ts_ph_Nat_1 ?ts_ph_Lst_0)) => (take ?ts_ph_Nat_1 (lmap ?ts_ph_Lst_0))" (lmap (take ?ts_ph_Nat_1 ?ts_ph_Lst_0)) (take ?ts_ph_Nat_1 (lmap ?ts_ph_Lst_0)))
+(=> "(take ?ts_ph_Nat_1 ?ts_ph_Lst_0) => (take ?ts_ph_Nat_1 (take ?ts_ph_Nat_1 ?ts_ph_Lst_0))" (take ?ts_ph_Nat_1 ?ts_ph_Lst_0) (take ?ts_ph_Nat_1 (take ?ts_ph_Nat_1 ?ts_ph_Lst_0)))
+(=> "(take ?ts_ph_Nat_1 (take ?ts_ph_Nat_1 ?ts_ph_Lst_0)) => (take ?ts_ph_Nat_1 ?ts_ph_Lst_0)" (take ?ts_ph_Nat_1 (take ?ts_ph_Nat_1 ?ts_ph_Lst_0)) (take ?ts_ph_Nat_1 ?ts_ph_Lst_0))
+(=> "(take (succ ?ts_ph_Nat_1) (take ?ts_ph_Nat_1 ?ts_ph_Lst_0)) => (take ?ts_ph_Nat_1 ?ts_ph_Lst_0)" (take (succ ?ts_ph_Nat_1) (take ?ts_ph_Nat_1 ?ts_ph_Lst_0)) (take ?ts_ph_Nat_1 ?ts_ph_Lst_0))
+(=> "(take ?ts_ph_Nat_1 ?ts_ph_Lst_0) => (take (succ ?ts_ph_Nat_1) (take ?ts_ph_Nat_1 ?ts_ph_Lst_0))" (take ?ts_ph_Nat_1 ?ts_ph_Lst_0) (take (succ ?ts_ph_Nat_1) (take ?ts_ph_Nat_1 ?ts_ph_Lst_0)))

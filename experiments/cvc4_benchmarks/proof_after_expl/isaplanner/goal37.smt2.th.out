@@ -1,0 +1,35 @@
+19:56:11 [0m[33m[WARN] [0mCollecting statistics
+(leq ?__x0 ?__y1) => (or (= ?__x0 ?__y1) (less ?__x0 ?__y1))
+(or (= ?__x0 ?__y1) (less ?__x0 ?__y1)) => (leq ?__x0 ?__y1)
+(mem ?x nil) => false
+(mem ?x (cons ?y ?z)) => (or (= ?x ?y) (mem ?x ?z))
+(or (= ?x ?y) (mem ?x ?z)) => (mem ?x (cons ?y ?z))
+(delete ?x nil) => nil
+(delete ?x (cons ?y ?z)) => (ite (= ?x ?y) (delete ?x ?z) (cons ?y (delete ?x ?z)))
+(ite (= ?x ?y) (delete ?x ?z) (cons ?y (delete ?x ?z))) => (delete ?x (cons ?y ?z))
+(leq zero ?ts_ph_Nat_0) => true
+(leq (succ zero) (succ ?ts_ph_Nat_0)) => true
+(delete ?ts_ph_Nat_1 ?ts_ph_Lst_0) => (delete ?ts_ph_Nat_1 (delete ?ts_ph_Nat_1 ?ts_ph_Lst_0))
+(delete ?ts_ph_Nat_1 (delete ?ts_ph_Nat_1 ?ts_ph_Lst_0)) => (delete ?ts_ph_Nat_1 ?ts_ph_Lst_0)
+(cons ?ts_ph_Nat_0 nil) => (delete (succ ?ts_ph_Nat_0) (cons ?ts_ph_Nat_0 nil))
+(delete (succ ?ts_ph_Nat_0) (cons ?ts_ph_Nat_0 nil)) => (cons ?ts_ph_Nat_0 nil)
+Searcher: (delete (succ ?autovar1) ?autovar2)
+Searcher: (leq ?autovar2 (succ ?autovar1))
+19:56:11 [0m[33m[WARN] [0m ex is: zero
+19:56:11 [0m[33m[WARN] [0m ex is: (succ zero)
+19:56:11 [0m[33m[WARN] [0m ex is: (succ (succ zero))
+19:56:11 [0m[33m[WARN] [0m ex is: nil
+19:56:11 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_0 nil)
+19:56:11 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+19:56:11 [0m[33m[WARN] [0mRunning exploration without proof mode, but goals were given
+19:56:11 [0m[33m[WARN] [0mProof mode: true
+19:56:11 [0m[33m[WARN] [0m ex is: zero
+19:56:11 [0m[33m[WARN] [0m ex is: (succ zero)
+19:56:11 [0m[33m[WARN] [0m ex is: (succ (succ zero))
+19:56:11 [0m[33m[WARN] [0m ex is: nil
+19:56:11 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_0 nil)
+19:56:11 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+19:56:11 [0m[33m[WARN] [0mRunning exploration without proof mode, but goals were given
+19:56:11 [0m[33m[WARN] [0mProof mode: true
+19:56:11 [0m[33m[WARN] [0mFound all lemmas
+done in 2

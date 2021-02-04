@@ -1,0 +1,29 @@
+20:02:41 [0m[33m[WARN] [0mCollecting statistics
+(leq ?__x0 ?__y1) => (or (= ?__x0 ?__y1) (less ?__x0 ?__y1))
+(or (= ?__x0 ?__y1) (less ?__x0 ?__y1)) => (leq ?__x0 ?__y1)
+(zip nil ?x) => znil
+(zip ?x nil) => znil
+(zip (cons ?x2 ?y) (cons ?z ?w)) => (zcons (mkpair ?x2 ?z) (zip ?y ?w))
+(zcons (mkpair ?x2 ?z) (zip ?y ?w)) => (zip (cons ?x2 ?y) (cons ?z ?w))
+(leq zero ?ts_ph_Nat_0) => true
+(leq (succ zero) (succ ?ts_ph_Nat_0)) => true
+Searcher: (zip ?autovar7 (cons ?autovar3 ?autovar4))
+Searcher: (zip (cons ?autovar5 ?autovar6) ?autovar8)
+Searcher: (leq ?autovar2 (succ ?autovar1))
+20:02:41 [0m[33m[WARN] [0m ex is: zero
+20:02:41 [0m[33m[WARN] [0m ex is: (succ zero)
+20:02:41 [0m[33m[WARN] [0m ex is: (succ (succ zero))
+20:02:41 [0m[33m[WARN] [0m ex is: nil
+20:02:41 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_0 nil)
+20:02:41 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+20:02:41 [0m[33m[WARN] [0mRunning exploration without proof mode, but goals were given
+20:02:41 [0m[33m[WARN] [0mProof mode: true
+20:02:41 [0m[33m[WARN] [0m ex is: zero
+20:02:41 [0m[33m[WARN] [0m ex is: (succ zero)
+20:02:41 [0m[33m[WARN] [0m ex is: (succ (succ zero))
+20:02:41 [0m[33m[WARN] [0m ex is: nil
+20:02:41 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_0 nil)
+20:02:41 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+20:02:41 [0m[33m[WARN] [0mRunning exploration without proof mode, but goals were given
+20:02:41 [0m[33m[WARN] [0mProof mode: true
+done in 653

@@ -1,0 +1,56 @@
+11:46:35 [0m[33m[WARN] [0mCollecting statistics
+(leq ?__x0 ?__y1) => (or (= ?__x0 ?__y1) (less ?__x0 ?__y1))
+(or (= ?__x0 ?__y1) (less ?__x0 ?__y1)) => (leq ?__x0 ?__y1)
+(drop ?x nil) => nil
+(drop zero ?x2) => ?x2
+(drop (succ ?x) (cons ?y ?z)) => (drop ?x ?z)
+(zip nil ?x3) => znil
+(zip ?x4 nil) => znil
+(zip (cons ?x ?y5) (cons ?z6 ?w)) => (zcons (mkpair ?x ?z6) (zip ?y5 ?w))
+(zcons (mkpair ?x ?z6) (zip ?y5 ?w)) => (zip (cons ?x ?y5) (cons ?z6 ?w))
+(zdrop ?x znil) => znil
+(zdrop zero ?x7) => ?x7
+(zdrop (succ ?x) (zcons ?y8 ?z9)) => (zdrop ?x ?z9)
+Searcher: (drop ?autovar5 (cons ?autovar2 ?autovar3))
+Searcher: (drop (succ ?autovar4) ?autovar6)
+Searcher: (zip ?autovar7 (cons ?autovar3 ?autovar4))
+Searcher: (zip (cons ?autovar5 ?autovar6) ?autovar8)
+Searcher: (zdrop ?autovar5 (zcons ?autovar2 ?autovar3))
+Searcher: (zdrop (succ ?autovar4) ?autovar6)
+11:46:35 [0m[33m[WARN] [0m ex is: zero
+11:46:35 [0m[33m[WARN] [0m ex is: (succ zero)
+11:46:35 [0m[33m[WARN] [0m ex is: (succ (succ zero))
+11:46:35 [0m[33m[WARN] [0m ex is: nil
+11:46:35 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_0 nil)
+11:46:35 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+11:46:35 [0m[33m[WARN] [0m ex is: (mkpair autovar_Nat_0 autovar_Nat_1)
+11:46:35 [0m[33m[WARN] [0m ex is: znil
+11:46:35 [0m[33m[WARN] [0m ex is: (zcons autovar_Pair_0 znil)
+11:46:35 [0m[33m[WARN] [0m ex is: (zcons autovar_Pair_1 (zcons autovar_Pair_0 znil))
+11:46:35 [0m[33m[WARN] [0mProof mode: false
+11:46:35 [0m[33m[WARN] [0m ex is: zero
+11:46:35 [0m[33m[WARN] [0m ex is: (succ zero)
+11:46:35 [0m[33m[WARN] [0m ex is: (succ (succ zero))
+11:46:35 [0m[33m[WARN] [0m ex is: nil
+11:46:35 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_0 nil)
+11:46:35 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+11:46:35 [0m[33m[WARN] [0m ex is: (mkpair autovar_Nat_0 autovar_Nat_1)
+11:46:35 [0m[33m[WARN] [0m ex is: znil
+11:46:35 [0m[33m[WARN] [0m ex is: (zcons autovar_Pair_0 znil)
+11:46:35 [0m[33m[WARN] [0m ex is: (zcons autovar_Pair_1 (zcons autovar_Pair_0 znil))
+11:46:35 [0m[33m[WARN] [0mProof mode: false
+11:46:35 [0m[33m[WARN] [0mproved: (leq zero ?ts_ph_Nat_0) => true
+11:46:51 [0m[33m[WARN] [0mproved: (drop ?ts_ph_Nat_0 (cons zero ?ts_ph_Lst_1)) => (drop ?ts_ph_Nat_0 (cons ?ts_ph_Nat_0 ?ts_ph_Lst_1))
+11:46:51 [0m[33m[WARN] [0mproved: (drop ?ts_ph_Nat_0 (cons ?ts_ph_Nat_0 ?ts_ph_Lst_1)) => (drop ?ts_ph_Nat_0 (cons zero ?ts_ph_Lst_1))
+11:46:51 [0m[33m[WARN] [0mproved: (leq (succ zero) (succ ?ts_ph_Nat_0)) => true
+11:46:51 [0m[33m[WARN] [0mproved: (zdrop (succ ?ts_ph_Nat_1) ?ts_ph_ZLst_0) => (zdrop (succ zero) (zdrop ?ts_ph_Nat_1 ?ts_ph_ZLst_0))
+11:46:51 [0m[33m[WARN] [0mproved: (zdrop (succ zero) (zdrop ?ts_ph_Nat_1 ?ts_ph_ZLst_0)) => (zdrop (succ ?ts_ph_Nat_1) ?ts_ph_ZLst_0)
+11:46:51 [0m[33m[WARN] [0mproved: (zdrop ?ts_ph_Nat_1 (zdrop ?ts_ph_Nat_0 ?ts_ph_ZLst_1)) => (zdrop ?ts_ph_Nat_0 (zdrop ?ts_ph_Nat_1 ?ts_ph_ZLst_1))
+11:46:51 [0m[33m[WARN] [0mproved: (zdrop ?ts_ph_Nat_0 (zdrop ?ts_ph_Nat_1 ?ts_ph_ZLst_1)) => (zdrop ?ts_ph_Nat_1 (zdrop ?ts_ph_Nat_0 ?ts_ph_ZLst_1))
+11:46:51 [0m[33m[WARN] [0mproved: (drop (succ zero) (drop ?ts_ph_Nat_0 ?ts_ph_Lst_1)) => (drop (succ ?ts_ph_Nat_0) ?ts_ph_Lst_1)
+11:46:51 [0m[33m[WARN] [0mproved: (drop (succ ?ts_ph_Nat_0) ?ts_ph_Lst_1) => (drop (succ zero) (drop ?ts_ph_Nat_0 ?ts_ph_Lst_1))
+11:46:51 [0m[33m[WARN] [0mproved: (drop ?ts_ph_Nat_0 (drop ?ts_ph_Nat_1 ?ts_ph_Lst_1)) => (drop ?ts_ph_Nat_1 (drop ?ts_ph_Nat_0 ?ts_ph_Lst_1))
+11:46:51 [0m[33m[WARN] [0mproved: (drop ?ts_ph_Nat_1 (drop ?ts_ph_Nat_0 ?ts_ph_Lst_1)) => (drop ?ts_ph_Nat_0 (drop ?ts_ph_Nat_1 ?ts_ph_Lst_1))
+11:46:52 [0m[33m[WARN] [0mproved: (zdrop ?ts_ph_Nat_1 (zip ?ts_ph_Lst_0 ?ts_ph_Lst_0)) => (zip (drop ?ts_ph_Nat_1 ?ts_ph_Lst_0) (drop ?ts_ph_Nat_1 ?ts_ph_Lst_0))
+11:46:52 [0m[33m[WARN] [0mproved: (zip (drop ?ts_ph_Nat_1 ?ts_ph_Lst_0) (drop ?ts_ph_Nat_1 ?ts_ph_Lst_0)) => (zdrop ?ts_ph_Nat_1 (zip ?ts_ph_Lst_0 ?ts_ph_Lst_0))
+done in 17586

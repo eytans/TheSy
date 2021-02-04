@@ -1,0 +1,95 @@
+20:11:34 [0m[33m[WARN] [0mCollecting statistics
+(less zero zero) => false
+(less zero (succ ?x)) => true
+(less (succ ?x) (succ ?y)) => (less ?x ?y)
+(less ?x ?y) => (less (succ ?x) (succ ?y))
+(leq ?__x0 ?__y1) => (or (= ?__x0 ?__y1) (less ?__x0 ?__y1))
+(or (= ?__x0 ?__y1) (less ?__x0 ?__y1)) => (leq ?__x0 ?__y1)
+(plus zero ?n) => ?n
+(plus (succ ?n) ?m) => (succ (plus ?n ?m))
+(succ (plus ?n ?m)) => (plus (succ ?n) ?m)
+(nmax ?n ?m) => (ite (less ?n ?m) ?m ?n)
+(ite (less ?n ?m) ?m ?n) => (nmax ?n ?m)
+(append nil ?x2) => ?x2
+(append (cons ?x ?y3) ?z) => (cons ?x (append ?y3 ?z))
+(cons ?x (append ?y3 ?z)) => (append (cons ?x ?y3) ?z)
+(len nil) => zero
+zero => (len nil)
+(len (cons ?x ?y4)) => (succ (len ?y4))
+(mem ?x nil) => false
+(mem ?x (cons ?y ?z)) => (or (= ?x ?y) (mem ?x ?z))
+(or (= ?x ?y) (mem ?x ?z)) => (mem ?x (cons ?y ?z))
+(tinsert leaf ?i) => (node ?i leaf leaf)
+(node ?i leaf leaf) => (tinsert leaf ?i)
+(tinsert (node ?d ?l ?r) ?i) => (ite (less ?d ?i) (node ?d ?l (tinsert ?r ?i)) (node ?d (tinsert ?l ?i) ?r))
+(ite (less ?d ?i) (node ?d ?l (tinsert ?r ?i)) (node ?d (tinsert ?l ?i) ?r)) => (tinsert (node ?d ?l ?r) ?i)
+(height leaf) => zero
+zero => (height leaf)
+(height (node ?x ?y5 ?z6)) => (succ (nmax (height ?y5) (height ?z6)))
+(tinsert-all ?x7 nil) => ?x7
+(tinsert-all ?x8 (cons ?n ?l9)) => (tinsert (tinsert-all ?x8 ?l9) ?n)
+(tinsert (tinsert-all ?x8 ?l9) ?n) => (tinsert-all ?x8 (cons ?n ?l9))
+(tsize leaf) => zero
+zero => (tsize leaf)
+(tsize (node ?x ?l ?r)) => (succ (plus (tsize ?l) (tsize ?r)))
+(tremove leaf ?i) => leaf
+(tremove (node ?d ?l ?r) ?i) => (node ?d (tremove ?l ?i) ?r)
+(tremove (node ?d ?l ?r) ?i) => (node ?d (tremove ?l ?i) ?r)
+(tremove (node ?d ?l ?r) ?i) => (node ?d ?l (tremove ?r ?i))
+(tremove (node ?d ?l ?r) ?i) => (node ?d ?l (tremove ?r ?i))
+(tremove (node ?d leaf ?r) ?d) => ?r
+(tremove (node ?d (node ?ld ?ll ?lr) ?r) ?d) => (node ?ld (tremove (node ?ld ?ll ?lr) ?ld) ?r)
+(tremove-all ?x10 nil) => ?x10
+(tremove-all ?x11 (cons ?n ?l12)) => (tremove-all (tremove ?x11 ?n) ?l12)
+(tremove-all (tremove ?x11 ?n) ?l12) => (tremove-all ?x11 (cons ?n ?l12))
+(tcontains leaf ?i) => false
+(tcontains (node ?d ?l ?r) ?i) => (or (= ?d ?i) (tcontains ?l ?i) (tcontains ?r ?i))
+(or (= ?d ?i) (tcontains ?l ?i) (tcontains ?r ?i)) => (tcontains (node ?d ?l ?r) ?i)
+(tsorted leaf) => true
+(tmember leaf ?x) => false
+(tmember (node ?d ?l ?r) ?i) => (ite (= ?i ?d) true (tmember (ite (less ?d ?i) ?r ?l) ?i))
+(ite (= ?i ?d) true (tmember (ite (less ?d ?i) ?r ?l) ?i)) => (tmember (node ?d ?l ?r) ?i)
+(content leaf) => nil
+nil => (content leaf)
+(content (node ?d ?l ?r)) => (append (content ?l) (cons ?d (content ?r)))
+(append (content ?l) (cons ?d (content ?r))) => (content (node ?d ?l ?r))
+(tsize (tinsert ?t ?n)) => (succ (tsize ?t))
+(or (= (tsize ?t) (tsize (tinsert-all ?t ?l13))) (less (tsize ?t) (tsize (tinsert-all ?t ?l13)))) => true
+(tsize (tinsert-all ?t ?l14)) => (plus (tsize ?t) (len ?l14))
+(plus (tsize ?t) (len ?l14)) => (tsize (tinsert-all ?t ?l14))
+(or (= (tsize (tremove ?t ?n)) (tsize ?t)) (less (tsize (tremove ?t ?n)) (tsize ?t))) => true
+(or (= (tsize (tremove-all ?t ?l15)) (tsize ?t)) (less (tsize (tremove-all ?t ?l15)) (tsize ?t))) => true
+(tcontains (tinsert ?x16 ?i) ?i) => true
+(or (= ?i ?j) (tcontains ?x17 ?j)) => (tcontains (tinsert ?x17 ?i) ?j)
+(tcontains (tinsert ?x17 ?i) ?j) => (or (= ?i ?j) (tcontains ?x17 ?j))
+(tsorted (tinsert ?x18 ?i)) => true
+Searcher: (less ?autovar5 zero)
+Searcher: (less ?autovar5 (succ ?autovar1))
+Searcher: (less ?autovar5 (succ ?autovar3))
+Searcher: (less zero ?autovar6)
+Searcher: (less zero ?autovar6)
+Searcher: (less (succ ?autovar4) ?autovar6)
+20:11:34 [0m[33m[WARN] [0m ex is: zero
+20:11:34 [0m[33m[WARN] [0m ex is: (succ zero)
+20:11:34 [0m[33m[WARN] [0m ex is: (succ (succ zero))
+20:11:34 [0m[33m[WARN] [0m ex is: nil
+20:11:34 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_0 nil)
+20:11:34 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+20:11:34 [0m[33m[WARN] [0m ex is: leaf
+20:11:34 [0m[33m[WARN] [0m ex is: (node autovar_Nat_0 leaf leaf)
+20:11:34 [0m[33m[WARN] [0m ex is: (node autovar_Nat_1 (node autovar_Nat_0 leaf leaf) (node autovar_Nat_0 leaf leaf))
+20:11:34 [0m[33m[WARN] [0mRunning exploration without proof mode, but goals were given
+20:11:34 [0m[33m[WARN] [0mProof mode: true
+20:11:34 [0m[33m[WARN] [0m ex is: zero
+20:11:34 [0m[33m[WARN] [0m ex is: (succ zero)
+20:11:34 [0m[33m[WARN] [0m ex is: (succ (succ zero))
+20:11:34 [0m[33m[WARN] [0m ex is: nil
+20:11:34 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_0 nil)
+20:11:34 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+20:11:34 [0m[33m[WARN] [0m ex is: leaf
+20:11:34 [0m[33m[WARN] [0m ex is: (node autovar_Nat_0 leaf leaf)
+20:11:34 [0m[33m[WARN] [0m ex is: (node autovar_Nat_1 (node autovar_Nat_0 leaf leaf) (node autovar_Nat_0 leaf leaf))
+20:11:34 [0m[33m[WARN] [0mRunning exploration without proof mode, but goals were given
+20:11:34 [0m[33m[WARN] [0mProof mode: true
+20:11:34 [0m[33m[WARN] [0mFound all lemmas
+done in 17

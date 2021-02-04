@@ -1,0 +1,26 @@
+11:22:59 [WARN] Collecting statistics
+11:22:59 [WARN]  ex is: zero
+11:22:59 [WARN]  ex is: (succ zero)
+11:22:59 [WARN]  ex is: (succ (succ zero))
+11:22:59 [WARN] Proof mode: false
+11:22:59 [WARN]  ex is: zero
+11:22:59 [WARN]  ex is: (succ zero)
+11:22:59 [WARN]  ex is: (succ (succ zero))
+11:22:59 [WARN] Proof mode: false
+11:22:59 [WARN] proved: (plus ?ts_ph_Nat_0 zero) => ?ts_ph_Nat_0
+11:22:59 [WARN] proved: (leq zero ?ts_ph_Nat_0) => true
+11:23:05 [WARN] proved: (succ (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1)) => (plus ?ts_ph_Nat_0 (succ ?ts_ph_Nat_1))
+11:23:05 [WARN] proved: (plus ?ts_ph_Nat_0 (succ ?ts_ph_Nat_1)) => (succ (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1))
+11:23:05 [WARN] proved: (even (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0)) => true
+11:23:05 [WARN] proved: (leq ?ts_ph_Nat_0 (succ ?ts_ph_Nat_0)) => (even (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0))
+11:23:05 [WARN] proved: (even (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0)) => (leq ?ts_ph_Nat_0 (succ ?ts_ph_Nat_0))
+11:23:06 [WARN] proved: (leq (succ zero) (succ ?ts_ph_Nat_0)) => (even (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0))
+11:23:06 [WARN] proved: (even (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0)) => (leq (succ zero) (succ ?ts_ph_Nat_0))
+11:23:06 [WARN] proved: (plus (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0) ?ts_ph_Nat_0) => (plus ?ts_ph_Nat_0 (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0))
+11:23:06 [WARN] proved: (plus ?ts_ph_Nat_0 (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0)) => (plus (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0) ?ts_ph_Nat_0)
+11:23:07 [WARN] proved: (leq (succ zero) (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0)) => (leq (succ zero) ?ts_ph_Nat_0)
+11:23:07 [WARN] proved: (leq (succ zero) ?ts_ph_Nat_0) => (leq (succ zero) (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0))
+11:23:30 [WARN] proved: (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1) => (plus ?ts_ph_Nat_1 ?ts_ph_Nat_0)
+11:23:30 [WARN] proved: (plus ?ts_ph_Nat_1 ?ts_ph_Nat_0) => (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1)
+11:23:31 [WARN] proved: (plus ?ts_ph_Nat_1 (plus ?ts_ph_Nat_0 ?ts_ph_Nat_2)) => (plus ?ts_ph_Nat_0 (plus ?ts_ph_Nat_1 ?ts_ph_Nat_2))
+11:23:31 [WARN] proved: (plus ?ts_ph_Nat_0 (plus ?ts_ph_Nat_1 ?ts_ph_Nat_2)) => (plus ?ts_ph_Nat_1 (plus ?ts_ph_Nat_0 ?ts_ph_Nat_2))

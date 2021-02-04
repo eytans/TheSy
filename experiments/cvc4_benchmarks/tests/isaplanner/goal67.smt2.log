@@ -1,0 +1,25 @@
+19:18:32 [WARN] Collecting statistics
+19:18:32 [WARN]  ex is: zero
+19:18:32 [WARN]  ex is: (succ zero)
+19:18:32 [WARN]  ex is: (succ (succ zero))
+19:18:32 [WARN]  ex is: nil
+19:18:32 [WARN]  ex is: (cons autovar_Nat_0 nil)
+19:18:32 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+19:18:32 [WARN] Running exploration without proof mode, but goals were given
+19:18:32 [WARN] Proof mode: true
+19:18:32 [WARN]  ex is: zero
+19:18:32 [WARN]  ex is: (succ zero)
+19:18:32 [WARN]  ex is: (succ (succ zero))
+19:18:32 [WARN]  ex is: nil
+19:18:32 [WARN]  ex is: (cons autovar_Nat_0 nil)
+19:18:32 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+19:18:32 [WARN] Running exploration without proof mode, but goals were given
+19:18:32 [WARN] Proof mode: true
+19:18:32 [WARN] proved: (less ?ts_ph_Nat_0 ?ts_ph_Nat_0) => false
+19:18:32 [WARN] proved: (leq zero ?ts_ph_Nat_0) => true
+19:18:35 [WARN] proved: (leq (succ zero) (succ ?ts_ph_Nat_0)) => true
+19:18:35 [WARN] proved: (less ?ts_ph_Nat_0 (succ ?ts_ph_Nat_0)) => (leq (succ zero) (succ ?ts_ph_Nat_0))
+19:18:35 [WARN] proved: (leq (succ zero) (succ ?ts_ph_Nat_0)) => (less ?ts_ph_Nat_0 (succ ?ts_ph_Nat_0))
+19:18:35 [WARN] proved: (filter (filter ?ts_ph_Lst_0)) => (filter ?ts_ph_Lst_0)
+19:18:35 [WARN] proved: (filter ?ts_ph_Lst_0) => (filter (filter ?ts_ph_Lst_0))
+19:18:35 [WARN] proved: (less (succ ?ts_ph_Nat_0) ?ts_ph_Nat_0) => false

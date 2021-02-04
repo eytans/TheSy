@@ -1,0 +1,1 @@
+(=> "(not (= ?ts_ph_Lst_0 nil)) |> (butlast (append ?ts_ph_Lst_0 (cons (last ?ts_ph_Lst_0) nil))) => ?ts_ph_Lst_0" (=> (not (= ?ts_ph_Lst_0 nil)) (= (butlast (append ?ts_ph_Lst_0 (cons (last ?ts_ph_Lst_0) nil))) ?ts_ph_Lst_0)))

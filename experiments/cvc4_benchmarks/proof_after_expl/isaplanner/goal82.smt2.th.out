@@ -1,0 +1,39 @@
+20:01:11 [0m[33m[WARN] [0mCollecting statistics
+(leq ?__x0 ?__y1) => (or (= ?__x0 ?__y1) (less ?__x0 ?__y1))
+(or (= ?__x0 ?__y1) (less ?__x0 ?__y1)) => (leq ?__x0 ?__y1)
+(minus zero ?n) => zero
+(minus ?n zero) => ?n
+(minus (succ ?n) (succ ?m)) => (minus ?n ?m)
+(minus ?n ?m) => (minus (succ ?n) (succ ?m))
+(append nil ?x) => ?x
+(append (cons ?x2 ?y) ?z) => (cons ?x2 (append ?y ?z))
+(cons ?x2 (append ?y ?z)) => (append (cons ?x2 ?y) ?z)
+(len nil) => zero
+zero => (len nil)
+(len (cons ?x3 ?y)) => (succ (len ?y))
+(take ?x4 nil) => nil
+(take zero ?x) => nil
+(take (succ ?x5) (cons ?y6 ?z)) => (cons ?y6 (take ?x5 ?z))
+(cons ?y6 (take ?x5 ?z)) => (take (succ ?x5) (cons ?y6 ?z))
+Searcher: (minus ?autovar4 (succ ?autovar2))
+Searcher: (minus (succ ?autovar3) ?autovar5)
+Searcher: (take ?autovar5 (cons ?autovar2 ?autovar3))
+Searcher: (take (succ ?autovar4) ?autovar6)
+20:01:11 [0m[33m[WARN] [0m ex is: zero
+20:01:11 [0m[33m[WARN] [0m ex is: (succ zero)
+20:01:11 [0m[33m[WARN] [0m ex is: (succ (succ zero))
+20:01:11 [0m[33m[WARN] [0m ex is: nil
+20:01:11 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_0 nil)
+20:01:11 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+20:01:11 [0m[33m[WARN] [0mRunning exploration without proof mode, but goals were given
+20:01:11 [0m[33m[WARN] [0mProof mode: true
+20:01:11 [0m[33m[WARN] [0m ex is: zero
+20:01:11 [0m[33m[WARN] [0m ex is: (succ zero)
+20:01:11 [0m[33m[WARN] [0m ex is: (succ (succ zero))
+20:01:11 [0m[33m[WARN] [0m ex is: nil
+20:01:11 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_0 nil)
+20:01:11 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+20:01:11 [0m[33m[WARN] [0mRunning exploration without proof mode, but goals were given
+20:01:11 [0m[33m[WARN] [0mProof mode: true
+20:01:11 [0m[33m[WARN] [0mFound all lemmas
+done in 4

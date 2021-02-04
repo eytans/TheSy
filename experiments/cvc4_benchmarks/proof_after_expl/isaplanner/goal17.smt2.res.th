@@ -1,0 +1,2 @@
+(=> "(or (= ?ts_ph_Nat_0 zero) (less ?ts_ph_Nat_0 zero)) => (= ?ts_ph_Nat_0 zero)" (or (= ?ts_ph_Nat_0 zero) (less ?ts_ph_Nat_0 zero)) (= ?ts_ph_Nat_0 zero))
+(=> "(= ?ts_ph_Nat_0 zero) => (or (= ?ts_ph_Nat_0 zero) (less ?ts_ph_Nat_0 zero))" (= ?ts_ph_Nat_0 zero) (or (= ?ts_ph_Nat_0 zero) (less ?ts_ph_Nat_0 zero)))

@@ -1,0 +1,3 @@
+(=> "(append ?ts_ph_Lst_0 nil) => ?ts_ph_Lst_0" (append ?ts_ph_Lst_0 nil) ?ts_ph_Lst_0)
+(=> "(= ?ts_ph_Lst_2 nil) |> (last (append ?ts_ph_Lst_0 ?ts_ph_Lst_2)) => (last ?ts_ph_Lst_0)" (=> (= ?ts_ph_Lst_2 nil) (= (last (append ?ts_ph_Lst_0 ?ts_ph_Lst_2)) (last ?ts_ph_Lst_0))))
+(=> "(= ?ts_ph_Lst_2 nil) |> (last ?ts_ph_Lst_0) => (last (append ?ts_ph_Lst_0 ?ts_ph_Lst_2))" (=> (= ?ts_ph_Lst_2 nil) (= (last ?ts_ph_Lst_0) (last (append ?ts_ph_Lst_0 ?ts_ph_Lst_2)))))

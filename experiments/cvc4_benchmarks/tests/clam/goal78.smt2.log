@@ -1,0 +1,27 @@
+19:39:13 [WARN] Collecting statistics
+19:39:13 [WARN]  ex is: zero
+19:39:13 [WARN]  ex is: (succ zero)
+19:39:13 [WARN]  ex is: (succ (succ zero))
+19:39:13 [WARN]  ex is: nil
+19:39:13 [WARN]  ex is: (cons autovar_Nat_0 nil)
+19:39:13 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+19:39:13 [WARN] Running exploration without proof mode, but goals were given
+19:39:13 [WARN] Proof mode: true
+19:39:13 [WARN]  ex is: zero
+19:39:13 [WARN]  ex is: (succ zero)
+19:39:13 [WARN]  ex is: (succ (succ zero))
+19:39:13 [WARN]  ex is: nil
+19:39:13 [WARN]  ex is: (cons autovar_Nat_0 nil)
+19:39:13 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+19:39:13 [WARN] Running exploration without proof mode, but goals were given
+19:39:13 [WARN] Proof mode: true
+19:39:13 [WARN] proved: (append ?ts_ph_Lst_0 nil) => ?ts_ph_Lst_0
+19:39:13 [WARN] proved: (leq zero ?ts_ph_Nat_0) => true
+19:39:16 [WARN] proved: (qreva (qreva ?ts_ph_Lst_0 ?ts_ph_Lst_1) nil) => (qreva ?ts_ph_Lst_1 ?ts_ph_Lst_0)
+19:39:16 [WARN] proved: (qreva ?ts_ph_Lst_1 ?ts_ph_Lst_0) => (qreva (qreva ?ts_ph_Lst_0 ?ts_ph_Lst_1) nil)
+19:39:16 [WARN] proved: (leq (succ zero) (succ ?ts_ph_Nat_0)) => true
+19:39:17 [WARN] proved: (append (append ?ts_ph_Lst_0 ?ts_ph_Lst_1) ?ts_ph_Lst_2) => (append ?ts_ph_Lst_0 (append ?ts_ph_Lst_1 ?ts_ph_Lst_2))
+19:39:17 [WARN] proved: (append ?ts_ph_Lst_0 (append ?ts_ph_Lst_1 ?ts_ph_Lst_2)) => (append (append ?ts_ph_Lst_0 ?ts_ph_Lst_1) ?ts_ph_Lst_2)
+19:39:17 [WARN] proved: (rev (qreva ?ts_ph_Lst_0 ?ts_ph_Lst_1)) => (append (rev ?ts_ph_Lst_1) ?ts_ph_Lst_0)
+19:39:17 [WARN] proved: (append (rev ?ts_ph_Lst_1) ?ts_ph_Lst_0) => (rev (qreva ?ts_ph_Lst_0 ?ts_ph_Lst_1))
+19:39:17 [WARN] Found all lemmas

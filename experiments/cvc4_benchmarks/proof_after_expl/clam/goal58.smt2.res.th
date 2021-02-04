@@ -1,0 +1,2 @@
+(=> "(rev (append ?ts_ph_Lst_1 (cons ?ts_ph_Nat_0 nil))) => (cons ?ts_ph_Nat_0 (rev ?ts_ph_Lst_1))" (rev (append ?ts_ph_Lst_1 (cons ?ts_ph_Nat_0 nil))) (cons ?ts_ph_Nat_0 (rev ?ts_ph_Lst_1)))
+(=> "(cons ?ts_ph_Nat_0 (rev ?ts_ph_Lst_1)) => (rev (append ?ts_ph_Lst_1 (cons ?ts_ph_Nat_0 nil)))" (cons ?ts_ph_Nat_0 (rev ?ts_ph_Lst_1)) (rev (append ?ts_ph_Lst_1 (cons ?ts_ph_Nat_0 nil))))

@@ -1,0 +1,41 @@
+11:13:16 [WARN] Collecting statistics
+11:13:16 [WARN]  ex is: zero
+11:13:16 [WARN]  ex is: (succ zero)
+11:13:16 [WARN]  ex is: (succ (succ zero))
+11:13:16 [WARN] Proof mode: false
+11:13:16 [WARN]  ex is: zero
+11:13:16 [WARN]  ex is: (succ zero)
+11:13:16 [WARN]  ex is: (succ (succ zero))
+11:13:16 [WARN] Proof mode: false
+11:13:16 [WARN] proved: (less ?ts_ph_Nat_0 ?ts_ph_Nat_0) => false
+11:13:16 [WARN] proved: (leq zero ?ts_ph_Nat_0) => true
+11:13:16 [WARN] proved: (plus ?ts_ph_Nat_0 zero) => ?ts_ph_Nat_0
+11:13:23 [WARN] proved: (less ?ts_ph_Nat_0 (succ ?ts_ph_Nat_0)) => true
+11:13:23 [WARN] proved: (less ?ts_ph_Nat_0 (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1)) => (less zero ?ts_ph_Nat_1)
+11:13:23 [WARN] proved: (less (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1) ?ts_ph_Nat_0) => false
+11:13:23 [WARN] proved: (less zero ?ts_ph_Nat_0) => (less zero (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0))
+11:13:23 [WARN] proved: (less zero (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0)) => (less zero ?ts_ph_Nat_0)
+11:13:23 [WARN] proved: (leq (succ zero) (succ ?ts_ph_Nat_0)) => true
+11:13:23 [WARN] proved: (leq ?ts_ph_Nat_0 (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0)) => (leq (succ zero) (succ ?ts_ph_Nat_0))
+11:13:23 [WARN] proved: (leq (succ zero) (succ ?ts_ph_Nat_0)) => (leq ?ts_ph_Nat_0 (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0))
+11:13:23 [WARN] proved: (less (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0) ?ts_ph_Nat_0) => (less (succ ?ts_ph_Nat_0) ?ts_ph_Nat_0)
+11:13:23 [WARN] proved: (less (succ ?ts_ph_Nat_0) ?ts_ph_Nat_0) => (less (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0) ?ts_ph_Nat_0)
+11:13:23 [WARN] proved: (less (succ ?ts_ph_Nat_0) (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1)) => (less (succ zero) ?ts_ph_Nat_1)
+11:13:24 [WARN] proved: (less ?ts_ph_Nat_0 (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0)) => (less (succ zero) (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0))
+11:13:24 [WARN] proved: (less (succ zero) (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0)) => (less ?ts_ph_Nat_0 (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0))
+11:13:25 [WARN] proved: (leq (succ zero) ?ts_ph_Nat_0) => (leq (succ ?ts_ph_Nat_0) (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0))
+11:13:25 [WARN] proved: (leq (succ ?ts_ph_Nat_0) (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0)) => (leq (succ zero) ?ts_ph_Nat_0)
+11:13:25 [WARN] proved: (leq (succ zero) (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0)) => (leq (succ ?ts_ph_Nat_0) (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0))
+11:13:25 [WARN] proved: (leq (succ ?ts_ph_Nat_0) (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0)) => (leq (succ zero) (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0))
+11:13:25 [WARN] proved: (less (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0) (succ zero)) => (less ?ts_ph_Nat_0 (succ zero))
+11:13:25 [WARN] proved: (less ?ts_ph_Nat_0 (succ zero)) => (less (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0) (succ zero))
+11:13:26 [WARN] proved: (succ (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1)) => (plus ?ts_ph_Nat_0 (succ ?ts_ph_Nat_1))
+11:13:26 [WARN] proved: (plus ?ts_ph_Nat_0 (succ ?ts_ph_Nat_1)) => (succ (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1))
+11:13:26 [WARN] proved: (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1) => (plus ?ts_ph_Nat_1 ?ts_ph_Nat_0)
+11:13:26 [WARN] proved: (plus ?ts_ph_Nat_1 ?ts_ph_Nat_0) => (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1)
+11:13:26 [WARN] proved: (leq ?ts_ph_Nat_1 (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1)) => true
+11:13:27 [WARN] proved: (plus ?ts_ph_Nat_1 (plus ?ts_ph_Nat_0 ?ts_ph_Nat_2)) => (plus ?ts_ph_Nat_0 (plus ?ts_ph_Nat_1 ?ts_ph_Nat_2))
+11:13:27 [WARN] proved: (plus ?ts_ph_Nat_0 (plus ?ts_ph_Nat_1 ?ts_ph_Nat_2)) => (plus ?ts_ph_Nat_1 (plus ?ts_ph_Nat_0 ?ts_ph_Nat_2))
+11:13:46 [WARN] proved: (less (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1) (succ ?ts_ph_Nat_1)) => (less ?ts_ph_Nat_0 (succ zero))
+11:16:46 [WARN] proved: (less (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1) (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0)) => (less ?ts_ph_Nat_1 ?ts_ph_Nat_0)
+11:16:46 [WARN] proved: (less ?ts_ph_Nat_1 ?ts_ph_Nat_0) => (less (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1) (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0))

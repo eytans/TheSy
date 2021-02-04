@@ -1,0 +1,26 @@
+12:05:01 [WARN] Collecting statistics
+12:05:01 [WARN]  ex is: zero
+12:05:01 [WARN]  ex is: (succ zero)
+12:05:01 [WARN]  ex is: (succ (succ zero))
+12:05:01 [WARN] Proof mode: false
+12:05:01 [WARN]  ex is: zero
+12:05:01 [WARN]  ex is: (succ zero)
+12:05:01 [WARN]  ex is: (succ (succ zero))
+12:05:01 [WARN] Proof mode: false
+12:05:01 [WARN] proved: (nmax ?ts_ph_Nat_0 ?ts_ph_Nat_0) => ?ts_ph_Nat_0
+12:05:01 [WARN] proved: (nmax zero ?ts_ph_Nat_0) => (nmax ?ts_ph_Nat_0 ?ts_ph_Nat_0)
+12:05:01 [WARN] proved: (nmax ?ts_ph_Nat_0 ?ts_ph_Nat_0) => (nmax zero ?ts_ph_Nat_0)
+12:05:01 [WARN] proved: (leq zero ?ts_ph_Nat_0) => true
+12:05:01 [WARN] proved: (less ?ts_ph_Nat_0 ?ts_ph_Nat_0) => false
+12:05:48 [WARN] proved: (nmax (succ ?ts_ph_Nat_0) ?ts_ph_Nat_0) => (succ ?ts_ph_Nat_0)
+12:05:48 [WARN] proved: (succ ?ts_ph_Nat_0) => (nmax (succ ?ts_ph_Nat_0) ?ts_ph_Nat_0)
+12:05:48 [WARN] proved: (nmax ?ts_ph_Nat_0 (succ ?ts_ph_Nat_0)) => (succ ?ts_ph_Nat_0)
+12:05:48 [WARN] proved: (succ ?ts_ph_Nat_0) => (nmax ?ts_ph_Nat_0 (succ ?ts_ph_Nat_0))
+12:05:48 [WARN] proved: (nmax ?ts_ph_Nat_0 (succ zero)) => (nmax (succ zero) ?ts_ph_Nat_0)
+12:05:48 [WARN] proved: (nmax (succ zero) ?ts_ph_Nat_0) => (nmax ?ts_ph_Nat_0 (succ zero))
+12:05:48 [WARN] proved: (less (succ ?ts_ph_Nat_0) ?ts_ph_Nat_0) => false
+12:05:48 [WARN] proved: (leq ?ts_ph_Nat_0 (succ ?ts_ph_Nat_0)) => (less ?ts_ph_Nat_0 (succ ?ts_ph_Nat_0))
+12:05:48 [WARN] proved: (less ?ts_ph_Nat_0 (succ ?ts_ph_Nat_0)) => (leq ?ts_ph_Nat_0 (succ ?ts_ph_Nat_0))
+12:05:48 [WARN] proved: (leq (succ zero) (succ ?ts_ph_Nat_0)) => true
+12:05:48 [WARN] proved: (leq (succ zero) (succ ?ts_ph_Nat_0)) => (less ?ts_ph_Nat_0 (succ ?ts_ph_Nat_0))
+12:05:48 [WARN] proved: (less ?ts_ph_Nat_0 (succ ?ts_ph_Nat_0)) => (leq (succ zero) (succ ?ts_ph_Nat_0))

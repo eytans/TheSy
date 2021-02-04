@@ -1,0 +1,30 @@
+10:59:45 [0m[33m[WARN] [0mCollecting statistics
+(leq ?__x0 ?__y1) => (or (= ?__x0 ?__y1) (less ?__x0 ?__y1))
+(or (= ?__x0 ?__y1) (less ?__x0 ?__y1)) => (leq ?__x0 ?__y1)
+(mem ?x nil) => false
+(mem ?x (cons ?y ?z)) => (or (= ?x ?y) (mem ?x ?z))
+(or (= ?x ?y) (mem ?x ?z)) => (mem ?x (cons ?y ?z))
+(delete ?x nil) => nil
+(delete ?x (cons ?y ?z)) => (ite (= ?x ?y) (delete ?x ?z) (cons ?y (delete ?x ?z)))
+(ite (= ?x ?y) (delete ?x ?z) (cons ?y (delete ?x ?z))) => (delete ?x (cons ?y ?z))
+10:59:45 [0m[33m[WARN] [0m ex is: zero
+10:59:45 [0m[33m[WARN] [0m ex is: (succ zero)
+10:59:45 [0m[33m[WARN] [0m ex is: (succ (succ zero))
+10:59:45 [0m[33m[WARN] [0m ex is: nil
+10:59:45 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_0 nil)
+10:59:45 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+10:59:45 [0m[33m[WARN] [0mProof mode: false
+10:59:45 [0m[33m[WARN] [0m ex is: zero
+10:59:45 [0m[33m[WARN] [0m ex is: (succ zero)
+10:59:45 [0m[33m[WARN] [0m ex is: (succ (succ zero))
+10:59:45 [0m[33m[WARN] [0m ex is: nil
+10:59:45 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_0 nil)
+10:59:45 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+10:59:45 [0m[33m[WARN] [0mProof mode: false
+10:59:45 [0m[33m[WARN] [0mproved: (leq zero ?ts_ph_Nat_0) => true
+11:06:07 [0m[33m[WARN] [0mproved: (leq (succ zero) (succ ?ts_ph_Nat_0)) => true
+11:06:07 [0m[33m[WARN] [0mproved: (delete ?ts_ph_Nat_1 ?ts_ph_Lst_0) => (delete ?ts_ph_Nat_1 (delete ?ts_ph_Nat_1 ?ts_ph_Lst_0))
+11:06:07 [0m[33m[WARN] [0mproved: (delete ?ts_ph_Nat_1 (delete ?ts_ph_Nat_1 ?ts_ph_Lst_0)) => (delete ?ts_ph_Nat_1 ?ts_ph_Lst_0)
+11:06:07 [0m[33m[WARN] [0mproved: (cons ?ts_ph_Nat_0 nil) => (delete (succ ?ts_ph_Nat_0) (cons ?ts_ph_Nat_0 nil))
+11:06:07 [0m[33m[WARN] [0mproved: (delete (succ ?ts_ph_Nat_0) (cons ?ts_ph_Nat_0 nil)) => (cons ?ts_ph_Nat_0 nil)
+done in 384656

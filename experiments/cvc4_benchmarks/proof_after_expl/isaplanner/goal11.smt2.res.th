@@ -1,0 +1,1 @@
+(=> "(drop zero ?ts_ph_Lst_0) => ?ts_ph_Lst_0" (drop zero ?ts_ph_Lst_0) ?ts_ph_Lst_0)

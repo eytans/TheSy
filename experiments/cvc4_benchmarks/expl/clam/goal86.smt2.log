@@ -1,0 +1,15 @@
+13:16:10 [WARN] Collecting statistics
+13:16:10 [WARN]  ex is: zero
+13:16:10 [WARN]  ex is: (succ zero)
+13:16:10 [WARN]  ex is: (succ (succ zero))
+13:16:10 [WARN] Proof mode: false
+13:16:10 [WARN]  ex is: zero
+13:16:10 [WARN]  ex is: (succ zero)
+13:16:10 [WARN]  ex is: (succ (succ zero))
+13:16:10 [WARN] Proof mode: false
+13:16:11 [WARN] proved: (plus ?ts_ph_Nat_0 zero) => ?ts_ph_Nat_0
+13:16:11 [WARN] proved: (leq zero ?ts_ph_Nat_0) => true
+13:16:11 [WARN] proved: (qexp ?ts_ph_Nat_1 ?ts_ph_Nat_0 zero) => zero
+13:16:11 [WARN] proved: (qexp ?ts_ph_Nat_1 ?ts_ph_Nat_0 zero) => (mult ?ts_ph_Nat_0 zero)
+13:16:11 [WARN] proved: (qexp zero ?ts_ph_Nat_0 ?ts_ph_Nat_0) => (qexp ?ts_ph_Nat_0 ?ts_ph_Nat_0 zero)
+13:16:11 [WARN] proved: (qexp ?ts_ph_Nat_0 ?ts_ph_Nat_0 zero) => (qexp zero ?ts_ph_Nat_0 ?ts_ph_Nat_0)

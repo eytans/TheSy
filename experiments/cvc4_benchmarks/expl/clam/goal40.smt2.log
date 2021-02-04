@@ -1,0 +1,23 @@
+15:08:06 [WARN] Collecting statistics
+15:08:06 [WARN]  ex is: zero
+15:08:06 [WARN]  ex is: (succ zero)
+15:08:06 [WARN]  ex is: (succ (succ zero))
+15:08:06 [WARN]  ex is: nil
+15:08:06 [WARN]  ex is: (cons autovar_Nat_0 nil)
+15:08:06 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+15:08:06 [WARN] Proof mode: false
+15:08:06 [WARN]  ex is: zero
+15:08:06 [WARN]  ex is: (succ zero)
+15:08:06 [WARN]  ex is: (succ (succ zero))
+15:08:06 [WARN]  ex is: nil
+15:08:06 [WARN]  ex is: (cons autovar_Nat_0 nil)
+15:08:06 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+15:08:06 [WARN] Proof mode: false
+15:08:06 [WARN] proved: (leq zero ?ts_ph_Nat_0) => true
+15:08:36 [WARN] proved: (leq (succ zero) (succ ?ts_ph_Nat_0)) => true
+15:08:36 [WARN] proved: (lst-eq (lst-union ?ts_ph_Lst_0 ?ts_ph_Lst_1) ?ts_ph_Lst_1) => (lst-eq ?ts_ph_Lst_1 (lst-union ?ts_ph_Lst_0 ?ts_ph_Lst_1))
+15:08:36 [WARN] proved: (lst-eq ?ts_ph_Lst_1 (lst-union ?ts_ph_Lst_0 ?ts_ph_Lst_1)) => (lst-eq (lst-union ?ts_ph_Lst_0 ?ts_ph_Lst_1) ?ts_ph_Lst_1)
+15:08:36 [WARN] proved: (lst-subset (lst-union ?ts_ph_Lst_0 nil) nil) => (lst-subset ?ts_ph_Lst_0 nil)
+15:08:36 [WARN] proved: (lst-subset ?ts_ph_Lst_0 nil) => (lst-subset (lst-union ?ts_ph_Lst_0 nil) nil)
+15:08:36 [WARN] proved: (lst-union (lst-union ?ts_ph_Lst_0 nil) nil) => (lst-union ?ts_ph_Lst_0 nil)
+15:08:36 [WARN] proved: (lst-union ?ts_ph_Lst_0 nil) => (lst-union (lst-union ?ts_ph_Lst_0 nil) nil)

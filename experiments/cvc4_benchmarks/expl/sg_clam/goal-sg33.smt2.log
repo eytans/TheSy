@@ -1,0 +1,85 @@
+11:16:39 [WARN] Collecting statistics
+11:16:39 [WARN]  ex is: zero
+11:16:39 [WARN]  ex is: (succ zero)
+11:16:39 [WARN]  ex is: (succ (succ zero))
+11:16:39 [WARN] Proof mode: false
+11:16:39 [WARN]  ex is: zero
+11:16:39 [WARN]  ex is: (succ zero)
+11:16:39 [WARN]  ex is: (succ (succ zero))
+11:16:39 [WARN] Proof mode: false
+11:16:39 [WARN] proved: (plus ?ts_ph_Nat_0 zero) => ?ts_ph_Nat_0
+11:16:39 [WARN] proved: (qfac ?ts_ph_Nat_0 zero) => zero
+11:16:40 [WARN] proved: (leq zero ?ts_ph_Nat_0) => true
+11:16:41 [WARN] proved: (fac (succ ?ts_ph_Nat_0)) => zero
+11:24:26 [WARN] proved: (qfac (fac ?ts_ph_Nat_0) ?ts_ph_Nat_0) => ?ts_ph_Nat_0
+11:24:26 [WARN] proved: (leq ?ts_ph_Nat_0 (fac ?ts_ph_Nat_0)) => (leq ?ts_ph_Nat_0 zero)
+11:24:26 [WARN] proved: (leq ?ts_ph_Nat_0 zero) => (leq ?ts_ph_Nat_0 (fac ?ts_ph_Nat_0))
+11:24:26 [WARN] proved: (plus ?ts_ph_Nat_0 (fac ?ts_ph_Nat_0)) => (plus (fac ?ts_ph_Nat_0) ?ts_ph_Nat_0)
+11:24:26 [WARN] proved: (plus (fac ?ts_ph_Nat_0) ?ts_ph_Nat_0) => (plus ?ts_ph_Nat_0 (fac ?ts_ph_Nat_0))
+11:24:26 [WARN] proved: (fac (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0)) => (fac ?ts_ph_Nat_0)
+11:24:26 [WARN] proved: (fac ?ts_ph_Nat_0) => (fac (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0))
+11:24:26 [WARN] proved: (leq (fac ?ts_ph_Nat_0) zero) => (leq (fac ?ts_ph_Nat_0) ?ts_ph_Nat_0)
+11:24:26 [WARN] proved: (leq (fac ?ts_ph_Nat_0) ?ts_ph_Nat_0) => (leq (fac ?ts_ph_Nat_0) zero)
+11:24:26 [WARN] proved: (mult ?ts_ph_Nat_0 (fac ?ts_ph_Nat_0)) => (qfac (fac ?ts_ph_Nat_0) zero)
+11:24:26 [WARN] proved: (qfac (fac ?ts_ph_Nat_0) zero) => (mult ?ts_ph_Nat_0 (fac ?ts_ph_Nat_0))
+11:24:26 [WARN] generalized case_split proof as: (qfac (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1) ?ts_ph_Nat_1) -- zero
+11:24:26 [WARN] proved: (qfac (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1) ?ts_ph_Nat_1) => zero
+11:24:26 [WARN] generalized case_split proof as: (qfac (fac ?ts_ph_Nat_0) ?ts_ph_Nat_1) -- (qfac (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_1) ?ts_ph_Nat_1)
+11:24:26 [WARN] proved: (qfac (fac ?ts_ph_Nat_0) ?ts_ph_Nat_1) => (qfac (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_1) ?ts_ph_Nat_1)
+11:24:26 [WARN] proved: (qfac (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_1) ?ts_ph_Nat_1) => (qfac (fac ?ts_ph_Nat_0) ?ts_ph_Nat_1)
+11:24:27 [WARN] generalized case_split proof as: (leq (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_1) ?ts_ph_Nat_1) -- (leq zero (fac ?ts_ph_Nat_0))
+11:24:27 [WARN] proved: (leq (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_1) ?ts_ph_Nat_1) => (leq zero (fac ?ts_ph_Nat_0))
+11:24:27 [WARN] generalized case_split proof as: (qfac ?ts_ph_Nat_0 (mult ?ts_ph_Nat_1 ?ts_ph_Nat_2)) -- (mult (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_1) ?ts_ph_Nat_2)
+11:24:27 [WARN] proved: (qfac ?ts_ph_Nat_0 (mult ?ts_ph_Nat_1 ?ts_ph_Nat_2)) => (mult (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_1) ?ts_ph_Nat_2)
+11:24:27 [WARN] proved: (mult (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_1) ?ts_ph_Nat_2) => (qfac ?ts_ph_Nat_0 (mult ?ts_ph_Nat_1 ?ts_ph_Nat_2))
+11:24:27 [WARN] proved: (qfac (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_1) ?ts_ph_Nat_0) => ?ts_ph_Nat_0
+11:24:27 [WARN] proved: (mult (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_1) zero) => zero
+11:24:27 [WARN] proved: (mult (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1) zero) => (qfac (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_1) zero)
+11:24:27 [WARN] proved: (qfac (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_1) zero) => (mult (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1) zero)
+11:24:29 [WARN] proved: (mult ?ts_ph_Nat_0 (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_1)) => (qfac (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_1) zero)
+11:24:29 [WARN] proved: (qfac (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_1) zero) => (mult ?ts_ph_Nat_0 (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_1))
+11:24:30 [WARN] proved: (qfac (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1) ?ts_ph_Nat_0) => (mult (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_1) zero)
+11:24:30 [WARN] proved: (mult (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_1) zero) => (qfac (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1) ?ts_ph_Nat_0)
+11:26:29 [WARN] proved: (leq (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_1) zero) => (leq (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_1) ?ts_ph_Nat_0)
+11:26:29 [WARN] proved: (leq (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_1) ?ts_ph_Nat_0) => (leq (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_1) zero)
+11:26:30 [WARN] proved: (plus (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_1) zero) => (qfac ?ts_ph_Nat_0 (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1))
+11:26:30 [WARN] proved: (qfac ?ts_ph_Nat_0 (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1)) => (plus (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_1) zero)
+11:26:30 [WARN] proved: (plus (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_1) zero) => (qfac ?ts_ph_Nat_0 (plus ?ts_ph_Nat_1 ?ts_ph_Nat_0))
+11:26:30 [WARN] proved: (qfac ?ts_ph_Nat_0 (plus ?ts_ph_Nat_1 ?ts_ph_Nat_0)) => (plus (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_1) zero)
+11:26:31 [WARN] proved: (mult ?ts_ph_Nat_0 (fac ?ts_ph_Nat_0)) => (qfac (mult ?ts_ph_Nat_0 ?ts_ph_Nat_0) ?ts_ph_Nat_0)
+11:26:31 [WARN] proved: (qfac (mult ?ts_ph_Nat_0 ?ts_ph_Nat_0) ?ts_ph_Nat_0) => (mult ?ts_ph_Nat_0 (fac ?ts_ph_Nat_0))
+11:38:40 [WARN] proved: (leq (fac ?ts_ph_Nat_0) (succ zero)) => true
+11:38:41 [WARN] proved: (mult (succ ?ts_ph_Nat_0) (fac ?ts_ph_Nat_0)) => (qfac ?ts_ph_Nat_0 (succ ?ts_ph_Nat_0))
+11:38:41 [WARN] proved: (qfac ?ts_ph_Nat_0 (succ ?ts_ph_Nat_0)) => (mult (succ ?ts_ph_Nat_0) (fac ?ts_ph_Nat_0))
+11:38:42 [WARN] proved: (mult (succ ?ts_ph_Nat_0) (fac ?ts_ph_Nat_0)) => (fac (mult ?ts_ph_Nat_0 ?ts_ph_Nat_0))
+11:38:42 [WARN] proved: (fac (mult ?ts_ph_Nat_0 ?ts_ph_Nat_0)) => (mult (succ ?ts_ph_Nat_0) (fac ?ts_ph_Nat_0))
+11:38:42 [WARN] proved: (plus (succ ?ts_ph_Nat_0) (fac ?ts_ph_Nat_0)) => (plus (fac ?ts_ph_Nat_0) (succ ?ts_ph_Nat_0))
+11:38:42 [WARN] proved: (plus (fac ?ts_ph_Nat_0) (succ ?ts_ph_Nat_0)) => (plus (succ ?ts_ph_Nat_0) (fac ?ts_ph_Nat_0))
+11:38:42 [WARN] proved: (plus (succ ?ts_ph_Nat_0) (succ zero)) => (succ (succ ?ts_ph_Nat_0))
+11:38:42 [WARN] proved: (succ (succ ?ts_ph_Nat_0)) => (plus (succ ?ts_ph_Nat_0) (succ zero))
+11:38:44 [WARN] proved: (mult (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_1) zero) => (mult (mult ?ts_ph_Nat_0 ?ts_ph_Nat_0) zero)
+11:38:46 [WARN] proved: (mult (mult ?ts_ph_Nat_0 ?ts_ph_Nat_0) zero) => zero
+11:38:52 [WARN] proved: (succ (fac ?ts_ph_Nat_0)) => (plus (fac ?ts_ph_Nat_0) (succ zero))
+11:38:52 [WARN] proved: (plus (fac ?ts_ph_Nat_0) (succ zero)) => (succ (fac ?ts_ph_Nat_0))
+11:38:53 [WARN] proved: (qfac ?ts_ph_Nat_1 (fac ?ts_ph_Nat_0)) => (qfac (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1) (succ ?ts_ph_Nat_0))
+11:38:53 [WARN] proved: (qfac (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1) (succ ?ts_ph_Nat_0)) => (qfac ?ts_ph_Nat_1 (fac ?ts_ph_Nat_0))
+11:38:53 [WARN] proved: (qfac (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_1) (fac ?ts_ph_Nat_0)) => (qfac (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1) (succ ?ts_ph_Nat_0))
+11:38:53 [WARN] proved: (qfac (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1) (succ ?ts_ph_Nat_0)) => (qfac (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_1) (fac ?ts_ph_Nat_0))
+11:38:54 [WARN] proved: (qfac (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1) (succ zero)) => (qfac (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1) (succ ?ts_ph_Nat_0))
+11:38:54 [WARN] proved: (qfac (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1) (succ ?ts_ph_Nat_0)) => (qfac (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1) (succ zero))
+11:46:19 [WARN] proved: (leq (fac ?ts_ph_Nat_0) (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_1)) => (leq (fac ?ts_ph_Nat_0) ?ts_ph_Nat_1)
+11:46:19 [WARN] proved: (leq (fac ?ts_ph_Nat_0) ?ts_ph_Nat_1) => (leq (fac ?ts_ph_Nat_0) (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_1))
+11:46:20 [WARN] proved: (mult (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1) (fac ?ts_ph_Nat_0)) => (mult (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_1) (succ zero))
+11:46:20 [WARN] proved: (mult (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_1) (succ zero)) => (mult (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1) (fac ?ts_ph_Nat_0))
+11:46:20 [WARN] proved: (mult (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_1) (succ ?ts_ph_Nat_0)) => (mult (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_1) (succ zero))
+11:46:20 [WARN] proved: (mult (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_1) (succ zero)) => (mult (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_1) (succ ?ts_ph_Nat_0))
+11:46:21 [WARN] proved: (mult (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_1) (fac ?ts_ph_Nat_0)) => (mult (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_1) (succ zero))
+11:46:21 [WARN] proved: (mult (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_1) (succ zero)) => (mult (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_1) (fac ?ts_ph_Nat_0))
+11:46:21 [WARN] proved: (mult (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1) (fac ?ts_ph_Nat_0)) => (mult ?ts_ph_Nat_1 (fac ?ts_ph_Nat_0))
+11:46:21 [WARN] proved: (mult ?ts_ph_Nat_1 (fac ?ts_ph_Nat_0)) => (mult (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1) (fac ?ts_ph_Nat_0))
+11:46:23 [WARN] proved: (fac (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1)) => (qfac (mult ?ts_ph_Nat_0 ?ts_ph_Nat_0) (fac ?ts_ph_Nat_1))
+11:46:23 [WARN] proved: (qfac (mult ?ts_ph_Nat_0 ?ts_ph_Nat_0) (fac ?ts_ph_Nat_1)) => (fac (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1))
+11:46:34 [WARN] proved: (qfac (fac ?ts_ph_Nat_0) (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_1)) => (mult (mult ?ts_ph_Nat_1 ?ts_ph_Nat_0) zero)
+11:46:34 [WARN] proved: (mult (mult ?ts_ph_Nat_1 ?ts_ph_Nat_0) zero) => (qfac (fac ?ts_ph_Nat_0) (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_1))
+11:46:41 [WARN] proved: (plus (fac ?ts_ph_Nat_0) (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_1)) => (qfac (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0) (succ ?ts_ph_Nat_1))
+11:46:41 [WARN] proved: (qfac (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0) (succ ?ts_ph_Nat_1)) => (plus (fac ?ts_ph_Nat_0) (qfac ?ts_ph_Nat_0 ?ts_ph_Nat_1))

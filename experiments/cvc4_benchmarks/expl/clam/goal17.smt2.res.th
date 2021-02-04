@@ -1,0 +1,8 @@
+(=> "(append ?ts_ph_Lst_0 nil) => ?ts_ph_Lst_0" (append ?ts_ph_Lst_0 nil) ?ts_ph_Lst_0)
+(=> "(leq zero ?ts_ph_Nat_0) => true" (leq zero ?ts_ph_Nat_0) true)
+(=> "(leq (succ zero) (succ ?ts_ph_Nat_0)) => true" (leq (succ zero) (succ ?ts_ph_Nat_0)) true)
+(=> "(append ?ts_ph_Lst_0 (append ?ts_ph_Lst_1 ?ts_ph_Lst_2)) => (append (append ?ts_ph_Lst_0 ?ts_ph_Lst_1) ?ts_ph_Lst_2)" (append ?ts_ph_Lst_0 (append ?ts_ph_Lst_1 ?ts_ph_Lst_2)) (append (append ?ts_ph_Lst_0 ?ts_ph_Lst_1) ?ts_ph_Lst_2))
+(=> "(append (append ?ts_ph_Lst_0 ?ts_ph_Lst_1) ?ts_ph_Lst_2) => (append ?ts_ph_Lst_0 (append ?ts_ph_Lst_1 ?ts_ph_Lst_2))" (append (append ?ts_ph_Lst_0 ?ts_ph_Lst_1) ?ts_ph_Lst_2) (append ?ts_ph_Lst_0 (append ?ts_ph_Lst_1 ?ts_ph_Lst_2)))
+(=> "(rev (append ?ts_ph_Lst_0 ?ts_ph_Lst_1)) => (append (rev ?ts_ph_Lst_1) (rev ?ts_ph_Lst_0))" (rev (append ?ts_ph_Lst_0 ?ts_ph_Lst_1)) (append (rev ?ts_ph_Lst_1) (rev ?ts_ph_Lst_0)))
+(=> "(append (rev ?ts_ph_Lst_1) (rev ?ts_ph_Lst_0)) => (rev (append ?ts_ph_Lst_0 ?ts_ph_Lst_1))" (append (rev ?ts_ph_Lst_1) (rev ?ts_ph_Lst_0)) (rev (append ?ts_ph_Lst_0 ?ts_ph_Lst_1)))
+(=> "(rev (rev ?ts_ph_Lst_0)) => ?ts_ph_Lst_0" (rev (rev ?ts_ph_Lst_0)) ?ts_ph_Lst_0)

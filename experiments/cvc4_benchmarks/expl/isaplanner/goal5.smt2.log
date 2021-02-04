@@ -1,0 +1,29 @@
+12:00:02 [WARN] Collecting statistics
+12:00:02 [WARN]  ex is: zero
+12:00:02 [WARN]  ex is: (succ zero)
+12:00:02 [WARN]  ex is: (succ (succ zero))
+12:00:02 [WARN]  ex is: nil
+12:00:02 [WARN]  ex is: (cons autovar_Nat_0 nil)
+12:00:02 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+12:00:02 [WARN] Proof mode: false
+12:00:02 [WARN]  ex is: zero
+12:00:02 [WARN]  ex is: (succ zero)
+12:00:02 [WARN]  ex is: (succ (succ zero))
+12:00:02 [WARN]  ex is: nil
+12:00:02 [WARN]  ex is: (cons autovar_Nat_0 nil)
+12:00:02 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+12:00:02 [WARN] Proof mode: false
+12:00:02 [WARN] proved: (leq zero ?ts_ph_Nat_0) => true
+12:00:02 [WARN] proved: (plus ?ts_ph_Nat_0 zero) => ?ts_ph_Nat_0
+12:06:47 [WARN] proved: (plus ?ts_ph_Nat_0 (succ ?ts_ph_Nat_1)) => (succ (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1))
+12:06:47 [WARN] proved: (succ (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1)) => (plus ?ts_ph_Nat_0 (succ ?ts_ph_Nat_1))
+12:06:47 [WARN] generalized case_split proof as: (plus (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1) ?ts_ph_Nat_2) -- (plus ?ts_ph_Nat_0 (plus ?ts_ph_Nat_1 ?ts_ph_Nat_2))
+12:06:47 [WARN] proved: (plus (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1) ?ts_ph_Nat_2) => (plus ?ts_ph_Nat_0 (plus ?ts_ph_Nat_1 ?ts_ph_Nat_2))
+12:06:47 [WARN] proved: (plus ?ts_ph_Nat_0 (plus ?ts_ph_Nat_1 ?ts_ph_Nat_2)) => (plus (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1) ?ts_ph_Nat_2)
+12:06:47 [WARN] proved: (leq (succ zero) (succ ?ts_ph_Nat_0)) => true
+12:06:47 [WARN] proved: (leq (succ zero) ?ts_ph_Nat_0) => (leq (succ zero) (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0))
+12:06:47 [WARN] proved: (leq (succ zero) (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0)) => (leq (succ zero) ?ts_ph_Nat_0)
+12:06:49 [WARN] proved: (plus ?ts_ph_Nat_1 ?ts_ph_Nat_0) => (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1)
+12:06:49 [WARN] proved: (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1) => (plus ?ts_ph_Nat_1 ?ts_ph_Nat_0)
+12:06:49 [WARN] proved: (count (succ ?ts_ph_Nat_0) (cons ?ts_ph_Nat_0 ?ts_ph_Lst_1)) => (count (succ ?ts_ph_Nat_0) ?ts_ph_Lst_1)
+12:06:49 [WARN] proved: (count (succ ?ts_ph_Nat_0) ?ts_ph_Lst_1) => (count (succ ?ts_ph_Nat_0) (cons ?ts_ph_Nat_0 ?ts_ph_Lst_1))

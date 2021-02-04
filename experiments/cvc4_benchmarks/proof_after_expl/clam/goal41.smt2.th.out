@@ -1,0 +1,36 @@
+20:32:24 [0m[33m[WARN] [0mCollecting statistics
+(leq ?__x0 ?__y1) => (or (= ?__x0 ?__y1) (less ?__x0 ?__y1))
+(or (= ?__x0 ?__y1) (less ?__x0 ?__y1)) => (leq ?__x0 ?__y1)
+(lst-mem ?n ?x) => (mem ?n ?x)
+(mem ?n ?x) => (lst-mem ?n ?x)
+(lst-subset nil ?x) => true
+(lst-subset (cons ?n ?x) ?y) => (and (lst-subset ?x ?y) (lst-mem ?n ?y))
+(and (lst-subset ?x ?y) (lst-mem ?n ?y)) => (lst-subset (cons ?n ?x) ?y)
+(lst-eq ?x ?y) => (and (lst-subset ?x ?y) (lst-subset ?y ?x))
+(and (lst-subset ?x ?y) (lst-subset ?y ?x)) => (lst-eq ?x ?y)
+(lst-intersection nil ?x) => nil
+(lst-intersection (cons ?n ?x) ?y) => (ite (lst-mem ?n ?y) (cons ?n (lst-intersection ?x ?y)) (lst-intersection ?x ?y))
+(ite (lst-mem ?n ?y) (cons ?n (lst-intersection ?x ?y)) (lst-intersection ?x ?y)) => (lst-intersection (cons ?n ?x) ?y)
+(leq zero ?ts_ph_Nat_0) => true
+(leq (succ zero) (succ ?ts_ph_Nat_0)) => true
+(lst-subset (lst-intersection ?ts_ph_Lst_0 ?ts_ph_Lst_1) ?ts_ph_Lst_1) => true
+(lst-intersection ?ts_ph_Lst_0 ?ts_ph_Lst_1) => (lst-intersection (lst-intersection ?ts_ph_Lst_0 ?ts_ph_Lst_1) ?ts_ph_Lst_1)
+(lst-intersection (lst-intersection ?ts_ph_Lst_0 ?ts_ph_Lst_1) ?ts_ph_Lst_1) => (lst-intersection ?ts_ph_Lst_0 ?ts_ph_Lst_1)
+Searcher: (leq ?autovar2 (succ ?autovar1))
+20:32:24 [0m[33m[WARN] [0m ex is: zero
+20:32:24 [0m[33m[WARN] [0m ex is: (succ zero)
+20:32:24 [0m[33m[WARN] [0m ex is: (succ (succ zero))
+20:32:24 [0m[33m[WARN] [0m ex is: nil
+20:32:24 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_0 nil)
+20:32:24 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+20:32:24 [0m[33m[WARN] [0mRunning exploration without proof mode, but goals were given
+20:32:24 [0m[33m[WARN] [0mProof mode: true
+20:32:24 [0m[33m[WARN] [0m ex is: zero
+20:32:24 [0m[33m[WARN] [0m ex is: (succ zero)
+20:32:24 [0m[33m[WARN] [0m ex is: (succ (succ zero))
+20:32:24 [0m[33m[WARN] [0m ex is: nil
+20:32:24 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_0 nil)
+20:32:24 [0m[33m[WARN] [0m ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+20:32:24 [0m[33m[WARN] [0mRunning exploration without proof mode, but goals were given
+20:32:24 [0m[33m[WARN] [0mProof mode: true
+done in 35733

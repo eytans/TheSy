@@ -1,0 +1,2 @@
+(=> "(append (revflat ?ts_ph_Tree_0) ?ts_ph_Lst_1) => (qrevaflat ?ts_ph_Tree_0 ?ts_ph_Lst_1)" (append (revflat ?ts_ph_Tree_0) ?ts_ph_Lst_1) (qrevaflat ?ts_ph_Tree_0 ?ts_ph_Lst_1))
+(=> "(qrevaflat ?ts_ph_Tree_0 ?ts_ph_Lst_1) => (append (revflat ?ts_ph_Tree_0) ?ts_ph_Lst_1)" (qrevaflat ?ts_ph_Tree_0 ?ts_ph_Lst_1) (append (revflat ?ts_ph_Tree_0) ?ts_ph_Lst_1))
