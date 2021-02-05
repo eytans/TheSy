@@ -1,48 +1,52 @@
-19:18:32 [WARN] Collecting statistics
-19:18:32 [WARN]  ex is: zero
-19:18:32 [WARN]  ex is: (succ zero)
-19:18:32 [WARN]  ex is: (succ (succ zero))
-19:18:32 [WARN]  ex is: nil
-19:18:32 [WARN]  ex is: (cons autovar_Nat_0 nil)
-19:18:32 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
-19:18:32 [WARN]  ex is: (mkpair autovar_Nat_0 autovar_Nat_1)
-19:18:32 [WARN]  ex is: znil
-19:18:32 [WARN]  ex is: (zcons autovar_Pair_0 znil)
-19:18:32 [WARN]  ex is: (zcons autovar_Pair_1 (zcons autovar_Pair_0 znil))
-19:18:32 [WARN] Running exploration without proof mode, but goals were given
-19:18:32 [WARN] Proof mode: true
-19:18:32 [WARN]  ex is: zero
-19:18:32 [WARN]  ex is: (succ zero)
-19:18:32 [WARN]  ex is: (succ (succ zero))
-19:18:32 [WARN]  ex is: nil
-19:18:32 [WARN]  ex is: (cons autovar_Nat_0 nil)
-19:18:32 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
-19:18:32 [WARN]  ex is: (mkpair autovar_Nat_0 autovar_Nat_1)
-19:18:32 [WARN]  ex is: znil
-19:18:32 [WARN]  ex is: (zcons autovar_Pair_0 znil)
-19:18:32 [WARN]  ex is: (zcons autovar_Pair_1 (zcons autovar_Pair_0 znil))
-19:18:32 [WARN] Running exploration without proof mode, but goals were given
-19:18:32 [WARN] Proof mode: true
-19:18:32 [WARN] proved: (zappend ?ts_ph_ZLst_0 znil) => ?ts_ph_ZLst_0
-19:18:32 [WARN] proved: (append ?ts_ph_Lst_0 nil) => ?ts_ph_Lst_0
-19:18:32 [WARN] proved: (leq zero ?ts_ph_Nat_0) => true
-19:18:45 [WARN] proved: (zip ?ts_ph_Lst_0 (append ?ts_ph_Lst_0 ?ts_ph_Lst_1)) => (zip ?ts_ph_Lst_0 ?ts_ph_Lst_0)
-19:18:45 [WARN] proved: (zip ?ts_ph_Lst_0 (append ?ts_ph_Lst_0 ?ts_ph_Lst_1)) => (zip (append ?ts_ph_Lst_0 ?ts_ph_Lst_1) ?ts_ph_Lst_0)
-19:18:45 [WARN] proved: (zip (append ?ts_ph_Lst_0 ?ts_ph_Lst_1) ?ts_ph_Lst_0) => (zip ?ts_ph_Lst_0 (append ?ts_ph_Lst_0 ?ts_ph_Lst_1))
-19:18:45 [WARN] proved: (leq (succ zero) (succ ?ts_ph_Nat_0)) => true
-19:18:45 [WARN] proved: (zip (cons ?ts_ph_Nat_1 nil) (append ?ts_ph_Lst_0 ?ts_ph_Lst_0)) => (zip (cons ?ts_ph_Nat_1 nil) ?ts_ph_Lst_0)
-19:18:45 [WARN] proved: (zip (cons ?ts_ph_Nat_1 nil) ?ts_ph_Lst_0) => (zip (cons ?ts_ph_Nat_1 nil) (append ?ts_ph_Lst_0 ?ts_ph_Lst_0))
-19:18:45 [WARN] proved: (zip (append ?ts_ph_Lst_0 ?ts_ph_Lst_0) (cons ?ts_ph_Nat_1 nil)) => (zip ?ts_ph_Lst_0 (cons ?ts_ph_Nat_1 nil))
-19:18:45 [WARN] proved: (zip ?ts_ph_Lst_0 (cons ?ts_ph_Nat_1 nil)) => (zip (append ?ts_ph_Lst_0 ?ts_ph_Lst_0) (cons ?ts_ph_Nat_1 nil))
-19:18:45 [WARN] proved: (zappend (zappend ?ts_ph_ZLst_0 ?ts_ph_ZLst_1) ?ts_ph_ZLst_2) => (zappend ?ts_ph_ZLst_0 (zappend ?ts_ph_ZLst_1 ?ts_ph_ZLst_2))
-19:18:45 [WARN] proved: (zappend ?ts_ph_ZLst_0 (zappend ?ts_ph_ZLst_1 ?ts_ph_ZLst_2)) => (zappend (zappend ?ts_ph_ZLst_0 ?ts_ph_ZLst_1) ?ts_ph_ZLst_2)
-19:18:45 [WARN] proved: (append (append ?ts_ph_Lst_0 ?ts_ph_Lst_1) ?ts_ph_Lst_2) => (append ?ts_ph_Lst_0 (append ?ts_ph_Lst_1 ?ts_ph_Lst_2))
-19:18:45 [WARN] proved: (append ?ts_ph_Lst_0 (append ?ts_ph_Lst_1 ?ts_ph_Lst_2)) => (append (append ?ts_ph_Lst_0 ?ts_ph_Lst_1) ?ts_ph_Lst_2)
-19:18:46 [WARN] proved: (zappend (zrev ?ts_ph_ZLst_1) (zrev ?ts_ph_ZLst_0)) => (zrev (zappend ?ts_ph_ZLst_0 ?ts_ph_ZLst_1))
-19:18:46 [WARN] proved: (zrev (zappend ?ts_ph_ZLst_0 ?ts_ph_ZLst_1)) => (zappend (zrev ?ts_ph_ZLst_1) (zrev ?ts_ph_ZLst_0))
-19:18:47 [WARN] proved: (zrev (zrev ?ts_ph_ZLst_0)) => ?ts_ph_ZLst_0
-19:18:56 [WARN] proved: (append (rev ?ts_ph_Lst_1) (rev ?ts_ph_Lst_0)) => (rev (append ?ts_ph_Lst_0 ?ts_ph_Lst_1))
-19:18:56 [WARN] proved: (rev (append ?ts_ph_Lst_0 ?ts_ph_Lst_1)) => (append (rev ?ts_ph_Lst_1) (rev ?ts_ph_Lst_0))
-19:19:14 [WARN] proved: (rev (rev ?ts_ph_Lst_0)) => ?ts_ph_Lst_0
-19:19:56 [WARN] proved: (zip (append ?ts_ph_Lst_0 ?ts_ph_Lst_1) (append ?ts_ph_Lst_0 ?ts_ph_Lst_2)) => (zappend (zip ?ts_ph_Lst_0 ?ts_ph_Lst_0) (zip ?ts_ph_Lst_1 ?ts_ph_Lst_2))
-19:19:56 [WARN] proved: (zappend (zip ?ts_ph_Lst_0 ?ts_ph_Lst_0) (zip ?ts_ph_Lst_1 ?ts_ph_Lst_2)) => (zip (append ?ts_ph_Lst_0 ?ts_ph_Lst_1) (append ?ts_ph_Lst_0 ?ts_ph_Lst_2))
+01:14:48 [WARN] Collecting statistics
+01:14:48 [WARN]  ex is: zero
+01:14:48 [WARN]  ex is: (succ zero)
+01:14:48 [WARN]  ex is: (succ (succ zero))
+01:14:48 [WARN]  ex is: nil
+01:14:48 [WARN]  ex is: (cons autovar_Nat_0 nil)
+01:14:48 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+01:14:48 [WARN]  ex is: (mkpair autovar_Nat_0 autovar_Nat_1)
+01:14:48 [WARN]  ex is: znil
+01:14:48 [WARN]  ex is: (zcons autovar_Pair_0 znil)
+01:14:48 [WARN]  ex is: (zcons autovar_Pair_1 (zcons autovar_Pair_0 znil))
+01:14:48 [WARN] Running exploration without proof mode, but goals were given
+01:14:48 [WARN] Proof mode: true
+01:14:48 [WARN]  ex is: zero
+01:14:48 [WARN]  ex is: (succ zero)
+01:14:48 [WARN]  ex is: (succ (succ zero))
+01:14:48 [WARN]  ex is: nil
+01:14:48 [WARN]  ex is: (cons autovar_Nat_0 nil)
+01:14:48 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+01:14:48 [WARN]  ex is: (mkpair autovar_Nat_0 autovar_Nat_1)
+01:14:48 [WARN]  ex is: znil
+01:14:48 [WARN]  ex is: (zcons autovar_Pair_0 znil)
+01:14:48 [WARN]  ex is: (zcons autovar_Pair_1 (zcons autovar_Pair_0 znil))
+01:14:48 [WARN] Running exploration without proof mode, but goals were given
+01:14:48 [WARN] Proof mode: true
+01:14:48 [WARN] proved: (append ?ts_ph_Lst_0 nil) => ?ts_ph_Lst_0
+01:14:48 [WARN] proved: (leq zero ?ts_ph_Nat_0) => true
+01:14:48 [WARN] proved: (zappend ?ts_ph_ZLst_0 znil) => ?ts_ph_ZLst_0
+01:15:00 [WARN] generalized case_split proof as: (append ?ts_ph_Lst_0 (append ?ts_ph_Lst_1 ?ts_ph_Lst_2)) -- (append (append ?ts_ph_Lst_0 ?ts_ph_Lst_1) ?ts_ph_Lst_2)
+01:15:00 [WARN] proved: (append ?ts_ph_Lst_0 (append ?ts_ph_Lst_1 ?ts_ph_Lst_2)) => (append (append ?ts_ph_Lst_0 ?ts_ph_Lst_1) ?ts_ph_Lst_2)
+01:15:00 [WARN] proved: (append (append ?ts_ph_Lst_0 ?ts_ph_Lst_1) ?ts_ph_Lst_2) => (append ?ts_ph_Lst_0 (append ?ts_ph_Lst_1 ?ts_ph_Lst_2))
+01:15:00 [WARN] proved: (zip ?ts_ph_Lst_0 (append ?ts_ph_Lst_0 ?ts_ph_Lst_1)) => (zip ?ts_ph_Lst_0 ?ts_ph_Lst_0)
+01:15:00 [WARN] proved: (zip (append ?ts_ph_Lst_0 ?ts_ph_Lst_1) ?ts_ph_Lst_0) => (zip ?ts_ph_Lst_0 (append ?ts_ph_Lst_0 ?ts_ph_Lst_1))
+01:15:00 [WARN] proved: (zip ?ts_ph_Lst_0 (append ?ts_ph_Lst_0 ?ts_ph_Lst_1)) => (zip (append ?ts_ph_Lst_0 ?ts_ph_Lst_1) ?ts_ph_Lst_0)
+01:15:00 [WARN] proved: (leq (succ zero) (succ ?ts_ph_Nat_0)) => true
+01:15:00 [WARN] generalized case_split proof as: (zappend (zip ?ts_ph_Lst_0 ?ts_ph_Lst_0) (zip ?ts_ph_Lst_1 ?ts_ph_Lst_2)) -- (zip (append ?ts_ph_Lst_0 ?ts_ph_Lst_1) (append ?ts_ph_Lst_0 ?ts_ph_Lst_2))
+01:15:00 [WARN] proved: (zappend (zip ?ts_ph_Lst_0 ?ts_ph_Lst_0) (zip ?ts_ph_Lst_1 ?ts_ph_Lst_2)) => (zip (append ?ts_ph_Lst_0 ?ts_ph_Lst_1) (append ?ts_ph_Lst_0 ?ts_ph_Lst_2))
+01:15:00 [WARN] proved: (zip (append ?ts_ph_Lst_0 ?ts_ph_Lst_1) (append ?ts_ph_Lst_0 ?ts_ph_Lst_2)) => (zappend (zip ?ts_ph_Lst_0 ?ts_ph_Lst_0) (zip ?ts_ph_Lst_1 ?ts_ph_Lst_2))
+01:15:00 [WARN] proved: (zip (cons ?ts_ph_Nat_1 nil) ?ts_ph_Lst_0) => (zip (cons ?ts_ph_Nat_1 nil) (append ?ts_ph_Lst_0 ?ts_ph_Lst_0))
+01:15:00 [WARN] proved: (zip (cons ?ts_ph_Nat_1 nil) (append ?ts_ph_Lst_0 ?ts_ph_Lst_0)) => (zip (cons ?ts_ph_Nat_1 nil) ?ts_ph_Lst_0)
+01:15:00 [WARN] proved: (zip (append ?ts_ph_Lst_0 ?ts_ph_Lst_0) (cons ?ts_ph_Nat_1 nil)) => (zip ?ts_ph_Lst_0 (cons ?ts_ph_Nat_1 nil))
+01:15:00 [WARN] proved: (zip ?ts_ph_Lst_0 (cons ?ts_ph_Nat_1 nil)) => (zip (append ?ts_ph_Lst_0 ?ts_ph_Lst_0) (cons ?ts_ph_Nat_1 nil))
+01:15:01 [WARN] proved: (zappend ?ts_ph_ZLst_0 (zappend ?ts_ph_ZLst_1 ?ts_ph_ZLst_2)) => (zappend (zappend ?ts_ph_ZLst_0 ?ts_ph_ZLst_1) ?ts_ph_ZLst_2)
+01:15:01 [WARN] proved: (zappend (zappend ?ts_ph_ZLst_0 ?ts_ph_ZLst_1) ?ts_ph_ZLst_2) => (zappend ?ts_ph_ZLst_0 (zappend ?ts_ph_ZLst_1 ?ts_ph_ZLst_2))
+01:15:01 [WARN] proved: (zappend (zrev ?ts_ph_ZLst_1) (zrev ?ts_ph_ZLst_0)) => (zrev (zappend ?ts_ph_ZLst_0 ?ts_ph_ZLst_1))
+01:15:01 [WARN] proved: (zrev (zappend ?ts_ph_ZLst_0 ?ts_ph_ZLst_1)) => (zappend (zrev ?ts_ph_ZLst_1) (zrev ?ts_ph_ZLst_0))
+01:15:02 [WARN] proved: (zrev (zrev ?ts_ph_ZLst_0)) => ?ts_ph_ZLst_0
+01:15:10 [WARN] proved: (rev (append ?ts_ph_Lst_0 ?ts_ph_Lst_1)) => (append (rev ?ts_ph_Lst_1) (rev ?ts_ph_Lst_0))
+01:15:10 [WARN] proved: (append (rev ?ts_ph_Lst_1) (rev ?ts_ph_Lst_0)) => (rev (append ?ts_ph_Lst_0 ?ts_ph_Lst_1))
+01:15:27 [WARN] proved: (rev (rev ?ts_ph_Lst_0)) => ?ts_ph_Lst_0
+01:15:50 [WARN] proved: (zrev (zip ?ts_ph_Lst_0 ?ts_ph_Lst_0)) => (zip (rev ?ts_ph_Lst_0) (rev ?ts_ph_Lst_0))
+01:15:50 [WARN] proved: (zip (rev ?ts_ph_Lst_0) (rev ?ts_ph_Lst_0)) => (zrev (zip ?ts_ph_Lst_0 ?ts_ph_Lst_0))

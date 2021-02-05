@@ -1,0 +1,1 @@
+(=> "(len (rotate ?ts_ph_Nat_0 ?ts_ph_Lst_1)) => (len ?ts_ph_Lst_1)" (len (rotate ?ts_ph_Nat_0 ?ts_ph_Lst_1)) (len ?ts_ph_Lst_1))

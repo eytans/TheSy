@@ -1,0 +1,26 @@
+05:54:19 [WARN] Collecting statistics
+05:54:19 [WARN]  ex is: zero
+05:54:19 [WARN]  ex is: (succ zero)
+05:54:19 [WARN]  ex is: (succ (succ zero))
+05:54:19 [WARN] Running exploration without proof mode, but goals were given
+05:54:19 [WARN] Proof mode: true
+05:54:19 [WARN]  ex is: zero
+05:54:19 [WARN]  ex is: (succ zero)
+05:54:19 [WARN]  ex is: (succ (succ zero))
+05:54:19 [WARN] Running exploration without proof mode, but goals were given
+05:54:19 [WARN] Proof mode: true
+05:54:19 [WARN] proved: (plus ?ts_ph_Nat_0 zero) => ?ts_ph_Nat_0
+05:54:19 [WARN] proved: (mult ?ts_ph_Nat_0 zero) => zero
+05:54:19 [WARN] proved: (plus (tri ?ts_ph_Nat_0) (cubes ?ts_ph_Nat_0)) => (plus (cubes ?ts_ph_Nat_0) (tri ?ts_ph_Nat_0))
+05:54:19 [WARN] proved: (plus (cubes ?ts_ph_Nat_0) (tri ?ts_ph_Nat_0)) => (plus (tri ?ts_ph_Nat_0) (cubes ?ts_ph_Nat_0))
+05:54:19 [WARN] proved: (plus (cubes ?ts_ph_Nat_0) (mult ?ts_ph_Nat_0 ?ts_ph_Nat_0)) => (plus (mult ?ts_ph_Nat_0 ?ts_ph_Nat_0) (cubes ?ts_ph_Nat_0))
+05:54:19 [WARN] proved: (plus (mult ?ts_ph_Nat_0 ?ts_ph_Nat_0) (cubes ?ts_ph_Nat_0)) => (plus (cubes ?ts_ph_Nat_0) (mult ?ts_ph_Nat_0 ?ts_ph_Nat_0))
+05:54:19 [WARN] proved: (succ ?ts_ph_Nat_0) => (mult (succ ?ts_ph_Nat_0) (succ zero))
+05:54:19 [WARN] proved: (mult (succ ?ts_ph_Nat_0) (succ zero)) => (succ ?ts_ph_Nat_0)
+05:54:19 [WARN] proved: (mult ?ts_ph_Nat_0 (succ zero)) => ?ts_ph_Nat_0
+05:54:22 [WARN] proved: (mult ?ts_ph_Nat_0 (succ ?ts_ph_Nat_1)) => (plus ?ts_ph_Nat_0 (mult ?ts_ph_Nat_0 ?ts_ph_Nat_1))
+05:54:22 [WARN] proved: (plus ?ts_ph_Nat_0 (mult ?ts_ph_Nat_0 ?ts_ph_Nat_1)) => (mult ?ts_ph_Nat_0 (succ ?ts_ph_Nat_1))
+05:54:36 [WARN] proved: (mult (succ ?ts_ph_Nat_0) ?ts_ph_Nat_0) => (plus (tri ?ts_ph_Nat_0) (tri ?ts_ph_Nat_0))
+05:54:36 [WARN] proved: (plus (tri ?ts_ph_Nat_0) (tri ?ts_ph_Nat_0)) => (mult (succ ?ts_ph_Nat_0) ?ts_ph_Nat_0)
+05:58:41 [WARN] proved: (mult (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1) ?ts_ph_Nat_1) => (plus (mult ?ts_ph_Nat_0 ?ts_ph_Nat_1) (mult ?ts_ph_Nat_1 ?ts_ph_Nat_1))
+05:58:41 [WARN] proved: (plus (mult ?ts_ph_Nat_0 ?ts_ph_Nat_1) (mult ?ts_ph_Nat_1 ?ts_ph_Nat_1)) => (mult (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1) ?ts_ph_Nat_1)

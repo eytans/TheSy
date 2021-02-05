@@ -1,19 +1,19 @@
-19:36:39 [WARN] Collecting statistics
-19:36:39 [WARN]  ex is: zero
-19:36:39 [WARN]  ex is: (succ zero)
-19:36:39 [WARN]  ex is: (succ (succ zero))
-19:36:39 [WARN]  ex is: nil
-19:36:39 [WARN]  ex is: (cons autovar_Nat_0 nil)
-19:36:39 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
-19:36:39 [WARN] Running exploration without proof mode, but goals were given
-19:36:39 [WARN] Proof mode: true
-19:36:39 [WARN]  ex is: zero
-19:36:39 [WARN]  ex is: (succ zero)
-19:36:39 [WARN]  ex is: (succ (succ zero))
-19:36:39 [WARN]  ex is: nil
-19:36:39 [WARN]  ex is: (cons autovar_Nat_0 nil)
-19:36:39 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
-19:36:39 [WARN] Running exploration without proof mode, but goals were given
-19:36:39 [WARN] Proof mode: true
-19:36:40 [WARN] proved: (leq zero ?ts_ph_Nat_0) => true
-19:36:40 [WARN] proved: (lst-union ?ts_ph_Lst_0 nil) => ?ts_ph_Lst_0
+06:19:19 [WARN] Collecting statistics
+06:19:19 [WARN]  ex is: zero
+06:19:19 [WARN]  ex is: (succ zero)
+06:19:19 [WARN]  ex is: (succ (succ zero))
+06:19:19 [WARN]  ex is: nil
+06:19:19 [WARN]  ex is: (cons autovar_Nat_0 nil)
+06:19:19 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+06:19:19 [WARN] Running exploration without proof mode, but goals were given
+06:19:19 [WARN] Proof mode: true
+06:19:19 [WARN]  ex is: zero
+06:19:19 [WARN]  ex is: (succ zero)
+06:19:19 [WARN]  ex is: (succ (succ zero))
+06:19:19 [WARN]  ex is: nil
+06:19:19 [WARN]  ex is: (cons autovar_Nat_0 nil)
+06:19:19 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+06:19:19 [WARN] Running exploration without proof mode, but goals were given
+06:19:19 [WARN] Proof mode: true
+06:19:21 [WARN] proved: (lst-union ?ts_ph_Lst_0 nil) => ?ts_ph_Lst_0
+06:19:21 [WARN] proved: (leq zero ?ts_ph_Nat_0) => true

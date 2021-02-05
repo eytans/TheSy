@@ -1,0 +1,2 @@
+(=> "(mult (tri ?ts_ph_Nat_0) (tri ?ts_ph_Nat_0)) => (cubes ?ts_ph_Nat_0)" (mult (tri ?ts_ph_Nat_0) (tri ?ts_ph_Nat_0)) (cubes ?ts_ph_Nat_0))
+(=> "(cubes ?ts_ph_Nat_0) => (mult (tri ?ts_ph_Nat_0) (tri ?ts_ph_Nat_0))" (cubes ?ts_ph_Nat_0) (mult (tri ?ts_ph_Nat_0) (tri ?ts_ph_Nat_0)))

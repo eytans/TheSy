@@ -1,21 +1,21 @@
-19:30:47 [WARN] Collecting statistics
-19:30:47 [WARN]  ex is: zero
-19:30:47 [WARN]  ex is: (succ zero)
-19:30:47 [WARN]  ex is: (succ (succ zero))
-19:30:47 [WARN]  ex is: nil
-19:30:47 [WARN]  ex is: (cons autovar_Nat_0 nil)
-19:30:47 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
-19:30:47 [WARN] Running exploration without proof mode, but goals were given
-19:30:47 [WARN] Proof mode: true
-19:30:47 [WARN]  ex is: zero
-19:30:47 [WARN]  ex is: (succ zero)
-19:30:47 [WARN]  ex is: (succ (succ zero))
-19:30:47 [WARN]  ex is: nil
-19:30:47 [WARN]  ex is: (cons autovar_Nat_0 nil)
-19:30:47 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
-19:30:47 [WARN] Running exploration without proof mode, but goals were given
-19:30:47 [WARN] Proof mode: true
-19:30:48 [WARN] proved: (less ?ts_ph_Nat_0 ?ts_ph_Nat_0) => false
-19:30:48 [WARN] proved: (leq zero ?ts_ph_Nat_0) => true
-19:30:48 [WARN] proved: (cons zero ?ts_ph_Lst_0) => (insort zero ?ts_ph_Lst_0)
-19:30:48 [WARN] proved: (insort zero ?ts_ph_Lst_0) => (cons zero ?ts_ph_Lst_0)
+06:09:24 [WARN] Collecting statistics
+06:09:24 [WARN]  ex is: zero
+06:09:24 [WARN]  ex is: (succ zero)
+06:09:24 [WARN]  ex is: (succ (succ zero))
+06:09:24 [WARN]  ex is: nil
+06:09:24 [WARN]  ex is: (cons autovar_Nat_0 nil)
+06:09:24 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+06:09:24 [WARN] Running exploration without proof mode, but goals were given
+06:09:24 [WARN] Proof mode: true
+06:09:24 [WARN]  ex is: zero
+06:09:24 [WARN]  ex is: (succ zero)
+06:09:24 [WARN]  ex is: (succ (succ zero))
+06:09:24 [WARN]  ex is: nil
+06:09:24 [WARN]  ex is: (cons autovar_Nat_0 nil)
+06:09:24 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+06:09:24 [WARN] Running exploration without proof mode, but goals were given
+06:09:24 [WARN] Proof mode: true
+06:09:25 [WARN] proved: (leq zero ?ts_ph_Nat_0) => true
+06:09:25 [WARN] proved: (insort zero ?ts_ph_Lst_0) => (cons zero ?ts_ph_Lst_0)
+06:09:25 [WARN] proved: (cons zero ?ts_ph_Lst_0) => (insort zero ?ts_ph_Lst_0)
+06:09:25 [WARN] proved: (less ?ts_ph_Nat_0 ?ts_ph_Nat_0) => false

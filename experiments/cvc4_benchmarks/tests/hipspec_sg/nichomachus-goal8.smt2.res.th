@@ -1,0 +1,2 @@
+(=> "(plus (tri ?ts_ph_Nat_0) (tri ?ts_ph_Nat_0)) => (plus ?ts_ph_Nat_0 (mult ?ts_ph_Nat_0 ?ts_ph_Nat_0))" (plus (tri ?ts_ph_Nat_0) (tri ?ts_ph_Nat_0)) (plus ?ts_ph_Nat_0 (mult ?ts_ph_Nat_0 ?ts_ph_Nat_0)))
+(=> "(plus ?ts_ph_Nat_0 (mult ?ts_ph_Nat_0 ?ts_ph_Nat_0)) => (plus (tri ?ts_ph_Nat_0) (tri ?ts_ph_Nat_0))" (plus ?ts_ph_Nat_0 (mult ?ts_ph_Nat_0 ?ts_ph_Nat_0)) (plus (tri ?ts_ph_Nat_0) (tri ?ts_ph_Nat_0)))

@@ -1,0 +1,2 @@
+(=> "(append (append ?ts_ph_Lst_0 ?ts_ph_Lst_1) ?ts_ph_Lst_3) => (append ?ts_ph_Lst_0 (append ?ts_ph_Lst_1 ?ts_ph_Lst_3))" (append (append ?ts_ph_Lst_0 ?ts_ph_Lst_1) ?ts_ph_Lst_3) (append ?ts_ph_Lst_0 (append ?ts_ph_Lst_1 ?ts_ph_Lst_3)))
+(=> "(append ?ts_ph_Lst_0 (append ?ts_ph_Lst_1 ?ts_ph_Lst_3)) => (append (append ?ts_ph_Lst_0 ?ts_ph_Lst_1) ?ts_ph_Lst_3)" (append ?ts_ph_Lst_0 (append ?ts_ph_Lst_1 ?ts_ph_Lst_3)) (append (append ?ts_ph_Lst_0 ?ts_ph_Lst_1) ?ts_ph_Lst_3))

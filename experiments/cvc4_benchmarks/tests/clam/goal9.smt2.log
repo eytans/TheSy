@@ -1,25 +1,25 @@
-19:38:08 [WARN] Collecting statistics
-19:38:08 [WARN]  ex is: zero
-19:38:08 [WARN]  ex is: (succ zero)
-19:38:08 [WARN]  ex is: (succ (succ zero))
-19:38:08 [WARN]  ex is: nil
-19:38:08 [WARN]  ex is: (cons autovar_Nat_0 nil)
-19:38:08 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
-19:38:08 [WARN] Running exploration without proof mode, but goals were given
-19:38:08 [WARN] Proof mode: true
-19:38:08 [WARN]  ex is: zero
-19:38:08 [WARN]  ex is: (succ zero)
-19:38:08 [WARN]  ex is: (succ (succ zero))
-19:38:08 [WARN]  ex is: nil
-19:38:08 [WARN]  ex is: (cons autovar_Nat_0 nil)
-19:38:08 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
-19:38:08 [WARN] Running exploration without proof mode, but goals were given
-19:38:08 [WARN] Proof mode: true
-19:38:08 [WARN] proved: (leq zero ?ts_ph_Nat_0) => true
-19:38:08 [WARN] proved: (drop ?ts_ph_Nat_0 (cons zero ?ts_ph_Lst_1)) => (drop ?ts_ph_Nat_0 (cons ?ts_ph_Nat_0 ?ts_ph_Lst_1))
-19:38:08 [WARN] proved: (drop ?ts_ph_Nat_0 (cons ?ts_ph_Nat_0 ?ts_ph_Lst_1)) => (drop ?ts_ph_Nat_0 (cons zero ?ts_ph_Lst_1))
-19:38:08 [WARN] proved: (leq (succ zero) (succ ?ts_ph_Nat_0)) => true
-19:38:08 [WARN] proved: (drop (succ zero) (drop ?ts_ph_Nat_1 ?ts_ph_Lst_0)) => (drop (succ ?ts_ph_Nat_1) ?ts_ph_Lst_0)
-19:38:08 [WARN] proved: (drop (succ ?ts_ph_Nat_1) ?ts_ph_Lst_0) => (drop (succ zero) (drop ?ts_ph_Nat_1 ?ts_ph_Lst_0))
-19:38:14 [WARN] proved: (drop ?ts_ph_Nat_0 (drop ?ts_ph_Nat_1 ?ts_ph_Lst_1)) => (drop ?ts_ph_Nat_1 (drop ?ts_ph_Nat_0 ?ts_ph_Lst_1))
-19:38:14 [WARN] proved: (drop ?ts_ph_Nat_1 (drop ?ts_ph_Nat_0 ?ts_ph_Lst_1)) => (drop ?ts_ph_Nat_0 (drop ?ts_ph_Nat_1 ?ts_ph_Lst_1))
+06:14:24 [WARN] Collecting statistics
+06:14:24 [WARN]  ex is: zero
+06:14:24 [WARN]  ex is: (succ zero)
+06:14:24 [WARN]  ex is: (succ (succ zero))
+06:14:24 [WARN]  ex is: nil
+06:14:24 [WARN]  ex is: (cons autovar_Nat_0 nil)
+06:14:24 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+06:14:24 [WARN] Running exploration without proof mode, but goals were given
+06:14:24 [WARN] Proof mode: true
+06:14:24 [WARN]  ex is: zero
+06:14:24 [WARN]  ex is: (succ zero)
+06:14:24 [WARN]  ex is: (succ (succ zero))
+06:14:24 [WARN]  ex is: nil
+06:14:24 [WARN]  ex is: (cons autovar_Nat_0 nil)
+06:14:24 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+06:14:24 [WARN] Running exploration without proof mode, but goals were given
+06:14:24 [WARN] Proof mode: true
+06:14:24 [WARN] proved: (leq zero ?ts_ph_Nat_0) => true
+06:14:25 [WARN] proved: (drop ?ts_ph_Nat_0 (cons zero ?ts_ph_Lst_1)) => (drop ?ts_ph_Nat_0 (cons ?ts_ph_Nat_0 ?ts_ph_Lst_1))
+06:14:25 [WARN] proved: (drop ?ts_ph_Nat_0 (cons ?ts_ph_Nat_0 ?ts_ph_Lst_1)) => (drop ?ts_ph_Nat_0 (cons zero ?ts_ph_Lst_1))
+06:14:25 [WARN] proved: (leq (succ zero) (succ ?ts_ph_Nat_0)) => true
+06:14:25 [WARN] proved: (drop (succ ?ts_ph_Nat_1) ?ts_ph_Lst_0) => (drop (succ zero) (drop ?ts_ph_Nat_1 ?ts_ph_Lst_0))
+06:14:25 [WARN] proved: (drop (succ zero) (drop ?ts_ph_Nat_1 ?ts_ph_Lst_0)) => (drop (succ ?ts_ph_Nat_1) ?ts_ph_Lst_0)
+06:14:30 [WARN] proved: (drop ?ts_ph_Nat_0 (drop ?ts_ph_Nat_1 ?ts_ph_Lst_1)) => (drop ?ts_ph_Nat_1 (drop ?ts_ph_Nat_0 ?ts_ph_Lst_1))
+06:14:30 [WARN] proved: (drop ?ts_ph_Nat_1 (drop ?ts_ph_Nat_0 ?ts_ph_Lst_1)) => (drop ?ts_ph_Nat_0 (drop ?ts_ph_Nat_1 ?ts_ph_Lst_1))

@@ -1,22 +1,22 @@
-19:18:43 [WARN] Collecting statistics
-19:18:43 [WARN]  ex is: zero
-19:18:43 [WARN]  ex is: (succ zero)
-19:18:43 [WARN]  ex is: (succ (succ zero))
-19:18:43 [WARN]  ex is: leaf
-19:18:43 [WARN]  ex is: (node autovar_Nat_0 leaf leaf)
-19:18:43 [WARN]  ex is: (node autovar_Nat_1 (node autovar_Nat_0 leaf leaf) (node autovar_Nat_0 leaf leaf))
-19:18:43 [WARN] Running exploration without proof mode, but goals were given
-19:18:43 [WARN] Proof mode: true
-19:18:43 [WARN]  ex is: zero
-19:18:43 [WARN]  ex is: (succ zero)
-19:18:43 [WARN]  ex is: (succ (succ zero))
-19:18:43 [WARN]  ex is: leaf
-19:18:43 [WARN]  ex is: (node autovar_Nat_0 leaf leaf)
-19:18:43 [WARN]  ex is: (node autovar_Nat_1 (node autovar_Nat_0 leaf leaf) (node autovar_Nat_0 leaf leaf))
-19:18:43 [WARN] Running exploration without proof mode, but goals were given
-19:18:43 [WARN] Proof mode: true
-19:18:44 [WARN] proved: (leq zero ?ts_ph_Nat_0) => true
-19:18:44 [WARN] proved: (nmax ?ts_ph_Nat_0 ?ts_ph_Nat_0) => ?ts_ph_Nat_0
-19:18:44 [WARN] proved: (less ?ts_ph_Nat_0 ?ts_ph_Nat_0) => false
-19:18:44 [WARN] proved: (nmax zero ?ts_ph_Nat_0) => (nmax ?ts_ph_Nat_0 ?ts_ph_Nat_0)
-19:18:44 [WARN] proved: (nmax ?ts_ph_Nat_0 ?ts_ph_Nat_0) => (nmax zero ?ts_ph_Nat_0)
+05:54:19 [WARN] Collecting statistics
+05:54:19 [WARN]  ex is: zero
+05:54:19 [WARN]  ex is: (succ zero)
+05:54:19 [WARN]  ex is: (succ (succ zero))
+05:54:19 [WARN]  ex is: leaf
+05:54:19 [WARN]  ex is: (node autovar_Nat_0 leaf leaf)
+05:54:19 [WARN]  ex is: (node autovar_Nat_1 (node autovar_Nat_0 leaf leaf) (node autovar_Nat_0 leaf leaf))
+05:54:19 [WARN] Running exploration without proof mode, but goals were given
+05:54:19 [WARN] Proof mode: true
+05:54:19 [WARN]  ex is: zero
+05:54:19 [WARN]  ex is: (succ zero)
+05:54:19 [WARN]  ex is: (succ (succ zero))
+05:54:19 [WARN]  ex is: leaf
+05:54:19 [WARN]  ex is: (node autovar_Nat_0 leaf leaf)
+05:54:19 [WARN]  ex is: (node autovar_Nat_1 (node autovar_Nat_0 leaf leaf) (node autovar_Nat_0 leaf leaf))
+05:54:19 [WARN] Running exploration without proof mode, but goals were given
+05:54:19 [WARN] Proof mode: true
+05:54:19 [WARN] proved: (leq zero ?ts_ph_Nat_0) => true
+05:54:19 [WARN] proved: (nmax ?ts_ph_Nat_0 ?ts_ph_Nat_0) => ?ts_ph_Nat_0
+05:54:19 [WARN] proved: (nmax zero ?ts_ph_Nat_0) => (nmax ?ts_ph_Nat_0 ?ts_ph_Nat_0)
+05:54:19 [WARN] proved: (nmax ?ts_ph_Nat_0 ?ts_ph_Nat_0) => (nmax zero ?ts_ph_Nat_0)
+05:54:19 [WARN] proved: (less ?ts_ph_Nat_0 ?ts_ph_Nat_0) => false

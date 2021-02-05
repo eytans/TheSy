@@ -1,0 +1,2 @@
+(=> "(mult ?ts_ph_Nat_0 (plus ?ts_ph_Nat_2 ?ts_ph_Nat_2)) => (mult ?ts_ph_Nat_2 (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0))" (mult ?ts_ph_Nat_0 (plus ?ts_ph_Nat_2 ?ts_ph_Nat_2)) (mult ?ts_ph_Nat_2 (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0)))
+(=> "(mult ?ts_ph_Nat_2 (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0)) => (mult ?ts_ph_Nat_0 (plus ?ts_ph_Nat_2 ?ts_ph_Nat_2))" (mult ?ts_ph_Nat_2 (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0)) (mult ?ts_ph_Nat_0 (plus ?ts_ph_Nat_2 ?ts_ph_Nat_2)))

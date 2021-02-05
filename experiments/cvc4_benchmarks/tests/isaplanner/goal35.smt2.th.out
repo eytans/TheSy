@@ -1,4 +1,4 @@
-19:23:44 [0m[33m[WARN] [0mCollecting statistics
+05:54:19 [0m[33m[WARN] [0mCollecting statistics
 (leq ?__x0 ?__y1) => (or (= ?__x0 ?__y1) (less ?__x0 ?__y1))
 (or (= ?__x0 ?__y1) (less ?__x0 ?__y1)) => (leq ?__x0 ?__y1)
 (drop ?x nil) => nil

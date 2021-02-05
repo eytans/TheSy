@@ -22,52 +22,66 @@ no expl proofs,isaplanner,19,11.553921253,"['IterationLimit', 'Saturated']",Fals
 no expl proofs,isaplanner,20,0.0029043180000000004,[],True,0,0,goal7.smt2.stats.json
 no expl proofs,isaplanner,21,0.0008881840000000001,[],True,0,0,goal43.smt2.stats.json
 no expl proofs,isaplanner,22,223.547215393,"['IterationLimit', 'Saturated']",False,7,0,goal52.smt2.stats.json
-no expl proofs,isaplanner,23,6.194774844,"['IterationLimit', 'Saturated']",False,4,0,goal61.smt2.stats.json
-no expl proofs,isaplanner,24,0.000359666,[],True,0,0,goal45.smt2.stats.json
-no expl proofs,isaplanner,25,32.510834428,['IterationLimit'],False,7,0,goal68.smt2.stats.json
-no expl proofs,isaplanner,26,0.00112757,[],True,0,0,goal38.smt2.stats.json
-no expl proofs,isaplanner,27,0.000656292,[],True,0,0,goal1.smt2.stats.json
-no expl proofs,isaplanner,28,123.423346291,['IterationLimit'],False,10,7,goal24.smt2.stats.json
-no expl proofs,isaplanner,29,0.00031322800000000003,[],True,0,0,goal42.smt2.stats.json
-no expl proofs,isaplanner,30,0.00019928,[],True,0,0,goal40.smt2.stats.json
-no expl proofs,isaplanner,31,0.0012946890000000001,[],True,0,0,goal37.smt2.stats.json
-no expl proofs,isaplanner,32,50.739024007,['IterationLimit'],True,4,0,goal54.smt2.stats.json
-no expl proofs,isaplanner,33,0.021532679000000002,[],True,0,0,goal25.smt2.stats.json
-no expl proofs,isaplanner,34,0.004304879,[],True,0,0,goal28.smt2.stats.json
-no expl proofs,isaplanner,35,0.00032632200000000004,[],True,0,0,goal16.smt2.stats.json
-no expl proofs,isaplanner,36,10.729405212,"['IterationLimit', 'Saturated']",True,3,0,goal57.smt2.stats.json
-no expl proofs,isaplanner,37,0.000514281,[],True,0,0,goal5.smt2.stats.json
-no expl proofs,isaplanner,38,0.001260643,[],True,0,0,goal2.smt2.stats.json
-no expl proofs,isaplanner,39,0.023805994,[],True,0,0,goal18.smt2.stats.json
-no expl proofs,isaplanner,40,0.002772356,[],True,0,0,goal15.smt2.stats.json
-no expl proofs,isaplanner,41,1.972849438,"['IterationLimit', 'Saturated']",False,6,2,goal75.smt2.stats.json
-no expl proofs,isaplanner,42,26.391764004,[],True,0,0,goal63.smt2.stats.json
-no expl proofs,isaplanner,43,19.55576466,['IterationLimit'],True,6,0,goal20.smt2.stats.json
-no expl proofs,isaplanner,44,0.124200343,[],True,0,0,goal8.smt2.stats.json
-no expl proofs,isaplanner,45,0.002970454,[],True,0,0,goal39.smt2.stats.json
-no expl proofs,isaplanner,46,0.0036741060000000003,[],True,0,0,goal82.smt2.stats.json
-no expl proofs,isaplanner,47,0.01359841,[],True,0,0,goal9.smt2.stats.json
-no expl proofs,isaplanner,48,108.099439303,['IterationLimit'],False,7,1,goal80.smt2.stats.json
-no expl proofs,isaplanner,49,0.012457014,[],True,0,0,goal19.smt2.stats.json
-no expl proofs,isaplanner,50,3.953563223,['IterationLimit'],False,5,0,goal71.smt2.stats.json
-no expl proofs,isaplanner,51,59.127929771,['IterationLimit'],False,8,2,goal31.smt2.stats.json
-no expl proofs,isaplanner,52,0.005612362,[],True,0,0,goal86.smt2.stats.json
-no expl proofs,isaplanner,53,0.002496701,[],True,0,0,goal85.smt2.stats.json
-no expl proofs,isaplanner,54,7.669975995,['IterationLimit'],True,4,0,goal66.smt2.stats.json
-no expl proofs,isaplanner,55,0.000212835,[],True,0,0,goal46.smt2.stats.json
-no expl proofs,isaplanner,56,0.000763236,[],True,0,0,goal41.smt2.stats.json
-no expl proofs,isaplanner,57,57.681927947,['IterationLimit'],False,8,2,goal34.smt2.stats.json
-no expl proofs,isaplanner,58,0.980497488,['Saturated'],False,2,0,goal44.smt2.stats.json
-no expl proofs,isaplanner,59,56.729536845,['IterationLimit'],False,8,5,goal33.smt2.stats.json
-no expl proofs,isaplanner,60,152.31194507,['IterationLimit'],False,4,0,goal26.smt2.stats.json
-no expl proofs,isaplanner,61,0.00399078,[],True,0,0,goal29.smt2.stats.json
-no expl proofs,isaplanner,62,2.989567315,['IterationLimit'],False,6,0,goal67.smt2.stats.json
-no expl proofs,isaplanner,63,3.834952307,[],True,0,0,goal64.smt2.stats.json
-no expl proofs,isaplanner,64,55.9633344,['IterationLimit'],False,8,8,goal22.smt2.stats.json
-no expl proofs,isaplanner,65,11.563377103,"['IterationLimit', 'Saturated']",False,4,1,goal51.smt2.stats.json
-no expl proofs,isaplanner,66,56.574138047,['IterationLimit'],False,8,4,goal32.smt2.stats.json
-no expl proofs,isaplanner,67,11.30258048,"['IterationLimit', 'Saturated']",False,4,0,goal49.smt2.stats.json
-no expl proofs,isaplanner,68,0.005773449,[],True,0,0,goal27.smt2.stats.json
+no expl proofs,isaplanner,23,110.236096547,"['IterationLimit', 'NodeLimit', 'Saturated']",False,16,16,goal87.smt2.stats.json
+no expl proofs,isaplanner,24,6.194774844,"['IterationLimit', 'Saturated']",False,4,0,goal61.smt2.stats.json
+no expl proofs,isaplanner,25,0.000359666,[],True,0,0,goal45.smt2.stats.json
+no expl proofs,isaplanner,26,32.510834428,['IterationLimit'],False,7,0,goal68.smt2.stats.json
+no expl proofs,isaplanner,27,0.00112757,[],True,0,0,goal38.smt2.stats.json
+no expl proofs,isaplanner,28,0.000656292,[],True,0,0,goal1.smt2.stats.json
+no expl proofs,isaplanner,29,123.423346291,['IterationLimit'],False,10,7,goal24.smt2.stats.json
+no expl proofs,isaplanner,30,0.00031322800000000003,[],True,0,0,goal42.smt2.stats.json
+no expl proofs,isaplanner,31,0.00019928,[],True,0,0,goal40.smt2.stats.json
+no expl proofs,isaplanner,32,0.0012946890000000001,[],True,0,0,goal37.smt2.stats.json
+no expl proofs,isaplanner,33,50.739024007,['IterationLimit'],True,4,0,goal54.smt2.stats.json
+no expl proofs,isaplanner,34,0.021532679000000002,[],True,0,0,goal25.smt2.stats.json
+no expl proofs,isaplanner,35,0.004304879,[],True,0,0,goal28.smt2.stats.json
+no expl proofs,isaplanner,36,0.00032632200000000004,[],True,0,0,goal16.smt2.stats.json
+no expl proofs,isaplanner,37,10.729405212,"['IterationLimit', 'Saturated']",True,3,0,goal57.smt2.stats.json
+no expl proofs,isaplanner,38,0.000514281,[],True,0,0,goal5.smt2.stats.json
+no expl proofs,isaplanner,39,0.001260643,[],True,0,0,goal2.smt2.stats.json
+no expl proofs,isaplanner,40,0.023805994,[],True,0,0,goal18.smt2.stats.json
+no expl proofs,isaplanner,41,0.002772356,[],True,0,0,goal15.smt2.stats.json
+no expl proofs,isaplanner,42,1.972849438,"['IterationLimit', 'Saturated']",False,6,2,goal75.smt2.stats.json
+no expl proofs,isaplanner,43,26.391764004,[],True,0,0,goal63.smt2.stats.json
+no expl proofs,isaplanner,44,19.55576466,['IterationLimit'],True,6,0,goal20.smt2.stats.json
+no expl proofs,isaplanner,45,0.124200343,[],True,0,0,goal8.smt2.stats.json
+no expl proofs,isaplanner,46,0.002970454,[],True,0,0,goal39.smt2.stats.json
+no expl proofs,isaplanner,47,0.0036741060000000003,[],True,0,0,goal82.smt2.stats.json
+no expl proofs,isaplanner,48,0.01359841,[],True,0,0,goal9.smt2.stats.json
+no expl proofs,isaplanner,49,108.099439303,['IterationLimit'],False,7,1,goal80.smt2.stats.json
+no expl proofs,isaplanner,50,0.012457014,[],True,0,0,goal19.smt2.stats.json
+no expl proofs,isaplanner,51,3.953563223,['IterationLimit'],False,5,0,goal71.smt2.stats.json
+no expl proofs,isaplanner,52,59.127929771,['IterationLimit'],False,8,2,goal31.smt2.stats.json
+no expl proofs,isaplanner,53,0.005612362,[],True,0,0,goal86.smt2.stats.json
+no expl proofs,isaplanner,54,0.002496701,[],True,0,0,goal85.smt2.stats.json
+no expl proofs,isaplanner,55,7.669975995,['IterationLimit'],True,4,0,goal66.smt2.stats.json
+no expl proofs,isaplanner,56,0.000212835,[],True,0,0,goal46.smt2.stats.json
+no expl proofs,isaplanner,57,0.000763236,[],True,0,0,goal41.smt2.stats.json
+no expl proofs,isaplanner,58,57.681927947,['IterationLimit'],False,8,2,goal34.smt2.stats.json
+no expl proofs,isaplanner,59,0.980497488,['Saturated'],False,2,0,goal44.smt2.stats.json
+no expl proofs,isaplanner,60,56.729536845,['IterationLimit'],False,8,5,goal33.smt2.stats.json
+no expl proofs,isaplanner,61,152.31194507,['IterationLimit'],False,4,0,goal26.smt2.stats.json
+no expl proofs,isaplanner,62,0.00399078,[],True,0,0,goal29.smt2.stats.json
+no expl proofs,isaplanner,63,2.989567315,['IterationLimit'],False,6,0,goal67.smt2.stats.json
+no expl proofs,isaplanner,64,3.834952307,[],True,0,0,goal64.smt2.stats.json
+no expl proofs,isaplanner,65,55.9633344,['IterationLimit'],False,8,8,goal22.smt2.stats.json
+no expl proofs,isaplanner,66,11.563377103,"['IterationLimit', 'Saturated']",False,4,1,goal51.smt2.stats.json
+no expl proofs,isaplanner,67,56.574138047,['IterationLimit'],False,8,4,goal32.smt2.stats.json
+no expl proofs,isaplanner,68,11.30258048,"['IterationLimit', 'Saturated']",False,4,0,goal49.smt2.stats.json
+no expl proofs,isaplanner,69,0.005773449,[],True,0,0,goal27.smt2.stats.json
+no expl proofs,hipspec_sg,0,0.0015558050000000002,[],True,0,0,nichomachus-goal6.smt2.stats.json
+no expl proofs,hipspec_sg,1,0.0009043740000000001,[],True,0,0,rev-equiv-goal8.smt2.stats.json
+no expl proofs,hipspec_sg,2,0.013112892000000001,[],True,0,0,nichomachus-goal5.smt2.stats.json
+no expl proofs,hipspec_sg,3,0.000509601,[],True,0,0,rev-equiv-goal6.smt2.stats.json
+no expl proofs,hipspec_sg,4,0.66898986,[],True,0,0,rotate-goal7.smt2.stats.json
+no expl proofs,hipspec_sg,5,0.048671473,[],True,0,0,nichomachus-goal9.smt2.stats.json
+no expl proofs,hipspec_sg,6,0.00154268,[],True,0,0,rotate-goal8.smt2.stats.json
+no expl proofs,hipspec_sg,7,0.000796138,[],True,0,0,rotate-goal9.smt2.stats.json
+no expl proofs,hipspec_sg,8,0.005269473,[],True,0,0,nichomachus-goal8.smt2.stats.json
+no expl proofs,hipspec_sg,9,0.000794434,[],True,0,0,nichomachus-goal2.smt2.stats.json
+no expl proofs,hipspec_sg,10,0.352339469,['IterationLimit'],True,2,0,nichomachus-goal4.smt2.stats.json
+no expl proofs,hipspec_sg,11,0.002352584,[],True,0,0,rev-equiv-goal3.smt2.stats.json
+no expl proofs,hipspec_sg,12,0.037268682000000004,[],True,0,0,nichomachus-goal7.smt2.stats.json
 no expl proofs,sg_clam,0,0.0025677670000000003,[],True,0,0,goal-sg8.smt2.stats.json
 no expl proofs,sg_clam,1,0.36647152000000005,['IterationLimit'],True,3,0,goal-sg21.smt2.stats.json
 no expl proofs,sg_clam,2,0.036729167,['IterationLimit'],True,1,0,goal-sg18.smt2.stats.json
@@ -195,21 +209,26 @@ no expl proofs,clam,68,0.005402912,[],True,0,0,goal49.smt2.stats.json
 no expl proofs,clam,69,1.532768963,"['IterationLimit', 'Saturated']",True,5,2,goal59.smt2.stats.json
 no expl proofs,clam,70,3.623731128,"['IterationLimit', 'Saturated']",True,6,3,goal27.smt2.stats.json
 no expl proofs,clam,71,140.19408169,['IterationLimit'],False,4,0,goal36.smt2.stats.json
-no expl proofs,hipspec,0,0.00025569700000000004,[],True,0,0,rev-equiv-goal1.smt2.stats.json
-no expl proofs,hipspec,1,39.995104022,['IterationLimit'],False,13,9,nichomachus-goal6.smt2.stats.json
-no expl proofs,hipspec,2,0.591485255,"['IterationLimit', 'Saturated']",True,4,0,rev-equiv-goal8.smt2.stats.json
-no expl proofs,hipspec,3,14.507478436,['IterationLimit'],False,11,7,nichomachus-goal5.smt2.stats.json
-no expl proofs,hipspec,4,8.507620267,['IterationLimit'],True,10,6,nichomachus-goal3.smt2.stats.json
-no expl proofs,hipspec,5,0.30006288000000003,"['IterationLimit', 'Saturated']",True,6,2,rev-equiv-goal7.smt2.stats.json
-no expl proofs,hipspec,6,0.000495415,[],True,0,0,rev-equiv-goal6.smt2.stats.json
-no expl proofs,hipspec,7,0.00038915200000000003,[],True,0,0,rev-equiv-goal2.smt2.stats.json
-no expl proofs,hipspec,8,0.6372799570000001,['IterationLimit'],True,8,6,nichomachus-goal8.smt2.stats.json
-no expl proofs,hipspec,9,0.10337746,['IterationLimit'],True,3,0,nichomachus-goal2.smt2.stats.json
-no expl proofs,hipspec,10,0.000385254,[],True,0,0,rev-equiv-goal5.smt2.stats.json
-no expl proofs,hipspec,11,0.5368029870000001,['IterationLimit'],True,5,2,nichomachus-goal1.smt2.stats.json
-no expl proofs,hipspec,12,0.271961216,"['IterationLimit', 'Saturated']",True,3,0,rev-equiv-goal3.smt2.stats.json
-no expl proofs,hipspec,13,15.695318515,['IterationLimit'],False,9,9,nichomachus-goal7.smt2.stats.json
-no expl proofs,hipspec,14,0.00043222400000000004,[],True,0,0,rev-equiv-goal4.smt2.stats.json
+no expl proofs,hipspec,0,7.1346891,['IterationLimit'],True,7,10,rotate-goal6.smt2.stats.json
+no expl proofs,hipspec,1,0.00025569700000000004,[],True,0,0,rev-equiv-goal1.smt2.stats.json
+no expl proofs,hipspec,2,39.995104022,['IterationLimit'],False,13,9,nichomachus-goal6.smt2.stats.json
+no expl proofs,hipspec,3,0.591485255,"['IterationLimit', 'Saturated']",True,4,0,rev-equiv-goal8.smt2.stats.json
+no expl proofs,hipspec,4,14.507478436,['IterationLimit'],False,11,7,nichomachus-goal5.smt2.stats.json
+no expl proofs,hipspec,5,8.507620267,['IterationLimit'],True,10,6,nichomachus-goal3.smt2.stats.json
+no expl proofs,hipspec,6,0.30006288000000003,"['IterationLimit', 'Saturated']",True,6,2,rev-equiv-goal7.smt2.stats.json
+no expl proofs,hipspec,7,0.000495415,[],True,0,0,rev-equiv-goal6.smt2.stats.json
+no expl proofs,hipspec,8,0.00038915200000000003,[],True,0,0,rev-equiv-goal2.smt2.stats.json
+no expl proofs,hipspec,9,0.010964268000000001,[],True,0,0,rotate-goal5.smt2.stats.json
+no expl proofs,hipspec,10,0.6372799570000001,['IterationLimit'],True,8,6,nichomachus-goal8.smt2.stats.json
+no expl proofs,hipspec,11,0.10337746,['IterationLimit'],True,3,0,nichomachus-goal2.smt2.stats.json
+no expl proofs,hipspec,12,0.000385254,[],True,0,0,rev-equiv-goal5.smt2.stats.json
+no expl proofs,hipspec,13,0.5368029870000001,['IterationLimit'],True,5,2,nichomachus-goal1.smt2.stats.json
+no expl proofs,hipspec,14,28.090214694,['IterationLimit'],False,10,5,nichomachus-goal4.smt2.stats.json
+no expl proofs,hipspec,15,0.271961216,"['IterationLimit', 'Saturated']",True,3,0,rev-equiv-goal3.smt2.stats.json
+no expl proofs,hipspec,16,0.000495685,[],True,0,0,rotate-goal2.smt2.stats.json
+no expl proofs,hipspec,17,0.00026019600000000003,[],True,0,0,rotate-goal1.smt2.stats.json
+no expl proofs,hipspec,18,15.695318515,['IterationLimit'],False,9,9,nichomachus-goal7.smt2.stats.json
+no expl proofs,hipspec,19,0.00043222400000000004,[],True,0,0,rev-equiv-goal4.smt2.stats.json
 expl,isaplanner,0,6.732021025,['IterationLimit'],False,7,0,goal81.smt2.stats.json
 expl,isaplanner,1,6.193155265,"['IterationLimit', 'Saturated']",False,4,1,goal62.smt2.stats.json
 expl,isaplanner,2,532.211185661,['IterationLimit'],False,9,0,goal3.smt2.stats.json

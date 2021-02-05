@@ -1,0 +1,18 @@
+05:52:46 [WARN] Collecting statistics
+05:52:46 [WARN]  ex is: zero
+05:52:46 [WARN]  ex is: (succ zero)
+05:52:46 [WARN]  ex is: (succ (succ zero))
+05:52:46 [WARN] Running exploration without proof mode, but goals were given
+05:52:46 [WARN] Proof mode: true
+05:52:46 [WARN]  ex is: zero
+05:52:46 [WARN]  ex is: (succ zero)
+05:52:46 [WARN]  ex is: (succ (succ zero))
+05:52:46 [WARN] Running exploration without proof mode, but goals were given
+05:52:46 [WARN] Proof mode: true
+05:52:46 [WARN] generalized case_split proof as: (mult ?ts_ph_Nat_1 (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0)) -- (mult ?ts_ph_Nat_0 (plus ?ts_ph_Nat_1 ?ts_ph_Nat_1))
+05:52:46 [WARN] proved: (mult ?ts_ph_Nat_1 (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0)) => (mult ?ts_ph_Nat_0 (plus ?ts_ph_Nat_1 ?ts_ph_Nat_1))
+05:52:46 [WARN] proved: (mult ?ts_ph_Nat_0 (plus ?ts_ph_Nat_1 ?ts_ph_Nat_1)) => (mult ?ts_ph_Nat_1 (plus ?ts_ph_Nat_0 ?ts_ph_Nat_0))
+05:52:46 [WARN] generalized case_split proof as: (mult ?ts_ph_Nat_1 (plus ?ts_ph_Nat_0 ?ts_ph_Nat_2)) -- (plus (mult ?ts_ph_Nat_0 ?ts_ph_Nat_1) (mult ?ts_ph_Nat_2 ?ts_ph_Nat_1))
+05:52:46 [WARN] proved: (mult ?ts_ph_Nat_1 (plus ?ts_ph_Nat_0 ?ts_ph_Nat_2)) => (plus (mult ?ts_ph_Nat_0 ?ts_ph_Nat_1) (mult ?ts_ph_Nat_2 ?ts_ph_Nat_1))
+05:52:46 [WARN] proved: (plus (mult ?ts_ph_Nat_0 ?ts_ph_Nat_1) (mult ?ts_ph_Nat_2 ?ts_ph_Nat_1)) => (mult ?ts_ph_Nat_1 (plus ?ts_ph_Nat_0 ?ts_ph_Nat_2))
+05:52:46 [WARN] Found all lemmas

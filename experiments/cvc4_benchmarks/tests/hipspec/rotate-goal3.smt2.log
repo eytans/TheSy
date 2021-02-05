@@ -1,0 +1,30 @@
+06:14:22 [WARN] Collecting statistics
+06:14:22 [WARN]  ex is: zero
+06:14:22 [WARN]  ex is: (succ zero)
+06:14:22 [WARN]  ex is: (succ (succ zero))
+06:14:22 [WARN]  ex is: nil
+06:14:22 [WARN]  ex is: (cons autovar_Nat_0 nil)
+06:14:22 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+06:14:22 [WARN] Running exploration without proof mode, but goals were given
+06:14:22 [WARN] Proof mode: true
+06:14:22 [WARN]  ex is: zero
+06:14:22 [WARN]  ex is: (succ zero)
+06:14:22 [WARN]  ex is: (succ (succ zero))
+06:14:22 [WARN]  ex is: nil
+06:14:22 [WARN]  ex is: (cons autovar_Nat_0 nil)
+06:14:22 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+06:14:22 [WARN] Running exploration without proof mode, but goals were given
+06:14:22 [WARN] Proof mode: true
+06:14:22 [WARN] proved: (plus ?ts_ph_Nat_0 zero) => ?ts_ph_Nat_0
+06:14:22 [WARN] proved: (rotate ?ts_ph_Nat_0 nil) => nil
+06:14:22 [WARN] proved: (append ?ts_ph_Lst_0 nil) => ?ts_ph_Lst_0
+06:14:29 [WARN] proved: (succ ?ts_ph_Nat_0) => (plus ?ts_ph_Nat_0 (succ zero))
+06:14:29 [WARN] proved: (plus ?ts_ph_Nat_0 (succ zero)) => (succ ?ts_ph_Nat_0)
+06:14:29 [WARN] generalized case_split proof as: (plus (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1) ?ts_ph_Nat_2) -- (plus ?ts_ph_Nat_0 (plus ?ts_ph_Nat_1 ?ts_ph_Nat_2))
+06:14:29 [WARN] proved: (plus (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1) ?ts_ph_Nat_2) => (plus ?ts_ph_Nat_0 (plus ?ts_ph_Nat_1 ?ts_ph_Nat_2))
+06:14:29 [WARN] proved: (plus ?ts_ph_Nat_0 (plus ?ts_ph_Nat_1 ?ts_ph_Nat_2)) => (plus (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1) ?ts_ph_Nat_2)
+06:14:29 [WARN] proved: (len (append ?ts_ph_Lst_0 ?ts_ph_Lst_1)) => (plus (len ?ts_ph_Lst_0) (len ?ts_ph_Lst_1))
+06:14:29 [WARN] proved: (plus (len ?ts_ph_Lst_0) (len ?ts_ph_Lst_1)) => (len (append ?ts_ph_Lst_0 ?ts_ph_Lst_1))
+06:14:29 [WARN] proved: (rotate ?ts_ph_Nat_0 (cons ?ts_ph_Nat_1 nil)) => (cons ?ts_ph_Nat_1 nil)
+06:14:29 [WARN] proved: (plus ?ts_ph_Nat_1 ?ts_ph_Nat_0) => (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1)
+06:14:29 [WARN] proved: (plus ?ts_ph_Nat_0 ?ts_ph_Nat_1) => (plus ?ts_ph_Nat_1 ?ts_ph_Nat_0)

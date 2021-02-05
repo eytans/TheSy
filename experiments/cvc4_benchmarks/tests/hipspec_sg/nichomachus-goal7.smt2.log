@@ -1,0 +1,12 @@
+05:59:19 [WARN] Collecting statistics
+05:59:19 [WARN]  ex is: zero
+05:59:19 [WARN]  ex is: (succ zero)
+05:59:19 [WARN]  ex is: (succ (succ zero))
+05:59:19 [WARN] Running exploration without proof mode, but goals were given
+05:59:19 [WARN] Proof mode: true
+05:59:19 [WARN]  ex is: zero
+05:59:19 [WARN]  ex is: (succ zero)
+05:59:19 [WARN]  ex is: (succ (succ zero))
+05:59:19 [WARN] Running exploration without proof mode, but goals were given
+05:59:19 [WARN] Proof mode: true
+05:59:19 [WARN] Found all lemmas

@@ -1,0 +1,2 @@
+(=> "(qrev ?ts_ph_Lst_0) => (rev ?ts_ph_Lst_0)" (qrev ?ts_ph_Lst_0) (rev ?ts_ph_Lst_0))
+(=> "(rev ?ts_ph_Lst_0) => (qrev ?ts_ph_Lst_0)" (rev ?ts_ph_Lst_0) (qrev ?ts_ph_Lst_0))

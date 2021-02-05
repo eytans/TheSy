@@ -1,37 +1,37 @@
-19:31:05 [WARN] Collecting statistics
-19:31:05 [WARN]  ex is: zero
-19:31:05 [WARN]  ex is: (succ zero)
-19:31:05 [WARN]  ex is: (succ (succ zero))
-19:31:05 [WARN]  ex is: nil
-19:31:05 [WARN]  ex is: (cons autovar_Nat_0 nil)
-19:31:05 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
-19:31:05 [WARN]  ex is: (mkpair autovar_Nat_0 autovar_Nat_1)
-19:31:05 [WARN]  ex is: znil
-19:31:05 [WARN]  ex is: (zcons autovar_Pair_0 znil)
-19:31:05 [WARN]  ex is: (zcons autovar_Pair_1 (zcons autovar_Pair_0 znil))
-19:31:05 [WARN] Running exploration without proof mode, but goals were given
-19:31:05 [WARN] Proof mode: true
-19:31:05 [WARN]  ex is: zero
-19:31:05 [WARN]  ex is: (succ zero)
-19:31:05 [WARN]  ex is: (succ (succ zero))
-19:31:05 [WARN]  ex is: nil
-19:31:05 [WARN]  ex is: (cons autovar_Nat_0 nil)
-19:31:05 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
-19:31:05 [WARN]  ex is: (mkpair autovar_Nat_0 autovar_Nat_1)
-19:31:05 [WARN]  ex is: znil
-19:31:05 [WARN]  ex is: (zcons autovar_Pair_0 znil)
-19:31:05 [WARN]  ex is: (zcons autovar_Pair_1 (zcons autovar_Pair_0 znil))
-19:31:05 [WARN] Running exploration without proof mode, but goals were given
-19:31:05 [WARN] Proof mode: true
-19:31:05 [WARN] proved: (leq zero ?ts_ph_Nat_0) => true
-19:31:21 [WARN] proved: (drop ?ts_ph_Nat_0 (cons zero ?ts_ph_Lst_1)) => (drop ?ts_ph_Nat_0 (cons ?ts_ph_Nat_0 ?ts_ph_Lst_1))
-19:31:21 [WARN] proved: (drop ?ts_ph_Nat_0 (cons ?ts_ph_Nat_0 ?ts_ph_Lst_1)) => (drop ?ts_ph_Nat_0 (cons zero ?ts_ph_Lst_1))
-19:31:21 [WARN] proved: (leq (succ zero) (succ ?ts_ph_Nat_0)) => true
-19:31:21 [WARN] proved: (drop (succ ?ts_ph_Nat_1) ?ts_ph_Lst_0) => (drop (succ zero) (drop ?ts_ph_Nat_1 ?ts_ph_Lst_0))
-19:31:21 [WARN] proved: (drop (succ zero) (drop ?ts_ph_Nat_1 ?ts_ph_Lst_0)) => (drop (succ ?ts_ph_Nat_1) ?ts_ph_Lst_0)
-19:31:21 [WARN] proved: (drop ?ts_ph_Nat_1 (drop ?ts_ph_Nat_0 ?ts_ph_Lst_1)) => (drop ?ts_ph_Nat_0 (drop ?ts_ph_Nat_1 ?ts_ph_Lst_1))
-19:31:21 [WARN] proved: (drop ?ts_ph_Nat_0 (drop ?ts_ph_Nat_1 ?ts_ph_Lst_1)) => (drop ?ts_ph_Nat_1 (drop ?ts_ph_Nat_0 ?ts_ph_Lst_1))
-19:31:27 [WARN] proved: (zdrop (succ zero) (zdrop ?ts_ph_Nat_1 ?ts_ph_ZLst_0)) => (zdrop (succ ?ts_ph_Nat_1) ?ts_ph_ZLst_0)
-19:31:27 [WARN] proved: (zdrop (succ ?ts_ph_Nat_1) ?ts_ph_ZLst_0) => (zdrop (succ zero) (zdrop ?ts_ph_Nat_1 ?ts_ph_ZLst_0))
-19:32:46 [WARN] proved: (zdrop ?ts_ph_Nat_1 (zdrop ?ts_ph_Nat_0 ?ts_ph_ZLst_1)) => (zdrop ?ts_ph_Nat_0 (zdrop ?ts_ph_Nat_1 ?ts_ph_ZLst_1))
-19:32:46 [WARN] proved: (zdrop ?ts_ph_Nat_0 (zdrop ?ts_ph_Nat_1 ?ts_ph_ZLst_1)) => (zdrop ?ts_ph_Nat_1 (zdrop ?ts_ph_Nat_0 ?ts_ph_ZLst_1))
+05:54:19 [WARN] Collecting statistics
+05:54:19 [WARN]  ex is: zero
+05:54:19 [WARN]  ex is: (succ zero)
+05:54:19 [WARN]  ex is: (succ (succ zero))
+05:54:19 [WARN]  ex is: nil
+05:54:19 [WARN]  ex is: (cons autovar_Nat_0 nil)
+05:54:19 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+05:54:19 [WARN]  ex is: (mkpair autovar_Nat_0 autovar_Nat_1)
+05:54:19 [WARN]  ex is: znil
+05:54:19 [WARN]  ex is: (zcons autovar_Pair_0 znil)
+05:54:19 [WARN]  ex is: (zcons autovar_Pair_1 (zcons autovar_Pair_0 znil))
+05:54:19 [WARN] Running exploration without proof mode, but goals were given
+05:54:19 [WARN] Proof mode: true
+05:54:19 [WARN]  ex is: zero
+05:54:19 [WARN]  ex is: (succ zero)
+05:54:19 [WARN]  ex is: (succ (succ zero))
+05:54:19 [WARN]  ex is: nil
+05:54:19 [WARN]  ex is: (cons autovar_Nat_0 nil)
+05:54:19 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+05:54:19 [WARN]  ex is: (mkpair autovar_Nat_0 autovar_Nat_1)
+05:54:19 [WARN]  ex is: znil
+05:54:19 [WARN]  ex is: (zcons autovar_Pair_0 znil)
+05:54:19 [WARN]  ex is: (zcons autovar_Pair_1 (zcons autovar_Pair_0 znil))
+05:54:19 [WARN] Running exploration without proof mode, but goals were given
+05:54:19 [WARN] Proof mode: true
+05:54:19 [WARN] proved: (leq zero ?ts_ph_Nat_0) => true
+05:54:35 [WARN] proved: (drop ?ts_ph_Nat_0 (cons zero ?ts_ph_Lst_1)) => (drop ?ts_ph_Nat_0 (cons ?ts_ph_Nat_0 ?ts_ph_Lst_1))
+05:54:35 [WARN] proved: (drop ?ts_ph_Nat_0 (cons ?ts_ph_Nat_0 ?ts_ph_Lst_1)) => (drop ?ts_ph_Nat_0 (cons zero ?ts_ph_Lst_1))
+05:54:35 [WARN] proved: (leq (succ zero) (succ ?ts_ph_Nat_0)) => true
+05:54:35 [WARN] proved: (drop (succ zero) (drop ?ts_ph_Nat_0 ?ts_ph_Lst_1)) => (drop (succ ?ts_ph_Nat_0) ?ts_ph_Lst_1)
+05:54:35 [WARN] proved: (drop (succ ?ts_ph_Nat_0) ?ts_ph_Lst_1) => (drop (succ zero) (drop ?ts_ph_Nat_0 ?ts_ph_Lst_1))
+05:54:35 [WARN] proved: (drop ?ts_ph_Nat_0 (drop ?ts_ph_Nat_1 ?ts_ph_Lst_1)) => (drop ?ts_ph_Nat_1 (drop ?ts_ph_Nat_0 ?ts_ph_Lst_1))
+05:54:35 [WARN] proved: (drop ?ts_ph_Nat_1 (drop ?ts_ph_Nat_0 ?ts_ph_Lst_1)) => (drop ?ts_ph_Nat_0 (drop ?ts_ph_Nat_1 ?ts_ph_Lst_1))
+05:54:40 [WARN] proved: (zdrop (succ zero) (zdrop ?ts_ph_Nat_1 ?ts_ph_ZLst_0)) => (zdrop (succ ?ts_ph_Nat_1) ?ts_ph_ZLst_0)
+05:54:40 [WARN] proved: (zdrop (succ ?ts_ph_Nat_1) ?ts_ph_ZLst_0) => (zdrop (succ zero) (zdrop ?ts_ph_Nat_1 ?ts_ph_ZLst_0))
+05:55:57 [WARN] proved: (zdrop ?ts_ph_Nat_1 (zdrop ?ts_ph_Nat_0 ?ts_ph_ZLst_1)) => (zdrop ?ts_ph_Nat_0 (zdrop ?ts_ph_Nat_1 ?ts_ph_ZLst_1))
+05:55:57 [WARN] proved: (zdrop ?ts_ph_Nat_0 (zdrop ?ts_ph_Nat_1 ?ts_ph_ZLst_1)) => (zdrop ?ts_ph_Nat_1 (zdrop ?ts_ph_Nat_0 ?ts_ph_ZLst_1))

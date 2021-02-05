@@ -1,23 +1,23 @@
-19:33:44 [WARN] Collecting statistics
-19:33:44 [WARN]  ex is: zero
-19:33:44 [WARN]  ex is: (succ zero)
-19:33:44 [WARN]  ex is: (succ (succ zero))
-19:33:44 [WARN]  ex is: nil
-19:33:44 [WARN]  ex is: (cons autovar_Nat_0 nil)
-19:33:44 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
-19:33:44 [WARN]  ex is: leaf
-19:33:44 [WARN]  ex is: (node autovar_Nat_0 leaf leaf)
-19:33:44 [WARN]  ex is: (node autovar_Nat_1 (node autovar_Nat_0 leaf leaf) (node autovar_Nat_0 leaf leaf))
-19:33:44 [WARN] Running exploration without proof mode, but goals were given
-19:33:44 [WARN] Proof mode: true
-19:33:44 [WARN]  ex is: zero
-19:33:44 [WARN]  ex is: (succ zero)
-19:33:44 [WARN]  ex is: (succ (succ zero))
-19:33:44 [WARN]  ex is: nil
-19:33:44 [WARN]  ex is: (cons autovar_Nat_0 nil)
-19:33:44 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
-19:33:44 [WARN]  ex is: leaf
-19:33:44 [WARN]  ex is: (node autovar_Nat_0 leaf leaf)
-19:33:44 [WARN]  ex is: (node autovar_Nat_1 (node autovar_Nat_0 leaf leaf) (node autovar_Nat_0 leaf leaf))
-19:33:44 [WARN] Running exploration without proof mode, but goals were given
-19:33:44 [WARN] Proof mode: true
+05:59:19 [WARN] Collecting statistics
+05:59:19 [WARN]  ex is: zero
+05:59:19 [WARN]  ex is: (succ zero)
+05:59:19 [WARN]  ex is: (succ (succ zero))
+05:59:19 [WARN]  ex is: nil
+05:59:19 [WARN]  ex is: (cons autovar_Nat_0 nil)
+05:59:19 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+05:59:19 [WARN]  ex is: leaf
+05:59:19 [WARN]  ex is: (node autovar_Nat_0 leaf leaf)
+05:59:19 [WARN]  ex is: (node autovar_Nat_1 (node autovar_Nat_0 leaf leaf) (node autovar_Nat_0 leaf leaf))
+05:59:19 [WARN] Running exploration without proof mode, but goals were given
+05:59:19 [WARN] Proof mode: true
+05:59:19 [WARN]  ex is: zero
+05:59:19 [WARN]  ex is: (succ zero)
+05:59:19 [WARN]  ex is: (succ (succ zero))
+05:59:19 [WARN]  ex is: nil
+05:59:19 [WARN]  ex is: (cons autovar_Nat_0 nil)
+05:59:19 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+05:59:19 [WARN]  ex is: leaf
+05:59:19 [WARN]  ex is: (node autovar_Nat_0 leaf leaf)
+05:59:19 [WARN]  ex is: (node autovar_Nat_1 (node autovar_Nat_0 leaf leaf) (node autovar_Nat_0 leaf leaf))
+05:59:19 [WARN] Running exploration without proof mode, but goals were given
+05:59:19 [WARN] Proof mode: true

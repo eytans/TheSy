@@ -1,0 +1,18 @@
+06:19:26 [WARN] Collecting statistics
+06:19:26 [WARN]  ex is: zero
+06:19:26 [WARN]  ex is: (succ zero)
+06:19:26 [WARN]  ex is: (succ (succ zero))
+06:19:26 [WARN]  ex is: nil
+06:19:26 [WARN]  ex is: (cons autovar_Nat_0 nil)
+06:19:26 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+06:19:26 [WARN] Running exploration without proof mode, but goals were given
+06:19:26 [WARN] Proof mode: true
+06:19:26 [WARN]  ex is: zero
+06:19:26 [WARN]  ex is: (succ zero)
+06:19:26 [WARN]  ex is: (succ (succ zero))
+06:19:26 [WARN]  ex is: nil
+06:19:26 [WARN]  ex is: (cons autovar_Nat_0 nil)
+06:19:26 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+06:19:26 [WARN] Running exploration without proof mode, but goals were given
+06:19:26 [WARN] Proof mode: true
+06:19:26 [WARN] Found all lemmas

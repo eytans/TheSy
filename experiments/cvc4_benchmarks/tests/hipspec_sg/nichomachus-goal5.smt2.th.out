@@ -1,0 +1,35 @@
+05:52:46 [0m[33m[WARN] [0mCollecting statistics
+(plus zero ?n) => ?n
+(plus (succ ?n) ?m) => (succ (plus ?n ?m))
+(succ (plus ?n ?m)) => (plus (succ ?n) ?m)
+(mult zero ?n) => zero
+(mult (succ ?n) ?m) => (plus (mult ?n ?m) ?m)
+(plus (mult ?n ?m) ?m) => (mult (succ ?n) ?m)
+(tri zero) => zero
+zero => (tri zero)
+(tri (succ ?n)) => (plus (tri ?n) (succ ?n))
+(plus (tri ?n) (succ ?n)) => (tri (succ ?n))
+(cubes zero) => zero
+zero => (cubes zero)
+(cubes (succ ?n)) => (plus (cubes ?n) (mult (succ ?n) (mult (succ ?n) (succ ?n))))
+(plus (cubes ?n) (mult (succ ?n) (mult (succ ?n) (succ ?n)))) => (cubes (succ ?n))
+(plus ?n ?m) => (plus ?m ?n)
+(plus ?m ?n) => (plus ?n ?m)
+(plus ?x (plus ?y ?z)) => (plus (plus ?y ?x) ?z)
+(plus (plus ?y ?x) ?z) => (plus ?x (plus ?y ?z))
+(mult ?n ?m) => (mult ?m ?n)
+(mult ?m ?n) => (mult ?n ?m)
+(mult ?x (mult ?y ?z)) => (mult (mult ?y ?x) ?z)
+(mult (mult ?y ?x) ?z) => (mult ?x (mult ?y ?z))
+05:52:46 [0m[33m[WARN] [0m ex is: zero
+05:52:46 [0m[33m[WARN] [0m ex is: (succ zero)
+05:52:46 [0m[33m[WARN] [0m ex is: (succ (succ zero))
+05:52:46 [0m[33m[WARN] [0mRunning exploration without proof mode, but goals were given
+05:52:46 [0m[33m[WARN] [0mProof mode: true
+05:52:46 [0m[33m[WARN] [0m ex is: zero
+05:52:46 [0m[33m[WARN] [0m ex is: (succ zero)
+05:52:46 [0m[33m[WARN] [0m ex is: (succ (succ zero))
+05:52:46 [0m[33m[WARN] [0mRunning exploration without proof mode, but goals were given
+05:52:46 [0m[33m[WARN] [0mProof mode: true
+05:52:46 [0m[33m[WARN] [0mFound all lemmas
+done in 14

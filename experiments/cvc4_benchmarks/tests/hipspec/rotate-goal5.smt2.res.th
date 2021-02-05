@@ -1,0 +1,1 @@
+(=> "(rotate ?ts_ph_Nat_0 (cons ?ts_ph_Nat_2 nil)) => (cons ?ts_ph_Nat_2 nil)" (rotate ?ts_ph_Nat_0 (cons ?ts_ph_Nat_2 nil)) (cons ?ts_ph_Nat_2 nil))

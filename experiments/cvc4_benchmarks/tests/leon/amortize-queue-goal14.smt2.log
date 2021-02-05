@@ -1,19 +1,19 @@
-19:25:37 [WARN] Collecting statistics
-19:25:37 [WARN]  ex is: zero
-19:25:37 [WARN]  ex is: (succ zero)
-19:25:37 [WARN]  ex is: (succ (succ zero))
-19:25:37 [WARN]  ex is: nil
-19:25:37 [WARN]  ex is: (cons autovar_Nat_0 nil)
-19:25:37 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
-19:25:37 [WARN]  ex is: (queue autovar_Lst_0 autovar_Lst_1)
-19:25:37 [WARN] Running exploration without proof mode, but goals were given
-19:25:37 [WARN] Proof mode: true
-19:25:37 [WARN]  ex is: zero
-19:25:37 [WARN]  ex is: (succ zero)
-19:25:37 [WARN]  ex is: (succ (succ zero))
-19:25:37 [WARN]  ex is: nil
-19:25:37 [WARN]  ex is: (cons autovar_Nat_0 nil)
-19:25:37 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
-19:25:37 [WARN]  ex is: (queue autovar_Lst_0 autovar_Lst_1)
-19:25:37 [WARN] Running exploration without proof mode, but goals were given
-19:25:37 [WARN] Proof mode: true
+06:04:20 [WARN] Collecting statistics
+06:04:20 [WARN]  ex is: zero
+06:04:20 [WARN]  ex is: (succ zero)
+06:04:20 [WARN]  ex is: (succ (succ zero))
+06:04:20 [WARN]  ex is: nil
+06:04:20 [WARN]  ex is: (cons autovar_Nat_0 nil)
+06:04:20 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+06:04:20 [WARN]  ex is: (queue autovar_Lst_0 autovar_Lst_1)
+06:04:20 [WARN] Running exploration without proof mode, but goals were given
+06:04:20 [WARN] Proof mode: true
+06:04:20 [WARN]  ex is: zero
+06:04:20 [WARN]  ex is: (succ zero)
+06:04:20 [WARN]  ex is: (succ (succ zero))
+06:04:20 [WARN]  ex is: nil
+06:04:20 [WARN]  ex is: (cons autovar_Nat_0 nil)
+06:04:20 [WARN]  ex is: (cons autovar_Nat_1 (cons autovar_Nat_0 nil))
+06:04:20 [WARN]  ex is: (queue autovar_Lst_0 autovar_Lst_1)
+06:04:20 [WARN] Running exploration without proof mode, but goals were given
+06:04:20 [WARN] Proof mode: true
