@@ -1,7 +1,7 @@
 ;(set-logic ALL_SUPPORTED)
 
-(declare-datatypes () ((Lst (cons (head Nat) (tail Lst)) (nil))
-                       (Nat (succ (pred Nat)) (zero))))
+(declare-datatypes () ((Nat (succ (pred Nat)) (zero))
+                       (Lst (cons (head Nat) (tail Lst)) (nil))))
 
 (declare-fun len (Lst) Nat)
 (assert (= (len nil) zero))
