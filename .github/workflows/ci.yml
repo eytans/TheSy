@@ -30,11 +30,15 @@ jobs:
         with:
           repository: 'eytans/egg'
           ref: 'dev'
-      - name: "Setup rust"
+      - name: Setup rust
         uses: actions-rs/toolchain@v1
         with:
             toolchain: stable
             components: rustfmt, clippy
+      - name: Setup Clippy
+        uses: actions-rs/clippy-check@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
       - name: Build
         uses: actions-rs/cargo@v1
         with:
