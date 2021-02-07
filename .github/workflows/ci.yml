@@ -33,6 +33,7 @@ jobs:
       - name: "Setup rust"
         uses: actions-rs/toolchain@v1
         with:
+            toolchain: stable
             components: rustfmt, clippy
       - name: Build
         uses: actions-rs/cargo@v1
