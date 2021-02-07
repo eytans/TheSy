@@ -23,6 +23,7 @@ pub mod parser {
     use std::fmt;
     use crate::thesy::parser::TheSyParseErr::IOError;
     use crate::thesy::thesy_parser::parser::TheSyParseErr::UnknownError;
+    use std::path::Display;
 
     #[derive(Debug)]
     pub enum TheSyParseErr {
@@ -54,7 +55,7 @@ pub mod parser {
         /// Rewrites defined by (assert forall)
         pub rws: Vec<Rewrite<SymbolLang, ()>>,
         /// Terms to prove, given as not forall, (vars - types, precondition, ex1, ex2)
-        pub conjectures: Vec<(HashMap<RecExpr<SymbolLang>, RecExpr<SymbolLang>>, Option<RecExpr<SymbolLang>>, RecExpr<SymbolLang>, RecExpr<SymbolLang>)>,
+        pub conjectures: Vec<(HashMap <RecExpr<SymbolLang>, RecExpr<SymbolLang>>, Option<RecExpr<SymbolLang>>, RecExpr<SymbolLang>, RecExpr<SymbolLang>)>,
         /// Logic of when to apply case split
         pub case_splitters: Vec<(Rc<dyn Searcher<SymbolLang, ()>>, Var, Vec<Pattern<SymbolLang>>)>,
     }
@@ -77,6 +78,34 @@ pub mod parser {
                         })
                 }).collect_vec());
             self.case_splitters.extend(std::mem::take(&mut other.case_splitters));
+        }
+    }
+
+    impl std::fmt::Display for Definitions {
+        fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+            writeln!(f, "datatypes:")?;
+            for d in &self.datatypes {
+                write!(f, "  ")?;
+                d.fmt(f)?;
+                writeln!(f);
+            }
+            writeln!(f, "functions:")?;
+            for fun in &self.functions {
+                write!(f, "  ")?;
+                fun.fmt(f)?;
+                writeln!(f);
+            }
+            writeln!(f, "rewrites:")?;
+            for rw in &self.rws {
+                write!(f, "  ")?;
+                rw.fmt(f)?;
+                writeln!(f);
+            }
+            for c in &self.conjectures {
+                write!(f, "  ")?;
+                writeln!(f, "{} = {}", c.2, c.3)?;
+            }
+            write!(f, "case splitters len: {}", self.case_splitters.len())
         }
     }
 

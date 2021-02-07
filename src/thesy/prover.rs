@@ -15,21 +15,31 @@ use crate::lang::{DataType, Function};
 use crate::thesy::TheSy;
 use crate::thesy::case_split::CaseSplit;
 
+#[derive(Clone, Debug)]
 pub struct Prover {
     datatype: DataType,
     wfo_rules: Vec<Rewrite<SymbolLang, ()>>,
     ind_var: Function,
+    split_depth: usize,
+    split_itern: usize
 }
 
 impl Prover {
     const CASE_SPLIT_DEPTH: usize = 1;
-    const CASE_SPLIT_RUN: usize = 4;
+    const CASE_ITERN: usize = 4;
     const RUN_DEPTH: usize = 12;
 
     pub fn new(datatype: DataType) -> Prover {
         let wfo_rules = Self::wfo_datatype(&datatype);
         let ind_var = TheSy::get_ind_var(&datatype);
-        Prover { datatype, wfo_rules, ind_var }
+        Prover { datatype, wfo_rules, ind_var, split_depth: Prover::CASE_SPLIT_DEPTH, split_itern: Prover::CASE_ITERN }
+    }
+
+    pub fn with_split_params(&self, depth: usize, iter_n: usize) -> Prover {
+        let mut res = self.clone();
+        res.split_itern = iter_n;
+        res.split_depth = depth;
+        res
     }
 
     fn wfo_op() -> &'static str { "ltwf" }
@@ -141,7 +151,7 @@ impl Prover {
             let contr_id = egraph.add_expr(&c.as_exp());
             egraph.union(contr_id, ind_id);
             let mut runner: Runner<SymbolLang, ()> = Runner::new(()).with_egraph(egraph).with_iter_limit(Self::RUN_DEPTH).run(&rules[..]);
-            case_splitter.iter_mut().for_each(|c| c.case_split(&mut runner.egraph, split_d, &rules, Self::CASE_SPLIT_RUN));
+            case_splitter.iter_mut().for_each(|c| c.case_split(&mut runner.egraph, split_d, &rules, Self::CASE_ITERN));
             !runner.egraph.equivs(&ex1, &ex2).is_empty()
         })
     }
@@ -224,7 +234,7 @@ impl Prover {
             let contr_id = egraph.add_expr(&contr_exp);
             egraph.union(contr_id, ind_id);
             let mut runner: Runner<SymbolLang, ()> = Runner::new(()).with_egraph(egraph).with_iter_limit(Self::RUN_DEPTH).run(&rule_set[..]);
-            case_splitter.iter_mut().for_each(|c| c.case_split(&mut runner.egraph, split_d, &rule_set, Self::CASE_SPLIT_RUN));
+            case_splitter.iter_mut().for_each(|c| c.case_split(&mut runner.egraph, split_d, &rule_set, Self::CASE_ITERN));
             res = res && !runner.egraph.equivs(&ex1, &ex2).is_empty()
         }
         if res {
