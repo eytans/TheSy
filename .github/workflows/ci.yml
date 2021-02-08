@@ -6,9 +6,9 @@ name: CI
 on:
   # Triggers the workflow on push or pull request events but only for the master branch
   push:
-    branches: [ master, dev ]
+    branches: [ features/ci ]
   pull_request:
-    branches: [ master, dev ]
+    branches: [ features/ci ]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -25,11 +25,14 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Checkout TheSy
         uses: actions/checkout@v2
+        with:
+          path: 'TheSy'
       - name: Checkout egg
         uses: actions/checkout@v2
         with:
           repository: 'eytans/egg'
           ref: 'dev'
+          path: 'egg'
       - name: Setup rust
         uses: actions-rs/toolchain@v1
         with:
@@ -44,10 +47,10 @@ jobs:
         with:
           command: build
           toolchain: stable
-          args: --release --features "stats"
+          args: --release --features "stats" --manifest-path "./TheSy/Cargo.toml"
       - name: Test
         uses: actions-rs/cargo@v1
         with:
           command: test
           toolchain: stable
-          args: --release --features "stats"
+          args: --release --features "stats" --manifest-path "./TheSy/Cargo.toml"
