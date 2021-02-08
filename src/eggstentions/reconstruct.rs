@@ -105,7 +105,7 @@ pub fn reconstruct_all(graph: &EGraph<SymbolLang, ()>, max_depth: usize) -> Hash
         info!("depth {}", d);
         last_level = HashSet::new();
         for e in levels.last().unwrap() {
-            for v in edges_by_reqiurments.get(&e.0) {
+            if let Some(v) = edges_by_reqiurments.get(&e.0) {
                 for (i_to_fill, e_to_fill) in v {
                     let params_to_fill = e_to_fill.1.children.iter().take(*i_to_fill).chain(&e_to_fill.1.children[i_to_fill + 1..]);
                     let trees = params_to_fill.filter_map(|h_id| known_terms.get(h_id).map_or(None, |x| Some(x.iter().cloned()))).collect_vec();
