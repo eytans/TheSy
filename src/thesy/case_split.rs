@@ -27,11 +27,11 @@ lazy_static! {
 pub struct Split {
     root: Id,
     splits: Vec<Id>,
-    colors: Vec<ColorId>,
+    color: Option<ColorId>,
 }
 
 impl Split {
-    pub fn new(root: Id, splits: Vec<Id>, colors: Vec<ColorId>) -> Self { Split { root, splits, colors } }
+    pub fn new(root: Id, splits: Vec<Id>, color: Option<ColorId>) -> Self { Split { root, splits, color } }
 
     pub(crate) fn update(&mut self, egraph: &EGraph<SymbolLang, ()>) {
         self.root = egraph.find(self.root);
@@ -73,7 +73,10 @@ impl CaseSplit {
                 let mut res = vec![];
                 for sm in sms {
                     for subst in &sm.substs {
-                        res.push(Split::new(subst[root], split_evaluators.iter().map(|ev| ev.apply_one(graph, sm.eclass, &subst)[0]).collect_vec()));
+                        if subst.colors().len() > 1 {
+                            continue;
+                        }
+                        res.push(Split::new(subst[root], split_evaluators.iter().map(|ev| ev.apply_one(graph, sm.eclass, &subst)[0]).collect_vec(), subst.colors().first().copied()));
                     }
                 }
                 res
