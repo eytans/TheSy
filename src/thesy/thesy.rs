@@ -507,7 +507,7 @@ impl TheSy {
 
             let mut conjectures = self.get_conjectures();
 
-                'outer: while !conjectures.is_empty() {
+            'outer: while !conjectures.is_empty() {
                 let (_, mut ex1, mut ex2, d) = conjectures.pop().unwrap();
                 let measure_key = self.stats.init_measure(|| 0);
                 let mut new_rules = self.datatypes[&d].prove_ind(&mut splitter_to_use, &rules, &ex1, &ex2);
@@ -906,7 +906,7 @@ mod test {
         let nat = create_nat_type();
         let mut rewrites = create_pl_rewrites();
         let ind_rec = TheSy::get_ind_var(&nat);
-        assert!(syg.datatypes[&nat].prove_ind(&mut None,&rewrites[..], &format!("(pl {} Z)", ind_rec.name).parse().unwrap(), &ind_rec.name.parse().unwrap()).is_some())
+        assert!(syg.datatypes[&nat].prove_ind(&mut None, &rewrites[..], &format!("(pl {} Z)", ind_rec.name).parse().unwrap(), &ind_rec.name.parse().unwrap()).is_some())
     }
 
     fn filter_definitions() -> Definitions {
@@ -981,7 +981,7 @@ mod test {
         assert!(conjs.iter().any(|(o, c1, c2, d)| {
             (c1.pretty(500) == "(filter ts_ph_POfn_Nat_boolPC_0 (filter ts_ph_POfn_Nat_boolPC_1 ts_ph_Lst_0))"
                 && c2.pretty(500) == "(filter ts_ph_POfn_Nat_boolPC_1 (filter ts_ph_POfn_Nat_boolPC_0 ts_ph_Lst_0))")
-            || (c2.pretty(500) == "(filter ts_ph_POfn_Nat_boolPC_0 (filter ts_ph_POfn_Nat_boolPC_1 ts_ph_Lst_0))"
+                || (c2.pretty(500) == "(filter ts_ph_POfn_Nat_boolPC_0 (filter ts_ph_POfn_Nat_boolPC_1 ts_ph_Lst_0))"
                 && c1.pretty(500) == "(filter ts_ph_POfn_Nat_boolPC_1 (filter ts_ph_POfn_Nat_boolPC_0 ts_ph_Lst_0))")
         }));
     }
@@ -991,7 +991,7 @@ mod test {
 
     #[test]
     fn take_drop_equiv_red() {
-        // init_logging();
+        init_logging();
 
         let mut conf = TheSyConfig::from_path("frontend/benchmarks/cvc4_translated/isaplanner/goal1.smt2.th".parse().unwrap());
         let mut thesy = TheSy::from(&conf);
@@ -1003,19 +1003,21 @@ mod test {
         let ex0 = thesy.egraph.add_expr(&"(append (take i nil) (drop i nil))".parse().unwrap());
         let ex1 = thesy.egraph.add_expr(&"(append (take i (cons x nil)) (drop i (cons x nil)))".parse().unwrap());
         let ex2 = thesy.egraph.add_expr(&"(append (take i (cons y (cons x nil))) (drop i (cons y (cons x nil))))".parse().unwrap());
+        info!("Starting first rebuild");
         thesy.egraph.rebuild();
-        println!("rules len: {}", rules.len());
+        info!("Done first rebuild");
         thesy.equiv_reduc(&mut rules);
-        println!("rules len: {}", rules.len());
+        info!("Done eq reduction");
         thesy.egraph.rebuild();
+        info!("Done second rebuild");
         // assert_ne!(egraph.find(nil), egraph.find(ex0));
         assert_ne!(thesy.egraph.find(consx), thesy.egraph.find(ex1));
         assert_ne!(thesy.egraph.find(consxy), thesy.egraph.find(ex2));
         assert_eq!(thesy.egraph.find(nil), thesy.egraph.find(ex0));
-        println!("rules len: {}", rules.len());
         case_split.case_split(&mut thesy.egraph, 2, &rules, 4);
-        println!("rules len: {}", rules.len());
+        info!("Done case split");
         thesy.egraph.rebuild();
+        info!("Done third and final rebuild");
         assert_eq!(thesy.egraph.find(consx), thesy.egraph.find(ex1));
         assert_eq!(thesy.egraph.find(consxy), thesy.egraph.find(ex2));
     }

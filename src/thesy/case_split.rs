@@ -42,7 +42,11 @@ impl Split {
 
     pub fn create_colors<L: Language, N: Analysis<L>>(&self, egraph: &mut EGraph<L, N>) -> Vec<ColorId> {
         self.splits.iter().map(|id| {
-            let c = egraph.create_color();
+            let c = if let Some(base_color) = self.color {
+                egraph.create_sub_color(base_color)
+            } else {
+                egraph.create_color()
+            };
             egraph.colored_union(c, self.root, *id);
             c
         }).collect_vec()
@@ -51,7 +55,7 @@ impl Split {
 
 impl fmt::Display for Split {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        write!(f, "(root: {}, splits [{}])", self.root, self.splits.iter().map(|x| usize::from(*x).to_string()).intersperse(" ".parse().unwrap()).collect::<String>())
+        write!(f, "(root: {}, splits [{}], color: {})", self.root, self.splits.iter().map(|x| usize::from(*x).to_string()).intersperse(" ".parse().unwrap()).collect::<String>(), self.color.map(|c| usize::from(c).to_string()).unwrap_or("None".to_string()))
     }
 }
 
@@ -113,6 +117,14 @@ impl CaseSplit {
             StopReason::TimeLimit(_) => { warn!("Stopped case split due to time limit") }
             StopReason::Other(_) => {}
         };
+        info!("Runner finished, rebuilding");
+        info!("Iterations: ");
+        for i in runner.iterations {
+            info!("  apply time: {}", i.apply_time);
+            info!("  search time: {}", i.search_time);
+            info!("  rebuild time: {}", i.rebuild_time);
+            info!("");
+        }
         runner.egraph.rebuild();
         runner.egraph
     }
@@ -163,9 +175,6 @@ impl CaseSplit {
             return;
         }
 
-        // TODO: once egg has better color interface add recursion and color merges
-        assert_eq!(split_depth, 1);
-
         let known_splits: HashSet<Split, RandomState> = known_splits.iter().map(|e| {
             let mut res = e.clone();
             res.update(egraph);
@@ -178,10 +187,14 @@ impl CaseSplit {
             .collect();
         let mut new_known = known_splits.clone();
         new_known.extend(splitters.iter().cloned().cloned());
+        info!("Splitters len: {}", splitters.len());
 
         let classes = egraph.classes().map(|c| c.id).collect_vec();
 
         let colors = splitters.iter().map(|s| s.create_colors(egraph)).collect_vec();
+        for s in splitters {
+            info!("  {}", s);
+        }
         // When the API is limited the code is mentally inhibited
         *egraph = Self::equiv_reduction(rules, std::mem::take(egraph), run_depth);
         self.colored_case_split(egraph, split_depth - 1, &new_known, rules, run_depth);
