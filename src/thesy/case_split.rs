@@ -167,7 +167,11 @@ impl CaseSplit {
 
     pub fn case_split(&mut self, egraph: &mut EGraph<SymbolLang, ()>, split_depth: usize, rules: &[Rewrite<SymbolLang, ()>], run_depth: usize) {
         if !cfg!(feature = "no_split") {
-            self.colored_case_split(egraph, split_depth, &Default::default(), rules, run_depth)
+            if cfg!(feature = "split_clone") {
+                self.inner_case_split(egraph, split_depth, &Default::default(), rules, run_depth)
+            } else {
+                self.colored_case_split(egraph, split_depth, &Default::default(), rules, run_depth)
+            }
         }
     }
 
