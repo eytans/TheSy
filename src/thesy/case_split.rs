@@ -8,6 +8,7 @@ use std::rc::Rc;
 use std::path::Display;
 use std::fmt;
 use smallvec::alloc::fmt::Formatter;
+use crate::eggstentions::reconstruct::reconstruct;
 
 /// To be used as the op of edges representing potential split
 pub const SPLITTER: &'static str = "potential_split";
@@ -193,7 +194,7 @@ impl CaseSplit {
 
         let colors = splitters.iter().map(|s| s.create_colors(egraph)).collect_vec();
         for s in splitters {
-            info!("  {}", s);
+            info!("  {} - root: {}, cases: {}", s, reconstruct(egraph, s.root, 3).map(|x| x.to_string()).unwrap_or("No reconstruct".to_string()), s.splits.iter().map(|c| reconstruct(egraph, *c, 3).map(|x| x.to_string()).unwrap_or("No reconstruct".to_string())).intersperse(" ".to_string()).collect::<String>());
         }
         // When the API is limited the code is mentally inhibited
         *egraph = Self::equiv_reduction(rules, std::mem::take(egraph), run_depth);
