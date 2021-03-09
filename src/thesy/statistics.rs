@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::time::{Duration, SystemTime};
 
-use egg::{Iteration, RecExpr, SymbolLang};
+use egg::{Iteration, RecExpr, SymbolLang, IterationData};
 
 global_counter!(MEASURE_COUNTER, usize, usize::default());
 
@@ -10,6 +10,20 @@ global_counter!(MEASURE_COUNTER, usize, usize::default());
 pub(crate) struct MeasureData {
     pub start: SystemTime,
     pub amount: usize,
+}
+
+pub struct GraphData {
+    pub classes: usize,
+    pub nodes: usize,
+}
+
+pub struct CaseSplitData {
+    pub graph_before: GraphData,
+    pub graph_after: GraphData,
+    pub iterations: Vec<Iteration<()>>,
+    pub duration: Duration,
+    /// Splitter reconstructed and relevant collected data
+    pub inner_splits: Vec<(String, CaseSplitData)>
 }
 
 #[derive(Clone)]
@@ -26,7 +40,7 @@ pub struct Stats {
     /// The iteration stats from egg foreach equivalence reduction done.
     pub equiv_red_iterations: Vec<Vec<Iteration<()>>>,
     /// Number of initial splitters and total time to complete case splitting. Not including prover.
-    pub case_split: Vec<(usize, Duration)>,
+    pub case_split: Vec<CaseSplitData>,
     /// Amount of nodes added to graph and time it took during term deepening
     pub term_creation: Vec<(usize, Duration)>,
     /// Time to collect conjectures
@@ -112,7 +126,7 @@ impl Stats {
     pub fn update_splits(&mut self, measure_key: usize) {
         if cfg!(feature = "stats") {
             let data = self.measures.remove(&measure_key);
-            self.case_split.push((data.as_ref().unwrap().amount, SystemTime::now().duration_since(data.unwrap().start).unwrap()));
+            // self.case_split.push((data.as_ref().unwrap().amount, SystemTime::now().duration_since(data.unwrap().start).unwrap()));
         }
     }
 }
