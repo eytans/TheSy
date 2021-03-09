@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::time::{Duration, SystemTime};
 
-use egg::{Iteration, RecExpr, SymbolLang, IterationData};
+use egg::{Iteration, RecExpr, SymbolLang, IterationData, EGraph, Language, Analysis};
 
 global_counter!(MEASURE_COUNTER, usize, usize::default());
 
@@ -17,13 +17,26 @@ pub struct GraphData {
     pub nodes: usize,
 }
 
+impl GraphData {
+    fn new<L: Language, N: Analysis<L>>(graph: &EGraph<L, N>) -> GraphData {
+        GraphData{classes: graph.number_of_classes(), nodes: graph.total_number_of_nodes()}
+    }
+}
+
 pub struct CaseSplitData {
     pub graph_before: GraphData,
     pub graph_after: GraphData,
     pub iterations: Vec<Iteration<()>>,
     pub duration: Duration,
     /// Splitter reconstructed and relevant collected data
-    pub inner_splits: Vec<(String, CaseSplitData)>
+    pub inner_splits: Vec<(String, CaseSplitData)>,
+    start: SystemTime
+}
+
+impl CaseSplitData {
+    pub fn new(before: GraphData, start: SystemTime) -> CaseSplitData {
+        CaseSplitData{start, graph_before: before, graph_after: GraphData {nodes: 0, classes: 0}, iterations: vec![], duration: Duration::default(), inner_splits: vec![]}
+    }
 }
 
 #[derive(Clone)]
@@ -120,13 +133,6 @@ impl Stats {
         if cfg!(feature = "stats") {
             let data = self.measures.remove(&measure_key);
             self.get_conjectures.push(SystemTime::now().duration_since(data.unwrap().start).unwrap());
-        }
-    }
-
-    pub fn update_splits(&mut self, measure_key: usize) {
-        if cfg!(feature = "stats") {
-            let data = self.measures.remove(&measure_key);
-            // self.case_split.push((data.as_ref().unwrap().amount, SystemTime::now().duration_since(data.unwrap().start).unwrap()));
         }
     }
 }
