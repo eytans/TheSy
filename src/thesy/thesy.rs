@@ -573,8 +573,6 @@ impl TheSy {
         // TODO: After finishing checking all conjectures in final depth (if a lemma was found) try case split again then finish.
         // TODO: can be a single loop with max depth
         case_splitter.case_split(&mut self.egraph, 2, rules, 4);
-        // case_split_all(rules, &mut self.egraph, 2, 4);
-        self.stats.update_splits(measure_splits);
 
         let mut splitter_to_use = Some(case_splitter);
 
