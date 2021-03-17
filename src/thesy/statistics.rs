@@ -18,7 +18,7 @@ pub struct GraphData {
 }
 
 impl GraphData {
-    fn new<L: Language, N: Analysis<L>>(graph: &EGraph<L, N>) -> GraphData {
+    pub fn new<L: Language, N: Analysis<L>>(graph: &EGraph<L, N>) -> GraphData {
         GraphData{classes: graph.number_of_classes(), nodes: graph.total_number_of_nodes()}
     }
 }
@@ -34,8 +34,13 @@ pub struct CaseSplitData {
 }
 
 impl CaseSplitData {
-    pub fn new(before: GraphData, start: SystemTime) -> CaseSplitData {
-        CaseSplitData{start, graph_before: before, graph_after: GraphData {nodes: 0, classes: 0}, iterations: vec![], duration: Duration::default(), inner_splits: vec![]}
+    pub fn new<L: Language, N: Analysis<L>>(graph: &EGraph<L, N>) -> CaseSplitData {
+        CaseSplitData{start: SystemTime::now(), graph_before: GraphData::new(graph), graph_after: GraphData {nodes: 0, classes: 0}, iterations: vec![], duration: Duration::default(), inner_splits: vec![]}
+    }
+
+    pub fn finalizer<L: Language, N: Analysis<L>>(&mut self, graph: &EGraph<L, N>) {
+        self.graph_after = GraphData::new(graph);
+        self.duration = self.start.elapsed()?;
     }
 }
 
