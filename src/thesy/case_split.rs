@@ -8,6 +8,7 @@ use std::rc::Rc;
 use std::path::Display;
 use std::fmt;
 use smallvec::alloc::fmt::Formatter;
+use crate::thesy::statistics::CaseSplitData;
 
 /// To be used as the op of edges representing potential split
 pub const SPLITTER: &'static str = "potential_split";
@@ -50,12 +51,13 @@ pub type SplitApplier = Box<dyn FnMut(&mut EGraph<SymbolLang, ()>, Vec<SearchMat
 
 pub struct CaseSplit {
     splitter_rules: Vec<(Rc<dyn Searcher<SymbolLang, ()>>, SplitApplier)>,
+    stats: Vec<CaseSplitData>,
 }
 
 impl CaseSplit {
     pub fn new(splitter_rules: Vec<(Rc<dyn Searcher<SymbolLang, ()>>,
                                     SplitApplier)>) -> Self {
-        CaseSplit { splitter_rules }
+        CaseSplit { splitter_rules, stats: vec![] }
     }
 
     pub fn from_applier_patterns(case_splitters: Vec<(Rc<dyn Searcher<SymbolLang, ()>>, Var, Vec<Pattern<SymbolLang>>)>) -> CaseSplit {
