@@ -7,12 +7,13 @@ use itertools::Itertools;
 
 use crate::tools::tools::combinations;
 use crate::tree::Tree;
+use crate::errors::{TheSyError, ReconstructError};
 
-pub fn reconstruct(graph: &EGraph<SymbolLang, ()>, class: Id, max_depth: usize) -> Option<RecExpr<SymbolLang>> {
+pub fn reconstruct(graph: &EGraph<SymbolLang, ()>, class: Id, max_depth: usize) -> Result<RecExpr<SymbolLang>, TheSyError> {
     let mut translations: HashMap<Id, RecExpr<SymbolLang>> = HashMap::new();
     let classes = graph.classes().into_iter().map(|c| (c.id, c)).collect();
     reconstruct_inner(&classes, class, max_depth, &mut translations);
-    translations.get(&class).map(|x| x.clone())
+    translations.get(&class).map(|x| Ok(x.clone())).unwrap_or(Err(ReconstructError::new(class)))
 }
 
 pub fn reconstruct_edge(graph: &EGraph<SymbolLang, ()>, class: Id, edge: SymbolLang, max_depth: usize) -> Option<RecExpr<SymbolLang>> {

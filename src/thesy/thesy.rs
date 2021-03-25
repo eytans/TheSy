@@ -551,7 +551,10 @@ impl TheSy {
         for _ in 0..self.system_rws.len() {
             rules.remove(system_rws_start);
         }
-        self.stats.update_total();
+        if cfg!(feature = "stats") {
+            self.stats.case_split = std::mem::take(&mut splitter_to_use.as_mut().unwrap().stats);
+            self.stats.update_total();
+        }
         found_rules
     }
 
