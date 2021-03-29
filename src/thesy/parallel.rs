@@ -1,68 +1,71 @@
 use std::boxed::Box;
 use egg::{Rewrite, SymbolLang, Runner, Pattern, EGraph};
-use std::sync::mpsc;
+use std::sync::{mpsc, Arc};
 use spmc;
 use crate::thesy::TheSy;
 use std::vec;
 use std::str::FromStr;
 use spmc::RecvError;
 use z3_sys::ParamKind::Symbol;
+use std::rc::Rc;
+
 extern crate owning_ref;
 
 /// An enum used for passing messages between threads when running Thesy in parallel mode
 pub enum Message{
     //IdRulePair(usize, Box<Rewrite<SymbolLang,()>>),                     // intended for sending a rule from thread to main, to let main thread know which thread does not need this rule
     //Rule(Box<Rewrite<SymbolLang,()>>),                              // intended for sending a rule from main thread to all other threads, as there is no id needed in this case
-    IdRulePair(usize, RewriteInfo),
-    Rule(RewriteInfo),
+    IdRulePair(usize, RewriteInfoFromPattern),
+    Rule(RewriteInfoFromPattern),
     Done(usize),                                                        // not sure if needed, but is used when one thread has done running
 }
 
 /// Used for passing data to hooks
 pub struct HookData<'a>{
-    pub rules_to_send: &'a [Rewrite<SymbolLang, ()>],
+    pub rules_to_send: &'a [Rewrite<SymbolLang,()>],
     pub rules_received: Vec<Rewrite<SymbolLang,()>>,
 }
 
 #[derive(Clone)]
-pub struct RewriteInfo{
+pub struct RewriteInfoFromPattern{
     pub name: String,
     pub long_name: String,
     pub searcher: Pattern<SymbolLang>,
     pub applier: Pattern<SymbolLang>,
 }
 
-impl RewriteInfo{
-    pub fn new_from_rewrite(rw: &Rewrite<SymbolLang,()>) -> RewriteInfo{
-        RewriteInfo{
+
+impl RewriteInfoFromPattern{
+    pub fn new_from_rewrite(rw: &Rewrite<SymbolLang,()>) -> RewriteInfoFromPattern{
+        RewriteInfoFromPattern {
             name : rw.name().to_string(),
             long_name : rw.long_name().to_string(),
-            searcher : **rw.searcher().clone(),
-            applier : **rw.applier().clone(),
+            searcher : *(*rw).searcher().clone(),
+            applier : *(*rw).applier().clone(),
         }
     }
 
-    pub fn as_rewrite(&self) -> Rewrite<SymbolLang,()>{
+    pub fn as_rewrite(&self) -> Rewrite<SymbolLang, ()>{
         Rewrite::new(self.name.clone(), self.long_name.clone(),
                      self.searcher.clone(),
                      self.applier.clone()).unwrap()
     }
 
-    pub fn into_rewrite(self) -> Rewrite<SymbolLang,()>{
+    pub fn into_rewrite(self) -> Rewrite<SymbolLang, ()>{
         Rewrite::new(self.name, self.long_name,
                      self.searcher,
                      self.applier).unwrap()
     }
 }
 
-impl From<Rewrite<SymbolLang, ()>> for RewriteInfo {
-    fn from(_: Rewrite<SymbolLang, ()>) -> Self {
+impl<L,N> From<Rewrite<L,N>> for RewriteInfoFromPattern {
+    fn from(_: Rewrite<L,N>) -> Self {
         unimplemented!()
     }
 }
 
-impl From<RewriteInfo> for Rewrite<SymbolLang, ()> {
-    fn from(_: RewriteInfo) -> Self {
+impl<L,N> From<RewriteInfoFromPattern> for Rewrite<L, N> {
+    fn from(_: RewriteInfoFromPattern) -> Self {
         unimplemented!()
     }
 }
@@ -75,11 +78,11 @@ pub struct SenderReceiverWrapper<'a, ReceiveType, SendType> {
 
 impl <'a, ReceiveType, SendType> SenderReceiverWrapper<'a, ReceiveType, SendType> {
     // fn (&mut Self, &HookData, &mut MsgSenderReceiverWrapper) -> Result<(), String>>>,
-    // //after_inference_hooks: Vec<Box<dyn FnMut(&mut Self, &Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, Rewrite<SymbolLang, ()>)>) -> Result<(), String>>>,
+    // //after_inference_hooks: Vec<Box<dyn FnMut(&mut Self, &Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, Rewrite)>) -> Result<(), String>>>,
     //
     // /// the hooks are used before every step of TheSy which could expand the rules set
     // /// currently used to support parallel running
-    // before_inference_hooks: Vec<Box<dyn FnMut(&mut Self, &mut Vec<Rewrite<SymbolLang, ()>>, &mut MsgSenderReceiverWrapper) -> Result<(), String>>>,
+    // before_inference_hooks: Vec<Box<dyn FnMut(&mut Self, &mut Vec<Rewrite>, &mut MsgSenderReceiverWrapper) -> Result<(), String>>>,
     // /// hooks passed to [runner]
     // /// for more info check: [EGG] documentation
     // equiv_reduc_hooks: Vec<Box<dyn FnMut(&mut Runner<SymbolLang,()>) -> Result<(), String>>>,
@@ -129,7 +132,7 @@ pub fn insert_parallel_hooks(thesy :&mut TheSy,
     let id = id;
     thesy.with_after_inference_hook(move |thesy, rules|{
         rules[last_index..].iter().for_each(|rule|{
-            thread_tx.send(Box::new(Message::IdRulePair(id, RewriteInfo::new_from_rewrite(rule))));                 // TODO: might be wrong and need to use into_str or something like that
+            thread_tx.send(Box::new(Message::IdRulePair(id, RewriteInfoFromPattern::new_from_rewrite(rule))));                 // TODO: might be wrong and need to use into_str or something like that
         });
         last_index = rules.len();
         Ok(())

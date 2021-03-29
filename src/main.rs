@@ -69,7 +69,7 @@ struct TheSyConfig {
     definitions: Definitions,
     ph_count: usize,
     dependencies: Vec<TheSyConfig>,
-    dep_results: Vec<Vec<Rewrite<SymbolLang, ()>>>,
+    dep_results: Vec<Vec<Rewrite<SymbolLang,()>>>,
     output: PathBuf,
     prerun: bool,
     proof_mode: bool,
@@ -104,7 +104,7 @@ impl TheSyConfig {
     }
 
     /// Run thesy using current configuration returning (thesy instance, previous + new rewrites)
-    pub fn run(&mut self, max_depth: Option<usize>) -> (TheSy, Vec<Rewrite<SymbolLang, ()>>) {
+    pub fn run(&mut self, max_depth: Option<usize>) -> (TheSy, Vec<Rewrite<SymbolLang,()>>) {
         self.collect_dependencies();
         let mut rules = self.definitions.rws.clone();
         rules.extend(self.dep_results.iter().flatten().cloned());

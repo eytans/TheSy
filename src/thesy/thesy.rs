@@ -37,6 +37,8 @@ use crate::thesy::parallel::{Message, HookData, SenderReceiverWrapper, MsgSender
 use std::borrow::Borrow;
 
 /// Theory Synthesizer - Explores a given theory finding and proving new lemmas.
+
+#[derive(Clone)]
 pub struct TheSy {
     /// known datatypes to prover
     datatypes: HashMap<DataType, Prover>,
@@ -54,7 +56,7 @@ pub struct TheSy {
     /// Equality rewrite
     /// Or and And rewrites
     /// TODO: add support for partial application
-    pub system_rws: Vec<Rewrite<SymbolLang, ()>>,
+    pub system_rws: Vec<Rewrite<SymbolLang,()>>,
     /// Limits to use in equiv reduc
     node_limit: usize,
     /// Limits to use in equiv reduc
@@ -66,17 +68,19 @@ pub struct TheSy {
     pub stats: Option<Stats>,
     /// the hooks are used after every step of TheSy which could expand the rules set
     /// currently used to support parallel running
-    after_inference_hooks: Vec<Box<dyn FnMut(&mut Self, &mut Vec<Rewrite<SymbolLang, ()>>) -> Result<(), String>>>,
-    //after_inference_hooks: Vec<Box<dyn FnMut(&mut Self, &Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, Rewrite<SymbolLang, ()>)>) -> Result<(), String>>>,
+    after_inference_hooks: Vec<Box<dyn FnMut(&mut Self, &mut Vec<Rewrite<SymbolLang,()>>) -> Result<(), String>>>,
+    //after_inference_hooks: Vec<Box<dyn FnMut(&mut Self, &Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, Rewrite)>) -> Result<(), String>>>,
 
     /// the hooks are used before every step of TheSy which could expand the rules set
     /// currently used to support parallel running
-    before_inference_hooks: Vec<Box<dyn FnMut(&mut Self, &mut Vec<Rewrite<SymbolLang, ()>>) -> Result<(), String>>>,
+    before_inference_hooks: Vec<Box<dyn FnMut(&mut Self, &mut Vec<Rewrite<SymbolLang,()>>) -> Result<(), String>>>,
     /// hooks passed to [runner]
     /// for more info check: [EGG] documentation
     equiv_reduc_hooks: Vec<Box<dyn FnMut(&mut egg::Runner<SymbolLang,()>) -> Result<(), String>>>,     // TODO: change to FnMut when changing rules
     // /// a workaround in order to pass and receive data from hooks
     // pub hook_data: Option<HookData>,
+    //// used for parallel implementation, in order to make copies of TheSy
+    //init_values: InitValues,
 }
 // TODO:
 //      1. Finish writing hooks at [set_parallel_run_hooks]
@@ -88,6 +92,13 @@ pub struct TheSy {
 //      6. implement searcher() and applier() functions which return the [Searcher] and [Applier] patterns in [egg::Pattern].
 //      7. add clone() implementation to TheSy
 //      8. Some compilation errors, need to check those
+/*
+impl Clone for TheSy{
+    fn clone(&self) -> Self {
+        TheSy::new()
+    }
+}
+*/
 /// *** Thesy ***
 impl TheSy {
     /// datatype: a DataType variable as used in eggstentions
@@ -123,7 +134,7 @@ impl TheSy {
 
         let apply_rws = TheSy::create_apply_rws(&known_functions, ph_count);
 
-        let ite_rws: Vec<Rewrite<SymbolLang, ()>> = TheSy::create_ite_rws();
+        let ite_rws: Vec<Rewrite<SymbolLang,()>> = TheSy::create_ite_rws();
 
         let eq_searcher = MultiEqSearcher::new(vec![Pattern::from_str("true").unwrap(), Pattern::from_str("(= ?x ?y)").unwrap()]);
         let union_applier = UnionApplier::new(vec![Var::from_str("?x").unwrap(), Var::from_str("?y").unwrap()]);
@@ -155,7 +166,7 @@ impl TheSy {
         let cons_conc_searcher: MultiEqSearcher<Pattern<SymbolLang>> = MultiEqSearcher::new(vec!["true".parse().unwrap(), "(is-cons ?x)".parse().unwrap()]);
         let cons_conclusion: DiffApplier<Pattern<SymbolLang>> = DiffApplier::new("(cons (isconsex ?x))".parse().unwrap());
 
-        let is_rws: Vec<Rewrite<SymbolLang, ()>> = vec![
+        let is_rws: Vec<Rewrite<SymbolLang,()>> = vec![
             rewrite!("is_cons_true"; "(is-cons ?x)" => "true" if PatternCondition::new("(cons ?y)".parse().unwrap(), Var::from_str("?x").unwrap())),
             rewrite!("is_cons_false"; "(is-cons ?x)" => "false" if PatternCondition::new("nil".parse().unwrap(), Var::from_str("?x").unwrap())),
             rewrite!("is_cons_conclusion"; cons_conc_searcher => cons_conclusion),
@@ -220,7 +231,7 @@ impl TheSy {
             stats,
             before_inference_hooks: vec![],
             after_inference_hooks: vec![],
-            equiv_reduc_hooks: vec![]
+            equiv_reduc_hooks: vec![],
         };
 
         res.searchers = res.create_sygue_serchers();
@@ -374,11 +385,11 @@ impl TheSy {
         }
     }
 
-    pub fn equiv_reduc(&mut self, rules: &[Rewrite<SymbolLang, ()>]) -> StopReason {
+    pub fn equiv_reduc(&mut self, rules: &[Rewrite<SymbolLang,()>]) -> StopReason {
         self.equiv_reduc_depth(rules, self.iter_limit)
     }
 
-    fn equiv_reduc_depth(&mut self, rules: &[Rewrite<SymbolLang, ()>], depth: usize) -> StopReason {
+    fn equiv_reduc_depth(&mut self, rules: &[Rewrite<SymbolLang,()>], depth: usize) -> StopReason {
         // TODO: for parallel running, add .with_hook() to runner instantiation, and make it get and send all new rules
         let mut runner = Runner::default().with_time_limit(Duration::from_secs(60 * 10)).with_node_limit(self.node_limit).with_egraph(std::mem::take(&mut self.egraph)).with_iter_limit(depth);
         runner = runner.run(rules);
@@ -439,14 +450,14 @@ impl TheSy {
         res.into_iter().rev().collect_vec()
     }
 
-    pub fn check_equality(rules: &[Rewrite<SymbolLang, ()>], precond: &Option<RecExpr<SymbolLang>>, ex1: &RecExpr<SymbolLang>, ex2: &RecExpr<SymbolLang>) -> bool {
+    pub fn check_equality(rules: &[Rewrite<SymbolLang,()>], precond: &Option<RecExpr<SymbolLang>>, ex1: &RecExpr<SymbolLang>, ex2: &RecExpr<SymbolLang>) -> bool {
         let mut egraph = Prover::create_graph(precond.as_ref(), &ex1, &ex2);
         let runner = Runner::default().with_iter_limit(8).with_time_limit(Duration::from_secs(60)).with_node_limit(10000).with_egraph(egraph).run(rules);
         !runner.egraph.equivs(ex1, ex2).is_empty()
     }
 
-    fn check_goals(&mut self, rules: &mut Vec<Rewrite<SymbolLang, ()>>)
-                   -> Option<Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, Rewrite<SymbolLang, ()>)>> {
+    fn check_goals(&mut self, rules: &mut Vec<Rewrite<SymbolLang,()>>)
+                   -> Option<Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, Rewrite<SymbolLang,()>)>> {
         if self.goals.is_none() {
             return None;
         }
@@ -480,7 +491,7 @@ impl TheSy {
         res
     }
 
-    pub fn run(&mut self, rules: &mut Vec<Rewrite<SymbolLang, ()>>, max_depth: usize) -> Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, Rewrite<SymbolLang, ()>)> {
+    pub fn run(&mut self, rules: &mut Vec<Rewrite<SymbolLang,()>>, max_depth: usize) -> Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, Rewrite<SymbolLang,()>)> {
         // TODO: run full tests
         // TODO: dont allow rules like (take ?x ?y) => (take ?x (append ?y ?y))
         println!("Running TheSy on datatypes: {} dict: {}", self.datatypes.keys().map(|x| &x.name).join(" "), self.dict.iter().map(|x| &x.name).join(" "));
@@ -626,7 +637,7 @@ impl TheSy {
     }
 
     /// Attempt to prove all lemmas with retry. Return true if finished all goals.
-    fn prove_goals(&mut self, rules: &mut Vec<Rewrite<SymbolLang, ()>>, found_rules: &mut Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, Rewrite<SymbolLang, ()>)>, new_rules_index: usize, start_total: Option<SystemTime>) -> bool {
+    fn prove_goals(&mut self, rules: &mut Vec<Rewrite<SymbolLang,()>>, found_rules: &mut Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, Rewrite<SymbolLang,()>)>, new_rules_index: usize, start_total: Option<SystemTime>) -> bool {
         loop {
             let lemma = self.check_goals(rules);
             if lemma.is_none() {
@@ -692,7 +703,7 @@ impl TheSy {
             Pattern::from_str(&*format!("({} ?root ?c0 ?c1 ?c2 ?c3 ?c4)", Self::SPLITTER)).unwrap(),
         ]
     }
-    fn create_ite_rws() -> Vec<Rewrite<SymbolLang, ()>> {
+    fn create_ite_rws() -> Vec<Rewrite<SymbolLang,()>> {
         let potential_split_conc = format!("({} ?z true false)", Self::SPLITTER);
         let applier: Pattern<SymbolLang> = potential_split_conc.parse().unwrap();
         let true_cond = NonPatternCondition::new(Pattern::from_str("true").unwrap(), Var::from_str("?z").unwrap());
@@ -708,7 +719,7 @@ impl TheSy {
         ]
     }
 
-    fn create_apply_rws(dict: &Vec<Function>, ph_count: usize) -> Vec<Rewrite<SymbolLang, ()>> {
+    fn create_apply_rws(dict: &Vec<Function>, ph_count: usize) -> Vec<Rewrite<SymbolLang,()>> {
         let apply_rws = dict.iter()
             .chain(TheSy::collect_phs(&dict, ph_count).iter())
             .filter(|fun| !fun.params.is_empty())
@@ -726,7 +737,7 @@ impl TheSy {
 
     /// Case splitting works by cloning the graph and merging the different possibilities.
     /// Enabling recursively splitting all
-    fn case_split(rules: &[Rewrite<SymbolLang, ()>], egraph: &mut EGraph<SymbolLang, ()>, root: Id, splits: Vec<Id>, split_depth: usize, run_depth: usize, dont_use: &HashSet<(Id, Vec<Id>)>) {
+    fn case_split(rules: &[Rewrite<SymbolLang,()>], egraph: &mut EGraph<SymbolLang, ()>, root: Id, splits: Vec<Id>, split_depth: usize, run_depth: usize, dont_use: &HashSet<(Id, Vec<Id>)>) {
         let classes = egraph.classes().collect_vec();
         // TODO: parallel
         let after_splits = splits.iter().map(|child| {
@@ -769,13 +780,13 @@ impl TheSy {
     /// egrph: the egraph to rewrite its expressions
     /// split_depth: depth of expression expansion. Check thesis for further explanation
     /// (explanation in chapter 2.1-Term Generation & Conjecture Inference
-    pub(crate) fn case_split_all(rules: &[Rewrite<SymbolLang, ()>],
+    pub(crate) fn case_split_all(rules: &[Rewrite<SymbolLang,()>],
                                  egraph: &mut EGraph<SymbolLang, ()>,
                                  split_depth: usize, run_depth: usize) {
         Self::_case_split_all(rules, egraph, split_depth, run_depth, &HashSet::new())
     }
 
-    fn _case_split_all(rules: &[Rewrite<SymbolLang, ()>],
+    fn _case_split_all(rules: &[Rewrite<SymbolLang,()>],
                        egraph: &mut EGraph<SymbolLang, ()>,
                        split_depth: usize, run_depth: usize,
                        dont_use: &HashSet<(Id, Vec<Id>)>) {
@@ -880,7 +891,7 @@ impl TheSy {
     /// input: rules vector
     /// output: rules vector is appended by all system rewrites
     ///         return value is the length of the appended vector
-    fn add_system_rws(&self, rules: &mut Vec<Rewrite<SymbolLang, ()>>) -> usize{
+    fn add_system_rws(&self, rules: &mut Vec<Rewrite<SymbolLang,()>>) -> usize{
         for r in self.system_rws.iter() {
             rules.push(r.clone());
         }
@@ -896,7 +907,7 @@ impl TheSy {
 
     // TODO: check if we want to send the rules in their form in found_rules or in rules
     /// calls every hook in [after_inference_hooks]
-    fn call_after_inference_hooks(&mut self, rules: &mut Vec<Rewrite<SymbolLang, ()>>) {
+    fn call_after_inference_hooks(&mut self, rules: &mut Vec<Rewrite<SymbolLang,()>>) {
         //let new_rules = new_rules.into_iter();
         //let self.hook_data = HookData{new_rules};                        // TODO: maybe use a constant reference to hook_data, so we don't need to make it every time we call this function
         self.after_inference_hooks.iter().for_each(|hook| {hook(self, rules);});
@@ -904,7 +915,7 @@ impl TheSy {
 
     pub fn with_before_inference_hook<F>(mut self, hook: F) -> Self
     where
-        F: FnMut(&mut Self, &mut Vec<Rewrite<SymbolLang, ()>>) -> Result<(), String> + 'static
+        F: FnMut(&mut Self, &mut Vec<Rewrite<SymbolLang,()>>) -> Result<(), String> + 'static
     {
         self.before_inference_hooks.push(Box::new(hook));
         self
@@ -912,7 +923,7 @@ impl TheSy {
 
     pub fn with_after_inference_hook<F>(mut self, hook: F) -> Self
     where
-        F: FnMut(&mut Self, &mut Vec<Rewrite<SymbolLang, ()>>) -> Result<(), String> + 'static
+        F: FnMut(&mut Self, &mut Vec<Rewrite<SymbolLang,()>>) -> Result<(), String> + 'static
     {
         self.after_inference_hooks.push(Box::new(hook));
         self
@@ -926,11 +937,11 @@ impl TheSy {
         self
     }
 
-    fn run_instance_parallel(&mut self, rules: &Vec<Rewrite<SymbolLang, ()>>,
+    fn run_instance_parallel(&mut self, rules: &Vec<Rewrite<SymbolLang,()>>,
                              // communicator: Option<MsgSenderReceiverWrapper>,
                              id: usize,
                              max_depth: usize) -> Vec<Rewrite<SymbolLang,()>>{
-        // fn try_recv_rules(rc: &Receiver<Box<Message>>) -> Vec<Box<Rewrite<SymbolLang, ()>>>{                      // TODO: if not working with borrowed rc, then pass ownership and then return it here
+        // fn try_recv_rules(rc: &Receiver<Box<Message>>) -> Vec<Box<Rewrite>>{                      // TODO: if not working with borrowed rc, then pass ownership and then return it here
         //     let mut rule_vec = vec![];
         //     loop{
         //         match rc.try_recv(){
@@ -1173,11 +1184,11 @@ impl TheSy {
         rules
     }
 
-    pub fn equiv_reduc_instance(&mut self, rules: &mut Vec<Rewrite<SymbolLang, ()>>) -> StopReason {
+    pub fn equiv_reduc_instance(&mut self, rules: &mut Vec<Rewrite<SymbolLang,()>>) -> StopReason {
         self.equiv_reduc_depth_instance(rules, self.iter_limit)
     }
 
-    fn equiv_reduc_depth_instance(&mut self, rules: &mut Vec<Rewrite<SymbolLang, ()>>, depth: usize) -> StopReason {
+    fn equiv_reduc_depth_instance(&mut self, rules: &mut Vec<Rewrite<SymbolLang,()>>, depth: usize) -> StopReason {
         // TODO: for parallel running, add .with_hook() to runner instantiation, and make it get and send all new rules
         let mut runner = Runner::default()
             .with_time_limit(Duration::from_secs(60 * 10))
@@ -1185,10 +1196,15 @@ impl TheSy {
             .with_egraph(std::mem::take(&mut self.egraph))
             .with_iter_limit(depth);
 
+        /*
         runner = self.equiv_reduc_hooks.iter()
             .fold(runner, |r,h|
                 { r.with_hook(|r| h(r)) }
             );
+         */
+        for h in self.equiv_reduc_hooks{
+            runner = runner.with_hook(h);
+        }
 
         runner.run(&*rules);
         if cfg!(feature = "stats") {
@@ -1225,9 +1241,7 @@ impl TheSy {
     //     self.equiv_reduc_hooks.push(Box::new(|runner|{}));
     // }
 
-    pub fn run_parallel(&mut self, rules: &mut Vec<Rewrite<SymbolLang, ()>>, max_depth: usize, num_processes: usize) -> Vec<(Option<Pattern<SymbolLang>>,
-                                                                                                                             Pattern<SymbolLang>, Pattern<SymbolLang>,
-                                                                                                                             Rewrite<SymbolLang, ()>)>{
+    pub fn run_parallel(&mut self, rules: &mut Vec<Rewrite<SymbolLang,()>>, max_depth: usize, num_processes: usize) -> Vec<Rewrite<SymbolLang,()>>{
         // TODO:
         //      1. Make the code compile. It currently doesn't compile because I'm trying to send rules through channels which is not safe,
         //          plus, it is incorrect to add these rules because they have no meaning in other thesy subgraphs. The right way to do it is
@@ -1252,18 +1266,19 @@ impl TheSy {
             handler: JoinHandle<HT>,
         }
 
-        fn get_rules_slice(rules: &Vec<Rewrite<SymbolLang, ()>>, sub_graphs_count: usize) -> impl Iterator<Item = &[Rewrite<SymbolLang, ()>]> {
+        fn get_rules_slice(rules: &Vec<Rewrite<SymbolLang,()>>, sub_graphs_count: usize) -> impl Iterator<Item = &[Rewrite<SymbolLang,()>]> {
             let rules_count = rules.len();
             let rules_per_instance : usize = rules_count / sub_graphs_count;
             rules.windows(rules_per_instance + 1)
         }
+
         let mut thread_managers = vec![];
         let mut found_rules = vec![];
         let mut active_ids = HashSet::new();
         let mut inactive_ids = HashSet::new();
         let mut active_threads = num_processes;
         let rules_count = rules.len();
-        let main_run_rules;
+        let mut main_run_rules = vec![];
         //let stop_reason;
         let (thread_tx, main_rc):(mpsc::Sender<Box<Message>>,mpsc::Receiver<Box<Message>>) = mpsc::channel();             // multiple senders will serve us when sending rules to main
         // id=0 is the main run of TheSy
@@ -1291,6 +1306,7 @@ impl TheSy {
         {
             let dropper = thread_tx;          // only for dropping thread_tx, so we will have the right number of writers
         }
+
         loop{
             let mut received_rules = vec![];
             let first_msg = main_rc.recv();
@@ -1371,6 +1387,12 @@ impl TheSy {
 
 }
 
+struct InitValues{
+    datatype: DataType,
+    examples: Vec<RecExpr<SymbolLang>>,
+    dict: Vec<Function>,
+}
+
 #[cfg(test)]
 mod test {
     use std::collections::{HashMap, HashSet};
@@ -1425,11 +1447,11 @@ mod test {
         )
     }
 
-    fn create_pl_rewrites() -> Vec<Rewrite<SymbolLang, ()>> {
+    fn create_pl_rewrites() -> Vec<Rewrite<SymbolLang,()>> {
         vec![rewrite!("pl base"; "(pl Z ?x)" => "?x"), rewrite!("pl ind"; "(pl (S ?y) ?x)" => "(S (pl ?y ?x))")]
     }
 
-    fn create_list_rewrites() -> Vec<Rewrite<SymbolLang, ()>> {
+    fn create_list_rewrites() -> Vec<Rewrite<SymbolLang,()>> {
         vec![
             rewrite!("app base"; "(app Nil ?xs)" => "?xs"),
             rewrite!("app ind"; "(app (Cons ?y ?ys) ?xs)" => "(Cons ?y (app ?ys ?xs))"),
@@ -1625,8 +1647,8 @@ mod test {
         assert_eq!(runner.egraph.find(pq), runner.egraph.find(qp));
     }
 
-    fn create_filter_rules() -> Vec<Rewrite<SymbolLang, ()>> {
-        let split_rule: Rewrite<SymbolLang, ()> = Rewrite::new("filter_split", "filter_split",
+    fn create_filter_rules() -> Vec<Rewrite<SymbolLang,()>> {
+        let split_rule: Rewrite<SymbolLang,()> = Rewrite::new("filter_split", "filter_split",
                                                                Pattern::from_str("(filter ?p (Cons ?x ?xs))").unwrap(),
                                                                DiffApplier::new(Pattern::from_str("(potential_split (apply ?p ?x) true false)").unwrap())).unwrap();
         let mut filter_rules = vec![
