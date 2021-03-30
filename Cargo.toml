@@ -7,7 +7,9 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-egg = { path = "../egg" }
+# When developing should use path egg = { path = "../egg" }
+# Otherwise, we can use github egg = { git = "https://github.com/eytans/egg", branch = "dev" }
+egg = { git = "https://github.com/eytans/egg", branch = "dev" }
 cached = "0.18.0"
 itertools= "0.9.0"
 symbolic_expressions = "5.0.3"
