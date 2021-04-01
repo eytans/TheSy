@@ -2,6 +2,7 @@ from .import_smtlib import SmtLibDocument
 from .case_splits import ExtractCaseSplits
 import traceback
 from pysmt.environment import reset_env
+import pathlib
 
 def main():
     # BENCHMARK_DIRS = ['benchmarks/cvc4-conj/original/benchmarks-dt/leon']
@@ -15,11 +16,13 @@ def main():
         except FileExistsError: pass
 
     for (d, target_dir) in zip(BENCHMARK_DIRS, TARGET_DIRS):
-        for fn in os.listdir(d):
-            if os.path.isdir(os.path.join(d, fn)):
+        d = pathlib.Path(d)
+        target_dir = pathlib.Path(target_dir)
+        for fn in d.glob('**/*.smt2'):
+            if fn.is_dir():
                 continue
             print('--  %s  --' % fn)
-            infile = open(os.path.join(d, fn))
+            infile = fn.open()
 
             reset_env()
             try:
@@ -27,9 +30,11 @@ def main():
             except:
                 print(f"bad {fn}")
                 print(traceback.format_exc())
+                exit()
                 continue
+            exit()
 
-            with open(os.path.join(target_dir, fn + '.th'), 'w') as outf:
+            with fn.with_suffix('.th').open('w') as outf:
                 for el in doc:
                     print(el)
                     print(el, file=outf)
