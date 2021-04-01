@@ -12,7 +12,8 @@ pub(crate) struct MeasureData {
     pub amount: usize,
 }
 
-#[derive(Clone, serde::Serialize)]
+#[derive(Clone)]
+#[cfg_attr(feature = "stats", derive(serde::Serialize))]
 pub struct GraphData {
     pub classes: usize,
     pub nodes: usize,
@@ -24,7 +25,8 @@ impl GraphData {
     }
 }
 
-#[derive(Clone, serde::Serialize)]
+#[derive(Clone)]
+#[cfg_attr(feature = "stats", derive(serde::Serialize))]
 pub struct CaseSplitData {
     pub graph_before: GraphData,
     pub graph_after: GraphData,
