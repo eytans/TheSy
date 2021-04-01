@@ -49,7 +49,7 @@ pub mod tools {
     pub fn choose<K>(vec: &[K], size: usize) -> Vec<Vec<&K>> {
         if size == 1 {
             let mut res = Vec::default();
-            vec.iter().for_each(|k| res.push(vec![k.clone()]));
+            vec.iter().for_each(|k: &K| res.push(vec![<&K>::clone(&k)]));
             return res;
         }
         if size == 0 || size > vec.len() {

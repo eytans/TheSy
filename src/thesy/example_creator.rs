@@ -46,7 +46,7 @@ impl Examples {
                             let index = *ph_counts.entry(p.clone()).or_insert(0);
                             *ph_counts.get_mut(p).unwrap() += 1;
                             let new_ph: RecExpr<SymbolLang> = format!("autovar_{}_{}", p.into_tree().to_spaceless_string(), index).parse().unwrap();
-                            constructor_phs.last_mut().unwrap().entry(constr.clone().clone()).or_insert(vec![]).push(new_ph.clone());
+                            constructor_phs.last_mut().unwrap().entry(<&Function>::clone(constr).clone()).or_insert(vec![]).push(new_ph.clone());
                             new_ph
                         } else {
                             last_example.clone()

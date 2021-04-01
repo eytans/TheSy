@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::time::{Duration, SystemTime};
 
-use egg::{Iteration, RecExpr, SymbolLang};
+use egg::{Iteration, RecExpr, SymbolLang, IterationData, EGraph, Language, Analysis};
 
 global_counter!(MEASURE_COUNTER, usize, usize::default());
 
@@ -10,6 +10,47 @@ global_counter!(MEASURE_COUNTER, usize, usize::default());
 pub(crate) struct MeasureData {
     pub start: SystemTime,
     pub amount: usize,
+}
+
+#[derive(Clone, serde::Serialize)]
+pub struct GraphData {
+    pub classes: usize,
+    pub nodes: usize,
+}
+
+impl GraphData {
+    pub fn new<L: Language, N: Analysis<L>>(graph: &EGraph<L, N>) -> GraphData {
+        GraphData { classes: graph.number_of_classes(), nodes: graph.total_number_of_nodes() }
+    }
+}
+
+#[derive(Clone, serde::Serialize)]
+pub struct CaseSplitData {
+    pub graph_before: GraphData,
+    pub graph_after: GraphData,
+    pub iterations: Vec<Iteration<()>>,
+    pub duration: Duration,
+    /// Splitter reconstructed and relevant collected data
+    pub inner_splits: Vec<(String, Vec<CaseSplitData>)>,
+    start: SystemTime,
+}
+
+impl CaseSplitData {
+    pub fn new<L: Language, N: Analysis<L>>(graph: &EGraph<L, N>) -> CaseSplitData {
+        CaseSplitData {
+            start: SystemTime::now(),
+            graph_before: GraphData::new(graph),
+            graph_after: GraphData { nodes: 0, classes: 0 },
+            iterations: vec![],
+            duration: Duration::default(),
+            inner_splits: vec![],
+        }
+    }
+
+    pub fn finalizer<L: Language, N: Analysis<L>>(&mut self, graph: &EGraph<L, N>) {
+        self.graph_after = GraphData::new(graph);
+        self.duration = self.start.elapsed().unwrap();
+    }
 }
 
 #[derive(Clone)]
@@ -26,7 +67,7 @@ pub struct Stats {
     /// The iteration stats from egg foreach equivalence reduction done.
     pub equiv_red_iterations: Vec<Vec<Iteration<()>>>,
     /// Number of initial splitters and total time to complete case splitting. Not including prover.
-    pub case_split: Vec<(usize, Duration)>,
+    pub case_split: Vec<CaseSplitData>,
     /// Amount of nodes added to graph and time it took during term deepening
     pub term_creation: Vec<(usize, Duration)>,
     /// Time to collect conjectures
@@ -62,23 +103,31 @@ impl Stats {
         }
     }
 
-    pub fn update_proved(&mut self, ex1: &RecExpr<SymbolLang>, ex2: &RecExpr<SymbolLang>, key: usize) {
+    pub fn update_proved(&mut self,
+                         ex1: &RecExpr<SymbolLang>,
+                         ex2: &RecExpr<SymbolLang>,
+                         key: usize) {
         if cfg!(feature = "stats") {
             let data = &self.measures[&key];
-            self.conjectures_proved.push((ex1.pretty(500), ex2.pretty(500), SystemTime::now().duration_since(data.start).unwrap()));
+            self.conjectures_proved.push(Self::pretty_with_time(ex1, ex2, data.start));
         }
     }
 
-    pub fn update_filtered_conjecture(&mut self, ex1: &RecExpr<SymbolLang>, ex2: &RecExpr<SymbolLang>) {
+    pub fn update_filtered_conjecture(&mut self,
+                                      ex1: &RecExpr<SymbolLang>,
+                                      ex2: &RecExpr<SymbolLang>) {
         if cfg!(feature = "stats") {
             self.filtered_lemmas.push((ex1.pretty(500), ex2.pretty(500)));
         }
     }
 
-    pub fn update_failed_proof(&mut self, ex1: RecExpr<SymbolLang>, ex2: RecExpr<SymbolLang>, key: usize) {
+    pub fn update_failed_proof(&mut self,
+                               ex1: RecExpr<SymbolLang>,
+                               ex2: RecExpr<SymbolLang>,
+                               key: usize) {
         if cfg!(feature = "stats") {
             let data = &self.measures[&key];
-            self.failed_proofs.push((ex1.pretty(500), ex2.pretty(500), SystemTime::now().duration_since(data.start).unwrap()));
+            self.failed_proofs.push(Self::pretty_with_time(&ex1, &ex2, data.start));
         }
     }
 
@@ -91,8 +140,9 @@ impl Stats {
     pub fn update_term_creation(&mut self, key: usize, n_nodes: usize) {
         if cfg!(feature = "stats") {
             let data = self.measures.remove(&key);
-            self.term_creation.push((n_nodes - data.as_ref().unwrap().amount,
-                                         SystemTime::now().duration_since(data.unwrap().start).unwrap()));
+            self.term_creation.push((
+                n_nodes - data.as_ref().unwrap().amount,
+                Self::duration(data.unwrap().start)));
         }
     }
 
@@ -105,14 +155,7 @@ impl Stats {
     pub fn update_conjectures(&mut self, measure_key: usize) {
         if cfg!(feature = "stats") {
             let data = self.measures.remove(&measure_key);
-            self.get_conjectures.push(SystemTime::now().duration_since(data.unwrap().start).unwrap());
-        }
-    }
-
-    pub fn update_splits(&mut self, measure_key: usize) {
-        if cfg!(feature = "stats") {
-            let data = self.measures.remove(&measure_key);
-            self.case_split.push((data.as_ref().unwrap().amount, SystemTime::now().duration_since(data.unwrap().start).unwrap()));
+            self.get_conjectures.push(Self::duration(data.unwrap().start));
         }
     }
 }
@@ -125,6 +168,15 @@ impl Stats {
             Some(SystemTime::now())
         } else { None }
     }
+
+    fn pretty_with_time(ex1: &RecExpr<SymbolLang>, ex2: &RecExpr<SymbolLang>, start: SystemTime)
+                        -> (String, String, Duration) {
+        (ex1.pretty(500), ex2.pretty(500), Self::duration(start))
+    }
+
+    fn duration(start: SystemTime) -> Duration {
+        SystemTime::now().duration_since(start).unwrap()
+    }
 }
 
 impl Default for Stats {
@@ -136,7 +188,7 @@ impl Default for Stats {
             failed_proofs_goals: Default::default(),
             equiv_red_iterations: Default::default(),
             case_split: Default::default(),
-            term_creation:  Default::default(),
+            term_creation: Default::default(),
             get_conjectures: Default::default(),
             filtered_lemmas: Default::default(),
             total_time: Default::default(),
