@@ -818,12 +818,12 @@ mod test {
         let anchor_patt: Pattern<SymbolLang> = Pattern::from_str("(typed ?x ?y)").unwrap();
         let results0 = anchor_patt.search(&syg.egraph);
         // Zero, S (functions are also in graph), ph1, ph0, (true false)
-        assert_eq!(6usize, results0.iter().map(|x| x.substs.len()).sum());
+        assert_eq!(6usize, results0.iter().map(|x| x.substs.len()).sum::<usize>());
         syg.increase_depth();
         // Zero, S, S Zero, ph1, S ph1, ph0, S ph0, (true false)
-        assert_eq!(9usize, anchor_patt.search(&syg.egraph).iter().map(|x| x.substs.len()).sum());
+        assert_eq!(9usize, anchor_patt.search(&syg.egraph).iter().map(|x| x.substs.len()).sum::<usize>());
         syg.increase_depth();
-        assert_eq!(12usize, anchor_patt.search(&syg.egraph).iter().map(|x| x.substs.len()).sum());
+        assert_eq!(12usize, anchor_patt.search(&syg.egraph).iter().map(|x| x.substs.len()).sum::<usize>());
 
         let new_nat = DataType::new("nat".to_string(), vec![
             Function::new("Z".to_string(), vec![], "nat".parse().unwrap()),
@@ -840,15 +840,15 @@ mod test {
 
         let results0 = anchor_patt.search(&syg.egraph);
         // Zero, x, ph1, ph0, ph2, (true false)
-        assert_eq!(7usize, results0.iter().map(|x| x.substs.len()).sum());
+        assert_eq!(7usize, results0.iter().map(|x| x.substs.len()).sum::<usize>());
         syg.increase_depth();
         let results1 = anchor_patt.search(&syg.egraph);
         // 7 + 16
-        assert_eq!(23usize, results1.iter().map(|x| x.substs.len()).sum());
+        assert_eq!(23usize, results1.iter().map(|x| x.substs.len()).sum::<usize>());
         syg.increase_depth();
         // 7 + 16 + 20*20 - 16
         let results2 = anchor_patt.search(&syg.egraph);
-        assert_eq!(407usize, results2.iter().map(|x| x.substs.len()).sum());
+        assert_eq!(407usize, results2.iter().map(|x| x.substs.len()).sum::<usize>());
     }
 
     #[test]
