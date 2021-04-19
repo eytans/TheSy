@@ -552,7 +552,7 @@ impl TheSy {
             rules.remove(system_rws_start);
         }
         if cfg!(feature = "stats") {
-            self.stats.case_split = std::mem::take(&mut splitter_to_use.as_mut().unwrap().stats);
+            self.stats.case_split = splitter_to_use.as_mut().map(|x| std::mem::take(&mut x.stats)).unwrap_or_default();
             self.stats.update_total();
         }
         found_rules
