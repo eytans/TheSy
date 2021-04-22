@@ -1,12 +1,15 @@
 from .import_smtlib import SmtLibDocument
 from .case_splits import ExtractCaseSplits
 import traceback
+import argparse
 from pysmt.environment import reset_env
 
-def main():
+def main(benchmark_dir, target_dir):
     # BENCHMARK_DIRS = ['benchmarks/cvc4-conj/original/benchmarks-dt/leon']
-    BENCHMARK_DIRS = ['/home/eytan.s/Apps/benchmarks/benchmarks/isaplanner_smt']
-    TARGET_DIRS = ['/home/eytan.s/Apps/benchmarks/benchmarks/isaplanner_smt_th']
+    # BENCHMARK_DIRS = ['/home/eytan.s/Apps/benchmarks/benchmarks/isaplanner_smt']
+    # TARGET_DIRS = ['/home/eytan.s/Apps/benchmarks/benchmarks/isaplanner_smt_th']
+    BENCHMARK_DIRS = [benchmark_dir]
+    TARGET_DIRS = [target_dir]
 
     import os
 
@@ -43,5 +46,9 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("benchmark_dir")
+    parser.add_argument("target_dir")
+    args = parser.parse_args()
+    main(args.benchmark_dir, args.target_dir)
 
