@@ -103,11 +103,31 @@ some [CVC4 benchmarks](http://lara.epfl.ch/~reynolds/VMCAI2015-ind/).
 The translation script may not work for other smt2 files.
 
 Usage: `python3 ./frontend/smtlib/main <dir to translate> <output dir>`.
-Requires pysmt to be installed.
+Requires python3 and pysmt to be installed.
 
 ## Experimentation
 Every experiment is contained in a folder under experiments.
 Each experiment has a single python runner, 
 but there is no single interface for all of them.
+Requires: python3 pandas 
+
+#### Lemma quality
+We compare lemma quality over the isaplanner benchmarks.
+To run TheSy on said benchmarks use 
+`python3 -m experiments.isaplanner_proving.run_thesy_expl`.
+The results will be in 
+"experiments/isaplanner_proving/isaplanner_no_cs/stats.csv" 
+and in "experiments/isaplanner_proving/isaplanner_with_cs/stats.csv".
+The directory "experiments/isaplanner_proving/via_hipster"
+contains the results from running Hipster on the same benchmarks.
+These results are used to create the comparison
+The lemma quality comparison is in "head_to_head.csv" and in "head_to_head-no-cs.csv"
+where no-cs means no case split was used.
+To create head_to_head comparison you can use the script
+"frontend/head_to_head.py", but be aware that Hipster may change some function names and it needs adressing.
 
 #### Comparison to CVC4 results
+From the root directory, `python3 -m experiments.cvc4_benchmarks.runner -t 1`.
+This experiment runs TheSy three times, in the CAV2021 paper we only used tests.
+The results of the run appear in "experiments/cvc4_benchmarks/stats.csv" where only results under 'no expl proofs' are interesting.
+
