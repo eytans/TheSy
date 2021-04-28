@@ -9,9 +9,9 @@ from collections import namedtuple
 from datetime import datetime
 from experiments import executable_release, project_root, cargo_path
 
-is_windows = os.name == 'nt'
-if not is_windows:
-    from cgroups import Cgroup
+# is_windows = os.name == 'nt'
+# if not is_windows:
+#     from cgroups import Cgroup
 
 RunParams = namedtuple('RunParams', ['fn', 'timeout', 'proof_mode'])
 
@@ -22,16 +22,17 @@ CMD = [str(executable_release)]
 
 
 # First we create the cgroup 'charlie' and we set it's cpu and memory limits
-if not is_windows:
-    cg = Cgroup('thesy_cgroup')
+# if not is_windows:
+#     cg = Cgroup('thesy_cgroup')
 
 
 # Then we a create a function to add a process in the cgroup
 def in_my_cgroup():
-    if not is_windows:
-        pid = os.getpid()
-        cg = Cgroup('thesy_cgroup')
-        cg.add(pid)
+    # if not is_windows:
+    #     pid = os.getpid()
+    #     cg = Cgroup('thesy_cgroup')
+    #     cg.add(pid)
+    pass
 
 
 def run_thesy(params: RunParams):
@@ -57,7 +58,7 @@ def run_thesy(params: RunParams):
     # with open(fn + ".json", 'w') as f:
 
 
-def run_all(dirs, prove=False, features="", skip=None, timeout=60, processnum=15, memorylimit=32, multiprocess=True, rerun=True):
+def run_all(dirs, prove=False, features="", skip=None, timeout=60, processnum=1, memorylimit=32, multiprocess=True, rerun=True):
     if skip is None:
         skip = []
     to = timeout * 60
@@ -74,9 +75,9 @@ def run_all(dirs, prove=False, features="", skip=None, timeout=60, processnum=15
     if not rerun:
         files = [p for p in files if not pathlib.Path(p.fn).with_suffix('.stats.json').exists()]
     # isa_files = ["./temp/" + f for f in isa_files]
-    if not is_windows:
-        cg.set_memory_limit(memorylimit, 'gigabytes')
-    pn = processnum
+    # if not is_windows:
+    #     cg.set_memory_limit(memorylimit, 'gigabytes')
+    pn = 1
     if multiprocess:
         pool = multiprocessing.Pool(pn)
         pool.map(run_thesy, files)
@@ -93,7 +94,7 @@ if __name__ == '__main__':
     parser.add_argument('-f', '--features', default="")
     parser.add_argument('--skip', nargs='*', default=None)
     parser.add_argument('-t', '--timeout', default=60)
-    parser.add_argument('-n', '--processnum', default=15)
+    parser.add_argument('-n', '--processnum', default=15, help="This option is disabled in this release to ease run on laptops")
     parser.add_argument('-m', '--memorylimit', default=32)
     parser.add_argument('--norerun', action='store_true', default=False)
 
