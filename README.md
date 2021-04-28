@@ -114,7 +114,7 @@ Requires: python3 pandas
 #### Lemma quality
 We compare lemma quality over the isaplanner benchmarks.
 To run TheSy on said benchmarks use 
-`python3 -m experiments.isaplanner_proving.run_thesy_expl`.
+```python3 -m experiments.isaplanner_proving.run_thesy_expl```
 The results will be in 
 "experiments/isaplanner_proving/isaplanner_no_cs/stats.csv" 
 and in "experiments/isaplanner_proving/isaplanner_with_cs/stats.csv".
@@ -127,7 +127,8 @@ To create head_to_head comparison you can use the script
 "frontend/head_to_head.py", but be aware that Hipster may change some function names and it needs adressing.
 
 #### Comparison to CVC4 results
-From the root directory, `python3 -m experiments.cvc4_benchmarks.runner -t 1`.
+From the root directory: 
+```python3 -m experiments.cvc4_benchmarks.runner -t 1```
 This experiment runs TheSy three times, in the CAV2021 paper we only used tests.
 The results of the run appear in "experiments/cvc4_benchmarks/stats.csv" where only results under 'no expl proofs' are interesting.
 
