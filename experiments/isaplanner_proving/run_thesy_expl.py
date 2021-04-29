@@ -1,5 +1,6 @@
 import shutil
 import pathlib
+import argparse
 
 from experiments import copy_tree_th_only
 from experiments.thesy_runner import run_all
@@ -17,6 +18,10 @@ if not backup.exists():
     backup.mkdir()
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-t', '--timeout', default=60, type=int)
+    args = parser.parse_args()
+
     if thesy_no_cs.exists() or thesy_with_cs.exists():
         shutil.rmtree(backup)
         backup.mkdir()
@@ -27,9 +32,9 @@ if __name__ == '__main__':
 
     # Default proof mode is false so we are doing exploration
     copy_tree_th_only(isaplanner_tests, thesy_no_cs)
-    run_all([thesy_no_cs], features='no_split', timeout=60)
+    run_all([thesy_no_cs], features='no_split', timeout=args.timeout)
     write_stats(thesy_no_cs)
     copy_tree_th_only(isaplanner_tests, thesy_with_cs)
-    run_all([thesy_with_cs], timeout=60)
+    run_all([thesy_with_cs], timeout=args.timeout)
     write_stats(thesy_with_cs)
 

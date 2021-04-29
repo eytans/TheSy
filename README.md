@@ -5,6 +5,8 @@ You can either run TheSy with cargo or compile and run the executable.
 For your convenience you may use the available [docker image](https://hub.docker.com/r/eytansingher/thesy) which contains 
 the source code and an installed version of TheSy. 
 For more information see [Installation](#Installation) section.
+It is recommended to use a machine with at least 32GB memory; 
+still, most cases will pass with less.
 
 ## Installation
 
@@ -23,6 +25,9 @@ after which TheSy will be available as part of the relevant cargo repos bin fold
 Optionally you can retrieve a docker image containing an installed version of TheSy 
 without building it yourself. 
 This is available using `docker pull eytansingher/thesy:latest`.
+If you have an image in tar format, use `docker load -i <tar file>`, 
+and then run the loaded image
+using `docker run --memory="32g" -it --entrypoint bash <image name>`.
 
 ## Usage
 
@@ -53,6 +58,11 @@ Mainly the relevant modes are:
   Usage: `-c` or `check-equiv`, when using cargo needs to be used after providing --
   `cargo run --release --features "stats" -- -c <path>`
   
+Note: TheSy might differ between different runs. 
+For example a single run (experiments/cvc4_benchmarks/tests/clam/goal6.smt2.th) might finish
+in 14 seconds and might finish in ~550 seconds.
+This instability, while not common, can greatly affect memory usage (longer runs equal more memory usage).
+ 
 ## TheSy Format
 Input files, with the ".th" extension, use a specific format
 to allow easy case definition and experimentation.
@@ -109,14 +119,20 @@ Requires python3 and pysmt to be installed.
 Every experiment is contained in a folder under experiments.
 Each experiment has a single python runner, 
 but there is no single interface for all of them.
-Requires: python3 pandas 
+Requires: python3 pandas
+
+Note: when using docker, please ensure enough ram is available by passing 
+the --memory="32g" parameter to `docker run`.
 
 #### Lemma quality
 We compare lemma quality over the isaplanner benchmarks.
-To run TheSy on said benchmarks use 
+To run TheSy on said benchmarks, from TheSy's root directory use 
 ```
-python3 -m experiments.isaplanner_proving.run_thesy_expl
+python3 -m experiments.isaplanner_proving.run_thesy_expl -t <timeout>
 ```
+The default timeout is 60 minutes per test (i.e. -t 60), 
+to get a runtime of ~4 hours use a 5 minute timeout (i.e. -t 5) 
+
 The results will be in 
 "experiments/isaplanner_proving/isaplanner_no_cs/stats.csv" 
 and in "experiments/isaplanner_proving/isaplanner_with_cs/stats.csv".
@@ -126,10 +142,10 @@ These results are used to create the comparison
 The lemma quality comparison is in "head_to_head.csv" and in "head_to_head-no-cs.csv"
 where no-cs means no case split was used.
 To create head_to_head comparison you can use the script
-"frontend/head_to_head.py", but be aware that Hipster may change some function names and it needs adressing.
+"frontend/head_to_head.py", but be aware that Hipster may change some function names and it needs addressing.
 
 #### Comparison to CVC4 results
-From the root directory: 
+From TheSy's root directory (this might be long): 
 ```
 python3 -m experiments.cvc4_benchmarks.runner -t 1
 ```
