@@ -4,10 +4,14 @@ use std::rc::Rc;
 
 use egg::{Pattern, RecExpr, Rewrite, Searcher, SymbolLang, Var};
 use itertools::Itertools;
-use thesy_parser::grammar;
+use thesy_parser::{grammar, ast};
 
 use crate::lang::{DataType, Function};
 use std::path::PathBuf;
+use thesy_parser::ast::{Expression, Statement};
+use thesy_parser::ast::Definitions::Defs;
+use std::str::FromStr;
+use crate::eggstentions::searchers::multisearcher::{MultiEqSearcher, MultiDiffSearcher, EitherSearcher, FilteringSearcher, ToDyn, aggregate_conditions};
 
 #[derive(Default, Clone)]
 pub struct Definitions {
@@ -46,10 +50,76 @@ impl Definitions {
     pub fn from_file(path: &PathBuf) -> Definitions {
         let res = grammar::DefsParser::new().parse(path.to_str().unwrap());
         match res {
-            Ok(x) => return x,
-            Err(e) => println!("{}", e)
+            Ok(x) => {
+                match x {
+                    Defs(stmts) => Definitions::from(stmts)
+                }
+            },
+            Err(e) => {
+                println!("{}", e);
+                panic!("Please implement error handleing")
+            }
         }
-        res.unwrap()
+    }
+
+    fn exp_to_pattern(exp: Expression) -> Pattern<SymbolLang> {
+        Pattern::from_str(&*exp.to_sexp_string()).unwrap()
+    }
+
+    fn make_rw(name: String, precond: Option<Expression>, source: Expression, target: Expression, conds: Vec<(thesy_parser::ast::Terminal, Expression)>) -> Rewrite<SymbolLang, ()> {
+        let precond_searcher = precond.map(|e| {
+            MultiEqSearcher::new(vec![Definitions::exp_to_pattern(e), Pattern::from_str("true").unwrap()])
+        });
+        let searcher = {
+            let s = Definitions::exp_to_pattern(source);
+            if precond.is_some() {
+                MultiDiffSearcher::new(vec![
+                    EitherSearcher::left(s),
+                    EitherSearcher::right(precond_searcher.unwrap())
+                ]).into_rc_dyn()
+            } else {
+                s.into_rc_dyn()
+            }
+        };
+        let applier = Definitions::exp_to_pattern(target);
+        let conditions = conds.into_iter().map(|(t, e)| {
+            FilteringSearcher::create_non_pattern_filterer(Definitions::exp_to_pattern(e).into_rc_dyn(), Var::from_str(&*t.to_string()).unwrap())
+        }).collect_vec();
+        let cond_searcher = FilteringSearcher::new(searcher, aggregate_conditions(conditions));
+        Rewrite::new(name, cond_searcher, applier).unwrap()
+    }
+}
+
+impl From<Vec<Statement>> for Definitions {
+    fn from(x: Vec<Statement>) -> Self {
+        let mut datatypes = vec![];
+        let mut functions = vec![];
+        let mut rws = vec![];
+        let mut goals = vec![];
+        for s in x {
+            match s {
+                Statement::RewriteDef(name, def) => {
+                    match def {
+                        ast::Rewrite::DRewrite(precond, source, target, conditions) => {
+                            ;
+                        }
+                        ast::Rewrite::BRewrite(precond, source, target, conditions) => {}
+                        ast::Rewrite::AddSearcher(precond, source, target, conditions) => {}
+                    }
+                }
+                Statement::Function(_, _, _, _) => {}
+                Statement::Datatype(_, _, _) => {}
+                Statement::Goal(_, _, _) => {}
+            }
+        }
+        Definitions {
+            datatypes,
+            functions,
+            rws,
+            conjectures: goals,
+            // TODO
+            case_splitters: vec![]
+        }
     }
 }
 
