@@ -1,29 +1,30 @@
 pub mod parser {
+    use std::collections::HashMap;
+    use std::error::Error;
+    use std::fmt;
+    use std::fmt::Debug;
     use std::fs::File;
     use std::io::Read;
+    use std::path::Display;
+    use std::rc::Rc;
     use std::str::FromStr;
 
-    use egg::{Pattern, RecExpr, Rewrite, SymbolLang, Var, Applier, Searcher, Language, PatternAst, ENodeOrVar, Id};
-    use itertools::{Itertools};
+    use egg::{Applier, ENodeOrVar, Id, Language, Pattern, PatternAst, RecExpr, Rewrite, Searcher, SymbolLang, Var};
+    use itertools::Itertools;
+    use multimap::MultiMap;
+    use smallvec::alloc::fmt::Formatter;
     use symbolic_expressions::{Sexp, SexpError};
 
     use crate::eggstentions::appliers::DiffApplier;
-    use crate::lang::{DataType, Function};
-    use std::collections::{HashMap};
-    use multimap::MultiMap;
-    use crate::eggstentions::searchers::multisearcher::{MultiDiffSearcher, EitherSearcher, MultiEqSearcher, FilteringSearcher, MatchFilter, aggregate_conditions, ToDyn, PointerSearcher};
-    use std::fmt::Debug;
-    use crate::eggstentions::pretty_string::PrettyString;
     use crate::eggstentions::expression_ops::{IntoTree, Tree};
-    use crate::thesy::{case_split};
-    use crate::tools::tools::combinations;
-    use std::rc::Rc;
-    use std::error::Error;
-    use smallvec::alloc::fmt::Formatter;
-    use std::fmt;
-    use crate::thesy::parser::TheSyParseErr::IOError;
+    use crate::eggstentions::pretty_string::PrettyString;
+    use crate::eggstentions::searchers::multisearcher::{aggregate_conditions, EitherSearcher, FilteringSearcher, MatchFilter, MultiDiffSearcher, MultiEqSearcher, PointerSearcher, ToDyn};
+    use crate::lang::{DataType, Function};
+    use crate::thesy::case_split;
+    use crate::thesy::thesy_parser::parser::TheSyParseErr::IOError;
+    use crate::thesy::semantics::Definitions;
     use crate::thesy::thesy_parser::parser::TheSyParseErr::UnknownError;
-    use std::path::Display;
+    use crate::tools::tools::combinations;
 
     #[derive(Debug)]
     pub enum TheSyParseErr {
@@ -43,69 +44,6 @@ pub mod parser {
                 }
             }
             res
-        }
-    }
-
-    #[derive(Default, Clone)]
-    pub struct Definitions {
-        /// All datatype definitions
-        pub datatypes: Vec<DataType>,
-        /// All function declereations as (name, type)
-        pub functions: Vec<Function>,
-        /// Rewrites defined by (assert forall)
-        pub rws: Vec<Rewrite<SymbolLang, ()>>,
-        /// Terms to prove, given as not forall, (vars - types, precondition, ex1, ex2)
-        pub conjectures: Vec<(HashMap <RecExpr<SymbolLang>, RecExpr<SymbolLang>>, Option<RecExpr<SymbolLang>>, RecExpr<SymbolLang>, RecExpr<SymbolLang>)>,
-        /// Logic of when to apply case split
-        pub case_splitters: Vec<(Rc<dyn Searcher<SymbolLang, ()>>, Var, Vec<Pattern<SymbolLang>>)>,
-    }
-
-    impl Definitions {
-        pub fn merge(&mut self, mut other: Definitions) {
-            self.functions.extend_from_slice(&std::mem::take(&mut other.functions).into_iter()
-                .filter(|f| self.functions.iter()
-                    .all(|f1| f1.name != f.name)).collect_vec());
-            self.datatypes.extend_from_slice(&std::mem::take(&mut other.datatypes).into_iter()
-                .filter(|d| self.datatypes.iter()
-                    .all(|d1| d1.name != d.name)).collect_vec());
-            self.conjectures.extend_from_slice(&std::mem::take(&mut other.conjectures).into_iter()
-                .filter(|c| !self.conjectures.contains(c)).collect_vec());
-            self.rws.extend_from_slice(&std::mem::take(&mut other.rws).into_iter()
-                .filter(|rw| {
-                    self.rws.iter()
-                        .all(|rw1| {
-                            rw1.name() != rw.name()
-                        })
-                }).collect_vec());
-            self.case_splitters.extend(std::mem::take(&mut other.case_splitters));
-        }
-    }
-
-    impl std::fmt::Display for Definitions {
-        fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-            writeln!(f, "datatypes:")?;
-            for d in &self.datatypes {
-                write!(f, "  ")?;
-                d.fmt(f)?;
-                writeln!(f);
-            }
-            writeln!(f, "functions:")?;
-            for fun in &self.functions {
-                write!(f, "  ")?;
-                fun.fmt(f)?;
-                writeln!(f);
-            }
-            writeln!(f, "rewrites:")?;
-            for rw in &self.rws {
-                write!(f, "  ")?;
-                rw.fmt(f)?;
-                writeln!(f);
-            }
-            for c in &self.conjectures {
-                write!(f, "  ")?;
-                writeln!(f, "{} = {}", c.2, c.3)?;
-            }
-            write!(f, "case splitters len: {}", self.case_splitters.len())
         }
     }
 

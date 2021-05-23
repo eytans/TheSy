@@ -1,6 +1,6 @@
 use crate::thesy::TheSy;
 use egg::{RecExpr, SymbolLang, Id};
-use crate::thesy::parser::Definitions;
+use crate::thesy::semantics::Definitions;
 use crate::thesy::case_split::CaseSplit;
 use crate::thesy::prover::Prover;
 use std::collections::HashSet;

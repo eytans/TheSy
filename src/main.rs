@@ -29,7 +29,7 @@ use crate::eggstentions::pretty_string::PrettyString;
 use crate::thesy::{example_creator, thesy_parser};
 use crate::thesy::case_split::{CaseSplit, Split};
 use crate::thesy::thesy::TheSy;
-use crate::thesy::thesy_parser::parser::Definitions;
+use thesy::semantics::Definitions;
 use crate::tools::tools::choose;
 use std::rc::Rc;
 

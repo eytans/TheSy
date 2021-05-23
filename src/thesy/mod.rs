@@ -1,7 +1,6 @@
 pub use {
     example_creator::Examples,
     thesy::TheSy,
-    thesy_parser::parser,
 };
 
 pub mod thesy;
@@ -11,4 +10,5 @@ pub mod prover;
 pub mod statistics;
 pub mod case_split;
 mod consts;
+pub mod semantics;
 

@@ -2,28 +2,27 @@ use std::collections::{HashMap, HashSet};
 use std::collections::hash_map::RandomState;
 use std::iter;
 use std::iter::FromIterator;
+use std::rc::Rc;
 use std::str::FromStr;
 use std::time::{Duration, SystemTime};
 
+use bimap::BiHashMap;
+use egg::*;
 use itertools::Itertools;
 use log::{info, warn};
-
-use egg::*;
+use multimap::MultiMap;
 
 use crate::eggstentions::costs::{MinRep, RepOrder};
 use crate::eggstentions::expression_ops::{IntoTree, Tree};
-use crate::eggstentions::searchers::multisearcher::{MultiDiffSearcher};
 use crate::eggstentions::pretty_string::PrettyString;
+use crate::eggstentions::searchers::multisearcher::MultiDiffSearcher;
 use crate::lang::*;
+use crate::thesy::{case_split, consts};
+use crate::thesy::case_split::{CaseSplit, Split, SplitApplier};
+use crate::thesy::example_creator::Examples;
 use crate::thesy::prover::Prover;
 use crate::thesy::statistics::Stats;
 use crate::tools::tools::choose;
-use crate::thesy::case_split::{CaseSplit, Split, SplitApplier};
-use crate::thesy::{case_split, consts};
-use bimap::BiHashMap;
-use crate::thesy::example_creator::Examples;
-use std::rc::Rc;
-use multimap::MultiMap;
 
 /// Theory Synthesizer - Explores a given theory finding and proving new lemmas.
 pub struct TheSy {
@@ -655,22 +654,22 @@ mod test {
     use std::str::FromStr;
     use std::time::SystemTime;
 
+    use egg::{EGraph, Pattern, RecExpr, Rewrite, Runner, Searcher, SearchMatches, Symbol, SymbolLang, Var};
     use itertools::Itertools;
 
-    use egg::{EGraph, Pattern, RecExpr, Rewrite, Runner, Searcher, SymbolLang, Symbol, SearchMatches, Var};
-
     use crate::eggstentions::appliers::DiffApplier;
-    use crate::lang::{DataType, Function};
-    use crate::thesy::thesy::TheSy;
-    use crate::TheSyConfig;
-    use crate::thesy::case_split::{CaseSplit, SplitApplier, Split};
-    use crate::thesy::{consts, Examples};
-    use crate::thesy::consts::ite_rws;
-    use crate::tools::tools::Grouped;
     use crate::eggstentions::reconstruct::{reconstruct, reconstruct_all};
-    use crate::tests::init_logging;
     use crate::eggstentions::searchers::multisearcher::ToDyn;
-    use crate::thesy::thesy_parser::parser::{parse, Definitions};
+    use crate::lang::{DataType, Function};
+    use crate::tests::init_logging;
+    use crate::thesy::{consts, Examples};
+    use crate::thesy::case_split::{CaseSplit, Split, SplitApplier};
+    use crate::thesy::consts::ite_rws;
+    use crate::thesy::semantics::Definitions;
+    use crate::thesy::thesy::TheSy;
+    use crate::thesy::thesy_parser::parser::parse;
+    use crate::TheSyConfig;
+    use crate::tools::tools::Grouped;
 
     fn create_nat_type() -> DataType {
         DataType::new("nat".to_string(), vec![
