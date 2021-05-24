@@ -1,14 +1,14 @@
 (include nat)
 (include nat.res)
 
-(declare-fun tri (Nat) Nat)
+fun tri (_: Nat) -> Nat
 
-(=> tri_base (tri zero) zero)
-(=> tri_ind_1 (tri (succ ?n)) (plus (tri ?n) (succ ?n)))
-(=> tri_ind_2 (plus (tri ?n) (succ ?n)) (tri (succ ?n)))
+rw tri_base (tri zero) => zero
+rw tri_ind_1 (tri (succ ?n)) => (plus (tri ?n) (succ ?n))
+rw tri_ind_2 (plus (tri ?n) (succ ?n)) => (tri (succ ?n))
 
-(declare-fun cubes (Nat) Nat)
+fun cubes (_: Nat) -> Nat
 
-(=> cubes_base (cubes zero) zero)
-(=> cubes_ind_1 (cubes (succ ?n)) (plus (cubes ?n) (mult (succ ?n) (mult (succ ?n) (succ ?n)))))
-(=> cubes_ind_2 (plus (cubes ?n) (mult (succ ?n) (mult (succ ?n) (succ ?n)))) (cubes (succ ?n)))
+rw cubes_base (cubes zero) => zero
+rw cubes_ind_1 (cubes (succ ?n)) => (plus (cubes ?n) (mult (succ ?n) (mult (succ ?n) (succ ?n))))
+rw cubes_ind_2 (plus (cubes ?n) (mult (succ ?n) (mult (succ ?n) (succ ?n)))) => (cubes (succ ?n))

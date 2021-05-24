@@ -1,9 +1,7 @@
 ;(include list)
 ;(include list.res)
-(datatype Lst () ((cons Nat Lst Lst) (nil Lst)))
+datatype Lst () := (cons : Nat -> Lst -> Lst) (nil : Lst)
 
-(declare-fun filter ((-> Nat bool) Lst) Lst)
-(=> filter_base (filter ?p nil) nil)
-(=> filter_ind (filter ?p (cons ?x ?xs)) (ite (apply ?p ?x) (cons ?x (filter ?p ?xs)) (filter ?p ?xs)))
-
-(=|> filter_split (filter ?p (cons ?x ?xs)) (potential_split (apply ?p ?x) true false))
+fun filter (f: (-> Nat bool) l : Lst) -> Lst
+rw filter_base (filter ?p nil) => nil
+rw filter_ind (filter ?p (cons ?x ?xs)) => (ite (apply ?p ?x) (cons ?x (filter ?p ?xs)) (filter ?p ?xs))

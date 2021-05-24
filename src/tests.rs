@@ -29,7 +29,7 @@ pub enum ProofMode {
 
 // TODO: maybe hint on recursion
 pub fn test_terms(mut definitions: Definitions) -> ProofMode {
-    let mut thesy: TheSy = definitions.into();
+    let mut thesy: TheSy = TheSy::from(&definitions);
     let mut case_splitter = TheSy::create_case_splitter(definitions.case_splitters);
     assert_eq!(1, definitions.conjectures.len());
     let (vars, precond, ex1, ex2) =
@@ -58,7 +58,7 @@ pub fn test_terms(mut definitions: Definitions) -> ProofMode {
         return ProofMode::TermNotCreated;
     }
 
-    for d in definitions.datatypes {
+    for d in &definitions.datatypes {
         // Check exploration results
         thesy.equiv_reduc(&mut definitions.rws);
         // TODO: generalize ex1\ex2 to placeholders
@@ -68,7 +68,7 @@ pub fn test_terms(mut definitions: Definitions) -> ProofMode {
         // }
 
         // Attempt proof
-        let prover = &thesy.datatypes[&d];
+        let prover = &thesy.datatypes[d];
         let res = prover.prove_ind(&mut Some(&mut case_splitter), &definitions.rws, ex1, ex2);
         if res.is_some() {
             return ProofMode::Prover;

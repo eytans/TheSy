@@ -1,14 +1,14 @@
-(datatype Lst () ((cons Nat Lst Lst) (nil Lst)))
+datatype Lst () := (nil : (ret : Lst))
 
-(declare-fun append (Lst Lst) Lst)
-(=> app_base (append nil ?x) ?x)
-(=> app_ind1 (append (cons ?x ?y) ?z) (cons ?x (append ?y ?z)))
-(=> app_ind2 (cons ?x (append ?y ?z)) (append (cons ?x ?y) ?z))
+fun append (l1: Lst) (l2: Lst) -> Lst
+rw app_base (append nil ?x) => ?x
+rw app_ind1 (append (cons ?x ?y) ?z) => (cons ?x (append ?y ?z))
+rw app_ind2 (cons ?x (append ?y ?z)) => (append (cons ?x ?y) ?z)
 
-(declare-fun snoc (Lst Nat) Lst)
-(=> snoc_base (snoc nil ?x) (cons ?x nil))
-(<=> snoc_ind (snoc (cons ?x ?xs) ?y) (cons ?x (snoc ?xs ?y)))
+fun snoc l: Lst x: Nat -> Lst
+rw snoc_base (snoc nil ?x) => (cons ?x nil)
+rw snoc_ind (snoc (cons ?x ?xs) ?y) <=> (cons ?x (snoc ?xs ?y))
 
-(declare-fun rev (Lst) Lst)
-(=> rev_base (rev nil) nil)
-(<=> rev_ind (rev (cons ?x ?y)) (snoc (rev ?y) ?x))
+fun rev l:Lst -> Lst
+rw rev_base (rev nil) => nil
+rw rev_ind (rev (cons ?x ?y)) <=> (snoc (rev ?y) ?x)
