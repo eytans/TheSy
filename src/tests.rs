@@ -4,6 +4,9 @@ use crate::thesy::semantics::Definitions;
 use crate::thesy::case_split::CaseSplit;
 use crate::thesy::prover::Prover;
 use std::collections::HashSet;
+use thesy_parser::ast;
+use std::str::FromStr;
+use thesy_parser::ast::Terminal;
 
 pub fn init_logging() {
     use simplelog::*;
@@ -31,9 +34,10 @@ pub enum ProofMode {
 pub fn test_terms(mut definitions: Definitions) -> ProofMode {
     let mut thesy: TheSy = TheSy::from(&definitions);
     let mut case_splitter = TheSy::create_case_splitter(definitions.case_splitters);
+    assert_eq!(1, definitions.goals.len());
     assert_eq!(1, definitions.conjectures.len());
-    let (vars, precond, ex1, ex2) =
-        definitions.conjectures.first().unwrap();
+    let (vars, precond, ex1, ex2) = definitions.conjectures.first().unwrap();
+    let (mut ast_precond, mut ast_exp1, mut ast_exp2) = definitions.goals.pop().unwrap();
 
     // Assert terms are not equal
     assert!(!TheSy::check_equality(&definitions.rws, precond, ex1, ex2));
@@ -46,8 +50,6 @@ pub fn test_terms(mut definitions: Definitions) -> ProofMode {
         return ProofMode::CaseSplit;
     }
 
-    // TODO: override expression 1 and 2 into ph format.
-
     // Create term succeeds
     thesy.increase_depth();
     thesy.equiv_reduc(&mut definitions.rws);
@@ -58,9 +60,32 @@ pub fn test_terms(mut definitions: Definitions) -> ProofMode {
         return ProofMode::TermNotCreated;
     }
 
+    // Reduce finds equality on examples
+    thesy.equiv_reduc(&mut definitions.rws);
+    // Take ast expressions and translate to placeholder by annotations
+    let exp_translator = |t: &Terminal| {
+        if let Some(a) = t.anno() {
+            Terminal::Id(
+                TheSy::get_ph(&RecExpr::from_str(
+                    &*a.get_type().unwrap().to_sexp_string()
+                ).unwrap(),
+                              a.get_ph().unwrap()
+                ).name, Some(a.clone()))
+        } else {
+            t.clone()
+        }
+    };
+    // let ph_precond = ast_precond.map(|e| e.map(exp_translator));
+    let ph_exp1 = RecExpr::from_str(&*ast_exp1.map(exp_translator).to_sexp_string()).unwrap();
+    let ph_exp2 = RecExpr::from_str(&*ast_exp2.map(exp_translator).to_sexp_string()).unwrap();
+    if !(precond.is_none() ||
+        thesy.egraph.add_expr(&ph_exp1) == thesy.egraph.add_expr(&ph_exp2)) {
+        return ProofMode::ExamplesFailed;
+    }
+
     for d in &definitions.datatypes {
         // Check exploration results
-        thesy.equiv_reduc(&mut definitions.rws);
+
         // TODO: generalize ex1\ex2 to placeholders
         // TODO: verify both are equal over examples (for at least one permutation of ph assignment.
         // if  {

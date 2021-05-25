@@ -34,7 +34,9 @@ pub struct Definitions {
     /// Logic of when to apply case split
     pub case_splitters: Vec<(Rc<dyn Searcher<SymbolLang, ()>>, Var, Vec<Pattern<SymbolLang>>)>,
     /// patterns used to deduce case splits
-    name_pats: Vec<(String, Expression)>
+    name_pats: Vec<(String, Expression)>,
+    /// goals in ast format
+    pub goals: Vec<(Option<Expression>, Expression, Expression)>
 }
 
 impl Definitions {
@@ -126,7 +128,8 @@ impl From<Vec<Statement>> for Definitions {
                     res.process_datatype(name, constructors);
                 }
                 Statement::Goal(precond, exp1, exp2) => {
-                    res.process_goals(precond, exp1, exp2);
+                    res.process_goals(precond.as_ref(), &exp1, &exp2);
+                    res.goals.push((precond, exp1, exp2));
                 }
                 Statement::CaseSplit(searcher, var, pats) => {
                     res.case_splitters.push((
@@ -234,7 +237,7 @@ impl Definitions {
         })
     }
 
-    fn process_goals(&mut self, precond: Option<Expression>, exp1: Expression, exp2: Expression) {
+    fn process_goals(&mut self, precond: Option<&Expression>, exp1: &Expression, exp2: &Expression) {
         let mut type_map = HashMap::new();
         let mut all_terminals = precond.iter()
             .flat_map(|e| e.terminals().iter().cloned().cloned().collect_vec())
