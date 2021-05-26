@@ -169,6 +169,10 @@ impl TheSy {
         }
     }
 
+    pub fn get_example_ids(&self, datatype: &DataType, class: Id) -> Option<&Vec<Id>> {
+        self.example_ids.get(datatype).map(|x| x.get(&class)).unwrap_or(None)
+    }
+
     fn known_functions<'a>(datatypes: &'a Vec<DataType>, dict: &'a [Function]) -> impl Iterator<Item=&'a Function> {
         dict.iter().chain(datatypes.iter().flat_map(|d| d.constructors.iter()))
     }

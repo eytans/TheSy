@@ -78,23 +78,20 @@ pub fn test_terms(mut definitions: Definitions) -> ProofMode {
     // let ph_precond = ast_precond.map(|e| e.map(exp_translator));
     let ph_exp1 = RecExpr::from_str(&*ast_exp1.map(exp_translator).to_sexp_string()).unwrap();
     let ph_exp2 = RecExpr::from_str(&*ast_exp2.map(exp_translator).to_sexp_string()).unwrap();
-    if !(precond.is_none() ||
-        thesy.egraph.add_expr(&ph_exp1) == thesy.egraph.add_expr(&ph_exp2)) {
+    let ph_id1 = thesy.egraph.add_expr(&ph_exp1);
+    let ph_id2 = thesy.egraph.add_expr(&ph_exp2);
+    if precond.is_none() && thesy.datatypes.keys().all(|d| {
+        thesy.get_example_ids(d, ph_id1)
+        != thesy.get_example_ids(d, ph_id2) }) {
         return ProofMode::ExamplesFailed;
     }
 
     for d in &definitions.datatypes {
         // Check exploration results
 
-        // TODO: generalize ex1\ex2 to placeholders
-        // TODO: verify both are equal over examples (for at least one permutation of ph assignment.
-        // if  {
-        //
-        // }
-
         // Attempt proof
         let prover = &thesy.datatypes[d];
-        let res = prover.prove_ind(&mut Some(&mut case_splitter), &definitions.rws, ex1, ex2);
+        let res = prover.prove_all_split_d(&mut Some(&mut case_splitter), &definitions.rws, Option::from(precond), ex1, ex2, 3);
         if res.is_some() {
             return ProofMode::Prover;
         }
