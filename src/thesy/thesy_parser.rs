@@ -1,4 +1,4 @@
-pub mod parser {
+mod parser {
     use std::collections::HashMap;
     use std::error::Error;
     use std::fmt;
@@ -47,7 +47,7 @@ pub mod parser {
         }
     }
 
-    pub fn parse_file(f: String) -> Result<Definitions, TheSyParseErr> {
+    fn parse_file(f: String) -> Result<Definitions, TheSyParseErr> {
         let mut file = File::open(f);
         let mut contents = String::new();
         file.and_then(|mut f| f.read_to_string(&mut contents)).map_err(|x| IOError(x))
@@ -85,7 +85,7 @@ pub mod parser {
         Rewrite::new(name, psearcher, applier)
     }
 
-    pub fn parse(lines: &[String]) -> Result<Definitions, TheSyParseErr> {
+    fn parse(lines: &[String]) -> Result<Definitions, TheSyParseErr> {
         // Creating case split rewrites is done per function.
         // Either the body of the function contains ite or the different rewrites
         // span a match expression on a second variable.

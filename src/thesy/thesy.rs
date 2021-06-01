@@ -671,7 +671,6 @@ mod test {
     use crate::thesy::consts::ite_rws;
     use crate::thesy::semantics::Definitions;
     use crate::thesy::thesy::TheSy;
-    use crate::thesy::thesy_parser::parser::parse;
     use crate::TheSyConfig;
     use crate::tools::tools::Grouped;
 
@@ -913,12 +912,10 @@ mod test {
     }
 
     fn filter_definitions() -> Definitions {
-        let definitions = parse(&vec!["(include list)".to_string(),
-                                      "(declare-fun filter ((-> Nat bool) Lst) Lst)".to_string(),
-                                      "(=> filter_base (filter ?p nil) nil)".to_string(),
-                                      "(=> filter_ind (filter ?p (cons ?x ?xs)) (ite (apply ?p ?x) (cons ?x (filter ?p ?xs)) (filter ?p ?xs)))".to_string()]);
-
-        definitions.unwrap()
+        let mut list_defs = Definitions::from_file(&"theories/list.th".parse().unwrap());
+        list_defs.merge(Definitions::from_file(&"thoeries/filter.th".parse().unwrap()));
+        println!("{}", list_defs.datatypes.len());
+        list_defs
     }
 
     #[test]
@@ -949,7 +946,7 @@ mod test {
     fn filter_p_filter_q_conjecture() {
         // We are ignoring this until smart splits is working (the filter feature on edges prevents the depth of case splits needed here).
 
-        // init_logging();
+        init_logging();
 
         let mut filter_defs = filter_definitions();
         filter_defs.functions = filter_defs.functions.into_iter().filter(|f| f.name == "filter".to_string()).collect_vec();
@@ -990,13 +987,14 @@ mod test {
     }
 
     #[test]
+    #[ignore]
     fn split_case_filter_p_and_q() {}
 
     #[test]
     fn take_drop_equiv_red() {
         init_logging();
 
-        let mut conf = TheSyConfig::from_path("frontend/benchmarks/cvc4_translated/isaplanner/goal1.smt2.th".parse().unwrap());
+        let mut conf = TheSyConfig::from_path("theories/goal1.smt2.th".parse().unwrap());
         let mut thesy = TheSy::from(&conf);
         let mut case_split = TheSy::create_case_splitter(conf.definitions.case_splitters);
         let mut rules = std::mem::take(&mut conf.definitions.rws);
@@ -1034,7 +1032,9 @@ mod test {
 
     #[test]
     fn filtering_searcher_playground() {
-        let mut conf = TheSyConfig::from_path("frontend/benchmarks/cvc4_translated/clam/goal1.smt2.th".parse().unwrap());
+        init_logging();
+
+        let mut conf = TheSyConfig::from_path("theories/goal1.smt2.th".parse().unwrap());
         let mut thesy = TheSy::from(&conf);
         let rules = std::mem::take(&mut conf.definitions.rws);
         println!("{}", rules.last().unwrap().name());

@@ -74,7 +74,7 @@ impl Definitions {
                 }
             },
             Err(e) => {
-                println!("{}", e);
+                error!("{}", e);
                 panic!("Please implement error handleing")
             }
         }

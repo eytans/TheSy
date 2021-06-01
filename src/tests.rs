@@ -14,7 +14,10 @@ pub fn init_logging() {
     let mut builder = ConfigBuilder::new();
     builder.add_filter_ignore("egg".parse().unwrap());
     let config = builder.build();
-    TermLogger::init(LevelFilter::Info, config, TerminalMode::Mixed).unwrap();
+    let logger = TermLogger::init(LevelFilter::Info, config, TerminalMode::Mixed);
+    if logger.is_err() {
+        println!("Error initializing log: {}", logger.unwrap_err());
+    }
 }
 
 pub enum ProofMode {

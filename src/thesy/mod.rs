@@ -5,7 +5,6 @@ pub use {
 
 pub mod thesy;
 pub mod example_creator;
-pub mod thesy_parser;
 pub mod prover;
 pub mod statistics;
 pub mod case_split;
