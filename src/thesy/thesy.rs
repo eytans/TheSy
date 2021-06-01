@@ -1084,6 +1084,8 @@ mod test {
 
     #[test]
     fn test_list_run_append_assoc() {
+        init_logging();
+
         let mut config = TheSyConfig::from_path("theories/list.th".parse().unwrap());
         let mut thesy = TheSy::from(&config);
         thesy.run(&mut config.definitions.rws, None, 2);

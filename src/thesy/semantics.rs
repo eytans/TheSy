@@ -59,7 +59,11 @@ impl Definitions {
         match res {
             Ok(x) => {
                 match x {
-                    Defs(stmts) => Definitions::from(stmts)
+                    Defs(stmts) => {
+                        let res = Definitions::from(stmts);
+                        info!("Read definitions:\n{}", res);
+                        res
+                    }
                 }
             },
             Err(e) => {
@@ -176,15 +180,11 @@ impl std::fmt::Display for Definitions {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         writeln!(f, "datatypes:")?;
         for d in &self.datatypes {
-            write!(f, "  ")?;
-            d.fmt(f)?;
-            writeln!(f);
+            write!(f, "  {}", d)?;
         }
         writeln!(f, "functions:")?;
         for fun in &self.functions {
-            write!(f, "  ")?;
-            fun.fmt(f)?;
-            writeln!(f);
+            write!(f, "  {}", fun)?;
         }
         writeln!(f, "rewrites:")?;
         for rw in &self.rws {
@@ -216,7 +216,7 @@ impl Definitions {
                                               target.clone(),
                                               source.clone(),
                                               conds.clone()));
-                rws.push(Definitions::make_rw(name, precond, source, target, conds));
+                rws.push(Definitions::make_rw(name + "_rev", precond, source, target, conds));
             }
             ast::Rewrite::AddSearcher(
                 precond, source, target, conds

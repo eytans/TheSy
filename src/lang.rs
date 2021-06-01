@@ -2,6 +2,7 @@ use egg::{Id, Language, RecExpr, Symbol, SymbolLang};
 use itertools::Itertools;
 
 use crate::eggstentions::expression_ops::{IntoTree, Tree};
+use std::fmt::{Display, Formatter};
 
 #[derive(Clone, Hash, PartialEq, Eq, Debug)]
 pub struct DataType {
@@ -12,12 +13,30 @@ pub struct DataType {
     pub constructors: Vec<Function>,
 }
 
+impl Display for DataType {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        writeln!(f, "Datatype {}: types - {}", self.name, self.type_params.iter().map(|e| e.pretty(500)).join(" "))?;
+        write!(f, "  {}", self.constructors.iter().map(|f| format!("{}", f)).join("| "))
+    }
+}
+
 #[derive(Clone, Hash, PartialEq, Eq, Debug)]
 pub struct Function {
     pub name: String,
     pub params: Vec<RecExpr<SymbolLang>>,
     /// Constructor name applied on types
     pub ret_type: RecExpr<SymbolLang>,
+}
+
+impl Display for Function {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        writeln!(f, "Function {}: {}{}{}",
+            self.name,
+            self.params.iter().map(|x| x.pretty(500)).join(" -> "),
+            self.params.first().map(|x| " -> ").unwrap_or(" "),
+            self.ret_type.pretty(500)
+        )
+    }
 }
 
 impl Function {

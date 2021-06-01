@@ -26,7 +26,7 @@ use structopt::StructOpt;
 use egg::*;
 
 use crate::eggstentions::pretty_string::PrettyString;
-use crate::thesy::{example_creator, thesy_parser};
+use crate::thesy::{example_creator};
 use crate::thesy::case_split::{CaseSplit, Split};
 use crate::thesy::thesy::TheSy;
 use thesy::semantics::Definitions;
@@ -62,7 +62,7 @@ struct CliOpt {
 impl From<&CliOpt> for TheSyConfig {
     fn from(opts: &CliOpt) -> Self {
         TheSyConfig::new(
-            thesy_parser::parser::parse_file(opts.path.to_str().unwrap().to_string()).unwrap(),
+            Definitions::from_file(&opts.path),
             opts.ph_count,
             vec![],
             opts.path.with_extension("res.th"),
@@ -106,8 +106,8 @@ impl TheSyConfig {
     }
 
     pub fn from_path(path: String) -> TheSyConfig {
-        let definitions = thesy_parser::parser::parse_file(path.clone());
-        TheSyConfig::new(definitions.unwrap(), 2, vec![], PathBuf::from(path).with_extension("res"), true)
+        let definitions = Definitions::from_file(&PathBuf::from(path.clone()));
+        TheSyConfig::new(definitions, 2, vec![], PathBuf::from(path).with_extension("res"), true)
     }
 
     /// Run thesy using current configuration returning (thesy instance, previous + new rewrites)
