@@ -665,13 +665,13 @@ mod test {
     use crate::eggstentions::reconstruct::{reconstruct, reconstruct_all};
     use crate::eggstentions::searchers::multisearcher::ToDyn;
     use crate::lang::{DataType, Function};
-    use crate::tests::init_logging;
+    use crate::tests::{init_logging, ProofMode};
     use crate::thesy::{consts, Examples};
     use crate::thesy::case_split::{CaseSplit, Split, SplitApplier};
     use crate::thesy::consts::ite_rws;
     use crate::thesy::semantics::Definitions;
     use crate::thesy::thesy::TheSy;
-    use crate::TheSyConfig;
+    use crate::{TheSyConfig, tests};
     use crate::tools::tools::Grouped;
 
     fn create_nat_type() -> DataType {
@@ -1096,5 +1096,26 @@ mod test {
         assert_eq!(config.definitions.datatypes.len(), 1);
         let res = TheSy::check_equality(&config.definitions.rws, &None, &"(append x (append y z))".parse().unwrap(), &"(append (append x y) z)".parse().unwrap());
         assert!(res);
+    }
+
+    #[test]
+    fn test_split_and_or() {
+        init_logging();
+
+        let mut defs = Definitions::from_file(&"tests/booleans.th".parse().unwrap());
+        let mut conjectures = std::mem::take(&mut defs.conjectures);
+        let mut goals = std::mem::take(&mut defs.goals);
+        for (c, g) in conjectures.into_iter().zip(goals.into_iter()) {
+            info!("proving {}{} = {}",
+                  g.0.as_ref().map_or("".to_string(), |e| e.to_string() + "|> "),
+                  &g.1,
+                  &g.2);
+            defs.goals = vec![g];
+            defs.conjectures = vec![c];
+            let proof = tests::test_terms(defs.clone());
+            assert_ne!(ProofMode::ExamplesFailed, proof);
+            assert_ne!(ProofMode::Failed, proof);
+            assert_ne!(ProofMode::TermNotCreated, proof);
+        }
     }
 }

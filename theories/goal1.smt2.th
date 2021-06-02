@@ -1,0 +1,29 @@
+datatype Nat () := (succ : (x: Nat) -> (ret: Nat)) (zero : ret : Nat)
+datatype Lst () := (nil : (ret : Lst)) (cons : (x: Nat) -> (xs: Lst) -> (ret: Lst))
+fun append (l1: Lst) (l2: Lst) -> Lst
+fun drop x: Nat l : Lst -> Lst
+fun take x: Nat l : Lst -> Lst
+rw rule0 (append nil ?x) => ?x
+rw rule1 (append (cons ?x50 ?y) ?z) => (cons ?x50 (append ?y ?z))
+rw rule2 (cons ?x50 (append ?y ?z)) => (append (cons ?x50 ?y) ?z)
+rw rule3 (drop ?x51 nil) => nil
+rw rule4 (drop zero ?x) => ?x
+rw rule5 (drop (succ ?x52) (cons ?y53 ?z)) => (drop ?x52 ?z)
+rw rule6 (take ?x54 nil) => nil
+rw rule7 (take zero ?x) => nil
+rw rule8 (take (succ ?x55) (cons ?y56 ?z)) => (cons ?y56 (take ?x55 ?z))
+rw rule9 (cons ?y56 (take ?x55 ?z)) => (take (succ ?x55) (cons ?y56 ?z))
+fun plus x: Nat  y : Nat -> Nat
+rw plus_base (plus zero ?n) => ?n
+rw plus_ind_1 (plus (succ ?n) ?m) => (succ (plus ?n ?m))
+rw plus_ind_2 (succ (plus ?n ?m)) => (plus (succ ?n) ?m)
+
+fun sum (l: Lst) -> Nat
+rw sum_base (sum nil) => zero
+rw sum_ind1 (sum (cons ?x ?y)) => (plus ?x (sum ?y))
+rw sum_ind2 (plus ?x (sum ?y)) => (sum (cons ?x ?y))
+fun len (l : Lst) -> Nat
+rw len_base (len nil) => zero
+rw len_ind (len (cons ?x ?xs)) => (succ (len ?xs))
+
+prove (append (take (i: Nat) (l: Lst)) (drop i l)) = l

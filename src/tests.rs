@@ -14,12 +14,13 @@ pub fn init_logging() {
     let mut builder = ConfigBuilder::new();
     builder.add_filter_ignore("egg".parse().unwrap());
     let config = builder.build();
-    let logger = TermLogger::init(LevelFilter::Info, config, TerminalMode::Mixed);
+    let logger = TermLogger::init(LevelFilter::Debug, config, TerminalMode::Mixed);
     if logger.is_err() {
         println!("Error initializing log: {}", logger.unwrap_err());
     }
 }
 
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum ProofMode {
     /// Proved by case split without exploration
     CaseSplit,
@@ -47,24 +48,6 @@ pub fn test_terms(mut definitions: Definitions) -> ProofMode {
 
     let mut egraph = Prover::create_graph(precond.as_ref(), &ex1, &ex2);
 
-    // Attempt prove by case split
-    case_splitter.case_split(&mut egraph, 1, &definitions.rws, 8);
-    if egraph.add_expr(ex1) == egraph.add_expr(ex2) {
-        return ProofMode::CaseSplit;
-    }
-
-    // Create term succeeds
-    thesy.increase_depth();
-    thesy.equiv_reduc(&mut definitions.rws);
-    thesy.increase_depth();
-    let classes = thesy.egraph.classes().map(|x| x.id).collect::<HashSet<Id>>();
-    if (!classes.contains(&thesy.egraph.add_expr(ex1))) ||
-        !classes.contains(&thesy.egraph.add_expr(ex2)) {
-        return ProofMode::TermNotCreated;
-    }
-
-    // Reduce finds equality on examples
-    thesy.equiv_reduc(&mut definitions.rws);
     // Take ast expressions and translate to placeholder by annotations
     let exp_translator = |t: &Terminal| {
         if let Some(a) = t.anno() {
@@ -78,11 +61,32 @@ pub fn test_terms(mut definitions: Definitions) -> ProofMode {
             t.clone()
         }
     };
+
     // let ph_precond = ast_precond.map(|e| e.map(exp_translator));
-    let ph_exp1 = RecExpr::from_str(&*ast_exp1.map(exp_translator).to_sexp_string()).unwrap();
-    let ph_exp2 = RecExpr::from_str(&*ast_exp2.map(exp_translator).to_sexp_string()).unwrap();
+    let ph_exp1 = RecExpr::from_str(&*ast_exp1.map(&exp_translator).to_sexp_string()).unwrap();
+    let ph_exp2 = RecExpr::from_str(&*ast_exp2.map(&exp_translator).to_sexp_string()).unwrap();
     let ph_id1 = thesy.egraph.add_expr(&ph_exp1);
     let ph_id2 = thesy.egraph.add_expr(&ph_exp2);
+    info!("ph_exp1: {}, ph_exp2: {}", ph_exp1, ph_exp2);
+
+    // Attempt prove by case split
+    case_splitter.case_split(&mut egraph, 1, &definitions.rws, 8);
+    if egraph.add_expr(ex1) == egraph.add_expr(ex2) {
+        return ProofMode::CaseSplit;
+    }
+
+    // Create term succeeds
+    thesy.increase_depth();
+    thesy.equiv_reduc(&mut definitions.rws);
+    thesy.increase_depth();
+    let classes = thesy.egraph.classes().map(|x| x.id).collect::<HashSet<Id>>();
+    if (!classes.contains(&thesy.egraph.add_expr(&ph_exp1))) ||
+        !classes.contains(&thesy.egraph.add_expr(&ph_exp2)) {
+        return ProofMode::TermNotCreated;
+    }
+
+    // Reduce finds equality on examples
+    thesy.equiv_reduc(&mut definitions.rws);
     if precond.is_none() && thesy.datatypes.keys().all(|d| {
         thesy.get_example_ids(d, ph_id1)
         != thesy.get_example_ids(d, ph_id2) }) {

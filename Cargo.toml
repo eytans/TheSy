@@ -29,7 +29,9 @@ serde = {version = "1.0.116", features = ["derive"], optional = true}
 serde_json = {version = "1.0.58", optional = true}
 
 [features]
+default = ["split_clone"]
 stats = ["serde", "serde_json", "egg/serde-1"]
+split_colored = ["egg/colored"]
 split_clone = []
 no_split = ["no_expl_split"]
 no_expl_split = []
