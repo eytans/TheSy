@@ -169,8 +169,8 @@ impl TheSy {
         }
     }
 
-    pub fn get_example_ids(&self, datatype: &DataType, class: Id) -> Option<&Vec<Id>> {
-        self.example_ids.get(datatype).map(|x| x.get(&class)).unwrap_or(None)
+    pub fn get_example_ids(&self, datatype: &DataType, class: Id) -> Option<Vec<Id>> {
+        self.example_ids.get(datatype).map(|x| x.get(&class).map(|v| v.iter().map(|c| self.egraph.find(*c)).collect_vec())).unwrap_or(None)
     }
 
     fn known_functions<'a>(datatypes: &'a Vec<DataType>, dict: &'a [Function]) -> impl Iterator<Item=&'a Function> {
@@ -1103,6 +1103,27 @@ mod test {
         init_logging();
 
         let mut defs = Definitions::from_file(&"tests/booleans.th".parse().unwrap());
+        let mut conjectures = std::mem::take(&mut defs.conjectures);
+        let mut goals = std::mem::take(&mut defs.goals);
+        for (c, g) in conjectures.into_iter().zip(goals.into_iter()) {
+            info!("proving {}{} = {}",
+                  g.0.as_ref().map_or("".to_string(), |e| e.to_string() + "|> "),
+                  &g.1,
+                  &g.2);
+            defs.goals = vec![g];
+            defs.conjectures = vec![c];
+            let proof = tests::test_terms(defs.clone());
+            assert_ne!(ProofMode::ExamplesFailed, proof);
+            assert_ne!(ProofMode::Failed, proof);
+            assert_ne!(ProofMode::TermNotCreated, proof);
+        }
+    }
+
+    #[test]
+    fn test_split_minus_plus() {
+        init_logging();
+
+        let mut defs = Definitions::from_file(&"tests/minus.th".parse().unwrap());
         let mut conjectures = std::mem::take(&mut defs.conjectures);
         let mut goals = std::mem::take(&mut defs.goals);
         for (c, g) in conjectures.into_iter().zip(goals.into_iter()) {

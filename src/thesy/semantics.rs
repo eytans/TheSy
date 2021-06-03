@@ -135,9 +135,17 @@ impl From<Vec<Statement>> for Definitions {
                     res.process_goals(precond.as_ref(), &exp1, &exp2);
                     res.goals.push((precond, exp1, exp2));
                 }
-                Statement::CaseSplit(searcher, var, pats) => {
+                Statement::CaseSplit(searcher, var, pats, conditions) => {
+                    let searcher = Pattern::from_str(&*searcher.to_sexp_string()).unwrap().into_rc_dyn();
+                    let conditions = conditions.into_iter().map(|(t, e)| {
+                        FilteringSearcher::create_non_pattern_filterer(
+                            Definitions::exp_to_pattern(&e).into_rc_dyn(),
+                            Var::from_str(&*t.to_string()).unwrap())
+                    }).collect_vec();
+                    let cond_searcher = FilteringSearcher::new(searcher,
+                                                               aggregate_conditions(conditions));
                     res.case_splitters.push((
-                        Pattern::from_str(&*searcher.to_sexp_string()).unwrap().into_rc_dyn(),
+                        cond_searcher.into_rc_dyn(),
                         Var::from_str(&*var.to_string()).unwrap(),
                         pats.iter().map(|x|
                             Pattern::from_str(&*x.to_sexp_string()).unwrap()).collect_vec()))

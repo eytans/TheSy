@@ -3,9 +3,6 @@ datatype Nat () := (Z: ret: Nat) (S: x: Nat -> ret: Nat)
 fun plus x: Nat y: Nat -> Nat
 rw plus_base (plus Z ?x) => (?x)
 rw plus_ind (plus (S ?y) ?x) <=> (S (plus ?y ?x))
-fun mult x: Nat y: Nat -> Nat
-rw mult_base (mult Z ?n) => Z
-rw mult_ind (mult (S ?n) ?m) <=> (plus (mult ?n ?m) ?m)
 
 fun minus x: Nat y: Nat -> Nat
 rw minus_base (minus ?y Z) => ?y
@@ -14,3 +11,5 @@ rw minus_rw (minus (S ?y) (S ?x)) => (minus ?y ?x)
 
 split ?x in (minus (S ?y) ?x) to Z (S (f ?x)) when (?x != (S ?p)) and (?x != Z)
 split ?x in (minus ?x (S ?y)) to Z (S (f ?x)) when (?x != (S ?p)) and (?x != Z)
+
+prove (minus v: {ph( 0 ), Nat} v: {ph( 0 ), Nat}) = Z

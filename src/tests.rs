@@ -7,6 +7,7 @@ use std::collections::HashSet;
 use thesy_parser::ast;
 use std::str::FromStr;
 use thesy_parser::ast::Terminal;
+use crate::eggstentions::reconstruct::reconstruct;
 
 pub fn init_logging() {
     use simplelog::*;
@@ -14,7 +15,7 @@ pub fn init_logging() {
     let mut builder = ConfigBuilder::new();
     builder.add_filter_ignore("egg".parse().unwrap());
     let config = builder.build();
-    let logger = TermLogger::init(LevelFilter::Debug, config, TerminalMode::Mixed);
+    let logger = TermLogger::init(LevelFilter::Debug, config, TerminalMode::Mixed, ColorChoice::Auto);
     if logger.is_err() {
         println!("Error initializing log: {}", logger.unwrap_err());
     }
@@ -55,7 +56,7 @@ pub fn test_terms(mut definitions: Definitions) -> ProofMode {
                 TheSy::get_ph(&RecExpr::from_str(
                     &*a.get_type().unwrap().to_sexp_string()
                 ).unwrap(),
-                              a.get_ph().unwrap()
+                              a.get_ph().unwrap(),
                 ).name, Some(a.clone()))
         } else {
             t.clone()
@@ -80,16 +81,23 @@ pub fn test_terms(mut definitions: Definitions) -> ProofMode {
     thesy.equiv_reduc(&mut definitions.rws);
     thesy.increase_depth();
     let classes = thesy.egraph.classes().map(|x| x.id).collect::<HashSet<Id>>();
-    if (!classes.contains(&thesy.egraph.add_expr(&ph_exp1))) ||
-        !classes.contains(&thesy.egraph.add_expr(&ph_exp2)) {
+    if !classes.contains(&thesy.egraph.find(ph_id1)) ||
+        !classes.contains(&thesy.egraph.find(ph_id2)) {
         return ProofMode::TermNotCreated;
     }
 
     // Reduce finds equality on examples
     thesy.equiv_reduc(&mut definitions.rws);
+    let ph_id1 = thesy.egraph.find(ph_id1);
+    let ph_id2 = thesy.egraph.find(ph_id2);
     if precond.is_none() && thesy.datatypes.keys().all(|d| {
         thesy.get_example_ids(d, ph_id1)
-        != thesy.get_example_ids(d, ph_id2) }) {
+            != thesy.get_example_ids(d, ph_id2)
+    }) {
+        println!("ph1: {}", reconstruct(&thesy.egraph, ph_id1, 5)
+            .map_or("".to_string(), |x| x.pretty(500)));
+        println!("ph2: {}", reconstruct(&thesy.egraph, ph_id2, 5)
+            .map_or("".to_string(), |x| x.pretty(500)));
         return ProofMode::ExamplesFailed;
     }
 
@@ -98,7 +106,12 @@ pub fn test_terms(mut definitions: Definitions) -> ProofMode {
 
         // Attempt proof
         let prover = &thesy.datatypes[d];
-        let res = prover.prove_all_split_d(&mut Some(&mut case_splitter), &definitions.rws, Option::from(precond), ex1, ex2, 3);
+        let res = prover.prove_all_split_d(&mut Some(&mut case_splitter),
+                                           &definitions.rws,
+                                           Option::from(precond),
+                                           &ph_exp1,
+                                           &ph_exp2,
+                                           1);
         if res.is_some() {
             return ProofMode::Prover;
         }

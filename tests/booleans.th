@@ -1,8 +1,8 @@
 datatype boolean () := (T: ret: boolean) (F: ret: boolean)
 
-fun And a: boolean b: boolean -> boolean => (ite ?a ?b false)
-fun Or a: boolean b: boolean -> boolean => (ite ?a true ?b)
-fun Not a: boolean -> boolean => (ite ?a false true)
+fun And a: boolean b: boolean -> boolean => (ite (#=# ?a T) ?b false)
+fun Or a: boolean b: boolean -> boolean => (ite (#=# ?a T) true ?b)
+fun Not a: boolean -> boolean => (ite (#=# ?a T) false true)
 
 prove (And v: {ph( 0 ), boolean} T) = v: {ph( 0 ), boolean}
 prove (And v: {ph( 0 ), boolean} F) = F

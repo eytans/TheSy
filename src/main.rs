@@ -212,7 +212,7 @@ fn main() {
     let log_path = args.path.with_extension("log");
     CombinedLogger::init(
         vec![
-            TermLogger::new(LevelFilter::Debug, Config::default(), TerminalMode::Mixed),
+            TermLogger::new(LevelFilter::Debug, Config::default(), TerminalMode::Mixed, ColorChoice::Auto),
             WriteLogger::new(LevelFilter::Info, Config::default(), File::create(log_path).unwrap()),
         ]
     ).unwrap();
