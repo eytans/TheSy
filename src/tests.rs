@@ -48,6 +48,15 @@ pub fn test_terms(mut definitions: Definitions) -> ProofMode {
     assert!(!TheSy::check_equality(&definitions.rws, precond, ex1, ex2));
 
     let mut egraph = Prover::create_graph(precond.as_ref(), &ex1, &ex2);
+    egraph.dot().to_dot("b_graph.dot");
+
+    // Attempt prove by case split
+    case_splitter.case_split(&mut egraph, 3, &definitions.rws, 8);
+    if egraph.add_expr(ex1) == egraph.add_expr(ex2) {
+        return ProofMode::CaseSplit;
+    }
+
+    egraph.dot().to_dot("a_graph.dot");
 
     // Take ast expressions and translate to placeholder by annotations
     let exp_translator = |t: &Terminal| {
@@ -69,12 +78,6 @@ pub fn test_terms(mut definitions: Definitions) -> ProofMode {
     let ph_id1 = thesy.egraph.add_expr(&ph_exp1);
     let ph_id2 = thesy.egraph.add_expr(&ph_exp2);
     info!("ph_exp1: {}, ph_exp2: {}", ph_exp1, ph_exp2);
-
-    // Attempt prove by case split
-    case_splitter.case_split(&mut egraph, 1, &definitions.rws, 8);
-    if egraph.add_expr(ex1) == egraph.add_expr(ex2) {
-        return ProofMode::CaseSplit;
-    }
 
     // Create term succeeds
     thesy.increase_depth();

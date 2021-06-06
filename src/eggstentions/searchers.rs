@@ -54,6 +54,15 @@ pub mod multisearcher {
         }
     }
 
+    impl<L: Language, N: Analysis<L>, A: Searcher<L, N> + Debug, B: Searcher<L, N> + Debug> std::fmt::Display for EitherSearcher<L, N, A, B> {
+        fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+            match &self.node {
+                Either::Left(x) => { write!(f, "{}", x) }
+                Either::Right(x) => { write!(f, "{}", x) }
+            }
+        }
+    }
+
     impl<L: Language, N: Analysis<L>, A: Searcher<L, N> + Debug + Clone, B: Searcher<L, N> + Debug + Clone> Clone for EitherSearcher<L, N, A, B> {
         fn clone(&self) -> Self {
             if self.node.is_left() {
@@ -158,6 +167,12 @@ pub mod multisearcher {
     pub struct MultiEqSearcher<A: Searcher<SymbolLang, ()>> {
         patterns: Vec<A>,
         common_vars: HashMap<Var, usize>,
+    }
+
+    impl<A: Searcher<SymbolLang, ()>> std::fmt::Display for MultiEqSearcher<A> {
+        fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+            write!(f, "{}", self.patterns.iter().map(|x| x.to_string()).join(" =:= "))
+        }
     }
 
     impl<A: Searcher<SymbolLang, ()>> MultiEqSearcher<A> {
@@ -274,13 +289,19 @@ pub mod multisearcher {
         }
     }
 
+    impl<S: Searcher<SymbolLang, ()> + 'static> std::fmt::Display for MultiDiffSearcher<S> {
+        fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+            write!(f, "{}", self.patterns.iter().map(|x| x.to_string()).join(" ||| "))
+        }
+    }
+
     // impl PrettyString for MultiDiffSearcher {
     //     fn pretty_string(&self) -> String {
     //         self.patterns.iter().map(|p| p.pretty_string()).intersperse(" |||| ".to_string()).collect()
     //     }
     // }
 
-    impl<A: Searcher<SymbolLang, ()>> Searcher<SymbolLang, ()> for MultiDiffSearcher<A> {
+    impl<A: 'static + Searcher<SymbolLang, ()>> Searcher<SymbolLang, ()> for MultiDiffSearcher<A> {
         fn search_eclass(&self, _: &EGraph<SymbolLang, ()>, _: Id) -> Option<SearchMatches> {
             unimplemented!()
         }
@@ -392,7 +413,7 @@ pub mod multisearcher {
         Rc<dyn Fn(&EGraph<L, N>, Vec<SearchMatches>) -> Vec<SearchMatches>> {
             Rc::new(move |graph: &EGraph<L, N>, sms: Vec<SearchMatches>| {
                 let res = searcher.search(graph).iter().map(|s| s.eclass).collect::<HashSet<Id>>();
-                sms.into_iter().filter_map(|mut sm | {
+                sms.into_iter().filter_map(|mut sm| {
                     let mut substs = std::mem::take(&mut sm.substs);
                     sm.substs = substs.into_iter().filter(|s| !res.contains(&s[root])).collect_vec();
                     if sm.substs.is_empty() {
@@ -440,7 +461,13 @@ pub mod multisearcher {
         })
     }
 
-    impl<L: Language, N: Analysis<L>> Searcher<L, N> for FilteringSearcher<L, N> {
+    impl<L: Language + 'static, N: Analysis<L> + 'static> std::fmt::Display for FilteringSearcher<L, N> {
+        fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+            write!(f, "{} if <Some predicate>", self.searcher)
+        }
+    }
+
+    impl<L: 'static + Language, N: 'static + Analysis<L>> Searcher<L, N> for FilteringSearcher<L, N> {
         fn search_eclass(&self, egraph: &EGraph<L, N>, eclass: Id) -> Option<SearchMatches> {
             unimplemented!()
         }
@@ -475,11 +502,17 @@ pub mod multisearcher {
     }
 
     pub struct PointerSearcher<L: Language, N: Analysis<L>> {
-        searcher: Rc<dyn Searcher<L, N>>
+        searcher: Rc<dyn Searcher<L, N>>,
     }
 
     impl<L: Language, N: Analysis<L>> PointerSearcher<L, N> {
-        pub fn new(searcher: Rc<dyn Searcher<L, N>>) -> Self { PointerSearcher{searcher} }
+        pub fn new(searcher: Rc<dyn Searcher<L, N>>) -> Self { PointerSearcher { searcher } }
+    }
+
+    impl<L: Language, N: Analysis<L>> std::fmt::Display for PointerSearcher<L, N> {
+        fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+            write!(f, "{}", self.searcher)
+        }
     }
 
     impl<L: Language, N: Analysis<L>> Searcher<L, N> for PointerSearcher<L, N> {

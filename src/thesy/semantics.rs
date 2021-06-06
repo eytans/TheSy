@@ -170,8 +170,7 @@ impl std::fmt::Display for Definitions {
         }
         writeln!(f, "rewrites:")?;
         for rw in &self.rws {
-            write!(f, "  ")?;
-            rw.fmt(f)?;
+            write!(f, "  {}", rw)?;
             writeln!(f);
         }
         for c in &self.conjectures {
@@ -239,9 +238,14 @@ impl Definitions {
         body.iter().for_each(|e| {
             let param_names = params.iter()
                 .map(|(i, a)| "?".to_owned() + i).collect_vec();
-            self.rws.extend(rewrite!(format!("{}_def", name);
-                            {Pattern::from_str(&*format!("({} {})", name, param_names.join(" "))).unwrap()}
-                            <=> {Pattern::from_str(&*e.to_sexp_string()).unwrap()}));
+            // let source = Pattern::from_str(&*format!("({} {})", name, param_names.join(" "))).unwrap();
+            let source = Expression::Op(Id(name.clone(), None), param_names.into_iter().map(|n| Expression::Leaf(Id(n, None))).collect_vec());
+            // let target = Pattern::from_str(&*e.to_sexp_string()).unwrap();
+            let target = e;
+            let rw = self.make_rw(format!("{}_def", name.clone()), None, source.clone(), target.clone(), vec![]);
+            self.rws.push(rw);
+            let rw = self.make_rw(format!("{}_def_rev", name.clone()), None, target.clone(), source, vec![]);
+            self.rws.push(rw);
         })
     }
 

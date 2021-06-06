@@ -1,5 +1,6 @@
 use egg::{Analysis, Applier, EGraph, Id, Language, Pattern, SearchMatches, Subst, SymbolLang, Var};
 use itertools::Itertools;
+use std::fmt::Formatter;
 
 pub struct DiffApplier<T: Applier<SymbolLang, ()>> {
     applier: T
@@ -14,6 +15,12 @@ impl<T: Applier<SymbolLang, ()>> DiffApplier<T> {
 impl DiffApplier<Pattern<SymbolLang>> {
     pub fn pretty(&self, width: usize) -> String {
         self.applier.pretty(width)
+    }
+}
+
+impl<T: Applier<SymbolLang, ()>> std::fmt::Display for DiffApplier<T> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "-|> {}", self.applier)
     }
 }
 
@@ -50,6 +57,12 @@ pub struct UnionApplier {
 impl UnionApplier {
     pub fn new(vars: Vec<Var>) -> UnionApplier {
         UnionApplier{vars}
+    }
+}
+
+impl std::fmt::Display for UnionApplier {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "-> {}", self.vars.iter().map(|x| x.to_string()).join(" =:= "))
     }
 }
 
