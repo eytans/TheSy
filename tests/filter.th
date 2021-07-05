@@ -1,0 +1,9 @@
+datatype Lst () := (nil : ret: Lst) (cons : h: Nat -> t: Lst -> ret: Lst)
+
+fun filter f: {pred} l : Lst -> Lst
+rw filter_base (filter ?p nil) => nil
+rw filter_ind (filter ?p (cons ?x ?xs)) => (ite (apply ?p ?x) (cons ?x (filter ?p ?xs)) (filter ?p ?xs))
+
+split (?p ?h) in (filter ?p (cons ?h ?t)) to true false
+
+prove (filter p (filter p l: {ph( 0 ), Lst})) = (filter p l: {ph( 0 ), Lst})

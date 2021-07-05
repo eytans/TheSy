@@ -1139,4 +1139,25 @@ mod test {
             assert_ne!(ProofMode::TermNotCreated, proof);
         }
     }
+
+    #[test]
+    fn test_split_filter_p() {
+        init_logging();
+
+        let mut defs = Definitions::from_file(&"tests/filter.th".parse().unwrap());
+        let mut conjectures = std::mem::take(&mut defs.conjectures);
+        let mut goals = std::mem::take(&mut defs.goals);
+        for (c, g) in conjectures.into_iter().zip(goals.into_iter()) {
+            info!("proving {}{} = {}",
+                  g.0.as_ref().map_or("".to_string(), |e| e.to_string() + "|> "),
+                  &g.1,
+                  &g.2);
+            defs.goals = vec![g];
+            defs.conjectures = vec![c];
+            let proof = tests::test_terms(defs.clone());
+            assert_ne!(ProofMode::ExamplesFailed, proof);
+            assert_ne!(ProofMode::Failed, proof);
+            //assert_ne!(ProofMode::TermNotCreated, proof);
+        }
+    }
 }
