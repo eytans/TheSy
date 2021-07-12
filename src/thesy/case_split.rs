@@ -9,6 +9,7 @@ use std::path::Display;
 use std::fmt;
 use smallvec::alloc::fmt::Formatter;
 use crate::eggstentions::reconstruct::reconstruct;
+use crate::eggstentions::appliers::DiffApplier;
 
 /// To be used as the op of edges representing potential split
 pub const SPLITTER: &'static str = "potential_split";
@@ -72,23 +73,30 @@ impl CaseSplit {
         CaseSplit { splitter_rules }
     }
 
-    pub fn from_applier_patterns(case_splitters: Vec<(Rc<dyn Searcher<SymbolLang, ()>>, Var, Vec<Pattern<SymbolLang>>)>) -> CaseSplit {
-        let mut res = CaseSplit::new(case_splitters.into_iter().map(|(searcher, root, split_evaluators)| {
-            let applier: SplitApplier = Box::new(move |graph: &mut EGraph<SymbolLang, ()>, sms: Vec<SearchMatches>| {
-                let mut res = vec![];
-                for sm in sms {
-                    for subst in &sm.substs {
-                        if subst.colors().len() > 1 {
-                            continue;
+    pub fn from_applier_patterns(case_splitters: Vec<(Rc<dyn Searcher<SymbolLang, ()>>,
+                                                      Pattern<SymbolLang>,
+                                                      Vec<Pattern<SymbolLang>>)>) -> CaseSplit {
+        let mut res = CaseSplit::new(case_splitters.into_iter()
+            .map(|(searcher, pattern, split_evaluators)| {
+                let diff_pattern = DiffApplier::new(pattern);
+                let applier: SplitApplier = Box::new(move |graph: &mut EGraph<SymbolLang, ()>, sms: Vec<SearchMatches>| {
+                    let mut res = vec![];
+                    for sm in sms {
+                        for subst in &sm.substs {
+                            if subst.colors().len() > 1 {
+                                continue;
+                            }
+                            // ECLass is irrelevant
+                            let id = diff_pattern.apply_one(graph, sm.eclass, subst);
+                            assert_eq!(id.len(), 1);
+                            res.push(Split::new(id[0], split_evaluators.iter().map(|ev| ev.apply_one(graph, sm.eclass, &subst)[0]).collect_vec(), subst.colors().first().copied()));
                         }
-                        res.push(Split::new(subst[root], split_evaluators.iter().map(|ev| ev.apply_one(graph, sm.eclass, &subst)[0]).collect_vec(), subst.colors().first().copied()));
                     }
-                }
-                res
-            });
-            (searcher.clone(),
-             applier)
-        }).collect_vec());
+                    res
+                });
+                (searcher.clone(),
+                 applier)
+            }).collect_vec());
         res
     }
 
@@ -134,6 +142,7 @@ impl CaseSplit {
         let mut res = vec![];
         for (s, c) in &mut self.splitter_rules {
             res.extend(c(egraph, s.search(egraph)));
+            egraph.rebuild();
         }
         let f = res.into_iter().unique().collect_vec();
         info!("Found {} splitters", f.len());

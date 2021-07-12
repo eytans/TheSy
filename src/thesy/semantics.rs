@@ -32,7 +32,7 @@ pub struct Definitions {
     /// Terms to prove, given as not forall, (vars - types, precondition, ex1, ex2)
     pub conjectures: Vec<(HashMap <RecExpr<SymbolLang>, RecExpr<SymbolLang>>, Option<RecExpr<SymbolLang>>, RecExpr<SymbolLang>, RecExpr<SymbolLang>)>,
     /// Logic of when to apply case split
-    pub case_splitters: Vec<(Rc<dyn Searcher<SymbolLang, ()>>, Var, Vec<Pattern<SymbolLang>>)>,
+    pub case_splitters: Vec<(Rc<dyn Searcher<SymbolLang, ()>>, Pattern<SymbolLang>, Vec<Pattern<SymbolLang>>)>,
     /// patterns used to deduce case splits
     name_pats: Vec<(String, Expression)>,
     /// goals in ast format
@@ -135,7 +135,7 @@ impl From<Vec<Statement>> for Definitions {
                     res.process_goals(precond.as_ref(), &exp1, &exp2);
                     res.goals.push((precond, exp1, exp2));
                 }
-                Statement::CaseSplit(searcher, var, pats, conditions) => {
+                Statement::CaseSplit(searcher, expr, pats, conditions) => {
                     let searcher = Pattern::from_str(&*searcher.to_sexp_string()).unwrap().into_rc_dyn();
                     let conditions = conditions.into_iter().map(|(t, e)| {
                         FilteringSearcher::create_non_pattern_filterer(
@@ -146,7 +146,7 @@ impl From<Vec<Statement>> for Definitions {
                                                                aggregate_conditions(conditions));
                     res.case_splitters.push((
                         cond_searcher.into_rc_dyn(),
-                        Var::from_str(&*var.to_string()).unwrap(),
+                        Definitions::exp_to_pattern(&expr),
                         pats.iter().map(|x|
                             Pattern::from_str(&*x.to_sexp_string()).unwrap()).collect_vec()))
                 }

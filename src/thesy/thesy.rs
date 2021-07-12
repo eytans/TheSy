@@ -269,7 +269,7 @@ impl TheSy {
         Self::get_ph(&d.as_exp(), 0)
     }
 
-    pub fn create_case_splitter(case_splitters: Vec<(Rc<dyn Searcher<SymbolLang, ()>>, Var, Vec<Pattern<SymbolLang>>)>) -> CaseSplit {
+    pub fn create_case_splitter(case_splitters: Vec<(Rc<dyn Searcher<SymbolLang, ()>>, Pattern<SymbolLang>, Vec<Pattern<SymbolLang>>)>) -> CaseSplit {
         let mut res = CaseSplit::from_applier_patterns(case_splitters);
         res.extend(consts::system_case_splits());
         res

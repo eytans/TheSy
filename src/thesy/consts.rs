@@ -87,7 +87,7 @@ pub fn system_case_splits() -> CaseSplit {
         let false_cond = FilteringSearcher::create_non_pattern_filterer(Pattern::from_str("false").unwrap().into_rc_dyn(), Var::from_str("?z").unwrap());
         FilteringSearcher::new(searcher.into_rc_dyn(), aggregate_conditions::<SymbolLang, ()>(vec![true_cond, false_cond]))
     };
-    let mut res = CaseSplit::from_applier_patterns(vec![(ite_searcher.into_rc_dyn(), Var::from_str("?z").unwrap(), vec!["true".parse().unwrap(), "false".parse().unwrap()])]);
+    let mut res = CaseSplit::from_applier_patterns(vec![(ite_searcher.into_rc_dyn(), Pattern::from_str("?z").unwrap(), vec!["true".parse().unwrap(), "false".parse().unwrap()])]);
 
     let or_multi_searcher = MultiEqSearcher::new(vec![
         Pattern::from_str("true").unwrap(),
