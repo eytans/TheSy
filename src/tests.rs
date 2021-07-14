@@ -8,6 +8,7 @@ use thesy_parser::ast;
 use std::str::FromStr;
 use thesy_parser::ast::Terminal;
 use crate::eggstentions::reconstruct::reconstruct;
+use crate::TheSyConfig;
 
 pub fn init_logging() {
     use simplelog::*;
@@ -39,24 +40,23 @@ pub enum ProofMode {
 pub fn test_terms(mut definitions: Definitions) -> ProofMode {
     let mut thesy: TheSy = TheSy::from(&definitions);
     let mut case_splitter = TheSy::create_case_splitter(definitions.case_splitters);
+    let mut rws = thesy.system_rws.clone();
+    rws.extend_from_slice(&definitions.rws);
     assert_eq!(1, definitions.goals.len());
     assert_eq!(1, definitions.conjectures.len());
     let (vars, precond, ex1, ex2) = definitions.conjectures.first().unwrap();
     let (mut ast_precond, mut ast_exp1, mut ast_exp2) = definitions.goals.pop().unwrap();
 
     // Assert terms are not equal
-    assert!(!TheSy::check_equality(&definitions.rws, precond, ex1, ex2));
+    assert!(!TheSy::check_equality(&rws, precond, ex1, ex2));
 
     let mut egraph = Prover::create_graph(precond.as_ref(), &ex1, &ex2);
-    egraph.dot().to_dot("b_graph.dot");
 
     // Attempt prove by case split
-    case_splitter.case_split(&mut egraph, 3, &definitions.rws, 8);
+    case_splitter.case_split(&mut egraph, 3, &rws, 8);
     if egraph.add_expr(ex1) == egraph.add_expr(ex2) {
         return ProofMode::CaseSplit;
     }
-
-    egraph.dot().to_dot("a_graph.dot");
 
     // Take ast expressions and translate to placeholder by annotations
     let exp_translator = |t: &Terminal| {
@@ -72,6 +72,11 @@ pub fn test_terms(mut definitions: Definitions) -> ProofMode {
         }
     };
 
+    // Create term succeeds
+    thesy.increase_depth();
+    thesy.equiv_reduc(&mut rws);
+    thesy.increase_depth();
+
     // let ph_precond = ast_precond.map(|e| e.map(exp_translator));
     let ph_exp1 = RecExpr::from_str(&*ast_exp1.map(&exp_translator).to_sexp_string()).unwrap();
     let ph_exp2 = RecExpr::from_str(&*ast_exp2.map(&exp_translator).to_sexp_string()).unwrap();
@@ -79,10 +84,6 @@ pub fn test_terms(mut definitions: Definitions) -> ProofMode {
     let ph_id2 = thesy.egraph.add_expr(&ph_exp2);
     info!("ph_exp1: {}, ph_exp2: {}", ph_exp1, ph_exp2);
 
-    // Create term succeeds
-    thesy.increase_depth();
-    thesy.equiv_reduc(&mut definitions.rws);
-    thesy.increase_depth();
     let classes = thesy.egraph.classes().map(|x| x.id).collect::<HashSet<Id>>();
     if !classes.contains(&thesy.egraph.find(ph_id1)) ||
         !classes.contains(&thesy.egraph.find(ph_id2)) {
@@ -90,7 +91,8 @@ pub fn test_terms(mut definitions: Definitions) -> ProofMode {
     }
 
     // Reduce finds equality on examples
-    thesy.equiv_reduc(&mut definitions.rws);
+    thesy.equiv_reduc(&mut rws);
+    case_splitter.case_split(&mut thesy.egraph, 2, &rws, 8);
     let ph_id1 = thesy.egraph.find(ph_id1);
     let ph_id2 = thesy.egraph.find(ph_id2);
     if precond.is_none() && thesy.datatypes.keys().all(|d| {
@@ -110,7 +112,7 @@ pub fn test_terms(mut definitions: Definitions) -> ProofMode {
         // Attempt proof
         let prover = &thesy.datatypes[d];
         let res = prover.prove_all_split_d(&mut Some(&mut case_splitter),
-                                           &definitions.rws,
+                                           &rws,
                                            Option::from(precond),
                                            &ph_exp1,
                                            &ph_exp2,

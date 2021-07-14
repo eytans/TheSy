@@ -126,14 +126,14 @@ impl CaseSplit {
             StopReason::TimeLimit(_) => { warn!("Stopped case split due to time limit") }
             StopReason::Other(_) => {}
         };
-        info!("Runner finished, rebuilding");
-        info!("Iterations: ");
-        for i in runner.iterations {
-            info!("  apply time: {}", i.apply_time);
-            info!("  search time: {}", i.search_time);
-            info!("  rebuild time: {}", i.rebuild_time);
-            info!("");
-        }
+        // info!("Runner finished, rebuilding");
+        // info!("Iterations: ");
+        // for i in runner.iterations {
+        //     info!("  apply time: {}", i.apply_time);
+        //     info!("  search time: {}", i.search_time);
+        //     info!("  rebuild time: {}", i.rebuild_time);
+        //     info!("");
+        // }
         runner.egraph.rebuild();
         runner.egraph
     }
