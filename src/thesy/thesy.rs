@@ -1155,6 +1155,7 @@ mod test {
             defs.goals = vec![g];
             defs.conjectures = vec![c];
             let proof = tests::test_terms(defs.clone());
+            println!("{:?}", proof);
             assert_ne!(ProofMode::ExamplesFailed, proof);
             assert_ne!(ProofMode::Failed, proof);
             //assert_ne!(ProofMode::TermNotCreated, proof);

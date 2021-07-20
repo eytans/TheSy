@@ -10,6 +10,7 @@ use crate::tree::Tree;
 
 pub fn reconstruct(graph: &EGraph<SymbolLang, ()>, class: Id, max_depth: usize) -> Option<RecExpr<SymbolLang>> {
     let mut translations: HashMap<Id, RecExpr<SymbolLang>> = HashMap::new();
+    let class = graph.find(class);
     let classes = graph.classes().into_iter().map(|c| (c.id, c)).collect();
     reconstruct_inner(&classes, class, max_depth, &mut translations);
     translations.get(&class).map(|x| x.clone())

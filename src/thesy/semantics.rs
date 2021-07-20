@@ -87,7 +87,7 @@ impl Definitions {
     fn create_searcher_applier(precond: Option<Expression>,
                                source: Expression,
                                target: Expression,
-                               conds: Vec<(thesy_parser::ast::Terminal, Expression)>)
+                               conds: Vec<thesy_parser::ast::Condition>)
         -> (FilteringSearcher<SymbolLang, ()>, Pattern<SymbolLang>) {
         let precond_searcher = precond.as_ref().map(|e| {
             MultiEqSearcher::new(vec![Definitions::exp_to_pattern(e),
@@ -105,10 +105,10 @@ impl Definitions {
             }
         };
         let applier = Definitions::exp_to_pattern(&target);
-        let conditions = conds.into_iter().map(|(t, e)| {
+        let conditions = conds.into_iter().map(|(matcher, negation)| {
             FilteringSearcher::create_non_pattern_filterer(
-                Definitions::exp_to_pattern(&e).into_rc_dyn(),
-                Var::from_str(&*t.to_string()).unwrap())
+                Definitions::exp_to_pattern(&matcher).into_rc_dyn(),
+                Definitions::exp_to_pattern(&negation).into_rc_dyn())
         }).collect_vec();
         let cond_searcher = FilteringSearcher::new(searcher,
                                                    aggregate_conditions(conditions));
@@ -137,10 +137,10 @@ impl From<Vec<Statement>> for Definitions {
                 }
                 Statement::CaseSplit(searcher, expr, pats, conditions) => {
                     let searcher = Pattern::from_str(&*searcher.to_sexp_string()).unwrap().into_rc_dyn();
-                    let conditions = conditions.into_iter().map(|(t, e)| {
+                    let conditions = conditions.into_iter().map(|(m, n)| {
                         FilteringSearcher::create_non_pattern_filterer(
-                            Definitions::exp_to_pattern(&e).into_rc_dyn(),
-                            Var::from_str(&*t.to_string()).unwrap())
+                            Definitions::exp_to_pattern(&m).into_rc_dyn(),
+                            Definitions::exp_to_pattern(&n).into_rc_dyn())
                     }).collect_vec();
                     let cond_searcher = FilteringSearcher::new(searcher,
                                                                aggregate_conditions(conditions));
@@ -280,7 +280,7 @@ impl Definitions {
                precond: Option<Expression>,
                source: Expression,
                target: Expression,
-               conds: Vec<(thesy_parser::ast::Terminal, Expression)>) -> Rewrite<SymbolLang, ()> {
+               conds: Vec<thesy_parser::ast::Condition>) -> Rewrite<SymbolLang, ()> {
         let (cond_searcher, applier) =
             Definitions::create_searcher_applier(precond, source.clone(), target, conds);
         if let Op(op, params) = &source {

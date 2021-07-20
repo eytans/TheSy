@@ -165,6 +165,12 @@ impl CaseSplit {
             }
         }
         egraph.rebuild();
+        egraph.dot().to_dot("splitted_graph.dot");
+        for group in group_by_splits.values().filter(|g| g.len() > 1) {
+            println!("{}", group.iter().map(|id|
+                reconstruct(egraph, egraph.find(*id), 5)
+                    .map(|x| x.pretty(500)).unwrap_or_default()).join("\n"))
+        }
     }
     fn collect_merged(egraph: &EGraph<SymbolLang, ()>, classes: &Vec<Id>) -> HashMap<Id, Id> {
         classes.iter().map(|c| (*c, egraph.find(*c))).collect::<HashMap<Id, Id>>()
@@ -214,7 +220,11 @@ impl CaseSplit {
         self.colored_case_split(egraph, split_depth - 1, &new_known, rules, run_depth);
         for cs in colors {
             let split_conclusions = cs.iter()
-                .map(|c| Self::collect_colored_merged(egraph, &classes, *c))
+                .map(|c| {
+                    let res = Self::collect_colored_merged(egraph, &classes, *c);
+                    println!("{}", res.iter().map(|x| format!("{:?}", x)).join("\n"));
+                    res
+                })
                 .collect_vec();
             Self::merge_conclusions(egraph, &classes, split_conclusions);
         }
@@ -236,7 +246,12 @@ impl CaseSplit {
             .filter(|s| !known_splits.contains(s))
             .collect();
         let mut new_known = known_splits.clone();
+
         new_known.extend(splitters.iter().cloned().cloned());
+        info!("Splitters len: {}", splitters.len());
+        for s in &splitters {
+            info!("  {} - root: {}, cases: {}", s, reconstruct(egraph, s.root, 3).map(|x| x.to_string()).unwrap_or("No reconstruct".to_string()), s.splits.iter().map(|c| reconstruct(egraph, *c, 3).map(|x| x.to_string()).unwrap_or("No reconstruct".to_string())).intersperse(" ".to_string()).collect::<String>());
+        }
 
         let classes = egraph.classes().map(|c| c.id).collect_vec();
 
