@@ -409,22 +409,14 @@ pub mod multisearcher {
     }
 
     impl<L: Language + 'static, N: Analysis<L> + 'static> FilteringSearcher<L, N> {
-        pub fn create_non_pattern_filterer(matcher: Rc<dyn Searcher<L, N>>, negator: Rc<dyn Searcher<L, N>>) ->
+        pub fn create_non_pattern_filterer(matcher: Rc<dyn Fn(&EGraph<L, N>, &Subst) -> Id>,
+                                           negator: Rc<dyn Fn(&EGraph<L, N>, &Subst) -> Id>) ->
         Rc<dyn Fn(&EGraph<L, N>, Vec<SearchMatches>) -> Vec<SearchMatches>> {
             Rc::new(move |graph: &EGraph<L, N>, sms: Vec<SearchMatches>| {
-                // TODO: create a function to insert substitutions directly into the match and then have a smart search.
-                let matched = matcher.search(graph).into_iter().flat_map(|x| {
-                    let ec = *&x.eclass;
-                    x.substs.into_iter().map(move |s| (s, ec))
-                }).collect_vec();
-                let negs = negator.search(graph).iter().map(|s| s.eclass).collect::<HashSet<Id>>();
                 sms.into_iter().filter_map(|mut sm| {
                     let mut substs = std::mem::take(&mut sm.substs);
                     sm.substs = substs.into_iter()
-                        .filter(|s1| matched.iter()
-                            .find(|(s2, eclass)| graph.subst_agrees(s1, s2) && negs.contains(eclass))
-                            .is_none()
-                        ).collect_vec();
+                        .filter(|s| matcher(graph, s) != negator(graph, s)).collect_vec();
                     if sm.substs.is_empty() {
                         None
                     } else {

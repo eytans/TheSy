@@ -5,6 +5,8 @@ pub mod tools {
 
     use itertools::MultiProduct;
     use itertools::Itertools;
+    use egg::{RecExpr, SymbolLang, Pattern, Language, Analysis, Subst, Id, ENodeOrVar, Searcher};
+    use std::rc::Rc;
 
 // fn combinations<'a, T: 'a, I: Iterator<Item = &'a T> + Clone>(mut sets: impl Iterator<Item = I>) -> impl Iterator<Item = Vec<&'a T>> {
 //     let first = sets.next();
@@ -42,7 +44,7 @@ pub mod tools {
         return res;
     }
 
-    pub(crate) fn  combinations<T: Clone, I: Clone + Iterator<Item = T>>(iters: impl Iterator<Item = I>) -> MultiProduct<I> {
+    pub(crate) fn combinations<T: Clone, I: Clone + Iterator<Item=T>>(iters: impl Iterator<Item=I>) -> MultiProduct<I> {
         iters.multi_cartesian_product()
     }
 
@@ -71,13 +73,47 @@ pub mod tools {
         fn grouped<K: Hash + Eq, F: Fn(&T) -> K>(&mut self, key: F) -> HashMap<K, Vec<T>>;
     }
 
-    impl<T, I: Iterator<Item = T>> Grouped<T> for I {
+    impl<T, I: Iterator<Item=T>> Grouped<T> for I {
         fn grouped<K: Hash + Eq, F: Fn(&T) -> K>(&mut self, key: F) -> HashMap<K, Vec<T>, RandomState> {
             let mut res = HashMap::new();
             self.for_each(|t| res.entry(key(&t)).or_insert(Vec::new()).push(t));
             res
         }
     }
+
+    // pub fn expression_to_matcher<L: Language, N: Analysis<L>>(pattern: Pattern<L>) -> Rc<dyn Fn(&Egraph<L, N>, &Subst) -> Option<Id>> {
+    //     fn rec_lookup(pattern: &[ENodeOrVar<L>], graph: &Egraph<L, N>, subst: &Subst) -> Option<Id> {
+    //         match pattern.last().unwrap() {
+    //             ENodeOrVar::ENode(node) => {
+    //                 let e = node.clone().map_children(|i| {
+    //                     let child = &pattern[..usize::from(i) + 1];
+    //                     let rec_res = rec_lookup(child, graph, subst)
+    //                     if rec_res.is_none() {
+    //                         return None;
+    //                     }
+    //                     *rec_res.unwrap()
+    //                 });
+    //                 graph.lookup(e)
+    //             }
+    //             ENodeOrVar::Var(v) => { subst.get(*v) }
+    //         }
+    //     }
+    //     Rc::new(|(g, s)| {
+    //         assert!(pattern.ast.as_ref().len() > 0, "Pattern must not be empty");
+    //         let new_pat = pattern.ast.as_ref().iter().map(|x| match x {
+    //             x @ ENodeOrVar::ENode(_) => { x.clone().map_children(|c| match c {
+    //                 Id(c_id) => {
+    //                     match pattern.ast.as_ref()[usize::from(c_id)] {
+    //                         ENodeOrVar::ENode(_) => {}
+    //                         ENodeOrVar::Var(v) => {}
+    //                     }
+    //                 }
+    //             }) }
+    //             ENodeOrVar::Var(v) => { panic!("Bad var in pattern (no subst) {:?}", v) }
+    //         }).last().unwrap();
+    //         new_pat.search(g).iter().map(|sms| sms.eclass).first()
+    //     })
+    // }
 
     // pub trait DispWrapper {
     //     fn to_print_str(&self) -> String;

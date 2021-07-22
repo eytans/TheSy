@@ -224,6 +224,16 @@ impl Definitions {
             Function::new(name.to_string(), constr_params, ret)
         }).collect_vec();
         self.datatypes.push(DataType::new(name, consts_funs));
+        // let mut constr_rewrites = vec![];
+        // for (c_name, c_params) in constructors {
+        //     format!("match <Exp> with <Const> => <Exp> (| <Const> => <Exp>)* ");
+        //     constructors_patterns.push(format!("({} {})",
+        //                                        c_name,
+        //                                        c_params.iter().map(|x|
+        //                                            format!("?{}", x.0)).join(" "))
+        //     );
+        // }
+        // let searcher = Pattern::from_str(format!("(match ?x {})", )).unwrap();
     }
 
     fn process_fun(&mut self, name: String, params: Vec<(String, Annotation)>, ret: Annotation, body: Option<Expression>) {
