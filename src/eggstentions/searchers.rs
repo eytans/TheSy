@@ -409,14 +409,26 @@ pub mod multisearcher {
     }
 
     impl<L: Language + 'static, N: Analysis<L> + 'static> FilteringSearcher<L, N> {
-        pub fn create_non_pattern_filterer(matcher: Rc<dyn Fn(&EGraph<L, N>, &Subst) -> Id>,
-                                           negator: Rc<dyn Fn(&EGraph<L, N>, &Subst) -> Id>) ->
+        pub fn matcher_from_var(var: Var) -> Rc<dyn Fn(&EGraph<L, N>, &Subst) -> Option<Id>> {
+            Rc::new(|graph, sbt|
+                sbt.get(var).copied())
+        }
+
+        pub fn matcher_from_enode(enode: L) -> Rc<dyn Fn(&EGraph<L, N>, &Subst) -> Option<Id>> {
+            Rc::new(|graph, sbt| graph.lookup(enode))
+        }
+
+        pub fn create_non_pattern_filterer(matcher: Rc<dyn Fn(&EGraph<L, N>, &Subst) -> Option<Id>>,
+                                           negator: Rc<dyn Fn(&EGraph<L, N>, &Subst) -> Option<Id>>) ->
         Rc<dyn Fn(&EGraph<L, N>, Vec<SearchMatches>) -> Vec<SearchMatches>> {
             Rc::new(move |graph: &EGraph<L, N>, sms: Vec<SearchMatches>| {
                 sms.into_iter().filter_map(|mut sm| {
                     let mut substs = std::mem::take(&mut sm.substs);
                     sm.substs = substs.into_iter()
-                        .filter(|s| matcher(graph, s) != negator(graph, s)).collect_vec();
+                        .filter(|s| {
+                            let m = matcher(graph, s);
+                            m.is_none() || m != negator(graph, s)
+                        }).collect_vec();
                     if sm.substs.is_empty() {
                         None
                     } else {
