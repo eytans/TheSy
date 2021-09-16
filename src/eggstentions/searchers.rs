@@ -410,12 +410,18 @@ pub mod multisearcher {
 
     impl<L: Language + 'static, N: Analysis<L> + 'static> FilteringSearcher<L, N> {
         pub fn matcher_from_var(var: Var) -> Rc<dyn Fn(&EGraph<L, N>, &Subst) -> Option<Id>> {
-            Rc::new(|graph, sbt|
+            Rc::new(move |graph, sbt|
                 sbt.get(var).copied())
         }
 
         pub fn matcher_from_enode(enode: L) -> Rc<dyn Fn(&EGraph<L, N>, &Subst) -> Option<Id>> {
-            Rc::new(|graph, sbt| graph.lookup(enode))
+            Rc::new(move |graph, sbt| graph.lookup(enode.clone()))
+        }
+
+        pub fn matcher_from_pattern(p: Pattern<L>)
+            -> Rc<dyn Fn(&EGraph<L, N>, &Subst) -> Option<Id>> {
+            // The parser asserts all vars are present.
+            Rc::new(move |graph, sbt| p.rec_lookup(graph, sbt))
         }
 
         pub fn create_non_pattern_filterer(matcher: Rc<dyn Fn(&EGraph<L, N>, &Subst) -> Option<Id>>,
@@ -547,9 +553,9 @@ pub mod multisearcher {
 mod tests {
     use std::str::FromStr;
 
-    use egg::{EGraph, RecExpr, Searcher, SymbolLang};
+    use egg::{EGraph, RecExpr, Searcher, SymbolLang, Pattern};
 
-    use crate::eggstentions::searchers::multisearcher::{MultiDiffSearcher, MultiEqSearcher};
+    use crate::eggstentions::searchers::multisearcher::{MultiDiffSearcher, MultiEqSearcher, FilteringSearcher};
 
     #[test]
     fn eq_two_trees_one_common() {
@@ -592,5 +598,23 @@ mod tests {
         egraph.rebuild();
         let searcher = MultiDiffSearcher::from_str("(ltwf ?x ind_var) |||| (pl ?x Z)").unwrap();
         assert!(!searcher.search(&egraph).is_empty());
+    }
+
+    #[test]
+    fn pattern_to_matcher_sanity() {
+        let mut graph: EGraph<SymbolLang, ()> = EGraph::default();
+        graph.add_expr(&RecExpr::from_str("(+ 1 (+ 2 3))").unwrap());
+        graph.add_expr(&RecExpr::from_str("(+ 31 (+ 32 33))").unwrap());
+        graph.add_expr(&RecExpr::from_str("(+ 21 (+ 22 23))").unwrap());
+        graph.add_expr(&RecExpr::from_str("(+ 11 (+ 12 13))").unwrap());
+        let p: Pattern<SymbolLang> = Pattern::from_str("(+ ?z (+ ?x ?y))").unwrap();
+        let m = FilteringSearcher::matcher_from_pattern(p.clone());
+        let results = p.search(&graph);
+        for sm in results {
+            let eclass = sm.eclass;
+            for sb in sm.substs {
+                assert_eq!(Some(eclass), m(&graph, &sb));
+            }
+        }
     }
 }

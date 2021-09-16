@@ -6,7 +6,6 @@ use crate::thesy::{case_split, TheSy};
 use crate::thesy::case_split::{CaseSplit, Split, SplitApplier};
 use itertools::Itertools;
 use std::rc::Rc;
-use serde::__private::de::IdentifierDeserializer;
 
 pub(crate) fn bool_rws() -> Vec<Rewrite<SymbolLang, ()>> {
     let and_multi_searcher = MultiEqSearcher::new(vec![
