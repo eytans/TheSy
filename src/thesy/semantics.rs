@@ -1,25 +1,25 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::fmt::{Debug, Formatter};
 use std::rc::Rc;
 
-use egg::{Pattern, RecExpr, Rewrite, Searcher, SymbolLang, Var, ENodeOrVar};
+use egg::{Pattern, RecExpr, Rewrite, Searcher, SymbolLang, Var, ENodeOrVar, Condition, ImmutableCondition, RcImmutableCondition};
 use itertools::Itertools;
 use thesy_parser::{grammar, ast};
 
 use crate::lang::{DataType, Function};
 use std::path::PathBuf;
-use thesy_parser::ast::{Expression, Statement, Identifier, Annotation};
+use thesy_parser::ast::{Expression, Statement, Identifier, Annotation, Terminal};
 use thesy_parser::ast::Definitions::Defs;
 use std::str::FromStr;
-use crate::eggstentions::searchers::multisearcher::{MultiEqSearcher, MultiDiffSearcher,
-                                                    EitherSearcher, FilteringSearcher,
-                                                    ToDyn, aggregate_conditions, PointerSearcher};
+use crate::eggstentions::searchers::multisearcher::{MultiEqSearcher, MultiDiffSearcher, EitherSearcher, FilteringSearcher, ToDyn, PointerSearcher};
 use crate::thesy::TheSy;
 use crate::eggstentions::appliers::DiffApplier;
 use thesy_parser::ast::Terminal::{Id, Hole};
-use thesy_parser::ast::Expression::Op;
+use thesy_parser::ast::Expression::{Op, Leaf};
 use multimap::MultiMap;
 use crate::eggstentions::expression_ops::{IntoTree, Tree};
+use crate::eggstentions::conditions::{AndCondition, OrCondition};
+use std::iter::FromIterator;
 
 #[derive(Default, Clone)]
 pub struct Definitions {
@@ -30,17 +30,17 @@ pub struct Definitions {
     /// Rewrites defined by (assert forall)
     pub rws: Vec<Rewrite<SymbolLang, ()>>,
     /// Terms to prove, given as not forall, (vars - types, precondition, ex1, ex2)
-    pub conjectures: Vec<(HashMap <RecExpr<SymbolLang>, RecExpr<SymbolLang>>, Option<RecExpr<SymbolLang>>, RecExpr<SymbolLang>, RecExpr<SymbolLang>)>,
+    pub conjectures: Vec<(HashMap<RecExpr<SymbolLang>, RecExpr<SymbolLang>>, Option<RecExpr<SymbolLang>>, RecExpr<SymbolLang>, RecExpr<SymbolLang>)>,
     /// Logic of when to apply case split
     pub case_splitters: Vec<(Rc<dyn Searcher<SymbolLang, ()>>, Pattern<SymbolLang>, Vec<Pattern<SymbolLang>>)>,
     /// patterns used to deduce case splits
     name_pats: Vec<(String, Expression)>,
     /// goals in ast format
-    pub goals: Vec<(Option<Expression>, Expression, Expression)>
+    pub goals: Vec<(Option<Expression>, Expression, Expression)>,
 }
 
 impl Definitions {
-    pub fn merge(&mut self, mut other: Definitions) {
+    pub fn merge(&mut self, mut other: Self) {
         self.functions.extend_from_slice(&std::mem::take(&mut other.functions).into_iter()
             .filter(|f| self.functions.iter()
                 .all(|f1| f1.name != f.name)).collect_vec());
@@ -49,7 +49,7 @@ impl Definitions {
                 .all(|d1| d1.name != d.name)).collect_vec());
         self.conjectures.extend_from_slice(
             &std::mem::take(&mut other.conjectures).into_iter()
-                    .filter(|c| !self.conjectures.contains(c)).collect_vec());
+                .filter(|c| !self.conjectures.contains(c)).collect_vec());
         self.rws.extend_from_slice(&std::mem::take(&mut other.rws).into_iter()
             .filter(|rw| {
                 self.rws.iter()
@@ -60,19 +60,19 @@ impl Definitions {
         self.case_splitters.extend(std::mem::take(&mut other.case_splitters));
     }
 
-    pub fn from_file(path: &PathBuf) -> Definitions {
+    pub fn from_file(path: &PathBuf) -> Self {
         let text = std::fs::read_to_string(path).unwrap();
         let res = grammar::DefsParser::new().parse(&text);
         match res {
             Ok(x) => {
                 match x {
                     Defs(stmts) => {
-                        let res = Definitions::from(stmts);
+                        let res = Self::from(stmts);
                         info!("Read definitions:\n{}", res);
                         res
                     }
                 }
-            },
+            }
             Err(e) => {
                 error!("{}", e);
                 panic!("Please implement error handling")
@@ -84,45 +84,125 @@ impl Definitions {
         Pattern::from_str(&*exp.to_sexp_string()).unwrap()
     }
 
+    fn collect_non_pattern_conds(conds: Vec<ast::Condition>) -> Vec<RcImmutableCondition<SymbolLang, ()>> {
+        conds.into_iter().map(|(matcher, negation)| {
+            FilteringSearcher::create_non_pattern_filterer(
+                FilteringSearcher::matcher_from_pattern(Self::exp_to_pattern(&matcher)),
+                FilteringSearcher::matcher_from_pattern(Self::exp_to_pattern(&negation)))
+        }).collect_vec()
+    }
+
     fn create_searcher_applier(precond: Option<Expression>,
                                source: Expression,
                                target: Expression,
                                conds: Vec<thesy_parser::ast::Condition>)
-        -> (FilteringSearcher<SymbolLang, ()>, Pattern<SymbolLang>) {
+                               -> (FilteringSearcher<SymbolLang, ()>, Pattern<SymbolLang>) {
         let precond_searcher = precond.as_ref().map(|e| {
-            MultiEqSearcher::new(vec![Definitions::exp_to_pattern(e),
+            MultiEqSearcher::new(vec![Self::exp_to_pattern(e),
                                       Pattern::from_str("true").unwrap()])
         });
         let searcher = {
-            let s = Definitions::exp_to_pattern(&source);
+            let s = Self::exp_to_pattern(&source);
             if precond.is_some() {
                 MultiDiffSearcher::new(vec![
                     EitherSearcher::left(s),
-                    EitherSearcher::right(precond_searcher.unwrap())
+                    EitherSearcher::right(precond_searcher.unwrap()),
                 ]).into_rc_dyn()
             } else {
                 s.into_rc_dyn()
             }
         };
-        let applier = Definitions::exp_to_pattern(&target);
-        let conditions = conds.into_iter().map(|(matcher, negation)| {
-            FilteringSearcher::create_non_pattern_filterer(
-                FilteringSearcher::matcher_from_pattern(Definitions::exp_to_pattern(&matcher)),
-                FilteringSearcher::matcher_from_pattern(Definitions::exp_to_pattern(&negation)))
-        }).collect_vec();
+        let applier = Self::exp_to_pattern(&target);
+        let conditions = Self::collect_non_pattern_conds(conds);
         let cond_searcher = FilteringSearcher::new(searcher,
-                                                   aggregate_conditions(conditions));
+                                                   RcImmutableCondition::new(AndCondition::new(conditions)));
         (cond_searcher, applier)
+    }
+
+    fn collect_splittable_params(&self, f: &Function, opt_pats: &Vec<(ast::Rewrite, Vec<usize>)>)
+                                 -> Vec<(usize, &DataType, RcImmutableCondition<SymbolLang, ()>)> {
+        let param_types = f.params.iter().enumerate()
+            // Get type of each param (if type exists)
+            .filter_map(|p| Some(p.0).zip(
+                self.datatypes.iter().find(|d| &d.as_exp() == p.1)))
+            // Only keep params which have patterns for all constructors
+            .filter(|(i, d)| d.constructors.iter()
+                .all(|c| opt_pats.iter().any(|(def, indices)| {
+                    // One of the patterns should equal be the constructor
+                    def.source_expressions().iter().any(|s| &c.name == s.children()[*i].root().ident())
+                })))
+            .collect_vec();
+
+
+        param_types.into_iter().map(|(i, p_dt)| {
+            // collect all patterns of other params for each constructor type
+            let mut patterns_grouped: HashMap<String, Vec<&Expression>> = HashMap::default();
+            for c in &p_dt.constructors {
+                patterns_grouped.insert(c.name.clone(), opt_pats.iter()
+                    .flat_map(|(def, indices)| def.source_expressions())
+                    .filter(|s| s.children()[i].root().ident() == &c.name)
+                    .collect_vec(),
+                );
+            }
+
+            // Can split by any param by itself by adding filterers on other params.
+            // Instead of a very sophisticated runtime I am creating a complex pattern for asserting
+            // the rewriting will continue in each split.
+            // Should be And(<for each constructor Or(for each pattern remove param to split)>)
+            let cond = AndCondition::new(patterns_grouped.into_iter().map(|(name, pats)| {
+                RcImmutableCondition::new(OrCondition::new(pats.into_iter().map(|exp| {
+                    let holename = "splithole";
+                    assert!(exp.holes().iter().find(|h| h.ident() == holename).is_none());
+                    let mut new_children = exp.children().iter().cloned().collect_vec();
+                    new_children[i] = Leaf(Hole(holename.to_string(), None));
+                    let mut new_exp = Op(exp.root().clone(), vec![]);
+                    FilteringSearcher::create_exists_pattern_filterer(Self::exp_to_pattern(&new_exp))
+                }).collect_vec()))
+            }).collect_vec());
+            (i, p_dt, RcImmutableCondition::new(cond))
+        }).collect_vec()
+    }
+
+    // Not most efficient but still:
+    // * Find an application of the function where all params are holes
+    // * Add the condition
+    // * For the splitted param create patterns with the param var as root (we don't split same var
+    //    twice)
+
+
+    fn create_splitters(datatype: &DataType, h: &thesy_parser::ast::Terminal) -> Vec<Expression> {
+        datatype.constructors.iter().map(|c| {
+            let const_name: Terminal = Id(c.name.clone(), None);
+            if c.params.is_empty() {
+                Leaf(const_name)
+            } else {
+                Op(const_name, (0..c.params.len())
+                    .map(|i| Leaf(Id(format!("(param_{}_{} {})",
+                                                     datatype.name, i, h.to_string()), None)))
+                    .collect_vec(),
+                )
+            }
+        }).collect_vec()
     }
 }
 
 impl From<Vec<Statement>> for Definitions {
     fn from(x: Vec<Statement>) -> Self {
-        let mut res: Definitions = Default::default();
+        let mut res: Self = Default::default();
+        let mut rw_definitions: MultiMap<String, (ast::Rewrite, Vec<usize>)> = Default::default();
         for s in x {
             match s {
                 Statement::RewriteDef(name, def) => {
-                    res.process_rw(name, def)
+                    let current = res.rws.len();
+                    // TODO: remove clone
+                    res.process_rw(name.clone(), def.clone());
+                    if res.rws.len() > current {
+                        let exps: Vec<&Expression> = def.source_expressions();
+                        for exp in exps {
+                            rw_definitions.insert(exp.root().ident().clone(),
+                                                  (def.clone(), Vec::from_iter(current..res.rws.len())));
+                        }
+                    }
                 }
                 Statement::Function(
                     name, params, ret, body) => {
@@ -137,26 +217,60 @@ impl From<Vec<Statement>> for Definitions {
                 }
                 Statement::CaseSplit(searcher, expr, pats, conditions) => {
                     let searcher = Pattern::from_str(&*searcher.to_sexp_string()).unwrap().into_rc_dyn();
-                    let conditions = conditions.into_iter().map(|(m, n)| {
-                        FilteringSearcher::create_non_pattern_filterer(
-                            FilteringSearcher::matcher_from_pattern(Definitions::exp_to_pattern(&m)),
-                            FilteringSearcher::matcher_from_pattern(Definitions::exp_to_pattern(&n)))
-                    }).collect_vec();
+                    let conditions = Self::collect_non_pattern_conds(conditions);
                     let cond_searcher = FilteringSearcher::new(searcher,
-                                                               aggregate_conditions(conditions));
+                                                               RcImmutableCondition::new(AndCondition::new(conditions)));
                     res.case_splitters.push((
                         cond_searcher.into_rc_dyn(),
-                        Definitions::exp_to_pattern(&expr),
+                        Self::exp_to_pattern(&expr),
                         pats.iter().map(|x|
                             Pattern::from_str(&*x.to_sexp_string()).unwrap()).collect_vec()))
                 }
             }
         }
 
+
+        fn create_hole_for_param(i: usize) -> Terminal {
+            Hole(format!("?autovar_{}", i), None)
+        }
+
+        fn pattern_for_func_app(f: &Function) -> Pattern<SymbolLang> {
+            Definitions::exp_to_pattern(
+                &Op(Id(f.name.clone(), None), (0..f.params.len())
+                    .into_iter().map(|i| Leaf(create_hole_for_param(i))).collect_vec())
+            )
+        }
+
+        // Foreach function find if and when case split should be applied
+        for f in &res.functions {
+            let opt_pats =
+                if rw_definitions.contains_key(&f.name) { rw_definitions.get_vec(&f.name).unwrap() } else { continue; };
+            let splittable_params = Self::collect_splittable_params(&res, f, opt_pats);
+            let func_pattern = pattern_for_func_app(f).into_rc_dyn();
+            let mut temp = vec![];
+            for (i, dt, cond) in splittable_params {
+                let param_hole = create_hole_for_param(i);
+                let const_cond = RcImmutableCondition::new(AndCondition::new(
+                    dt.constructors.iter().map(|c| {
+                        FilteringSearcher::create_non_pattern_filterer(
+                            FilteringSearcher::matcher_from_var(Var::from_str(&param_hole.to_string()).unwrap()),
+                            FilteringSearcher::matcher_from_pattern(pattern_for_func_app(c))
+                        )
+                    }).collect_vec()
+                ));
+                let final_condition = RcImmutableCondition::new(AndCondition::new(vec![const_cond, cond]));
+                let splitters = Self::create_splitters(dt, &param_hole).iter()
+                    .map(Self::exp_to_pattern).collect_vec();
+                temp.push((
+                    FilteringSearcher::new(func_pattern.clone(), final_condition).into_rc_dyn(),
+                    Self::exp_to_pattern(&Leaf(param_hole.clone())),
+                    splitters));
+            }
+            res.case_splitters.extend_from_slice(&temp);
+        }
         res
     }
 }
-
 
 impl std::fmt::Display for Definitions {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
@@ -207,7 +321,7 @@ impl Definitions {
                 precond, source, target, conds
             ) => {
                 let (cond_searcher, applier) =
-                    Definitions::create_searcher_applier(precond, source, target, conds);
+                    Self::create_searcher_applier(precond, source, target, conds);
                 let diff_applier = DiffApplier::new(applier);
                 self.rws.push(Rewrite::new(name, cond_searcher, diff_applier).unwrap());
             }
@@ -279,10 +393,10 @@ impl Definitions {
             }
         }
         self.conjectures.push((type_map,
-                    precond.map(|t|
-                        RecExpr::from_str(&*t.to_sexp_string()).unwrap()),
-                    RecExpr::from_str(&*exp1.to_sexp_string()).unwrap(),
-                    RecExpr::from_str(&*exp2.to_sexp_string()).unwrap()));
+                               precond.map(|t|
+                                   RecExpr::from_str(&*t.to_sexp_string()).unwrap()),
+                               RecExpr::from_str(&*exp1.to_sexp_string()).unwrap(),
+                               RecExpr::from_str(&*exp2.to_sexp_string()).unwrap()));
     }
 
     fn make_rw(&mut self,
@@ -292,7 +406,7 @@ impl Definitions {
                target: Expression,
                conds: Vec<thesy_parser::ast::Condition>) -> Rewrite<SymbolLang, ()> {
         let (cond_searcher, applier) =
-            Definitions::create_searcher_applier(precond, source.clone(), target, conds);
+            Self::create_searcher_applier(precond, source.clone(), target, conds);
         if let Op(op, params) = &source {
             if op.is_id() {
                 self.name_pats.push((op.ident().clone(), source));
@@ -300,146 +414,6 @@ impl Definitions {
         }
         Rewrite::new(name, cond_searcher, applier).unwrap()
     }
-
-    // fn deduce_case_splitters(&mut self) {
-    //     let mut function_patterns: MultiMap<Function, Expression> = MultiMap::new();
-    //
-    //     for (name, pat) in &self.name_pats {
-    //         let opt = self.functions.iter().find(|f| f.name == name);
-    //         if opt.is_some() {
-    //             function_patterns.insert(opt.unwrap().clone(), pat.clone());
-    //         }
-    //     }
-    //
-    //     fn get_splitters(datatype: &DataType, root_var: &ENodeOrVar<SymbolLang>) -> Vec<String> {
-    //         datatype.constructors.iter().map(|c|
-    //             if c.params.is_empty() {
-    //                 c.name.clone()
-    //             } else {
-    //                 format!("({} {})", c.name, (0..c.params.len()).map(|i| format!("(param_{}_{} {})", datatype.name, i, root_var.display_op())).join(" "))
-    //             }
-    //         ).collect_vec()
-    //     }
-    //
-    //     // Foreach function find if and when case split should be applied
-    //     for f in &self.functions {
-    //         if !function_patterns.contains_key(f) { continue; }
-    //         let mut case_splitters = vec![];
-    //         let pats = function_patterns.get_vec(f).unwrap();
-    //
-    //         let relevant_params = f.params.iter()
-    //             .enumerate()
-    //             .filter_map(|(i, t)| {
-    //                 // For each param check whether it covers all of the datatype's constructors
-    //                 // This means splitting makes sense as all cases can be expanded
-    //                 let param_datatype = self.datatypes.iter().find(|d|
-    //                     d.name == t.into_tree().root().op.to_string());
-    //                 param_datatype.filter(|d| d.constructors.iter().all(|c|
-    //                     pats.iter().any(|p|
-    //                         p.children()[*i].root().ident() == c.name))
-    //                 ).map(|d| (i, t, d));
-    //                 // TODO: also filter by whether the other params are always the same or var and one pattern.
-    //                 // TODO: if there is a pattern use it for screening
-    //         });
-    //
-    //         let mut x = 0;
-    //         let mut fresh_v = || {
-    //             x = x + 1;
-    //             Var::from_str(&*("?autovar".to_string() + &*x.to_string())).unwrap()
-    //         };
-    //
-    //         let mut fresh_vars = |exp: RecExpr<ENodeOrVar<SymbolLang>>, vars: &mut HashMap<Var, Var>| {
-    //             RecExpr::from(exp.as_ref().iter().cloned().map(|e| match e {
-    //                 ENodeOrVar::ENode(n) => { ENodeOrVar::ENode(n) }
-    //                 ENodeOrVar::Var(v) => {
-    //                     if !vars.contains_key(&v) {
-    //                         vars.insert(v, fresh_v());
-    //                     }
-    //                     ENodeOrVar::Var(vars[&v])
-    //                 }
-    //             }).collect_vec())
-    //         };
-    //
-    //         // Match case split only when split will be possible by other params (not splitted ones)
-    //         let param_pats = relevant_params.filter_map(|(i, t, d)| {
-    //             let mut par_pats = (0..f.params.len()).map(|_| vec![]).collect_vec();
-    //             for p in pats.iter().filter(|p|
-    //                 // Take only patterns where the i param is being matched
-    //                 match p.children()[i].root() {
-    //                     Id(s, _) => { d.constructors.iter().any(|c| c.name == s.op.to_string()) }
-    //                     Hole(_, _) => { false }
-    //                 }) {
-    //                 let mut vars = HashMap::new();
-    //                 for j in 0..f.params.len() {
-    //                     if i == j { continue; }
-    //                     if let Id(par_pat, a) = p.children()[j].root() {
-    //                         // replace vars
-    //                         let replaced = fresh_vars(p.children()[j].clone(), &mut vars);
-    //                         par_pats[j].push(replaced);
-    //                     }
-    //                 }
-    //             }
-    //             Some((i, d, par_pats)).filter(|(_, _, ps)| ps.iter().any(|v| !v.is_empty()))
-    //         }).collect_vec();
-    //
-    //         param_pats.into_iter().flat_map(|(index, datatype, param_pat)| {
-    //             let patterns_and_vars = param_pat.into_iter()
-    //                 .map(|v|
-    //                     if v.is_empty() {
-    //                         let mut exp = RecExpr::default();
-    //                         exp.add(ENodeOrVar::Var(fresh_v()));
-    //                         vec![exp]
-    //                     } else {
-    //                         v
-    //                     }).collect_vec();
-    //             // let mut res: Vec<Rewrite<SymbolLang, ()>> = vec![];
-    //             let mut res: Vec<(Rc<dyn Searcher<SymbolLang, ()>>, Var, Vec<Pattern<SymbolLang>>)> = vec![];
-    //             for combs in combinations(patterns_and_vars.iter().cloned().map(|x| x.into_iter())) {
-    //                 let mut nodes = vec![];
-    //                 let children = combs.into_iter().map(|exp| {
-    //                     let cur_len = nodes.len();
-    //                     nodes.extend(exp.as_ref().iter().cloned().map(|s|
-    //                         match s {
-    //                             ENodeOrVar::ENode(n) => {
-    //                                 ENodeOrVar::ENode(n.map_children(|child| Id::from(usize::from(child) + cur_len)))
-    //                             }
-    //                             ENodeOrVar::Var(v) => { ENodeOrVar::Var(v) }
-    //                         }));
-    //                     Id::from(nodes.len() - 1)
-    //                 }).collect_vec();
-    //                 nodes.push(ENodeOrVar::ENode(SymbolLang::new(&f.name, children)));
-    //                 let searcher = Pattern::from(RecExpr::from(nodes));
-    //                 println!("Searcher: {}", searcher.pretty_string());
-    //                 let root_var: &ENodeOrVar<SymbolLang> = searcher.ast.into_tree().children()[index].root();
-    //                 let root_v_opt = if let &ENodeOrVar::Var(v) = root_var {
-    //                     Some(v)
-    //                 } else {
-    //                     None
-    //                 };
-    //                 let mut cond_texts = vec![];
-    //                 let searcher_conditions = datatype.constructors.iter().map(|c| c.apply_params(
-    //                     (0..c.params.len()).map(|i| RecExpr::from_str(&*("?param_".to_owned() + &*i.to_string())).unwrap()).collect_vec()
-    //                 )).map(|exp| {
-    //                     cond_texts.push(format!("Cond(var: {}, pat: {})", root_v_opt.as_ref().unwrap().to_string(), exp.pretty(1000)));
-    //                     FilteringSearcher::create_non_pattern_filterer(Pattern::from_str(&*exp.pretty(1000)).unwrap().into_rc_dyn(), root_v_opt.unwrap())
-    //                 }).collect_vec();
-    //                 let dyn_searcher: Rc<dyn Searcher<SymbolLang, ()>> = Rc::new(searcher.clone());
-    //                 let conditonal_searcher = searcher_conditions.into_iter().fold(dyn_searcher, |pattern, y| {
-    //                     Rc::new(FilteringSearcher::new(pattern, y))
-    //                 });
-    //
-    //                 // For now pass the searcher, a condition and expressions for root and
-    //                 // splits. Should be (Searcher, root_var, children_expr, conditions)
-    //                 // res.push(Rewrite::new(rule_name, searcher, DiffApplier::new(ConditionalApplier { applier, condition: cond })).unwrap());
-    //                 res.push((conditonal_searcher.clone(),
-    //                           root_v_opt.unwrap(),
-    //                           get_splitters(datatype, root_var).iter().map(|x| Pattern::from_str(x).unwrap()).collect_vec()));
-    //             }
-    //             res
-    //         }).collect_vec();
-    //         res.case_splitters.extend(case_splitters);
-    //     }
-    // }
 }
 
 #[cfg(test)]
