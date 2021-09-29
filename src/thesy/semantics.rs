@@ -119,7 +119,7 @@ impl Definitions {
         (cond_searcher, applier)
     }
 
-    fn collect_splittable_params(&self, f: &Function, opt_pats: &Vec<(ast::Rewrite, Vec<usize>)>)
+    fn collect_splittable_params(&self, f: &Function, opt_pats: &Vec<Expression>)
                                  -> Vec<(usize, &DataType, RcImmutableCondition<SymbolLang, ()>)> {
         let param_types = f.params.iter().enumerate()
             // Get type of each param (if type exists)
@@ -127,9 +127,9 @@ impl Definitions {
                 self.datatypes.iter().find(|d| &d.as_exp() == p.1)))
             // Only keep params which have patterns for all constructors
             .filter(|(i, d)| d.constructors.iter()
-                .all(|c| opt_pats.iter().any(|(def, indices)| {
+                .all(|c| opt_pats.iter().any(|exp| {
                     // One of the patterns should equal be the constructor
-                    def.source_expressions().iter().any(|s| &c.name == s.children()[*i].root().ident())
+                    &c.name == exp.children()[*i].root().ident()
                 })))
             .collect_vec();
 
@@ -138,8 +138,7 @@ impl Definitions {
             // collect all patterns of other params for each constructor type
             let mut patterns_grouped: HashMap<String, Vec<&Expression>> = HashMap::default();
             for c in &p_dt.constructors {
-                patterns_grouped.insert(c.name.clone(), opt_pats.iter()
-                    .flat_map(|(def, indices)| def.source_expressions())
+                patterns_grouped.insert(c.name.clone(), opt_pats.into_iter()
                     .filter(|s| s.children()[i].root().ident() == &c.name)
                     .collect_vec(),
                 );
@@ -148,14 +147,14 @@ impl Definitions {
             // Can split by any param by itself by adding filterers on other params.
             // Instead of a very sophisticated runtime I am creating a complex pattern for asserting
             // the rewriting will continue in each split.
-            // Should be And(<for each constructor Or(for each pattern remove param to split)>)
+            // Should be And(<for each constructor c Or(for all pattern with c in place i where the subpattern in place i is replaced with a fresh hole)>)
             let cond = AndCondition::new(patterns_grouped.into_iter().map(|(name, pats)| {
                 RcImmutableCondition::new(OrCondition::new(pats.into_iter().map(|exp| {
                     let holename = "splithole";
                     assert!(exp.holes().iter().find(|h| h.ident() == holename).is_none());
                     let mut new_children = exp.children().iter().cloned().collect_vec();
                     new_children[i] = Leaf(Hole(holename.to_string(), None));
-                    let mut new_exp = Op(exp.root().clone(), vec![]);
+                    let mut new_exp = Op(exp.root().clone(), new_children);
                     FilteringSearcher::create_exists_pattern_filterer(Self::exp_to_pattern(&new_exp))
                 }).collect_vec()))
             }).collect_vec());
@@ -189,7 +188,7 @@ impl Definitions {
 impl From<Vec<Statement>> for Definitions {
     fn from(x: Vec<Statement>) -> Self {
         let mut res: Self = Default::default();
-        let mut rw_definitions: MultiMap<String, (ast::Rewrite, Vec<usize>)> = Default::default();
+        let mut rw_definitions: MultiMap<String, Expression> = Default::default();
         for s in x {
             match s {
                 Statement::RewriteDef(name, def) => {
@@ -197,10 +196,10 @@ impl From<Vec<Statement>> for Definitions {
                     // TODO: remove clone
                     res.process_rw(name.clone(), def.clone());
                     if res.rws.len() > current {
-                        let exps: Vec<&Expression> = def.source_expressions();
+                        let exps: Vec<Expression> = def.source_expressions().into_iter().cloned().collect_vec();
                         for exp in exps {
                             rw_definitions.insert(exp.root().ident().clone(),
-                                                  (def.clone(), Vec::from_iter(current..res.rws.len())));
+                                                  exp);
                         }
                     }
                 }
