@@ -3,7 +3,7 @@ pub mod multisearcher {
     use std::iter::FromIterator;
     use std::str::FromStr;
 
-    use egg::{EGraph, Id, Pattern, Searcher, SearchMatches, Subst, SymbolLang, Var, Language, Analysis};
+    use egg::{EGraph, Id, Pattern, Searcher, SearchMatches, Subst, SymbolLang, Var, Language, Analysis, Condition, ImmutableCondition, RcImmutableCondition};
     use itertools::{Itertools, Either};
 
     use crate::tools::tools::Grouped;
@@ -400,69 +400,58 @@ pub mod multisearcher {
         }
     }
 
-    pub type MatchFilter<L: Language, N: Analysis<L>> = Rc<dyn Fn(&EGraph<L, N>, Vec<SearchMatches>) -> Vec<SearchMatches>>;
-
     #[derive(Clone)]
     pub struct FilteringSearcher<L: Language, N: Analysis<L>> {
         searcher: Rc<dyn Searcher<L, N>>,
-        predicate: Rc<dyn Fn(&EGraph<L, N>, Vec<SearchMatches>) -> Vec<SearchMatches>>,
+        predicate: RcImmutableCondition<L, N>,
         phantom_ln: PhantomData<(L, N)>,
     }
 
     impl<L: Language + 'static, N: Analysis<L> + 'static> FilteringSearcher<L, N> {
-        pub fn create_non_pattern_filterer(matcher_p: Pattern<L>,
-                                           negator_p: Pattern<L>) ->
-        Rc<dyn Fn(&EGraph<L, N>, Vec<SearchMatches>) -> Vec<SearchMatches>> {
-            let matcher = tools::pattern_to_matcher(matcher_p);
-            let negator = tools::pattern_to_matcher(negator_p);
-            Rc::new(move |graph: &EGraph<L, N>, sms: Vec<SearchMatches>| {
-                sms.into_iter().filter_map(|mut sm| {
-                    let mut substs = std::mem::take(&mut sm.substs);
-                    sm.substs = substs.into_iter()
-                        .filter(|s| matcher(graph, s) != negator(graph, s) || negator(graph, s).is_none()).collect_vec();
-                    if sm.substs.is_empty() {
-                        None
-                    } else {
-                        Some(sm)
-                    }
-                }).collect_vec()
-            })
+        pub fn matcher_from_var(var: Var) -> Rc<dyn Fn(&EGraph<L, N>, &Subst) -> Option<Id>> {
+            Rc::new(move |graph, sbt|
+                sbt.get(var).copied())
         }
 
-        pub fn create_exists_pattern_filterer(searcher: Rc<dyn Searcher<L, N>>, root: Var) ->
-        Rc<dyn Fn(&EGraph<L, N>, Vec<SearchMatches>) -> Vec<SearchMatches>> {
-            Rc::new(move |graph: &EGraph<L, N>, sms: Vec<SearchMatches>| {
-                let res = searcher.search(graph).iter().map(|s| s.eclass).collect::<HashSet<Id>>();
-                sms.into_iter().filter_map(|mut sm| {
-                    let mut substs = std::mem::take(&mut sm.substs);
-                    sm.substs = substs.into_iter().filter(|s| res.contains(&s[root])).collect_vec();
-                    if sm.substs.is_empty() {
-                        None
-                    } else {
-                        Some(sm)
-                    }
-                }).collect_vec()
+        pub fn matcher_from_enode(enode: L) -> Rc<dyn Fn(&EGraph<L, N>, &Subst) -> Option<Id>> {
+            Rc::new(move |graph, sbt| graph.lookup(enode.clone()))
+        }
+
+        pub fn matcher_from_pattern(p: Pattern<L>)
+            -> Rc<dyn Fn(&EGraph<L, N>, &Subst) -> Option<Id>> {
+            // The parser asserts all vars are present.
+            Rc::new(move |graph, sbt| p.rec_lookup(graph, sbt))
+        }
+
+        pub fn create_non_pattern_filterer(matcher: Rc<dyn Fn(&EGraph<L, N>, &Subst) -> Option<Id>>,
+                                           negator: Rc<dyn Fn(&EGraph<L, N>, &Subst) -> Option<Id>>)
+            -> RcImmutableCondition<L, N> {
+            let x = (move |graph: &EGraph<L, N>, id: Id, subst: &Subst| {
+                let m = matcher(graph, subst);
+                m.is_none() || m != negator(graph, subst)
+            });
+            RcImmutableCondition::new(x)
+        }
+
+        pub fn create_exists_pattern_filterer(searcher: Pattern<L>) -> RcImmutableCondition<L, N> {
+            RcImmutableCondition::new(move |graph: &EGraph<L, N>, id: Id, subst: &Subst| {
+                searcher.rec_lookup(graph, subst).is_some()
             })
         }
 
         pub fn new(searcher: Rc<dyn Searcher<L, N>>,
-                   predicate: MatchFilter<L, N>, ) -> Self {
-            FilteringSearcher { searcher, predicate, phantom_ln: Default::default() }
+                   predicate: RcImmutableCondition<L, N>, ) -> Self {
+            FilteringSearcher {
+                searcher,
+                predicate,
+                phantom_ln: Default::default()
+            }
         }
 
-        pub fn from<S: Searcher<L, N> + 'static>(s: S, predicate: MatchFilter<L, N>) -> Self {
+        pub fn from<S: Searcher<L, N> + 'static>(s: S, predicate: RcImmutableCondition<L, N>) -> Self {
             let dyn_searcher: Rc<dyn Searcher<L, N>> = Rc::new(s);
             Self::new(dyn_searcher, predicate)
         }
-    }
-
-    pub fn aggregate_conditions<L: Language + 'static, N: Analysis<L> + 'static>(conditions: Vec<MatchFilter<L, N>>) -> MatchFilter<L, N> {
-        Rc::new(move |graph: &EGraph<L, N>, mut sms: Vec<SearchMatches>| {
-            for c in &conditions {
-                sms = c(graph, sms);
-            }
-            sms
-        })
     }
 
     impl<L: Language + 'static, N: Analysis<L> + 'static> std::fmt::Display for FilteringSearcher<L, N> {
@@ -478,7 +467,7 @@ pub mod multisearcher {
 
         fn search(&self, egraph: &EGraph<L, N>) -> Vec<SearchMatches> {
             let origin = self.searcher.search(egraph);
-            let res = (self.predicate)(egraph, origin);
+            let res = self.predicate.filter(egraph, origin);
             res
         }
 
@@ -538,9 +527,9 @@ pub mod multisearcher {
 mod tests {
     use std::str::FromStr;
 
-    use egg::{EGraph, RecExpr, Searcher, SymbolLang};
+    use egg::{EGraph, RecExpr, Searcher, SymbolLang, Pattern};
 
-    use crate::eggstentions::searchers::multisearcher::{MultiDiffSearcher, MultiEqSearcher};
+    use crate::eggstentions::searchers::multisearcher::{MultiDiffSearcher, MultiEqSearcher, FilteringSearcher};
 
     #[test]
     fn eq_two_trees_one_common() {
@@ -583,5 +572,23 @@ mod tests {
         egraph.rebuild();
         let searcher = MultiDiffSearcher::from_str("(ltwf ?x ind_var) |||| (pl ?x Z)").unwrap();
         assert!(!searcher.search(&egraph).is_empty());
+    }
+
+    #[test]
+    fn pattern_to_matcher_sanity() {
+        let mut graph: EGraph<SymbolLang, ()> = EGraph::default();
+        graph.add_expr(&RecExpr::from_str("(+ 1 (+ 2 3))").unwrap());
+        graph.add_expr(&RecExpr::from_str("(+ 31 (+ 32 33))").unwrap());
+        graph.add_expr(&RecExpr::from_str("(+ 21 (+ 22 23))").unwrap());
+        graph.add_expr(&RecExpr::from_str("(+ 11 (+ 12 13))").unwrap());
+        let p: Pattern<SymbolLang> = Pattern::from_str("(+ ?z (+ ?x ?y))").unwrap();
+        let m = FilteringSearcher::matcher_from_pattern(p.clone());
+        let results = p.search(&graph);
+        for sm in results {
+            let eclass = sm.eclass;
+            for sb in sm.substs {
+                assert_eq!(Some(eclass), m(&graph, &sb));
+            }
+        }
     }
 }
