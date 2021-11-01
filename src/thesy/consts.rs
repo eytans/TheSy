@@ -83,8 +83,8 @@ pub(crate) fn ite_rws() -> Vec<Rewrite<SymbolLang, ()>> {
 pub fn system_case_splits() -> CaseSplit {
     let ite_searcher = {
         let searcher: Pattern<SymbolLang> = Pattern::from_str("(ite ?z ?x ?y)").unwrap();
-        let true_cond = FilteringSearcher::create_non_pattern_filterer(Pattern::from_str("?z").unwrap().into_rc_dyn(), Pattern::from_str("true").unwrap().into_rc_dyn());
-        let false_cond = FilteringSearcher::create_non_pattern_filterer(Pattern::from_str("?z").unwrap().into_rc_dyn(), Pattern::from_str("false").unwrap().into_rc_dyn());
+        let true_cond = FilteringSearcher::create_non_pattern_filterer(Pattern::from_str("?z").unwrap(), Pattern::from_str("true").unwrap());
+        let false_cond = FilteringSearcher::create_non_pattern_filterer(Pattern::from_str("?z").unwrap(), Pattern::from_str("false").unwrap());
         FilteringSearcher::new(searcher.into_rc_dyn(), aggregate_conditions::<SymbolLang, ()>(vec![true_cond, false_cond]))
     };
     let mut res = CaseSplit::from_applier_patterns(vec![(ite_searcher.into_rc_dyn(), Pattern::from_str("?z").unwrap(), vec!["true".parse().unwrap(), "false".parse().unwrap()])]);

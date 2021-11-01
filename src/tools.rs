@@ -5,7 +5,7 @@ pub mod tools {
 
     use itertools::MultiProduct;
     use itertools::Itertools;
-    use egg::{RecExpr, SymbolLang, Pattern, Language, Analysis, Subst, Id, ENodeOrVar, Searcher};
+    use egg::{RecExpr, SymbolLang, Pattern, Language, Analysis, Subst, Id, ENodeOrVar, Searcher, EGraph};
     use std::rc::Rc;
 
 // fn combinations<'a, T: 'a, I: Iterator<Item = &'a T> + Clone>(mut sets: impl Iterator<Item = I>) -> impl Iterator<Item = Vec<&'a T>> {
@@ -81,68 +81,27 @@ pub mod tools {
         }
     }
 
-    // pub fn expression_to_matcher<L: Language, N: Analysis<L>>(pattern: Pattern<L>) -> Rc<dyn Fn(&Egraph<L, N>, &Subst) -> Option<Id>> {
-    //     fn rec_lookup(pattern: &[ENodeOrVar<L>], graph: &Egraph<L, N>, subst: &Subst) -> Option<Id> {
-    //         match pattern.last().unwrap() {
-    //             ENodeOrVar::ENode(node) => {
-    //                 let e = node.clone().map_children(|i| {
-    //                     let child = &pattern[..usize::from(i) + 1];
-    //                     let rec_res = rec_lookup(child, graph, subst)
-    //                     if rec_res.is_none() {
-    //                         return None;
-    //                     }
-    //                     *rec_res.unwrap()
-    //                 });
-    //                 graph.lookup(e)
-    //             }
-    //             ENodeOrVar::Var(v) => { subst.get(*v) }
-    //         }
-    //     }
-    //     Rc::new(|(g, s)| {
-    //         assert!(pattern.ast.as_ref().len() > 0, "Pattern must not be empty");
-    //         let new_pat = pattern.ast.as_ref().iter().map(|x| match x {
-    //             x @ ENodeOrVar::ENode(_) => { x.clone().map_children(|c| match c {
-    //                 Id(c_id) => {
-    //                     match pattern.ast.as_ref()[usize::from(c_id)] {
-    //                         ENodeOrVar::ENode(_) => {}
-    //                         ENodeOrVar::Var(v) => {}
-    //                     }
-    //                 }
-    //             }) }
-    //             ENodeOrVar::Var(v) => { panic!("Bad var in pattern (no subst) {:?}", v) }
-    //         }).last().unwrap();
-    //         new_pat.search(g).iter().map(|sms| sms.eclass).first()
-    //     })
-    // }
-
-    // pub trait DispWrapper {
-    //     fn to_print_str(&self) -> String;
-    // }
-    //
-    // impl<T: ToString> DispWrapper for T {
-    //     fn to_print_str(&self) -> String {
-    //         self.to_string()
-    //     }
-    // }
-    //
-    // impl<T: DispWrapper, I: Iterator<Item = T> + Clone> DispWrapper for I {
-    //     fn to_print_str(&self) -> String {
-    //         let mut res = String::new();
-    //         let mut cloned = self.clone();
-    //         let mut next = cloned.next();
-    //         while next.is_some() {
-    //             res += &*next.as_ref().unwrap().to_print_str();
-    //             res += ", "
-    //         }
-    //         res
-    //     }
-    // }
-    //
-    // impl<T: DispWrapper> Display for T {
-    //     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-    //         self.to_print_str().fmt(f)
-    //     }
-    // }
+    pub fn pattern_to_matcher<L: 'static + Language, N: Analysis<L>>(pattern: Pattern<L>) -> Rc<dyn Fn(&EGraph<L, N>, &Subst) -> Option<Id>> {
+        Rc::new(move |g: &EGraph<L, N>, s: &Subst| {
+            assert!(pattern.ast.as_ref().len() > 0, "Pattern must not be empty");
+            assert!(s.colors().len() <= 1);
+            let mut res: Vec<Option<Id>> = Vec::with_capacity(pattern.ast.as_ref().len());
+            for x in pattern.ast.as_ref() {
+                match x {
+                    ENodeOrVar::ENode(n) => {
+                        if n.children().iter().all(|c| res[usize::from(*c)].is_some()) {
+                            let new_n = n.clone().map_children(|c| res[usize::from(c)].unwrap());
+                            res.push(g.lookup(new_n));
+                        } else {
+                            res.push(None);
+                        }
+                    }
+                    ENodeOrVar::Var(v) => { res.push(s.get(*v).copied()); }
+                }
+            }
+            *res.last().unwrap()
+        })
+    }
 }
 
 #[cfg(test)]

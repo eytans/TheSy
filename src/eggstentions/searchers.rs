@@ -12,6 +12,7 @@ pub mod multisearcher {
     use smallvec::alloc::fmt::Formatter;
     use std::marker::PhantomData;
     use std::rc::Rc;
+    use crate::tools::tools;
 
     pub struct EitherSearcher<L: Language, N: Analysis<L>, A: Searcher<L, N> + Debug, B: Searcher<L, N> + Debug> {
         node: Either<A, B>,
@@ -409,14 +410,16 @@ pub mod multisearcher {
     }
 
     impl<L: Language + 'static, N: Analysis<L> + 'static> FilteringSearcher<L, N> {
-        pub fn create_non_pattern_filterer(matcher: Rc<dyn Fn(&EGraph<L, N>, &Subst) -> Id>,
-                                           negator: Rc<dyn Fn(&EGraph<L, N>, &Subst) -> Id>) ->
+        pub fn create_non_pattern_filterer(matcher_p: Pattern<L>,
+                                           negator_p: Pattern<L>) ->
         Rc<dyn Fn(&EGraph<L, N>, Vec<SearchMatches>) -> Vec<SearchMatches>> {
+            let matcher = tools::pattern_to_matcher(matcher_p);
+            let negator = tools::pattern_to_matcher(negator_p);
             Rc::new(move |graph: &EGraph<L, N>, sms: Vec<SearchMatches>| {
                 sms.into_iter().filter_map(|mut sm| {
                     let mut substs = std::mem::take(&mut sm.substs);
                     sm.substs = substs.into_iter()
-                        .filter(|s| matcher(graph, s) != negator(graph, s)).collect_vec();
+                        .filter(|s| matcher(graph, s) != negator(graph, s) || negator(graph, s).is_none()).collect_vec();
                     if sm.substs.is_empty() {
                         None
                     } else {

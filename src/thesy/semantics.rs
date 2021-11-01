@@ -107,8 +107,8 @@ impl Definitions {
         let applier = Definitions::exp_to_pattern(&target);
         let conditions = conds.into_iter().map(|(matcher, negation)| {
             FilteringSearcher::create_non_pattern_filterer(
-                Definitions::exp_to_pattern(&matcher).into_rc_dyn(),
-                Definitions::exp_to_pattern(&negation).into_rc_dyn())
+                Definitions::exp_to_pattern(&matcher),
+                Definitions::exp_to_pattern(&negation))
         }).collect_vec();
         let cond_searcher = FilteringSearcher::new(searcher,
                                                    aggregate_conditions(conditions));
@@ -139,8 +139,8 @@ impl From<Vec<Statement>> for Definitions {
                     let searcher = Pattern::from_str(&*searcher.to_sexp_string()).unwrap().into_rc_dyn();
                     let conditions = conditions.into_iter().map(|(m, n)| {
                         FilteringSearcher::create_non_pattern_filterer(
-                            Definitions::exp_to_pattern(&m).into_rc_dyn(),
-                            Definitions::exp_to_pattern(&n).into_rc_dyn())
+                            Definitions::exp_to_pattern(&m),
+                            Definitions::exp_to_pattern(&n))
                     }).collect_vec();
                     let cond_searcher = FilteringSearcher::new(searcher,
                                                                aggregate_conditions(conditions));
