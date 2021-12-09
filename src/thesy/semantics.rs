@@ -218,8 +218,8 @@ impl From<Vec<Statement>> for Definitions {
                     let searcher = Pattern::from_str(&*searcher.to_sexp_string()).unwrap().into_rc_dyn();
                     let conditions = conditions.into_iter().map(|(m, n)| {
                         FilteringSearcher::create_non_pattern_filterer(
-                            Definitions::exp_to_pattern(&m).into_rc_dyn(),
-                            Definitions::exp_to_pattern(&n).into_rc_dyn())
+                            FilteringSearcher::matcher_from_pattern(Definitions::exp_to_pattern(&m)),
+                            FilteringSearcher::matcher_from_pattern(Definitions::exp_to_pattern(&n)))
                     }).collect_vec();
                     let cond_searcher = FilteringSearcher::new(searcher,
                                                                RcImmutableCondition::new(AndCondition::new(conditions)));
