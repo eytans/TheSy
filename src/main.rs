@@ -227,9 +227,9 @@ fn main() {
     let mut rws = thesy.system_rws.clone();
     rws.extend_from_slice(&config.definitions.rws);
     if args.check_equiv {
-        for (vars, precond, ex1, ex2) in &config.definitions.conjectures {
+        for (vars, holes, precond, ex1, ex2) in &config.definitions.conjectures {
             if TheSy::check_equality(&rws, precond, ex1, ex2) {
-                println!("proved: {}{} = {}", precond.as_ref().map(|x| format!("{} => ", x.pretty(500))).unwrap_or("".to_string()), ex1.pretty(500), ex2.pretty(500))
+                println!("proved: Forall {}. {}{} = {}", holes.iter().join(", "), precond.as_ref().map(|x| format!("{} => ", x.pretty(500))).unwrap_or("".to_string()), ex1.pretty(500), ex2.pretty(500))
             }
         }
         exit(0)

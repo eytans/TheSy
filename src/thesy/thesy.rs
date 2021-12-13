@@ -103,7 +103,7 @@ impl TheSy {
         Self::new_with_ph(vec![datatype.clone()], HashMap::from_iter(iter::once((datatype, examples))), dict, 2, None)
     }
 
-    pub fn new_with_ph(datatypes: Vec<DataType>, examples: HashMap<DataType, Examples>, dict: Vec<Function>, ph_count: usize, lemmas: Option<Vec<(HashMap<RecExpr<SymbolLang>, RecExpr<SymbolLang>>, Option<RecExpr<SymbolLang>>, RecExpr<SymbolLang>, RecExpr<SymbolLang>)>>) -> TheSy {
+    pub fn new_with_ph(datatypes: Vec<DataType>, examples: HashMap<DataType, Examples>, dict: Vec<Function>, ph_count: usize, lemmas: Option<Vec<(HashMap<RecExpr<SymbolLang>, RecExpr<SymbolLang>>, HashSet<RecExpr<SymbolLang>>, Option<RecExpr<SymbolLang>>, RecExpr<SymbolLang>, RecExpr<SymbolLang>)>>) -> TheSy {
         debug_assert!(examples.iter().all(|(d, e)| &e.datatype == d));
         let datatype_to_prover: HashMap<DataType, Prover> = datatypes.iter()
             .map(|d| (d.clone(), Prover::new(d.clone()))).collect();
@@ -118,10 +118,14 @@ impl TheSy {
             .chain(consts::is_rws().into_iter())
             .collect_vec();
 
+        // TODO: replace placeholders only for holes and not for all terminals (also in creating ph0)
         let conjectures = lemmas.map(|v| v.into_iter()
-            .map(|(vars, precond, ex1, ex2)| {
+            .map(|(vars, holes, precond, ex1, ex2)| {
                 let mut types_to_vars: HashMap<RecExpr<SymbolLang>, HashMap<Symbol, Function>> = HashMap::new();
                 for v in vars {
+                    if !holes.contains(&v.0) {
+                        continue;
+                    }
                     if !types_to_vars.contains_key(&v.1) {
                         types_to_vars.insert(v.1.clone(), HashMap::new());
                     }

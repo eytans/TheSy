@@ -44,7 +44,7 @@ pub fn test_terms(mut definitions: Definitions) -> ProofMode {
     rws.extend_from_slice(&definitions.rws);
     assert_eq!(1, definitions.goals.len());
     assert_eq!(1, definitions.conjectures.len());
-    let (vars, precond, ex1, ex2) = definitions.conjectures.first().unwrap();
+    let (vars, holes, precond, ex1, ex2) = definitions.conjectures.first().unwrap();
     let (mut ast_precond, mut ast_exp1, mut ast_exp2) = definitions.goals.pop().unwrap();
 
     // Assert terms are not equal

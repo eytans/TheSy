@@ -1,5 +1,6 @@
 use std::collections::{HashMap, HashSet};
 use std::fmt::{Debug, Formatter};
+use std::hash::Hash;
 use std::rc::Rc;
 
 use egg::{Pattern, RecExpr, Rewrite, Searcher, SymbolLang, Var, ENodeOrVar, Condition, ImmutableCondition, RcImmutableCondition};
@@ -29,8 +30,8 @@ pub struct Definitions {
     pub functions: Vec<Function>,
     /// Rewrites defined by (assert forall)
     pub rws: Vec<Rewrite<SymbolLang, ()>>,
-    /// Terms to prove, given as not forall, (vars - types, precondition, ex1, ex2)
-    pub conjectures: Vec<(HashMap<RecExpr<SymbolLang>, RecExpr<SymbolLang>>, Option<RecExpr<SymbolLang>>, RecExpr<SymbolLang>, RecExpr<SymbolLang>)>,
+    /// Terms to prove, given as not forall, (vars - types, holes, precondition, ex1, ex2)
+    pub conjectures: Vec<(HashMap<RecExpr<SymbolLang>, RecExpr<SymbolLang>>, HashSet<RecExpr<SymbolLang>>, Option<RecExpr<SymbolLang>>, RecExpr<SymbolLang>, RecExpr<SymbolLang>)>,
     /// Logic of when to apply case split
     pub case_splitters: Vec<(Rc<dyn Searcher<SymbolLang, ()>>, Pattern<SymbolLang>, Vec<Pattern<SymbolLang>>)>,
     /// patterns used to deduce case splits
@@ -292,7 +293,7 @@ impl std::fmt::Display for Definitions {
         }
         for c in &self.conjectures {
             write!(f, "  ")?;
-            writeln!(f, "{} = {}", c.2, c.3)?;
+            writeln!(f, "Forall {}. {} = {}", c.2.iter().join(", "), c.3, c.4)?;
         }
         write!(f, "case splitters len: {}", self.case_splitters.len())
     }
@@ -378,28 +379,43 @@ impl Definitions {
 
     fn process_goals(&mut self, precond: Option<&Expression>, exp1: &Expression, exp2: &Expression) {
         let mut type_map = HashMap::new();
+        let mut holes = HashSet::new();
         let mut all_terminals = precond.iter()
             .flat_map(|e| e.terminals().iter().cloned().cloned().collect_vec())
             .collect_vec();
         all_terminals.extend(exp1.terminals().into_iter().cloned());
         all_terminals.extend(exp2.terminals().into_iter().cloned());
+
         for t in all_terminals {
-            // No holes in goals
-            if let Id(name, anno) = t {
-                if let Some(ptr) = anno {
-                    if let Some(typ) = ptr.get_type() {
-                        type_map.insert(
-                            RecExpr::from_str(&*name).unwrap(),
-                            RecExpr::from_str(&*typ.to_sexp_string()).unwrap());
-                    }
+            let name = t.ident().clone();
+            let anno = t.anno().clone();
+
+            if t.is_hole() {
+                holes.insert(RecExpr::from_str(&*name).unwrap());
+                debug_assert!(!t.ident().starts_with("?"));
+            }
+
+            if let Some(ptr) = anno {
+                if let Some(typ) = ptr.get_type() {
+                    type_map.insert(
+                        RecExpr::from_str(&*name).unwrap(),
+                        RecExpr::from_str(&*typ.to_sexp_string()).unwrap());
                 }
             }
         }
-        self.conjectures.push((type_map,
+
+        fn hole_to_id(t: &Terminal) -> Terminal {
+            match t {
+                Hole(id, a) => Id(id.clone(), a.clone()),
+                _ => t.clone()
+            }
+        }
+
+        self.conjectures.push((type_map, holes,
                                precond.map(|t|
-                                   RecExpr::from_str(&*t.to_sexp_string()).unwrap()),
-                               RecExpr::from_str(&*exp1.to_sexp_string()).unwrap(),
-                               RecExpr::from_str(&*exp2.to_sexp_string()).unwrap()));
+                                   RecExpr::from_str(&*t.map(&hole_to_id).to_sexp_string()).unwrap()),
+                               RecExpr::from_str(&*exp1.map(&hole_to_id).to_sexp_string()).unwrap(),
+                               RecExpr::from_str(&*exp2.map(&hole_to_id).to_sexp_string()).unwrap()));
     }
 
     fn make_rw(&mut self,
