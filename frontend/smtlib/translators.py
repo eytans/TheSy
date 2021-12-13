@@ -307,11 +307,11 @@ class Goal(object):
     def __str__(self):
         fixed_precondition = ""
         if self.precondition:
-            fixed_precondition = f" if {self.precondition} then"
+            fixed_precondition = f" if {self.precondition.to_smtlib(daggify=False)} then"
         fixed_rhs = ""
         if self.rhs:
-            fixed_rhs = f" = {self.rhs}"
-        return f"prove{fixed_precondition} {self.lhs} {fixed_rhs}"
+            fixed_rhs = f" = {self.rhs.to_smtlib(daggify=False)}"
+        return f"prove{fixed_precondition} {self.lhs.to_smtlib(daggify=False)} {fixed_rhs}"
 
 
 class NewThesyFromSmt(ThesyFromSmt):

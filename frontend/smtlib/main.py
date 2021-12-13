@@ -16,6 +16,7 @@ def main():
     parser.add_argument('smtlib_in', nargs='*', help='SMT-LIB file or directory to extract thesy from (default: stdin)')
     parser.add_argument('--output', '-o', help='Output directory according to input (default: stdout)')
     parser.add_argument('--thesy_version', '-v', help='Thesy version to use (default: 2)', choices=[1, 2], default=2)
+    parser.add_argument('--verbose', type=bool, default=True)
     args = parser.parse_args()
 
     files = []
@@ -25,6 +26,9 @@ def main():
                 files.append((Path(inp), Path(f)))
         else:
             files.append((Path(inp).absolute().parent.relative_to(os.getcwd()), Path(inp)))
+
+    if args.output:
+        Path(args.output).mkdir(parents=True, exist_ok=True)
 
     for d, fn in files:
         print('--  %s  --' % fn)
@@ -44,11 +48,12 @@ def main():
 
         out = stdout
         if args.output:
-            out = open(Path(args.output) / fn.relative_to(d), 'w')
+            out = open(Path(args.output) / fn.relative_to(d).with_suffix('.th'), 'w')
 
         try:
             for el in doc:
-                print(el)
+                if args.output and args.verbose:
+                    print(el)
                 print(el, file=out)
 
             # for srule in ExtractCaseSplits(doc).guess_rules():
