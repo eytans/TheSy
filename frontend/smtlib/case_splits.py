@@ -1,6 +1,6 @@
 from pysmt.fnode import FNode
 from pysmt.shortcuts import get_type, get_env, Function, FunctionType, FreshSymbol, Type
-from .import_smtlib import SmtLibDocument, SExpression, SmtLibSExpression
+from .translators import ThesyFromSmt, SExpression, SmtLibSExpression
 
 
 def get_top_fn(exp: SmtLibSExpression):
@@ -11,7 +11,7 @@ def get_top_fn(exp: SmtLibSExpression):
 
 
 class ExtractCaseSplits:
-    def __init__(self, doc: SmtLibDocument):
+    def __init__(self, doc: ThesyFromSmt):
         self.doc = doc
         sym = get_env().formula_manager.get_symbol
         #fsym = lambda ty: FreshSymbol(ty, template='?c%d')

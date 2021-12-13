@@ -12,7 +12,7 @@ from pysmt.shortcuts import Symbol, FunctionType, ForAll, Equals, \
     Iff, Function, Bool, get_free_variables, TRUE, FALSE, Implies, get_env
 
 
-class SmtLibDocument:
+class ThesyFromSmt(object):
     """
     Reads definition in SMTLIB-2.6 format and exports them in TheSy S-Expression
     syntax.
@@ -135,13 +135,19 @@ class SmtLibDocument:
 
     def export_rules(self, formula):
         ex = self.export_expr
+        for precondition, op, lhs, rhs in self.extract_rw_parts(formula):
+            if precondition is not None:
+                yield SExpression([op, self._fresh('rule%d'), ex(Implies(precondition._repr, formula._repr))])
+            else:
+                yield SExpression([op, self._fresh('rule%d'), lhs, rhs])
 
+    def extract_rw_parts(self, formula):
+        ex = self.export_expr
         uvars, formula = self.extract_universal(formula)
         precondition = None
         if formula.is_implies():
             precondition = formula.arg(0)
             formula = formula.arg(1)
-
         if formula.is_equals() or formula.is_iff():
             if uvars:
                 re = {v: self._qvar_from_symbol(v) for v in uvars}
@@ -152,12 +158,12 @@ class SmtLibDocument:
 
             lhs, rhs = formula.args()
             for lhs, rhs in [(lhs, rhs), (rhs, lhs)]:
-                if ((lhs not in uvars) and     # avoid e.g. x => x + 0
+                if ((lhs not in uvars) and  # avoid e.g. x => x + 0
                         fv(lhs) >= fv(rhs)):
                     if precondition is not None:
-                        yield SExpression(['=>', self._fresh('rule%d'), ex(Implies(precondition, formula))])
+                        yield precondition, '=>', ex(lhs), ex(rhs)
                     else:
-                        yield SExpression(['=>', self._fresh('rule%d'), ex(lhs), ex(rhs)])
+                        yield None, '=>', ex(lhs), ex(rhs)
         elif not (formula.is_not() and self.extract_universal(formula.args()[0])[0]):
             # this is either a not exp or an expr
             if uvars:
@@ -174,25 +180,37 @@ class SmtLibDocument:
             if uvars:
                 op = '=>'
             if precondition is not None:
-                yield SExpression([op, self._fresh('rule%d'), ex(Implies(precondition, Iff(formula, equals_to)))])
+                yield precondition, op, ex(formula), ex(equals_to)
             else:
-                yield SExpression([op, self._fresh('rule%d'), ex(formula), ex(equals_to)])
+                yield None, op, ex(formula), ex(equals_to)
 
     def export_goals(self, formula):
         ex = self.export_expr
+        for uvars, precondition, lhs, rhs in self.export_goal_parts(formula):
+            if precondition is None and rhs is None:
+                goal = ForAll(uvars, Equals(lhs, Bool(True)))
+            elif precondition is None:
+                goal = ForAll(uvars, Equals(lhs, rhs))
+            elif rhs is None:
+                goal = Implies(precondition, ForAll(uvars, Equals(lhs, Bool(True))))
+            else:
+                goal = Implies(precondition, ForAll(uvars, Equals(lhs, rhs)))
+            yield SExpression(['prove', ex(goal)])
 
+    def export_goal_parts(self, formula):
         if formula.is_not() and self.extract_universal(formula.args()[0])[0]:
             formula = formula.arg(0)
             uvars, inner = self.extract_universal(formula)
             if inner.is_equals() or inner.is_iff():
-                goal = formula
+                yield uvars, None, inner.arg(0), inner.arg(1)
             elif inner.is_implies():
-                goal = formula
                 if (not inner.arg(1).is_equals()) and (not inner.arg(1).is_iff()):
-                    ForAll(uvars, Implies(inner.arg(0), Iff(inner.arg(1), Bool(True))))
+                    yield uvars, inner.arg(0), inner.arg(1), None
+                else:
+                    yield uvars, inner.arg(0), inner.arg(1).arg(0), inner.arg(1).arg(1)
             else:
-                goal = ForAll(uvars, Iff(inner, Bool(True)))
-            yield SExpression(['prove', ex(goal)])
+                yield uvars, None, inner, None
+
 
     def export_expr(self, e):
         return SmtLibSExpression(e)
@@ -216,6 +234,109 @@ class SmtLibDocument:
 
     def _fresh(self, template):
         return template % self._fresh_cnt.__next__()
+
+
+class Rule(object):
+    def __init__(self, name, lhs, rhs, rule_type=None, precondition=None, conditions=None):
+        self.name = name
+        self.lhs = lhs
+        self.rhs = rhs
+        self.rule_type = rule_type
+        if rule_type is None:
+            self.rule_type = "=>"
+        self.precondition = precondition
+        self.conditions = conditions
+
+    def __str__(self):
+        if self.precondition is None:
+            fixed_precondition = ""
+        else:
+            fixed_precondition = f"if {self.precondition} then "
+        if self.conditions is None:
+            fixed_conditions = ""
+        else:
+            fixed_conditions = f" when {' and '.join([f'({c[0]} != {c[1]})' for c in self.conditions])}"
+        return f"rw {self.name} {fixed_precondition}{self.lhs} {self.rule_type} {self.rhs}{fixed_conditions}"
+
+
+class FunDef(object):
+    def __init__(self, name, args, ret_type, body=None):
+        self.name = name
+        self.args = args
+        self.ret_type = ret_type
+        self.body = body
+
+    def __str__(self):
+        if self.body is None:
+            fixed_body = ""
+        else:
+            fixed_body = f" => {self.body}"
+        return f"fun {self.name} {' '.join([f'({a} : {t})' for a, t in self.args])} -> {self.ret_type}{fixed_body}"
+
+
+class Datatype(object):
+    def __init__(self, name, type_params, ctors):
+        self.name = name
+        self.type_params = type_params
+        self.ctors = ctors
+
+    def ctor_str(self, ctr):
+        args = [f'(x_{i} : {t})' for i, t in enumerate(ctr[1])] + [f"(res : {self.name})"]
+        ctr_name = ctr[0]
+        return f"({ctr_name} : {' -> '.join([x for x in args])})"
+
+    def __str__(self):
+        return f"datatype {self.name} ({' '.join(self.type_params)}) := {' '.join([f'{self.ctor_str(c)}' for c in self.ctors])}"
+
+
+class Goal(object):
+    def __init__(self, uvar, precondition, lhs, rhs):
+        self.precondition = precondition
+        self.lhs = lhs
+        self.rhs = rhs
+        for v in uvar:
+            # Need to change v occurences in precondition, lhs, rhs to "?v"
+            assert v.is_symbol()
+            subs = {Symbol("%s" % v.symbol_name(), v.symbol_type()): Symbol("?%s" % v.symbol_name(), v.symbol_type())}
+            if self.precondition is not None:
+                self.precondition = self.precondition.substitute(subs)
+            if self.rhs is not None:
+                self.rhs = self.rhs.substitute(subs)
+            self.lhs = self.lhs.substitute(subs)
+
+    def __str__(self):
+        fixed_precondition = ""
+        if self.precondition:
+            fixed_precondition = f" if {self.precondition} then"
+        fixed_rhs = ""
+        if self.rhs:
+            fixed_rhs = f" = {self.rhs}"
+        return f"prove{fixed_precondition} {self.lhs} {fixed_rhs}"
+
+
+class NewThesyFromSmt(ThesyFromSmt):
+    def export_rule_def(self, defun):
+        name, args, rettype, body = defun
+        if body:
+            body = self.export_expr(body)
+        yield FunDef(name, [(a, a.get_type()) for a in args], rettype, body)
+
+    def export_datatype(self, dt):
+        (name, ctors) = dt
+        ctors = [(nm, [self.export_type(t) for (_, t) in args]) for (nm, args) in ctors]
+        return Datatype(name, [], ctors)
+
+    def export_func(self, df):
+        type_ = df.symbol_type()
+        return FunDef(df.symbol_name(), [(f'x_{i}', t) for i, t in enumerate(type_.param_types)], type_.return_type)
+
+    def export_rules(self, formula):
+        for precondition, op, lhs, rhs in self.extract_rw_parts(formula):
+            yield Rule(self._fresh('rule%d'), lhs, rhs, rule_type=op, precondition=precondition)
+
+    def export_goals(self, formula):
+        for uvars, precondition, lhs, rhs in self.export_goal_parts(formula):
+            yield Goal(uvars, precondition, lhs, rhs)
 
 
 class SmtLibDocumentParser(SmtLib20ParserPlus):
