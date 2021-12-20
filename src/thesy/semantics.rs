@@ -22,6 +22,10 @@ use crate::eggstentions::expression_ops::{IntoTree, Tree};
 use crate::eggstentions::conditions::{AndCondition, OrCondition};
 use std::iter::FromIterator;
 
+lazy_static!(
+    static ref split_hole: Terminal = Hole(String::from("splithole"), None);
+);
+
 #[derive(Default, Clone)]
 pub struct Definitions {
     /// All datatype definitions
@@ -151,11 +155,11 @@ impl Definitions {
             // Should be And(<for each constructor c Or(for all pattern with c in place i where the subpattern in place i is replaced with a fresh hole)>)
             let cond = AndCondition::new(patterns_grouped.into_iter().map(|(name, pats)| {
                 RcImmutableCondition::new(OrCondition::new(pats.into_iter().map(|exp| {
-                    let holename = "splithole";
-                    assert!(exp.holes().iter().find(|h| h.ident() == holename).is_none());
+                    assert!(exp.holes().iter().find(|h| h.ident() == split_hole.ident()).is_none());
                     let mut new_children = exp.children().iter().cloned().collect_vec();
-                    new_children[i] = Leaf(Hole(holename.to_string(), None));
+                    new_children[i] = Leaf(split_hole.clone());
                     let mut new_exp = Op(exp.root().clone(), new_children);
+                    // TODO: new_exp should change param names to fit the seacher being created
                     FilteringSearcher::create_exists_pattern_filterer(Self::exp_to_pattern(&new_exp))
                 }).collect_vec()))
             }).collect_vec());
@@ -235,13 +239,18 @@ impl From<Vec<Statement>> for Definitions {
 
 
         fn create_hole_for_param(i: usize) -> Terminal {
-            Hole(format!("?autovar_{}", i), None)
+            Hole(format!("autovar_{}", i), None)
         }
 
-        fn pattern_for_func_app(f: &Function) -> Pattern<SymbolLang> {
+        fn pattern_for_func_app(f: &Function, hole_i: usize) -> Pattern<SymbolLang> {
             Definitions::exp_to_pattern(
-                &Op(Id(f.name.clone(), None), (0..f.params.len())
-                    .into_iter().map(|i| Leaf(create_hole_for_param(i))).collect_vec())
+                &Op(Id(f.name.clone(), None), (0..f.params.len()).into_iter().map(|i|
+                    if hole_i == i {
+                        Leaf(split_hole.clone())
+                    } else {
+                        Leaf(create_hole_for_param(i))
+                    }
+                ).collect_vec())
             )
         }
 
@@ -249,16 +258,18 @@ impl From<Vec<Statement>> for Definitions {
         for f in &res.functions {
             let opt_pats =
                 if rw_definitions.contains_key(&f.name) { rw_definitions.get_vec(&f.name).unwrap() } else { continue; };
+            // TODO: Either here or in collect_splittable_params, rename top level holes
+            //       so they will be the same as created func_app holes (i.e. autovar_i or splithole)
             let splittable_params = Self::collect_splittable_params(&res, f, opt_pats);
-            let func_pattern = pattern_for_func_app(f).into_rc_dyn();
             let mut temp = vec![];
             for (i, dt, cond) in splittable_params {
-                let param_hole = create_hole_for_param(i);
+                let func_pattern = pattern_for_func_app(f, i).into_rc_dyn();
+                let param_hole = split_hole.clone();
                 let const_cond = RcImmutableCondition::new(AndCondition::new(
                     dt.constructors.iter().map(|c| {
                         FilteringSearcher::create_non_pattern_filterer(
                             FilteringSearcher::matcher_from_var(Var::from_str(&param_hole.to_string()).unwrap()),
-                            FilteringSearcher::matcher_from_pattern(pattern_for_func_app(c))
+                            FilteringSearcher::matcher_from_pattern(pattern_for_func_app(c, i))
                         )
                     }).collect_vec()
                 ));
@@ -269,6 +280,7 @@ impl From<Vec<Statement>> for Definitions {
                     FilteringSearcher::new(func_pattern.clone(), final_condition).into_rc_dyn(),
                     Self::exp_to_pattern(&Leaf(param_hole.clone())),
                     splitters));
+                warn!("adding Searcher: {}; Param hole: {}; Splitters: {}", &temp.last().unwrap().0.to_string(), temp.last().unwrap().1.to_string(), temp.last().unwrap().2.iter().join(", "));
             }
             res.case_splitters.extend_from_slice(&temp);
         }

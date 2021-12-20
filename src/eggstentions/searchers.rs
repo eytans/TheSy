@@ -12,6 +12,8 @@ pub mod multisearcher {
     use smallvec::alloc::fmt::Formatter;
     use std::marker::PhantomData;
     use std::rc::Rc;
+    use thesy_parser::ast::Expression;
+    use crate::eggstentions::expression_ops::{IntoTree, RecExpSlice, Tree};
     use crate::tools::tools;
 
     pub struct EitherSearcher<L: Language, N: Analysis<L>, A: Searcher<L, N> + Debug, B: Searcher<L, N> + Debug> {
@@ -400,6 +402,85 @@ pub mod multisearcher {
         }
     }
 
+    #[derive(Clone, Debug)]
+    pub struct SubPattern<L: Language> {
+        orig: Expression,
+        pub patterns: Vec<(Var, Pattern<L>)>,
+    }
+
+    impl<L: Language> SubPattern<L> {
+        fn collect_patterns(orig: &Expression, pattern_tree: &RecExpSlice<L>) -> Result<Vec<(Var, Pattern<L>)>, String> {
+            let mut res = Vec::new();
+            // For each node in the orig pattern we will check the new pattern.
+            //  1. If orig and new pattern are nodes assert they agree, otherwise error.
+            if orig.root().is_id() && pattern_tree.is_root_ident() {
+                if orig.children().len() != pattern_tree.children().len() ||
+                    orig.root().ident() != pattern_tree.root().display_op().to_string() {
+                    return Err(format!("Patterns don't agree: {}{} != {}{}",
+                                       orig.root().ident(), orig.children().len(),
+                                       pattern_tree.root().display_op(), pattern_tree.children().len()));
+                }
+                for (orig_child, pattern_child) in orig.children().iter().zip(pattern_tree.children().iter()) {
+                    res.extend(SubPattern::collect_patterns(orig_child, pattern_child)?);
+                }
+            }
+            //  2. If orig is node and new pattern is a hole then skip this is a constant derived
+            //      from the orig pattern substitution and there is no need to search this.
+            else if orig.root().is_id() && pattern_tree.is_hole() {
+                // Do nothing
+            }
+            //  3. If the orig is a hole and new pattern is a node, add a subpattern that should be
+            //     started from the eclasses the orig hole recieves.
+            else if orig.root().is_hole() && pattern_tree.is_root_ident() {
+                let pattern_root = Var::from_str(&*orig.root().to_string()).unwrap();
+                res.push((pattern_root, Pattern::from(pattern_tree.to_clean_exp())));
+            }
+            // 4. If the orig is a hole and new pattern is a hole, assert holes are equal
+            else if orig.root().is_hole() && pattern_tree.is_root_hole() {
+                if orig.root().to_string() == pattern_tree.root().display_op().to_string() {
+                    return Err(format!("Patterns don't agree: {} != {}",
+                                       orig.root().ident(), pattern_tree.root().display_op()));
+                }
+            }
+            Ok(res)
+        }
+
+        pub fn new(orig: Expression, pattern: Pattern<L>) -> Self {
+            let pattern_tree = pattern.ast.into_tree();
+            debug_assert_eq!(orig.root().ident(), &pattern_tree.root().display_op().to_string());
+            let patterns = Self::collect_patterns(&orig, &pattern_tree.into_iter());
+            patterns.map(|p| SubPattern { orig, patterns: p }).unwrap_or_else(|e| {
+                panic!("{}", e)
+            })
+        }
+    }
+
+    impl<L: Language, N: Analysis<L>> ImmutableCondition<L, N> for SubPattern<L> {
+        fn check_imm(&self, egraph: &EGraph<L, N>, eclass: Id, subst: &Subst) -> bool {
+            let mut res = true;
+            for (var, pattern) in &self.patterns {
+                // Get eclass from the substitution
+                let eclass = subst.get(var.clone()).unwrap_or_else(|| {
+                    panic!("{} not found in {}", var, subst)
+                });
+                let subs = pattern.search_eclass(egraph, *eclass);
+                res &= subs.is_some();
+                if pattern.vars().iter().any(|v| subst.contains_key(v)) {
+                    res &= subs.unwrap().substs.iter().any(|s| {
+                        pattern.vars().iter()
+                            .filter(|v| subst.contains_key(v))
+                            .all(|v| s.get(*v) == subst.get(*v))
+                    })
+                }
+            }
+            res
+        }
+
+        fn describe(&self) -> String {
+            format!("{} if {}", self.orig.to_string(), self.patterns.iter().map(|(v, p)| format!("{}@{}", p, v)).join(" && "))
+        }
+    }
+
     #[derive(Clone)]
     pub struct FilteringSearcher<L: Language, N: Analysis<L>> {
         searcher: Rc<dyn Searcher<L, N>>,
@@ -434,7 +515,10 @@ pub mod multisearcher {
         }
 
         pub fn create_exists_pattern_filterer(searcher: Pattern<L>) -> RcImmutableCondition<L, N> {
-            RcImmutableCondition::new(move |graph: &EGraph<L, N>, id: Id, subst: &Subst| {
+            // TODO: partially fill pattern and if not all vars have values then search by eclass
+            //       In practice, create special searcher that will take the constant part from
+            //       subst and check existence for each subpattern over eclasses found in subst
+            RcImmutableCondition::new(move |graph: &EGraph<L, N>, eclass: Id, subst: &Subst| {
                 searcher.rec_lookup(graph, subst).is_some()
             })
         }
@@ -456,7 +540,7 @@ pub mod multisearcher {
 
     impl<L: Language + 'static, N: Analysis<L> + 'static> std::fmt::Display for FilteringSearcher<L, N> {
         fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-            write!(f, "{} if <Some predicate>", self.searcher)
+            write!(f, "{} if {}", self.searcher, self.predicate.describe())
         }
     }
 
@@ -466,6 +550,7 @@ pub mod multisearcher {
         }
 
         fn search(&self, egraph: &EGraph<L, N>) -> Vec<SearchMatches> {
+            warn!("Running {} with {}", self.searcher, self.predicate.describe());
             let origin = self.searcher.search(egraph);
             let res = self.predicate.filter(egraph, origin);
             res

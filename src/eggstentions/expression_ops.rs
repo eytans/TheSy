@@ -120,6 +120,14 @@ pub trait Tree<'a, T: 'a + Language> {
     fn is_leaf(&self) -> bool {
         self.children().is_empty()
     }
+
+    fn is_root_hole(&self) -> bool {
+        self.root().display_op().to_string().starts_with("?")
+    }
+
+    fn is_root_ident(&self) -> bool {
+        !self.is_root_hole()
+    }
 }
 
 impl<'a ,L: Language> Tree<'a, L> for RecExpSlice<'a, L> {

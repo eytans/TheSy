@@ -23,7 +23,7 @@ impl<L: Language, N: Analysis<L>> ImmutableCondition<L, N> for AndCondition<L, N
     }
 
     fn describe(&self) -> String {
-        format!("if {}", self.conditions.iter().map(|x| x.describe()).join(" && "))
+        format!("{}", self.conditions.iter().map(|x| x.describe()).join(" && "))
     }
 }
 
@@ -48,6 +48,6 @@ impl<L: Language, N: Analysis<L>> ImmutableCondition<L, N> for OrCondition<L, N>
     }
 
     fn describe(&self) -> String {
-        format!("if {}", self.conditions.iter().map(|x| x.describe()).join(" || "))
+        format!("{}", self.conditions.iter().map(|x| x.describe()).join(" || "))
     }
 }
