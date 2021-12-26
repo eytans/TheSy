@@ -3,7 +3,7 @@ use std::fmt::{Debug, Formatter};
 use std::hash::Hash;
 use std::rc::Rc;
 
-use egg::{Pattern, RecExpr, Rewrite, Searcher, SymbolLang, Var, ENodeOrVar, Condition, ImmutableCondition, RcImmutableCondition};
+use egg::{Pattern, RecExpr, Rewrite, Searcher, SymbolLang, Var, ENodeOrVar, Condition, ImmutableCondition, RcImmutableCondition, Language};
 use itertools::Itertools;
 use thesy_parser::{grammar, ast};
 
@@ -125,7 +125,7 @@ impl Definitions {
     }
 
     fn collect_splittable_params(&self, f: &Function, opt_pats: &Vec<Expression>)
-                                 -> Vec<(usize, &DataType, RcImmutableCondition<SymbolLang, ()>)> {
+                                 -> Vec<(usize, &DataType, HashMap<String, Vec<&Expression>>)> {
         let param_types = f.params.iter().enumerate()
             // Get type of each param (if type exists)
             .filter_map(|p| Some(p.0).zip(
@@ -149,22 +149,30 @@ impl Definitions {
                 );
             }
 
-            // Can split by any param by itself by adding filterers on other params.
-            // Instead of a very sophisticated runtime I am creating a complex pattern for asserting
-            // the rewriting will continue in each split.
-            // Should be And(<for each constructor c Or(for all pattern with c in place i where the subpattern in place i is replaced with a fresh hole)>)
-            let cond = AndCondition::new(patterns_grouped.into_iter().map(|(name, pats)| {
-                RcImmutableCondition::new(OrCondition::new(pats.into_iter().map(|exp| {
-                    assert!(exp.holes().iter().find(|h| h.ident() == split_hole.ident()).is_none());
-                    let mut new_children = exp.children().iter().cloned().collect_vec();
-                    new_children[i] = Leaf(split_hole.clone());
-                    let mut new_exp = Op(exp.root().clone(), new_children);
-                    // TODO: new_exp should change param names to fit the seacher being created
-                    FilteringSearcher::create_exists_pattern_filterer(Self::exp_to_pattern(&new_exp))
-                }).collect_vec()))
-            }).collect_vec());
-            (i, p_dt, RcImmutableCondition::new(cond))
+            // let cond = Self::condition_from_grouped_patterns(i, patterns_grouped);
+            (i, p_dt, patterns_grouped)
         }).collect_vec()
+    }
+
+    fn condition_from_grouped_patterns(i: usize, patterns_grouped: HashMap<String, Vec<&Expression>>) -> AndCondition<SymbolLang, ()> {
+        // Can split by any param by itself by adding filterers on other params.
+        // Instead of a very sophisticated runtime I am creating a complex pattern for asserting
+        // the rewriting will continue in each split.
+        // Should be And(<for each constructor c Or(for all pattern with c in place i where the subpattern in place i is replaced with a fresh hole)>)
+
+        // TODO: Careful! currently have a hacky way to make pattern expression holes match the
+        //       searcher for case split. In the future make this generic.
+        let cond = AndCondition::new(patterns_grouped.into_iter().map(|(name, pats)| {
+            RcImmutableCondition::new(OrCondition::new(pats.into_iter().map(|exp| {
+                assert!(exp.holes().iter().find(|h| h.ident() == split_hole.ident()).is_none());
+                let mut new_children = exp.children().iter().cloned().collect_vec();
+                new_children[i] = Leaf(split_hole.clone());
+                let mut new_exp = Op(exp.root().clone(), new_children);
+                // TODO: new_exp should change param names to fit the seacher being created
+                FilteringSearcher::create_exists_pattern_filterer(Self::exp_to_pattern(&new_exp))
+            }).collect_vec()))
+        }).collect_vec());
+        cond
     }
 
     // Not most efficient but still:
@@ -258,12 +266,34 @@ impl From<Vec<Statement>> for Definitions {
         for f in &res.functions {
             let opt_pats =
                 if rw_definitions.contains_key(&f.name) { rw_definitions.get_vec(&f.name).unwrap() } else { continue; };
-            // TODO: Either here or in collect_splittable_params, rename top level holes
-            //       so they will be the same as created func_app holes (i.e. autovar_i or splithole)
             let splittable_params = Self::collect_splittable_params(&res, f, opt_pats);
             let mut temp = vec![];
-            for (i, dt, cond) in splittable_params {
+            for (i, dt, grouped_patterns) in splittable_params {
                 let func_pattern = pattern_for_func_app(f, i).into_rc_dyn();
+                let mut fixed_pattern_groups = HashMap::new();
+                for (c, patterns) in grouped_patterns {
+                    let mut fixed_patterns = vec![];
+                    for p in patterns {
+                        let mut fixed_pattern = p.clone();
+                        let mut subs = vec![];
+                        for (i, c) in pattern_for_func_app(f, i).ast.into_tree().children().into_iter().enumerate() {
+                            // We know this is a hole because we created it.
+                            let hole = c.root().display_op().to_string();
+                            // If this is a hole we want them to have the same name in the whole exp
+                            let exp_c = fixed_pattern.children()[i].root();
+                            if exp_c.is_hole() && exp_c.to_string() != hole {
+                                subs.push((exp_c.to_string(), hole.to_string()));
+                            }
+                        }
+                        fixed_pattern.map(&|t: &Terminal| subs.iter()
+                            .find(|&(a, b)| a == t.to_string())
+                            .map(|&(a, b)| Hole(b.replace("?", ""), t.anno().clone()))
+                            .unwrap_or(t.clone()));
+                        fixed_patterns.push(fixed_pattern);
+                    }
+                    fixed_pattern_groups.insert(c, fixed_patterns);
+                }
+                let cond = Self::condition_from_grouped_patterns(i, grouped_patterns);
                 let param_hole = split_hole.clone();
                 let const_cond = RcImmutableCondition::new(AndCondition::new(
                     dt.constructors.iter().map(|c| {
