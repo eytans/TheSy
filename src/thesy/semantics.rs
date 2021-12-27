@@ -124,8 +124,8 @@ impl Definitions {
         (cond_searcher, applier)
     }
 
-    fn collect_splittable_params(&self, f: &Function, opt_pats: &Vec<Expression>)
-                                 -> Vec<(usize, &DataType, HashMap<String, Vec<&Expression>>)> {
+    fn collect_splittable_params<'a>(&self, f: &Function, opt_pats: &'a Vec<Expression>)
+                                 -> Vec<(usize, &DataType, HashMap<String, Vec<&'a Expression>>)> {
         let param_types = f.params.iter().enumerate()
             // Get type of each param (if type exists)
             .filter_map(|p| Some(p.0).zip(
@@ -137,7 +137,9 @@ impl Definitions {
                     &c.name == exp.children()[*i].root().ident()
                 })))
             .collect_vec();
-
+        if param_types.len() < 2 {
+            return vec![];
+        }
 
         param_types.into_iter().map(|(i, p_dt)| {
             // collect all patterns of other params for each constructor type
@@ -264,14 +266,17 @@ impl From<Vec<Statement>> for Definitions {
 
         // Foreach function find if and when case split should be applied
         for f in &res.functions {
-            let opt_pats =
-                if rw_definitions.contains_key(&f.name) { rw_definitions.get_vec(&f.name).unwrap() } else { continue; };
+            let opt_pats = if rw_definitions.contains_key(&f.name) {
+                    rw_definitions.get_vec(&f.name).unwrap()
+                } else {
+                    continue;
+                };
             let splittable_params = Self::collect_splittable_params(&res, f, opt_pats);
             let mut temp = vec![];
             for (i, dt, grouped_patterns) in splittable_params {
                 let func_pattern = pattern_for_func_app(f, i).into_rc_dyn();
                 let mut fixed_pattern_groups = HashMap::new();
-                for (c, patterns) in grouped_patterns {
+                for (c, patterns) in &grouped_patterns {
                     let mut fixed_patterns = vec![];
                     for p in patterns {
                         let mut fixed_pattern = p.clone();
@@ -280,20 +285,19 @@ impl From<Vec<Statement>> for Definitions {
                             // We know this is a hole because we created it.
                             let hole = c.root().display_op().to_string();
                             // If this is a hole we want them to have the same name in the whole exp
-                            let exp_c = fixed_pattern.children()[i].root();
+                            let exp_c = fixed_pattern.children()[i].root().clone();
                             if exp_c.is_hole() && exp_c.to_string() != hole {
                                 subs.push((exp_c.to_string(), hole.to_string()));
                             }
                         }
-                        fixed_pattern.map(&|t: &Terminal| subs.iter()
-                            .find(|&(a, b)| a == t.to_string())
-                            .map(|&(a, b)| Hole(b.replace("?", ""), t.anno().clone()))
-                            .unwrap_or(t.clone()));
-                        fixed_patterns.push(fixed_pattern);
+                        fixed_patterns.push(fixed_pattern.map(&|t: &Terminal| subs.iter()
+                            .find(|&(a, b)| a == &t.to_string())
+                            .map(|(a, b)| Hole(b.replace("?", ""), t.anno().clone()))
+                            .unwrap_or(t.clone())));
                     }
                     fixed_pattern_groups.insert(c, fixed_patterns);
                 }
-                let cond = Self::condition_from_grouped_patterns(i, grouped_patterns);
+                let cond = RcImmutableCondition::new(Self::condition_from_grouped_patterns(i, grouped_patterns));
                 let param_hole = split_hole.clone();
                 let const_cond = RcImmutableCondition::new(AndCondition::new(
                     dt.constructors.iter().map(|c| {

@@ -3,7 +3,7 @@ pub mod multisearcher {
     use std::iter::FromIterator;
     use std::str::FromStr;
 
-    use egg::{EGraph, Id, Pattern, Searcher, SearchMatches, Subst, SymbolLang, Var, Language, Analysis, Condition, ImmutableCondition, RcImmutableCondition};
+    use egg::{EGraph, Id, Pattern, Searcher, SearchMatches, Subst, SymbolLang, Var, Language, Analysis, Condition, ImmutableCondition, RcImmutableCondition, ENodeOrVar};
     use itertools::{Itertools, Either};
 
     use crate::tools::tools::Grouped;
@@ -409,13 +409,13 @@ pub mod multisearcher {
     }
 
     impl<L: Language> SubPattern<L> {
-        fn collect_patterns(orig: &Expression, pattern_tree: &RecExpSlice<L>) -> Result<Vec<(Var, Pattern<L>)>, String> {
+        fn collect_patterns(orig: &Expression, pattern_tree: &RecExpSlice<ENodeOrVar<L>>) -> Result<Vec<(Var, Pattern<L>)>, String> {
             let mut res = Vec::new();
             // For each node in the orig pattern we will check the new pattern.
             //  1. If orig and new pattern are nodes assert they agree, otherwise error.
             if orig.root().is_id() && pattern_tree.is_root_ident() {
                 if orig.children().len() != pattern_tree.children().len() ||
-                    orig.root().ident() != pattern_tree.root().display_op().to_string() {
+                    orig.root().ident() != &pattern_tree.root().display_op().to_string() {
                     return Err(format!("Patterns don't agree: {}{} != {}{}",
                                        orig.root().ident(), orig.children().len(),
                                        pattern_tree.root().display_op(), pattern_tree.children().len()));
@@ -426,7 +426,7 @@ pub mod multisearcher {
             }
             //  2. If orig is node and new pattern is a hole then skip this is a constant derived
             //      from the orig pattern substitution and there is no need to search this.
-            else if orig.root().is_id() && pattern_tree.is_hole() {
+            else if orig.root().is_id() && pattern_tree.is_root_hole() {
                 // Do nothing
             }
             //  3. If the orig is a hole and new pattern is a node, add a subpattern that should be
@@ -448,7 +448,7 @@ pub mod multisearcher {
         pub fn new(orig: Expression, pattern: Pattern<L>) -> Self {
             let pattern_tree = pattern.ast.into_tree();
             debug_assert_eq!(orig.root().ident(), &pattern_tree.root().display_op().to_string());
-            let patterns = Self::collect_patterns(&orig, &pattern_tree.into_iter());
+            let patterns = Self::collect_patterns(&orig, &pattern_tree);
             patterns.map(|p| SubPattern { orig, patterns: p }).unwrap_or_else(|e| {
                 panic!("{}", e)
             })
@@ -465,10 +465,10 @@ pub mod multisearcher {
                 });
                 let subs = pattern.search_eclass(egraph, *eclass);
                 res &= subs.is_some();
-                if pattern.vars().iter().any(|v| subst.contains_key(v)) {
+                if pattern.vars().iter().any(|v| subst.get(*v).is_some()) {
                     res &= subs.unwrap().substs.iter().any(|s| {
                         pattern.vars().iter()
-                            .filter(|v| subst.contains_key(v))
+                            .filter(|v| subst.get(**v).is_some())
                             .all(|v| s.get(*v) == subst.get(*v))
                     })
                 }
