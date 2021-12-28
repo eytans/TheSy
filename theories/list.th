@@ -1,4 +1,4 @@
-datatype Lst () := (nil : (ret : Lst)) (cons : (x: Nat) -> (xs: Lst) -> (ret: Lst))
+datatype Lst () := (nil : (ret : Lst)) (cons : (x : Nat) -> (xs : Lst) -> (ret : Lst))
 
 fun append (l1: Lst) (l2: Lst) -> Lst
 rw app_base (append nil ?x) => ?x

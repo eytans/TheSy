@@ -89,6 +89,7 @@ impl Definitions {
                     })
             }).collect_vec());
         self.case_splitters.extend(std::mem::take(&mut other.case_splitters));
+        self.goals.extend(std::mem::take(&mut other.goals));
     }
 
     pub fn from_file(path: &PathBuf) -> Self {

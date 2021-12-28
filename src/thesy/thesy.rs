@@ -917,8 +917,8 @@ mod test {
 
     fn filter_definitions() -> Definitions {
         let mut list_defs = Definitions::from_file(&"theories/list.th".parse().unwrap());
-        list_defs.merge(Definitions::from_file(&"thoeries/filter.th".parse().unwrap()));
-        println!("{}", list_defs.datatypes.len());
+        let filter_defs = Definitions::from_file(&"tests/filter.th".parse().unwrap());
+        list_defs.merge(filter_defs);
         list_defs
     }
 
@@ -946,7 +946,6 @@ mod test {
     }
 
     #[test]
-    #[ignore]
     fn filter_p_filter_q_conjecture() {
         // We are ignoring this until smart splits is working (the filter feature on edges prevents the depth of case splits needed here).
 
@@ -965,29 +964,34 @@ mod test {
             })
         };
 
-        let mut thesy = TheSy::from(&filter_defs);
+        let proof = tests::test_terms(filter_defs.clone());
 
-        filter_defs.rws.extend(thesy.system_rws.iter().cloned());
 
-        thesy.increase_depth();
-        thesy.equiv_reduc(&mut filter_defs.rws);
-        thesy.increase_depth();
-        thesy.equiv_reduc(&mut filter_defs.rws);
-
-        thesy.egraph.rebuild();
-        assert!(filter_p_filter_q_exists(&thesy.egraph, 1));
-
-        let mut case_splitter = TheSy::create_case_splitter(filter_defs.case_splitters);
-        case_splitter.extend(consts::system_case_splits());
-
-        case_splitter.case_split(&mut thesy.egraph, 4, &filter_defs.rws, 4);
-        let conjs = thesy.get_conjectures();
-        assert!(conjs.iter().any(|(o, c1, c2, d)| {
-            (c1.pretty(500) == "(filter ts_ph_POfn_Nat_boolPC_0 (filter ts_ph_POfn_Nat_boolPC_1 ts_ph_Lst_0))"
-                && c2.pretty(500) == "(filter ts_ph_POfn_Nat_boolPC_1 (filter ts_ph_POfn_Nat_boolPC_0 ts_ph_Lst_0))")
-                || (c2.pretty(500) == "(filter ts_ph_POfn_Nat_boolPC_0 (filter ts_ph_POfn_Nat_boolPC_1 ts_ph_Lst_0))"
-                && c1.pretty(500) == "(filter ts_ph_POfn_Nat_boolPC_1 (filter ts_ph_POfn_Nat_boolPC_0 ts_ph_Lst_0))")
-        }));
+        // let mut thesy = TheSy::from(&filter_defs);
+        // filter_defs.rws.extend(thesy.system_rws.iter().cloned());
+        // thesy.increase_depth();
+        // thesy.equiv_reduc(&mut filter_defs.rws);
+        // thesy.increase_depth();
+        // thesy.equiv_reduc(&mut filter_defs.rws);
+        //
+        // thesy.egraph.rebuild();
+        // assert!(filter_p_filter_q_exists(&thesy.egraph, 1));
+        //
+        // let mut case_splitter = TheSy::create_case_splitter(filter_defs.case_splitters);
+        // case_splitter.extend(consts::system_case_splits());
+        //
+        // case_splitter.case_split(&mut thesy.egraph, 4, &filter_defs.rws, 4);
+        // let conjs = thesy.get_conjectures();
+        // assert!(conjs.iter().any(|(o, c1, c2, d)| {
+        //     (c1.pretty(500) == "(filter ts_ph_POfn_Nat_boolPC_0 (filter ts_ph_POfn_Nat_boolPC_1 ts_ph_Lst_0))"
+        //         && c2.pretty(500) == "(filter ts_ph_POfn_Nat_boolPC_1 (filter ts_ph_POfn_Nat_boolPC_0 ts_ph_Lst_0))")
+        //         || (c2.pretty(500) == "(filter ts_ph_POfn_Nat_boolPC_0 (filter ts_ph_POfn_Nat_boolPC_1 ts_ph_Lst_0))"
+        //         && c1.pretty(500) == "(filter ts_ph_POfn_Nat_boolPC_1 (filter ts_ph_POfn_Nat_boolPC_0 ts_ph_Lst_0))")
+        // }));
+        assert_ne!(proof, ProofMode::Failed);
+        assert_ne!(proof, ProofMode::TermNotCreated);
+        assert_ne!(proof, ProofMode::ExamplesFailed);
+        assert_eq!(proof, ProofMode::Prover);
     }
 
     #[test]

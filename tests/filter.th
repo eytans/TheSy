@@ -1,10 +1,8 @@
-datatype Lst () := (nil : ret: Lst) (cons : h: Nat -> t: Lst -> ret: Lst)
+datatype Lst () := (nil : (ret : Lst)) (cons : (x : Nat) -> (xs : Lst) -> (ret : Lst))
 
-fun filter f: FNatBool l : Lst -> Lst
+fun filter (f: FNatBool) (l : Lst) -> Lst
 rw filter_base (filter ?p nil) => nil
 rw filter_ind (filter ?p (cons ?x ?xs)) => (ite (apply ?p ?x) (cons ?x (filter ?p ?xs)) (filter ?p ?xs))
-
-split (apply ?p ?h) in (filter ?p (cons ?h ?t)) to true false when ((apply ?p ?h) != true) and ((apply ?p ?h) != false)
 
 ;prove (filter (p: {ph( 1 ), FNatBool}) (filter (p: {ph( 1 ), FNatBool}) l: {ph( 0 ), Lst})) = (filter (p: {ph( 1 ), FNatBool}) l: {ph( 0 ), Lst})
 prove (filter (p: {ph( 1 ), FNatBool}) (filter (p: {ph( 1 ), FNatBool}) (cons y (cons x nil)))) = (filter (p: {ph( 1 ), FNatBool}) (cons y (cons x nil)))

@@ -4,21 +4,31 @@ use crate::thesy::semantics::Definitions;
 use crate::thesy::case_split::CaseSplit;
 use crate::thesy::prover::Prover;
 use std::collections::HashSet;
+use std::ops::Not;
 use thesy_parser::ast;
 use std::str::FromStr;
+use std::sync::atomic::AtomicBool;
+use std::sync::Mutex;
 use thesy_parser::ast::Terminal;
 use crate::eggstentions::reconstruct::reconstruct;
 use crate::TheSyConfig;
 
+lazy_static!(
+    static ref log_initialized: Mutex<bool> = Mutex::new(false);
+);
 pub fn init_logging() {
     use simplelog::*;
 
-    let mut builder = ConfigBuilder::new();
-    builder.add_filter_ignore("egg".parse().unwrap());
-    let config = builder.build();
-    let logger = TermLogger::init(LevelFilter::Debug, config, TerminalMode::Mixed, ColorChoice::Auto);
-    if logger.is_err() {
-        println!("Error initializing log: {}", logger.unwrap_err());
+    let mut lock = log_initialized.lock().unwrap();
+    if lock.not() {
+        let mut builder = ConfigBuilder::new();
+        builder.add_filter_ignore("egg".parse().unwrap());
+        let config = builder.build();
+        let logger = TermLogger::init(LevelFilter::Debug, config, TerminalMode::Mixed, ColorChoice::Auto);
+        if logger.is_err() {
+            println!("Error initializing log: {}", logger.unwrap_err());
+        }
+        *lock = true;
     }
 }
 
