@@ -437,7 +437,7 @@ pub mod multisearcher {
             }
             // 4. If the orig is a hole and new pattern is a hole, assert holes are equal
             else if orig.root().is_hole() && pattern_tree.is_root_hole() {
-                if orig.root().to_string() == pattern_tree.root().display_op().to_string() {
+                if orig.root().to_string() == pattern_tree.root().display_op().to_string().replace("?", "") {
                     return Err(format!("Patterns don't agree: {} != {}",
                                        orig.root().ident(), pattern_tree.root().display_op()));
                 }

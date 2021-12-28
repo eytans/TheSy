@@ -1106,7 +1106,7 @@ mod test {
     fn test_split_and_or() {
         init_logging();
 
-        let mut defs = Definitions::from_file(&"tests/booleans.th".parse().unwrap());
+        let mut defs = TheSyConfig::from_path("tests/booleans.th".to_string()).definitions;
         let mut conjectures = std::mem::take(&mut defs.conjectures);
         let mut goals = std::mem::take(&mut defs.goals);
         for (c, g) in conjectures.into_iter().zip(goals.into_iter()) {
@@ -1127,7 +1127,7 @@ mod test {
     fn test_split_minus_plus() {
         init_logging();
 
-        let mut defs = Definitions::from_file(&"tests/minus.th".parse().unwrap());
+        let mut defs = TheSyConfig::from_path("tests/minus.th".to_string()).definitions;
         let mut conjectures = std::mem::take(&mut defs.conjectures);
         let mut goals = std::mem::take(&mut defs.goals);
         for (c, g) in conjectures.into_iter().zip(goals.into_iter()) {

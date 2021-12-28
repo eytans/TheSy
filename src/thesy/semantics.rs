@@ -12,19 +12,45 @@ use std::path::PathBuf;
 use thesy_parser::ast::{Expression, Statement, Identifier, Annotation, Terminal};
 use thesy_parser::ast::Definitions::Defs;
 use std::str::FromStr;
-use crate::eggstentions::searchers::multisearcher::{MultiEqSearcher, MultiDiffSearcher, EitherSearcher, FilteringSearcher, ToDyn, PointerSearcher};
+use crate::eggstentions::searchers::multisearcher::{MultiEqSearcher, MultiDiffSearcher, EitherSearcher, FilteringSearcher, ToDyn, PointerSearcher, SubPattern};
 use crate::thesy::TheSy;
 use crate::eggstentions::appliers::DiffApplier;
 use thesy_parser::ast::Terminal::{Id, Hole};
 use thesy_parser::ast::Expression::{Op, Leaf};
 use multimap::MultiMap;
-use crate::eggstentions::expression_ops::{IntoTree, Tree};
+use crate::eggstentions::expression_ops::{IntoTree, RecExpSlice, Tree};
 use crate::eggstentions::conditions::{AndCondition, OrCondition};
 use std::iter::FromIterator;
 
 lazy_static!(
     static ref split_hole: Terminal = Hole(String::from("splithole"), None);
 );
+
+pub trait ToExpression<'a> {
+    fn to_expression(&'a self) -> Expression;
+}
+
+impl<'a> ToExpression<'a> for RecExpSlice<'a, ENodeOrVar<SymbolLang>> {
+    fn to_expression(&'a self) -> Expression {
+        let op = self.root().display_op().to_string();
+        let term = if self.is_root_hole() { Hole(op.replace("?", ""), None) } else { Id(op, None) };
+        if !self.is_leaf() {
+            let mut children = vec![];
+            for c in self.children() {
+                children.push(c.to_expression());
+            }
+            Op(term, children)
+        } else {
+            Leaf(term)
+        }
+    }
+}
+
+impl<'a> ToExpression<'a> for Pattern<SymbolLang> {
+    fn to_expression(&'a self) -> Expression {
+        self.ast.into_tree().to_expression()
+    }
+}
 
 #[derive(Default, Clone)]
 pub struct Definitions {
@@ -156,7 +182,7 @@ impl Definitions {
         }).collect_vec()
     }
 
-    fn condition_from_grouped_patterns(i: usize, patterns_grouped: HashMap<String, Vec<&Expression>>) -> AndCondition<SymbolLang, ()> {
+    fn condition_from_grouped_patterns(orig:&Expression, i: usize, patterns_grouped: HashMap<String, Vec<&Expression>>) -> AndCondition<SymbolLang, ()> {
         // Can split by any param by itself by adding filterers on other params.
         // Instead of a very sophisticated runtime I am creating a complex pattern for asserting
         // the rewriting will continue in each split.
@@ -171,7 +197,8 @@ impl Definitions {
                 new_children[i] = Leaf(split_hole.clone());
                 let mut new_exp = Op(exp.root().clone(), new_children);
                 // TODO: new_exp should change param names to fit the seacher being created
-                FilteringSearcher::create_exists_pattern_filterer(Self::exp_to_pattern(&new_exp))
+                let subpattern = SubPattern::new(orig.clone(), Self::exp_to_pattern(&new_exp));
+                RcImmutableCondition::new(subpattern)
             }).collect_vec()))
         }).collect_vec());
         cond
@@ -274,7 +301,7 @@ impl From<Vec<Statement>> for Definitions {
             let splittable_params = Self::collect_splittable_params(&res, f, opt_pats);
             let mut temp = vec![];
             for (i, dt, grouped_patterns) in splittable_params {
-                let func_pattern = pattern_for_func_app(f, i).into_rc_dyn();
+                let func_pattern = pattern_for_func_app(f, i);
                 let mut fixed_pattern_groups = HashMap::new();
                 for (c, patterns) in &grouped_patterns {
                     let mut fixed_patterns = vec![];
@@ -290,14 +317,18 @@ impl From<Vec<Statement>> for Definitions {
                                 subs.push((exp_c.to_string(), hole.to_string()));
                             }
                         }
-                        fixed_patterns.push(fixed_pattern.map(&|t: &Terminal| subs.iter()
+                        let new_pat = fixed_pattern.map(&|t: &Terminal| subs.iter()
                             .find(|&(a, b)| a == &t.to_string())
                             .map(|(a, b)| Hole(b.replace("?", ""), t.anno().clone()))
-                            .unwrap_or(t.clone())));
+                            .unwrap_or(t.clone()));
+                        fixed_patterns.push(new_pat);
                     }
                     fixed_pattern_groups.insert(c, fixed_patterns);
                 }
-                let cond = RcImmutableCondition::new(Self::condition_from_grouped_patterns(i, grouped_patterns));
+                let referenced_fixed_groups = fixed_pattern_groups.iter()
+                    .map(|(c, p)| (c.clone().clone(), p.iter().collect_vec()))
+                    .collect();
+                let cond = RcImmutableCondition::new(Self::condition_from_grouped_patterns(&func_pattern.to_expression(), i, referenced_fixed_groups));
                 let param_hole = split_hole.clone();
                 let const_cond = RcImmutableCondition::new(AndCondition::new(
                     dt.constructors.iter().map(|c| {
@@ -311,7 +342,7 @@ impl From<Vec<Statement>> for Definitions {
                 let splitters = Self::create_splitters(dt, &param_hole).iter()
                     .map(Self::exp_to_pattern).collect_vec();
                 temp.push((
-                    FilteringSearcher::new(func_pattern.clone(), final_condition).into_rc_dyn(),
+                    FilteringSearcher::new(func_pattern.into_rc_dyn(), final_condition).into_rc_dyn(),
                     Self::exp_to_pattern(&Leaf(param_hole.clone())),
                     splitters));
                 warn!("adding Searcher: {}; Param hole: {}; Splitters: {}", &temp.last().unwrap().0.to_string(), temp.last().unwrap().1.to_string(), temp.last().unwrap().2.iter().join(", "));
