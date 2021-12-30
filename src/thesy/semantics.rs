@@ -128,7 +128,7 @@ impl Definitions {
                                source: Expression,
                                target: Expression,
                                conds: Vec<thesy_parser::ast::Condition>)
-                               -> (FilteringSearcher<SymbolLang, ()>, Pattern<SymbolLang>) {
+                               -> (Rc<dyn Searcher<SymbolLang, ()>>, Pattern<SymbolLang>) {
         let precond_searcher = precond.as_ref().map(|e| {
             MultiEqSearcher::new(vec![Self::exp_to_pattern(e),
                                       Pattern::from_str("true").unwrap()])
@@ -146,8 +146,11 @@ impl Definitions {
         };
         let applier = Self::exp_to_pattern(&target);
         let conditions = Self::collect_non_pattern_conds(conds);
-        let cond_searcher = FilteringSearcher::new(searcher,
-                                                   RcImmutableCondition::new(AndCondition::new(conditions)));
+        let cond_searcher =
+            if conditions.is_empty() { searcher }
+            else { FilteringSearcher::new(searcher,
+                                       RcImmutableCondition::new(AndCondition::new(conditions))).into_rc_dyn()
+            };
         (cond_searcher, applier)
     }
 
@@ -405,7 +408,7 @@ impl Definitions {
                 let (cond_searcher, applier) =
                     Self::create_searcher_applier(precond, source, target, conds);
                 let diff_applier = DiffApplier::new(applier);
-                self.rws.push(Rewrite::new(name, cond_searcher, diff_applier).unwrap());
+                self.rws.push(Rewrite::new(name, PointerSearcher::new(cond_searcher), diff_applier).unwrap());
             }
         }
     }
@@ -509,7 +512,7 @@ impl Definitions {
                 self.name_pats.push((op.ident().clone(), source));
             }
         }
-        Rewrite::new(name, cond_searcher, applier).unwrap()
+        Rewrite::new(name, PointerSearcher::new(cond_searcher), applier).unwrap()
     }
 }
 
