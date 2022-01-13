@@ -84,7 +84,6 @@ pub mod tools {
     pub fn pattern_to_matcher<L: 'static + Language, N: Analysis<L>>(pattern: Pattern<L>) -> Rc<dyn Fn(&EGraph<L, N>, &Subst) -> Option<Id>> {
         Rc::new(move |g: &EGraph<L, N>, s: &Subst| {
             assert!(pattern.ast.as_ref().len() > 0, "Pattern must not be empty");
-            assert!(s.colors().len() <= 1);
             let mut res: Vec<Option<Id>> = Vec::with_capacity(pattern.ast.as_ref().len());
             for x in pattern.ast.as_ref() {
                 match x {

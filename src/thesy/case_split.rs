@@ -8,7 +8,7 @@ use std::rc::Rc;
 use std::path::Display;
 use std::fmt;
 use smallvec::alloc::fmt::Formatter;
-use crate::eggstentions::reconstruct::reconstruct;
+use crate::eggstentions::reconstruct::{reconstruct, reconstruct_colored};
 use crate::eggstentions::appliers::DiffApplier;
 
 /// To be used as the op of edges representing potential split
@@ -83,13 +83,10 @@ impl CaseSplit {
                     let mut res = vec![];
                     for sm in sms {
                         for subst in &sm.substs {
-                            if subst.colors().len() > 1 {
-                                continue;
-                            }
                             // ECLass is irrelevant
                             let id = diff_pattern.apply_one(graph, sm.eclass, subst);
                             assert_eq!(id.len(), 1);
-                            res.push(Split::new(id[0], split_evaluators.iter().map(|ev| ev.apply_one(graph, sm.eclass, &subst)[0]).collect_vec(), subst.colors().first().copied()));
+                            res.push(Split::new(id[0], split_evaluators.iter().map(|ev| ev.apply_one(graph, sm.eclass, &subst)[0]).collect_vec(), subst.color()));
                         }
                     }
                     res
@@ -213,7 +210,7 @@ impl CaseSplit {
 
         let colors = splitters.iter().map(|s| s.create_colors(egraph)).collect_vec();
         for s in splitters {
-            info!("  {} - root: {}, cases: {}", s, reconstruct(egraph, s.root, 3).map(|x| x.to_string()).unwrap_or("No reconstruct".to_string()), s.splits.iter().map(|c| reconstruct(egraph, *c, 3).map(|x| x.to_string()).unwrap_or("No reconstruct".to_string())).intersperse(" ".to_string()).collect::<String>());
+            info!("  {} - root: {}, cases: {}", s, reconstruct_colored(egraph, s.color, s.root, 3).map(|x| x.to_string()).unwrap_or("No reconstruct".to_string()), s.splits.iter().map(|c| reconstruct(egraph, *c, 3).map(|x| x.to_string()).unwrap_or("No reconstruct".to_string())).intersperse(" ".to_string()).collect::<String>());
         }
         // When the API is limited the code is mentally inhibited
         *egraph = Self::equiv_reduction(rules, std::mem::take(egraph), run_depth);

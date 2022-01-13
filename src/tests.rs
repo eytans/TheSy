@@ -4,6 +4,7 @@ use crate::thesy::semantics::Definitions;
 use crate::thesy::case_split::CaseSplit;
 use crate::thesy::prover::Prover;
 use std::collections::HashSet;
+use std::fs::File;
 use std::ops::Not;
 use thesy_parser::ast;
 use std::str::FromStr;
@@ -21,10 +22,15 @@ pub fn init_logging() {
 
     let mut lock = log_initialized.lock().unwrap();
     if lock.not() {
-        let mut builder = ConfigBuilder::new();
-        builder.add_filter_ignore("egg".parse().unwrap());
-        let config = builder.build();
-        let logger = TermLogger::init(LevelFilter::Debug, config, TerminalMode::Mixed, ColorChoice::Auto);
+        // let mut builder = ConfigBuilder::new();
+        // builder.add_filter_ignore("egg".parse().unwrap());
+        // let config = builder.build();
+        let logger = CombinedLogger::init(
+            vec![
+                TermLogger::new(LevelFilter::Info, Config::default(), TerminalMode::Mixed, ColorChoice::Auto),
+                WriteLogger::new(LevelFilter::Info, Config::default(), File::create("my_rust_bin.log").unwrap())
+            ]
+        );
         if logger.is_err() {
             println!("Error initializing log: {}", logger.unwrap_err());
         }

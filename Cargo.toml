@@ -29,8 +29,8 @@ serde = {version = "1.0.116", features = ["derive"], optional = true}
 serde_json = {version = "1.0.58", optional = true}
 
 [features]
-#default = ["split_colored"]
-default = ["split_clone"]
+default = ["split_colored"]
+#default = ["split_clone"]
 stats = ["serde", "serde_json", "egg/serde-1"]
 split_colored = ["egg/colored"]
 split_clone = []
@@ -39,3 +39,6 @@ no_expl_split = []
 
 #[build]
 #rustflags = ["-C", "link-args=-Wl,-stack_size,0x100000000"]    # custom flags to pass to all compiler invocations
+
+[profile.test]
+opt-level = 3

@@ -113,7 +113,8 @@ impl Definitions {
     }
 
     fn exp_to_pattern(exp: &Expression) -> Pattern<SymbolLang> {
-        Pattern::from_str(&*exp.to_sexp_string()).unwrap()
+        let exp_s = exp.to_sexp_string();
+        Pattern::from_str(&*exp_s).unwrap()
     }
 
     fn collect_non_pattern_conds(conds: Vec<ast::Condition>) -> Vec<RcImmutableCondition<SymbolLang, ()>> {

@@ -106,12 +106,7 @@ pub fn system_case_splits() -> CaseSplit {
     let or_implies_applier: SplitApplier = Box::new(move |graph, sms| {
         let true_root = graph.add_expr(&"true".parse().unwrap());
         sms.iter().flat_map(|sm| sm.substs.iter().filter_map(|subs|
-            // TODO: multi color to new color?
-            if subs.colors().len() <= 1 {
-                Some(Split::new(true_root, vec![*subs.get(x_var).unwrap(), *subs.get(y_var).unwrap()], subs.colors().first().copied()))
-            } else {
-                None
-            }
+            Some(Split::new(true_root, vec![*subs.get(x_var).unwrap(), *subs.get(y_var).unwrap()], subs.color()))
         )).collect_vec()
     });
 
