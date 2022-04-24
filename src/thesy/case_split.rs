@@ -162,13 +162,8 @@ impl CaseSplit {
             }
         }
         egraph.rebuild();
-        egraph.dot().to_dot("splitted_graph.dot");
-        for group in group_by_splits.values().filter(|g| g.len() > 1) {
-            println!("{}", group.iter().map(|id|
-                reconstruct(egraph, egraph.find(*id), 5)
-                    .map(|x| x.pretty(500)).unwrap_or_default()).join("\n"))
-        }
     }
+
     fn collect_merged(egraph: &EGraph<SymbolLang, ()>, classes: &Vec<Id>) -> HashMap<Id, Id> {
         classes.iter().map(|c| (*c, egraph.find(*c))).collect::<HashMap<Id, Id>>()
     }
@@ -218,9 +213,7 @@ impl CaseSplit {
         for cs in colors {
             let split_conclusions = cs.iter()
                 .map(|c| {
-                    let res = Self::collect_colored_merged(egraph, &classes, *c);
-                    println!("{}", res.iter().map(|x| format!("{:?}", x)).join("\n"));
-                    res
+                    Self::collect_colored_merged(egraph, &classes, *c)
                 })
                 .collect_vec();
             Self::merge_conclusions(egraph, &classes, split_conclusions);

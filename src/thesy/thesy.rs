@@ -752,21 +752,21 @@ mod test {
         syg.increase_depth();
         syg.increase_depth();
         let level0 = syg.egraph.classes()
-            .filter(|c| c.nodes[0].children.len() == 0)
-            .map(|c| (c.id, c.nodes[0].clone()))
+            .filter(|c| c.nodes[0].0.children.len() == 0)
+            .map(|c| (c.id, c.nodes[0].0.clone()))
             .collect_vec();
         let edges_level0 = level0.iter().map(|c| &c.1).collect::<HashSet<&SymbolLang>>();
         assert_eq!(edges_level0.len(), level0.len());
         let level1 = syg.egraph.classes()
-            .filter(|c| c.nodes[0].children.len() > 0 || c.nodes[0].children.iter().all(|n| level0.iter().find(|x| x.0 == *n).is_some()))
-            .map(|c| (c.id, &c.nodes[0]))
+            .filter(|c| c.nodes[0].0.children.len() > 0 || c.nodes[0].0.children.iter().all(|n| level0.iter().find(|x| x.0 == *n).is_some()))
+            .map(|c| (c.id, &c.nodes[0].0))
             .collect_vec();
         let edges_level1 = level1.iter().map(|c| c.1).collect::<HashSet<&SymbolLang>>();
         assert_eq!(edges_level1.len(), level1.len());
         let level2 = syg.egraph.classes()
-            .filter(|c| c.nodes[0].children.iter().any(|n| level1.iter().find(|x| x.0 == *n).is_some()))
-            .filter(|c| c.nodes[0].children.len() > 0 || c.nodes[0].children.iter().all(|n| level0.iter().find(|x| x.0 == *n).is_some() || level1.iter().find(|x| x.0 == *n).is_some()))
-            .map(|c| (c.id, &c.nodes[0]))
+            .filter(|c| c.nodes[0].0.children.iter().any(|n| level1.iter().find(|x| x.0 == *n).is_some()))
+            .filter(|c| c.nodes[0].0.children.len() > 0 || c.nodes[0].0.children.iter().all(|n| level0.iter().find(|x| x.0 == *n).is_some() || level1.iter().find(|x| x.0 == *n).is_some()))
+            .map(|c| (c.id, &c.nodes[0].0))
             .collect_vec();
         let edges_level2 = level2.iter().map(|c| c.1).collect::<HashSet<&SymbolLang>>();
         assert_eq!(edges_level2.len(), level2.len());
@@ -1060,17 +1060,18 @@ mod test {
     }
 
     fn check_types_not_merged(egraph: &EGraph<SymbolLang, ()>) {
-        egraph.classes().flat_map(|c| c.nodes.iter()
+        egraph.classes().flat_map(|c| c.iter_without_colors()
             .filter(|n| n.op == Symbol::from_str("typed").unwrap()))
             .grouped(|x| {
                 assert_eq!(x.children.len(), 2);
                 x.children[0]
             }).iter().for_each(|(id, edges)| {
-            if edges.len() != 1 {
-                println!("{:#?}", edges);
-                println!("{}", reconstruct(&egraph, *id, 3).unwrap().pretty(500));
-            }
-            assert_eq!(1, edges.len())
+            assert_eq!(1, edges.len(),
+                       "Type {} (reconstructed as {}) has {} edges: {:#?}",
+                       id,
+                       reconstruct(&egraph, *id, 3).unwrap().pretty(500),
+                       edges.len(),
+                       edges);
         });
     }
 

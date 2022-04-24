@@ -28,6 +28,9 @@ bimap = "0.5.3"
 serde = {version = "1.0.116", features = ["derive"], optional = true}
 serde_json = {version = "1.0.58", optional = true}
 
+[dev-dependencies]
+proptest = "1.0.0"
+
 [features]
 default = ["split_colored"]
 #default = ["split_clone"]

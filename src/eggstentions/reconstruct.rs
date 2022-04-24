@@ -66,11 +66,11 @@ fn reconstruct_inner(graph: &EGraph<SymbolLang, ()>, class: Id, max_depth: usize
 
 fn check_class<'a>(graph: &EGraph<SymbolLang, ()>, color: Option<ColorId>, class: Id, translations: &mut HashMap<Id, RecExpr<SymbolLang>>, mut inner_ids: &mut Vec<&'a SymbolLang>, colorded_class: &'a EClass<SymbolLang, ()>) {
     for edge in &colorded_class.nodes {
-        if edge.children.iter().all(|c| translations.contains_key(c)) {
-            build_translation(graph, color, translations, &edge, class);
+        if edge.0.children.iter().all(|c| translations.contains_key(c)) {
+            build_translation(graph, color, translations, &edge.0, class);
             return;
         }
-        inner_ids.push(edge);
+        inner_ids.push(&edge.0);
     }
 }
 
@@ -97,10 +97,10 @@ fn build_translation(graph: &EGraph<SymbolLang, ()>, color: Option<ColorId>, tra
 
 pub fn reconstruct_all(graph: &EGraph<SymbolLang, ()>, max_depth: usize) -> HashMap<Id, HashSet<Rc<Tree>>> {
     for c in graph.classes() {
-        let set = c.nodes.iter().collect::<HashSet<&SymbolLang>>();
+        let set = c.nodes.iter().map(|x| &x.0).collect::<HashSet<&SymbolLang>>();
         for c1 in graph.classes() {
             for n in c1.nodes.iter() {
-                assert!(!set.contains(n) || c.id == c1.id)
+                assert!(!set.contains(&n.0) || c.id == c1.id)
             }
         }
     }
@@ -108,6 +108,7 @@ pub fn reconstruct_all(graph: &EGraph<SymbolLang, ()>, max_depth: usize) -> Hash
     // let idToType = inputEdges.filter(_.edgeType.identifier == Language.typeId).map(e => (e.sources(0), Programs.reconstruct(inputEdges, e.sources(1)).head)).toMap
     let mut known_terms: HashMap<Id, HashSet<Rc<Tree>>> = HashMap::new();
     let mut last_level: HashSet<(Id, Rc<Tree>)> = edges.iter().filter_map(|(id, e)| {
+        let e = &e.0;
         if e.is_leaf() {
             let tree = Rc::new(Tree::leaf(e.op.to_string()));
             if !known_terms.contains_key(id) {
@@ -125,7 +126,7 @@ pub fn reconstruct_all(graph: &EGraph<SymbolLang, ()>, max_depth: usize) -> Hash
     // let edges_by_reqiurments = collection.mutable.HashMultiMap.empty[HyperTermId, (Int, HyperEdge[HyperTermId, HyperTermIdentifier])]
     let mut edges_by_reqiurments = HashMap::new();
     for x in edges.iter() {
-        for (i, s) in x.1.children.iter().enumerate() {
+        for (i, s) in x.1.0.children.iter().enumerate() {
             assert_eq!(graph.find(*s), *s);
             if !edges_by_reqiurments.contains_key(s) {
                 edges_by_reqiurments.insert(*s, HashSet::new());
@@ -141,12 +142,12 @@ pub fn reconstruct_all(graph: &EGraph<SymbolLang, ()>, max_depth: usize) -> Hash
         for e in levels.last().unwrap() {
             for v in edges_by_reqiurments.get(&e.0) {
                 for (i_to_fill, e_to_fill) in v {
-                    let params_to_fill = e_to_fill.1.children.iter().take(*i_to_fill).chain(&e_to_fill.1.children[i_to_fill + 1..]);
+                    let params_to_fill = e_to_fill.1.0.children.iter().take(*i_to_fill).chain(&e_to_fill.1.0.children[i_to_fill + 1..]);
                     let trees = params_to_fill.filter_map(|h_id| known_terms.get(h_id).map_or(None, |x| Some(x.iter().cloned()))).collect_vec();
-                    if trees.len() == e_to_fill.1.children.len() - 1 {
+                    if trees.len() == e_to_fill.1.0.children.len() - 1 {
                         for mut fillers in combinations(trees.into_iter()) {
                             fillers.insert(*i_to_fill, e.1.clone());
-                            last_level.insert((e.0, Rc::new(Tree::branch(e_to_fill.1.op.to_string(), fillers))));
+                            last_level.insert((e.0, Rc::new(Tree::branch(e_to_fill.1.0.op.to_string(), fillers))));
                         }
                     }
                 }
