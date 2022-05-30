@@ -5,6 +5,7 @@ use std::io::Write;
 use std::path::PathBuf;
 use std::process::exit;
 use std::time::SystemTime;
+use log::warn;
 
 use itertools::{Either, Itertools};
 #[cfg(feature = "stats")]
@@ -13,14 +14,14 @@ use structopt::StructOpt;
 
 use egg::*;
 
-use crate::eggstentions::pretty_string::PrettyString;
-use crate::thesy::{example_creator};
-use crate::thesy::case_split::{CaseSplit, Split};
-use crate::thesy::thesy::TheSy;
-use thesy::semantics::Definitions;
-use crate::tools::tools::choose;
+use TheSy::eggstentions::pretty_string::PrettyString;
+use TheSy::thesy::{example_creator};
+use TheSy::thesy::case_split::{CaseSplit, Split};
+use TheSy::thesy::thesy::TheSy as Synth;
+use TheSy::thesy::semantics::Definitions;
+use TheSy::TheSyConfig;
+use TheSy::tools::tools::choose;
 use std::rc::Rc;
-use thesy_parser::ast::Definitions;
 
 /// Arguments to use to run thesy
 #[derive(StructOpt)]
@@ -71,12 +72,12 @@ fn main() {
 
     let start = SystemTime::now();
     let mut config = TheSyConfig::from(&args);
-    let thesy = TheSy::from(&config);
+    let thesy = Synth::from(&config);
     let mut rws = thesy.system_rws.clone();
     rws.extend_from_slice(&config.definitions.rws);
     if args.check_equiv {
         for (vars, holes, precond, ex1, ex2) in &config.definitions.conjectures {
-            if TheSy::check_equality(&rws, precond, ex1, ex2) {
+            if Synth::check_equality(&rws, precond, ex1, ex2) {
                 println!("proved: Forall {}. {}{} = {}", holes.iter().join(", "), precond.as_ref().map(|x| format!("{} => ", x.pretty(500))).unwrap_or("".to_string()), ex1.pretty(500), ex2.pretty(500))
             }
         }
@@ -97,4 +98,4 @@ fn export_json(thesy: &TheSy, path: &PathBuf) {
 }
 
 #[cfg(not(feature = "stats"))]
-fn export_json(thesy: &TheSy, path: &PathBuf) {}
+fn export_json(thesy: &TheSy::thesy::thesy::TheSy, path: &PathBuf) {}

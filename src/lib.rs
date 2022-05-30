@@ -11,9 +11,9 @@ extern crate global_counter;
 #[macro_use]
 extern crate lazy_static;
 
-mod eggstentions;
-mod tools;
-mod thesy;
+pub mod eggstentions;
+pub mod tools;
+pub mod thesy;
 mod lang;
 mod tree;
 mod tests;
@@ -43,8 +43,8 @@ use crate::tools::tools::choose;
 use std::rc::Rc;
 
 #[derive(Clone)]
-struct TheSyConfig {
-    definitions: Definitions,
+pub struct TheSyConfig {
+    pub definitions: Definitions,
     ph_count: usize,
     dependencies: Vec<TheSyConfig>,
     dep_results: Vec<Vec<Rewrite<SymbolLang, ()>>>,
@@ -174,3 +174,7 @@ impl From<&TheSyConfig> for TheSy {
                            if conf.proof_mode { conjectures } else { None })
     }
 }
+
+pub use {
+    eggstentions::*
+};
