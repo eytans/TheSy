@@ -1,5 +1,4 @@
 pub mod multisearcher {
-    use std::collections::{HashMap, HashSet};
     use std::iter::FromIterator;
     use std::str::FromStr;
 
@@ -12,6 +11,7 @@ pub mod multisearcher {
     use smallvec::alloc::fmt::Formatter;
     use std::marker::PhantomData;
     use std::rc::Rc;
+    use indexmap::{IndexMap, IndexSet};
     use thesy_parser::ast::Expression;
     use crate::eggstentions::expression_ops::{IntoTree, RecExpSlice, Tree};
     use crate::tools::tools;
@@ -92,14 +92,14 @@ pub mod multisearcher {
         }
     }
 
-    fn get_common_vars(patterns: &mut Vec<impl Searcher<SymbolLang, ()>>) -> HashMap<Var, usize> {
+    fn get_common_vars(patterns: &mut Vec<impl Searcher<SymbolLang, ()>>) -> IndexMap<Var, usize> {
         let common_vars = patterns.iter().flat_map(|p| p.vars())
             .grouped(|v| v.clone()).iter()
             .filter_map(|(k, v)|
                 if v.len() <= 1 { None } else { Some((*k, v.len())) })
-            .collect::<HashMap<Var, usize>>();
+            .collect::<IndexMap<Var, usize>>();
 
-        fn count_commons(p: &impl Searcher<SymbolLang, ()>, common_vars: &HashMap<Var, usize>) -> usize {
+        fn count_commons(p: &impl Searcher<SymbolLang, ()>, common_vars: &IndexMap<Var, usize>) -> usize {
             p.vars().iter().map(|v| common_vars.get(v).unwrap_or(&0)).sum()
         }
 
@@ -124,7 +124,7 @@ pub mod multisearcher {
     }
 
     // Aggregate product of equal common var substs
-    fn aggregate_substs(possibilities: &[HashMap<Vec<Option<Id>>, Vec<Subst>>],
+    fn aggregate_substs(possibilities: &[IndexMap<Vec<Option<Id>>, Vec<Subst>>],
                         limits: Vec<&Option<Id>>,
                         all_vars: &Vec<Var>) -> Vec<Subst> {
         let current = possibilities.first().unwrap();
@@ -151,11 +151,11 @@ pub mod multisearcher {
         }
     }
 
-    fn group_by_common_vars(mut search_results: Vec<&mut SearchMatches>, common_vars: &HashMap<Var, usize>)
-                            -> Vec<HashMap<Vec<Option<Id>>, Vec<Subst>>> {
-        let mut by_vars: Vec<HashMap<Vec<Option<Id>>, Vec<Subst>>> = Vec::new();
+    fn group_by_common_vars(mut search_results: Vec<&mut SearchMatches>, common_vars: &IndexMap<Var, usize>)
+                            -> Vec<IndexMap<Vec<Option<Id>>, Vec<Subst>>> {
+        let mut by_vars: Vec<IndexMap<Vec<Option<Id>>, Vec<Subst>>> = Vec::new();
         for matches in search_results.iter_mut() {
-            let cur_map: HashMap<Vec<Option<Id>>, Vec<Subst>> = {
+            let cur_map: IndexMap<Vec<Option<Id>>, Vec<Subst>> = {
                 let substs: Vec<Subst> = std::mem::replace(&mut matches.substs, Vec::new());
                 let grouped = substs.into_iter().grouped(|s| common_vars.keys()
                     .map(|v| s.get(v.clone()).map(|i| i.clone()))
@@ -169,7 +169,7 @@ pub mod multisearcher {
 
     pub struct MultiEqSearcher<A: Searcher<SymbolLang, ()>> {
         patterns: Vec<A>,
-        common_vars: HashMap<Var, usize>,
+        common_vars: IndexMap<Var, usize>,
     }
 
     impl<A: Searcher<SymbolLang, ()>> std::fmt::Display for MultiEqSearcher<A> {
@@ -204,7 +204,7 @@ pub mod multisearcher {
             let mut search_results = {
                 let mut res = Vec::new();
                 for p in self.patterns.iter() {
-                    let mut current = HashMap::new();
+                    let mut current = IndexMap::new();
                     let searched = p.search(egraph);
                     for s in searched {
                         assert!(!current.contains_key(&s.eclass));
@@ -215,7 +215,7 @@ pub mod multisearcher {
                 res
             };
 
-            let mut ids = search_results[0].keys().cloned().collect::<HashSet<Id>>();
+            let mut ids = search_results[0].keys().cloned().collect::<IndexSet<Id>>();
             for r in search_results.iter().skip(1) {
                 ids = ids.into_iter().filter(|k| r.contains_key(k)).collect();
             }
@@ -268,7 +268,7 @@ pub mod multisearcher {
 
     pub struct MultiDiffSearcher<A: Searcher<SymbolLang, ()>> {
         patterns: Vec<A>,
-        common_vars: HashMap<Var, usize>,
+        common_vars: IndexMap<Var, usize>,
     }
 
     impl<A: Searcher<SymbolLang, ()>> MultiDiffSearcher<A> {
@@ -314,11 +314,11 @@ pub mod multisearcher {
                 return self.patterns[0].search(egraph);
             }
 
-            // TODO: we dont need a hashmap here
+            // TODO: we dont need a IndexMap here
             let mut search_results = {
                 let mut res = Vec::new();
                 for p in self.patterns.iter() {
-                    let mut current = HashMap::new();
+                    let mut current = IndexMap::new();
                     let searched = p.search(egraph);
                     for s in searched {
                         assert!(!current.contains_key(&s.eclass));

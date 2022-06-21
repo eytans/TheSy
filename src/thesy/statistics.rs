@@ -1,7 +1,7 @@
-use std::collections::HashMap;
 use std::time::{Duration, SystemTime};
 
 use egg::{Iteration, RecExpr, SymbolLang};
+use indexmap::IndexMap;
 
 global_counter!(MEASURE_COUNTER, usize, usize::default());
 
@@ -36,7 +36,7 @@ pub struct Stats {
     /// total runtime of run fn
     pub total_time: Duration,
     /// Measures to use for each run. Should be removed after used
-    pub(crate) measures: HashMap<usize, MeasureData>,
+    pub(crate) measures: IndexMap<usize, MeasureData>,
     /// Run start time
     start_total: SystemTime,
 }

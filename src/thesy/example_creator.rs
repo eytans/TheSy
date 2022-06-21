@@ -1,17 +1,16 @@
-use std::collections::{HashMap};
-
 use egg::{RecExpr, SymbolLang};
 use itertools::Itertools;
 
 use crate::eggstentions::expression_ops::{IntoTree};
 use crate::lang::{DataType, Function};
 use std::collections::hash_map::RandomState;
+use indexmap::IndexMap;
 
 #[derive(Clone, Debug)]
 pub struct Examples {
     pub datatype: DataType,
     examples: Vec<RecExpr<SymbolLang>>,
-    example_vars: Vec<HashMap<Function, Vec<RecExpr<SymbolLang>>>>,
+    example_vars: Vec<IndexMap<Function, Vec<RecExpr<SymbolLang>>>>,
 }
 
 impl Examples {
@@ -22,8 +21,8 @@ impl Examples {
     }
 
     pub fn new(datatype: &DataType, max_depth: usize) -> Self {
-        let mut constructor_phs: Vec<HashMap<Function, Vec<RecExpr<SymbolLang>>, RandomState>> = Default::default();
-        let mut ph_counts: HashMap<RecExpr<SymbolLang>, usize> = HashMap::new();
+        let mut constructor_phs: Vec<IndexMap<Function, Vec<RecExpr<SymbolLang>>, RandomState>> = Default::default();
+        let mut ph_counts: IndexMap<RecExpr<SymbolLang>, usize> = IndexMap::new();
         let mut res = datatype.constructors.iter()
             .filter(|f| !f.params.contains(&datatype.as_exp()))
             .map(|f| f.apply_params(f.params.iter().map(|p| {
@@ -34,7 +33,7 @@ impl Examples {
         let constructors = datatype.constructors.iter()
             .filter(|f| f.params.contains(&datatype.as_exp())).collect_vec();
         for _ in 0..max_depth {
-            constructor_phs.push(HashMap::new());
+            constructor_phs.push(IndexMap::new());
             let last_example = res.last().unwrap().clone();
             res.extend(constructors.iter().map(|constr| {
                 // Creating example by creating ph and using as params.

@@ -1,5 +1,4 @@
 pub mod tools {
-    use std::collections::HashMap;
     use std::collections::hash_map::RandomState;
     use std::hash::Hash;
 
@@ -7,6 +6,7 @@ pub mod tools {
     use itertools::Itertools;
     use egg::{RecExpr, SymbolLang, Pattern, Language, Analysis, Subst, Id, ENodeOrVar, Searcher, EGraph};
     use std::rc::Rc;
+    use indexmap::IndexMap;
 
 // fn combinations<'a, T: 'a, I: Iterator<Item = &'a T> + Clone>(mut sets: impl Iterator<Item = I>) -> impl Iterator<Item = Vec<&'a T>> {
 //     let first = sets.next();
@@ -70,12 +70,12 @@ pub mod tools {
     }
 
     pub trait Grouped<T> {
-        fn grouped<K: Hash + Eq, F: Fn(&T) -> K>(&mut self, key: F) -> HashMap<K, Vec<T>>;
+        fn grouped<K: Hash + Eq, F: Fn(&T) -> K>(&mut self, key: F) -> IndexMap<K, Vec<T>>;
     }
 
     impl<T, I: Iterator<Item=T>> Grouped<T> for I {
-        fn grouped<K: Hash + Eq, F: Fn(&T) -> K>(&mut self, key: F) -> HashMap<K, Vec<T>, RandomState> {
-            let mut res = HashMap::new();
+        fn grouped<K: Hash + Eq, F: Fn(&T) -> K>(&mut self, key: F) -> IndexMap<K, Vec<T>, RandomState> {
+            let mut res = IndexMap::new();
             self.for_each(|t| res.entry(key(&t)).or_insert(Vec::new()).push(t));
             res
         }
@@ -105,8 +105,8 @@ pub mod tools {
 
 #[cfg(test)]
 mod tests {
-    use std::collections::HashSet;
     use std::iter::FromIterator;
+    use indexmap::IndexSet;
 
     use itertools::Itertools;
 
@@ -123,7 +123,7 @@ mod tests {
             assert_eq!(v.len(), 2);
         }
         // No doubles
-        let as_set: HashSet<&Vec<&i32>> = HashSet::from_iter(combs.iter());
+        let as_set: IndexSet<&Vec<&i32>> = IndexSet::from_iter(combs.iter());
         assert_eq!(as_set.len(), 9);
     }
 
@@ -135,7 +135,7 @@ mod tests {
             for v in &chosen {
                 assert_eq!(v.len(), i);
             }
-            let as_set: HashSet<&Vec<&i32>> = HashSet::from_iter(chosen.iter());
+            let as_set: IndexSet<&Vec<&i32>> = IndexSet::from_iter(chosen.iter());
             assert_eq!(chosen.len(), as_set.len());
         }
         assert_eq!(choose(&v3, 2).len(), 36);

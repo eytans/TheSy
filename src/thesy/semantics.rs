@@ -1,4 +1,3 @@
-use std::collections::{HashMap, HashSet};
 use std::fmt::{Debug, Formatter};
 use std::hash::Hash;
 use std::rc::Rc;
@@ -21,6 +20,7 @@ use multimap::MultiMap;
 use crate::eggstentions::expression_ops::{IntoTree, RecExpSlice, Tree};
 use crate::eggstentions::conditions::{AndCondition, OrCondition};
 use std::iter::FromIterator;
+use indexmap::{IndexMap, IndexSet};
 
 lazy_static!(
     static ref split_hole: Terminal = Hole(String::from("splithole"), None);
@@ -61,7 +61,7 @@ pub struct Definitions {
     /// Rewrites defined by (assert forall)
     pub rws: Vec<Rewrite<SymbolLang, ()>>,
     /// Terms to prove, given as not forall, (vars - types, holes, precondition, ex1, ex2)
-    pub conjectures: Vec<(HashMap<RecExpr<SymbolLang>, RecExpr<SymbolLang>>, HashSet<RecExpr<SymbolLang>>, Option<RecExpr<SymbolLang>>, RecExpr<SymbolLang>, RecExpr<SymbolLang>)>,
+    pub conjectures: Vec<(IndexMap<RecExpr<SymbolLang>, RecExpr<SymbolLang>>, IndexSet<RecExpr<SymbolLang>>, Option<RecExpr<SymbolLang>>, RecExpr<SymbolLang>, RecExpr<SymbolLang>)>,
     /// Logic of when to apply case split
     pub case_splitters: Vec<(Rc<dyn Searcher<SymbolLang, ()>>, Pattern<SymbolLang>, Vec<Pattern<SymbolLang>>)>,
     /// patterns used to deduce case splits
@@ -156,7 +156,7 @@ impl Definitions {
     }
 
     fn collect_splittable_params<'a>(&self, f: &Function, opt_pats: &'a Vec<Expression>)
-                                 -> Vec<(usize, &DataType, HashMap<String, Vec<&'a Expression>>)> {
+                                 -> Vec<(usize, &DataType, IndexMap<String, Vec<&'a Expression>>)> {
         let param_types = f.params.iter().enumerate()
             // Get type of each param (if type exists)
             .filter_map(|p| Some(p.0).zip(
@@ -174,7 +174,7 @@ impl Definitions {
 
         param_types.into_iter().map(|(i, p_dt)| {
             // collect all patterns of other params for each constructor type
-            let mut patterns_grouped: HashMap<String, Vec<&Expression>> = HashMap::default();
+            let mut patterns_grouped: IndexMap<String, Vec<&Expression>> = IndexMap::default();
             for c in &p_dt.constructors {
                 patterns_grouped.insert(c.name.clone(), opt_pats.into_iter()
                     .filter(|s| s.children()[i].root().ident() == &c.name)
@@ -187,7 +187,7 @@ impl Definitions {
         }).collect_vec()
     }
 
-    fn condition_from_grouped_patterns(orig:&Expression, i: usize, patterns_grouped: HashMap<String, Vec<&Expression>>) -> AndCondition<SymbolLang, ()> {
+    fn condition_from_grouped_patterns(orig:&Expression, i: usize, patterns_grouped: IndexMap<String, Vec<&Expression>>) -> AndCondition<SymbolLang, ()> {
         // Can split by any param by itself by adding filterers on other params.
         // Instead of a very sophisticated runtime I am creating a complex pattern for asserting
         // the rewriting will continue in each split.
@@ -307,7 +307,7 @@ impl From<Vec<Statement>> for Definitions {
             let mut temp = vec![];
             for (i, dt, grouped_patterns) in splittable_params {
                 let func_pattern = pattern_for_func_app(f, i);
-                let mut fixed_pattern_groups = HashMap::new();
+                let mut fixed_pattern_groups = IndexMap::new();
                 for (c, patterns) in &grouped_patterns {
                     let mut fixed_patterns = vec![];
                     for p in patterns {
@@ -460,8 +460,8 @@ impl Definitions {
     }
 
     fn process_goals(&mut self, precond: Option<&Expression>, exp1: &Expression, exp2: &Expression) {
-        let mut type_map = HashMap::new();
-        let mut holes = HashSet::new();
+        let mut type_map = IndexMap::new();
+        let mut holes = IndexSet::new();
         let mut all_terminals = precond.iter()
             .flat_map(|e| e.terminals().iter().cloned().cloned().collect_vec())
             .collect_vec();

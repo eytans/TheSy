@@ -1,12 +1,11 @@
-use egg::{Rewrite, SymbolLang, EGraph, Id, Runner, StopReason, EClass, Var, Pattern, Searcher, SearchMatches, Applier, Language, Analysis, ColorId};
+use egg::{Rewrite, SymbolLang, EGraph, Id, Runner, StopReason, Var, Pattern, Searcher, SearchMatches, Applier, Language, Analysis, ColorId};
 use itertools::Itertools;
 use std::time::Duration;
-use std::collections::{HashMap, HashSet};
 use std::str::FromStr;
 use std::collections::hash_map::RandomState;
 use std::rc::Rc;
-use std::path::Display;
 use std::fmt;
+use indexmap::{IndexMap, IndexSet};
 use smallvec::alloc::fmt::Formatter;
 use crate::eggstentions::reconstruct::{reconstruct, reconstruct_colored};
 use crate::eggstentions::appliers::DiffApplier;
@@ -146,8 +145,8 @@ impl CaseSplit {
         f
     }
 
-    fn merge_conclusions(egraph: &mut EGraph<SymbolLang, ()>, classes: &Vec<Id>, split_conclusions: Vec<HashMap<Id, Id>>) {
-        let mut group_by_splits: HashMap<Vec<Id>, HashSet<Id>> = HashMap::new();
+    fn merge_conclusions(egraph: &mut EGraph<SymbolLang, ()>, classes: &Vec<Id>, split_conclusions: Vec<IndexMap<Id, Id>>) {
+        let mut group_by_splits: IndexMap<Vec<Id>, IndexSet<Id>> = IndexMap::new();
         for c in classes {
             let key = split_conclusions.iter().map(|m| m[c]).collect_vec();
             group_by_splits.entry(key).or_default().insert(*c);
@@ -164,12 +163,12 @@ impl CaseSplit {
         egraph.rebuild();
     }
 
-    fn collect_merged(egraph: &EGraph<SymbolLang, ()>, classes: &Vec<Id>) -> HashMap<Id, Id> {
-        classes.iter().map(|c| (*c, egraph.find(*c))).collect::<HashMap<Id, Id>>()
+    fn collect_merged(egraph: &EGraph<SymbolLang, ()>, classes: &Vec<Id>) -> IndexMap<Id, Id> {
+        classes.iter().map(|c| (*c, egraph.find(*c))).collect::<IndexMap<Id, Id>>()
     }
 
-    fn collect_colored_merged(egraph: &EGraph<SymbolLang, ()>, classes: &Vec<Id>, color: ColorId) -> HashMap<Id, Id> {
-        classes.iter().map(|eclass| (*eclass, egraph.colored_find(color, *eclass))).collect::<HashMap<Id, Id>>()
+    fn collect_colored_merged(egraph: &EGraph<SymbolLang, ()>, classes: &Vec<Id>, color: ColorId) -> IndexMap<Id, Id> {
+        classes.iter().map(|eclass| (*eclass, egraph.colored_find(color, *eclass))).collect::<IndexMap<Id, Id>>()
     }
 
     pub fn case_split(&mut self, egraph: &mut EGraph<SymbolLang, ()>, split_depth: usize, rules: &[Rewrite<SymbolLang, ()>], run_depth: usize) {
@@ -182,12 +181,12 @@ impl CaseSplit {
         }
     }
 
-    fn colored_case_split(&mut self, egraph: &mut EGraph<SymbolLang, ()>, split_depth: usize, known_splits: &HashSet<Split>, rules: &[Rewrite<SymbolLang, ()>], run_depth: usize) {
+    fn colored_case_split(&mut self, egraph: &mut EGraph<SymbolLang, ()>, split_depth: usize, known_splits: &IndexSet<Split>, rules: &[Rewrite<SymbolLang, ()>], run_depth: usize) {
         if split_depth == 0 {
             return;
         }
 
-        let known_splits: HashSet<Split, RandomState> = known_splits.iter().map(|e| {
+        let known_splits: IndexSet<Split, RandomState> = known_splits.iter().map(|e| {
             let mut res = e.clone();
             res.update(egraph);
             res
@@ -195,7 +194,7 @@ impl CaseSplit {
 
         let temp = self.find_splitters(egraph);
         let splitters: Vec<&Split> = temp.iter()
-            .filter(|s| !known_splits.contains(s))
+            .filter(|s| !known_splits.contains(*s))
             .collect();
         let mut new_known = known_splits.clone();
         new_known.extend(splitters.iter().cloned().cloned());
@@ -220,12 +219,12 @@ impl CaseSplit {
         }
     }
 
-    fn inner_case_split(&mut self, egraph: &mut EGraph<SymbolLang, ()>, split_depth: usize, known_splits: &HashSet<Split>, rules: &[Rewrite<SymbolLang, ()>], run_depth: usize) {
+    fn inner_case_split(&mut self, egraph: &mut EGraph<SymbolLang, ()>, split_depth: usize, known_splits: &IndexSet<Split>, rules: &[Rewrite<SymbolLang, ()>], run_depth: usize) {
         if split_depth == 0 {
             return;
         }
 
-        let known_splits: HashSet<Split, RandomState> = known_splits.iter().map(|e| {
+        let known_splits: IndexSet<Split, RandomState> = known_splits.iter().map(|e| {
             let mut res = e.clone();
             res.update(egraph);
             res
@@ -233,7 +232,7 @@ impl CaseSplit {
 
         let temp = self.find_splitters(egraph);
         let splitters: Vec<&Split> = temp.iter()
-            .filter(|s| !known_splits.contains(s))
+            .filter(|s| !known_splits.contains(*s))
             .collect();
         let mut new_known = known_splits.clone();
 

@@ -1,4 +1,3 @@
-use std::collections::{HashMap, HashSet};
 use std::collections::hash_map::RandomState;
 use std::iter;
 use std::iter::FromIterator;
@@ -8,6 +7,7 @@ use std::time::{Duration, SystemTime};
 
 use bimap::BiHashMap;
 use egg::*;
+use indexmap::{IndexMap, IndexSet};
 use itertools::Itertools;
 use log::{info, warn};
 use multimap::MultiMap;
@@ -27,16 +27,16 @@ use crate::tools::tools::choose;
 /// Theory Synthesizer - Explores a given theory finding and proving new lemmas.
 pub struct TheSy {
     /// known datatypes to wfo rewrites for induction
-    pub(crate) datatypes: HashMap<DataType, Prover>,
+    pub(crate) datatypes: IndexMap<DataType, Prover>,
     /// known function declerations and their types
     dict: Vec<Function>,
     /// egraph which is expanded as part of the exploration
     pub egraph: EGraph<SymbolLang, ()>,
     /// searchers used to create the next depth of terms
-    searchers: HashMap<String, (MultiDiffSearcher<Pattern<SymbolLang>>, Vec<(Var, RecExpr<SymbolLang>)>)>,
+    searchers: IndexMap<String, (MultiDiffSearcher<Pattern<SymbolLang>>, Vec<(Var, RecExpr<SymbolLang>)>)>,
     /// map maintaining the connection between eclasses created by sygue
     /// and their associated eclasses with `ind_ph` replaced by symbolic examples.
-    example_ids: HashMap<DataType, HashMap<Id, Vec<Id>>>,
+    example_ids: IndexMap<DataType, IndexMap<Id, Vec<Id>>>,
     /// Flattern apply rewrites are used for high order function such as fold.
     /// Ite rewrites
     /// Equality rewrite
@@ -65,22 +65,22 @@ pub struct TheSy {
     /// for more info check: [EGG] documentation
     equiv_reduc_hooks: Vec<Box<dyn FnMut(&mut Runner<SymbolLang, ()>, &mut Vec<Rewrite<SymbolLang, ()>>) -> Result<(), String>>>,
     /// Vars created for examples, used to reduce case split depth
-    examples: HashMap<DataType, Examples>,
+    examples: IndexMap<DataType, Examples>,
 }
 
 /// *** TheSy Statics ***
 impl TheSy {
-    fn replace_ops(exp: &RecExpr<SymbolLang>, replacments: &HashMap<Symbol, Symbol>) -> RecExpr<SymbolLang> {
+    fn replace_ops(exp: &RecExpr<SymbolLang>, replacments: &IndexMap<Symbol, Symbol>) -> RecExpr<SymbolLang> {
         RecExpr::from(exp.as_ref().iter().map(|s| replacments.get(&s.op)
             .map(|x| SymbolLang::new(x.as_str(), s.children.clone())).unwrap_or(s.clone())).collect_vec())
     }
 
     fn replace_op(exp: &RecExpr<SymbolLang>, orig: Symbol, replacment: Symbol) -> RecExpr<SymbolLang> {
-        Self::replace_ops(exp, &HashMap::from_iter(iter::once((orig, replacment))))
+        Self::replace_ops(exp, &IndexMap::from_iter(iter::once((orig, replacment))))
     }
 
-    fn create_sygue_serchers<'a>(dict: &[Function], datatypes: impl Iterator<Item=&'a DataType>) -> HashMap<String, (MultiDiffSearcher<Pattern<SymbolLang>>, Vec<(Var, RecExpr<SymbolLang>)>)> {
-        let mut res = HashMap::new();
+    fn create_sygue_serchers<'a>(dict: &[Function], datatypes: impl Iterator<Item=&'a DataType>) -> IndexMap<String, (MultiDiffSearcher<Pattern<SymbolLang>>, Vec<(Var, RecExpr<SymbolLang>)>)> {
+        let mut res = IndexMap::new();
         let datas = datatypes.cloned().collect_vec();
         TheSy::known_functions(&datas, dict).for_each(|fun| {
             if !fun.params.is_empty() {
@@ -100,12 +100,12 @@ impl TheSy {
     }
 
     pub fn new(datatype: DataType, examples: Examples, dict: Vec<Function>) -> TheSy {
-        Self::new_with_ph(vec![datatype.clone()], HashMap::from_iter(iter::once((datatype, examples))), dict, 2, None)
+        Self::new_with_ph(vec![datatype.clone()], IndexMap::from_iter(iter::once((datatype, examples))), dict, 2, None)
     }
 
-    pub fn new_with_ph(datatypes: Vec<DataType>, examples: HashMap<DataType, Examples>, dict: Vec<Function>, ph_count: usize, lemmas: Option<Vec<(HashMap<RecExpr<SymbolLang>, RecExpr<SymbolLang>>, HashSet<RecExpr<SymbolLang>>, Option<RecExpr<SymbolLang>>, RecExpr<SymbolLang>, RecExpr<SymbolLang>)>>) -> TheSy {
+    pub fn new_with_ph(datatypes: Vec<DataType>, examples: IndexMap<DataType, Examples>, dict: Vec<Function>, ph_count: usize, lemmas: Option<Vec<(IndexMap<RecExpr<SymbolLang>, RecExpr<SymbolLang>>, IndexSet<RecExpr<SymbolLang>>, Option<RecExpr<SymbolLang>>, RecExpr<SymbolLang>, RecExpr<SymbolLang>)>>) -> TheSy {
         debug_assert!(examples.iter().all(|(d, e)| &e.datatype == d));
-        let datatype_to_prover: HashMap<DataType, Prover> = datatypes.iter()
+        let datatype_to_prover: IndexMap<DataType, Prover> = datatypes.iter()
             .map(|d| (d.clone(), Prover::new(d.clone()))).collect();
         let (mut egraph, mut example_ids) = TheSy::create_graph_example_ids(&datatypes, &examples, &dict, ph_count);
 
@@ -121,18 +121,18 @@ impl TheSy {
         // TODO: replace placeholders only for holes and not for all terminals (also in creating ph0)
         let conjectures = lemmas.map(|v| v.into_iter()
             .map(|(vars, holes, precond, ex1, ex2)| {
-                let mut types_to_vars: HashMap<RecExpr<SymbolLang>, HashMap<Symbol, Function>> = HashMap::new();
+                let mut types_to_vars: IndexMap<RecExpr<SymbolLang>, IndexMap<Symbol, Function>> = IndexMap::new();
                 for v in vars {
                     if !holes.contains(&v.0) {
                         continue;
                     }
                     if !types_to_vars.contains_key(&v.1) {
-                        types_to_vars.insert(v.1.clone(), HashMap::new());
+                        types_to_vars.insert(v.1.clone(), IndexMap::new());
                     }
                     let current_ph = types_to_vars[&v.1].len() + 1;
                     types_to_vars.get_mut(&v.1).unwrap().insert(v.0.as_ref().last().unwrap().op, TheSy::get_ph(&v.1, current_ph));
                 }
-                let replacments: HashMap<Symbol, Symbol> = types_to_vars.values().flat_map(|v| {
+                let replacments: IndexMap<Symbol, Symbol> = types_to_vars.values().flat_map(|v| {
                     v.iter().map(|(k, f)| (*k, Symbol::from(&f.name)))
                 }).collect();
                 let precond_replaced = precond.map(|p| Self::replace_ops(&p, &replacments));
@@ -181,11 +181,11 @@ impl TheSy {
         dict.iter().chain(datatypes.iter().flat_map(|d| d.constructors.iter()))
     }
 
-    fn create_graph_example_ids(datatypes: &Vec<DataType>, examples: &HashMap<DataType, Examples>, dict: &Vec<Function>, ph_count: usize) -> (EGraph<SymbolLang, ()>, HashMap<DataType, HashMap<Id, Vec<Id>, RandomState>, RandomState>) {
+    fn create_graph_example_ids(datatypes: &Vec<DataType>, examples: &IndexMap<DataType, Examples>, dict: &Vec<Function>, ph_count: usize) -> (EGraph<SymbolLang, ()>, IndexMap<DataType, IndexMap<Id, Vec<Id>, RandomState>, RandomState>) {
         let mut egraph = EGraph::default();
-        let mut example_ids = HashMap::new();
+        let mut example_ids = IndexMap::new();
         for d in datatypes.iter() {
-            example_ids.insert(d.clone(), HashMap::new());
+            example_ids.insert(d.clone(), IndexMap::new());
         }
 
         for fun in dict.iter()
@@ -241,7 +241,7 @@ impl TheSy {
 
     /// Create all needed phs from
     fn collect_phs<'a>(known_functions: impl Iterator<Item=&'a Function>, ph_count: usize) -> Vec<Function> {
-        let mut res = HashSet::new();
+        let mut res = IndexSet::new();
         for f in known_functions {
             for e in f.params.iter() {
                 res.insert(e.clone());
@@ -282,10 +282,10 @@ impl TheSy {
 
 /// *** Thesy ***
 impl TheSy {
-    fn extract_classes(&self) -> HashMap<Id, (RepOrder, RecExpr<SymbolLang>)> {
+    fn extract_classes(&self) -> IndexMap<Id, (RepOrder, RecExpr<SymbolLang>)> {
         let mut ext = Extractor::new(&self.egraph, MinRep);
         // each datatype should have the same keys
-        let keys: HashSet<Id> = self.example_ids.iter().flat_map(|(d, m)| m.keys()).copied().collect();
+        let keys: IndexSet<Id> = self.example_ids.iter().flat_map(|(d, m)| m.keys()).copied().collect();
         keys.iter().map(|key| {
             let updated_key = &self.egraph.find(*key);
             (*updated_key, ext.find_best(*updated_key))
@@ -293,9 +293,9 @@ impl TheSy {
     }
 
     fn fix_example_ids(&mut self) {
-        let mut new_ex_ids = HashMap::new();
+        let mut new_ex_ids = IndexMap::new();
         for d in self.example_ids.keys() {
-            // new_ex_ids.insert(d, HashMap::new());
+            // new_ex_ids.insert(d, IndexMap::new());
             let t = self.example_ids[d].iter().map(|(k, v)|
                 (self.egraph.find(*k), v.iter()
                     .map(|x| self.egraph.find(*x)).collect())).collect();
@@ -323,7 +323,7 @@ impl TheSy {
             SymbolLang::new(op.clone(), params.iter().map(|(v, typ)| sub.get(v.clone()).unwrap()).copied().collect())
         }
 
-        fn translate_edge(edge: &SymbolLang, e_index: usize, translations: &HashMap<Id, Vec<Id>>) -> SymbolLang {
+        fn translate_edge(edge: &SymbolLang, e_index: usize, translations: &IndexMap<Id, Vec<Id>>) -> SymbolLang {
             let new_child = edge.children.iter().map(|id| {
                 translations[id][e_index]
             }).collect_vec();
@@ -413,22 +413,22 @@ impl TheSy {
         // TODO: make this an iterator to save alot of time during recreating conjectures
         let m_key = self.stats.init_measure(|| 0);
         self.fix_example_ids();
-        let finer_classes: HashMap<DataType, HashMap<Vec<Id>, HashSet<Id>>> = self.example_ids.iter().map(|(d, m)| {
-            let mut finer_equality_classes: HashMap<Vec<Id>, HashSet<Id>> = HashMap::new();
+        let finer_classes: IndexMap<DataType, IndexMap<Vec<Id>, IndexSet<Id>>> = self.example_ids.iter().map(|(d, m)| {
+            let mut finer_equality_classes: IndexMap<Vec<Id>, IndexSet<Id>> = IndexMap::new();
             for (id, vals) in m {
                 if !finer_equality_classes.contains_key(vals) {
-                    finer_equality_classes.insert(vals.iter().map(|i| self.egraph.find(*i)).collect_vec(), HashSet::new());
+                    finer_equality_classes.insert(vals.iter().map(|i| self.egraph.find(*i)).collect_vec(), IndexSet::new());
                 }
                 finer_equality_classes.get_mut(vals).expect("Should have just added if missing").insert(self.egraph.find(*id));
             }
             (d.clone(), finer_equality_classes)
         }).collect();
-        let reps = self.extract_classes();
+        let reps: IndexMap<Id, (RepOrder, RecExpr<SymbolLang>)> = self.extract_classes();
         let mut res = Vec::new();
         for (d, m) in finer_classes {
             for set in m.values() {
                 if set.len() < 2 { continue; }
-                for couple in choose(&set.iter().collect_vec()[..], 2) {
+                for couple in choose(&set.iter().copied().collect_vec()[..], 2) {
                     let max_cop = if reps[couple[0]].0 > reps[couple[1]].0 { (reps[couple[0]].0.clone(), reps[couple[1]].0.clone()) } else { (reps[couple[1]].0.clone(), reps[couple[0]].0.clone()) };
                     res.push((max_cop, reps[couple[0]].1.clone(), reps[couple[1]].1.clone(), d.clone()));
                 }
@@ -441,7 +441,7 @@ impl TheSy {
 
     pub fn check_equality(rules: &[Rewrite<SymbolLang, ()>], precond: &Option<RecExpr<SymbolLang>>, ex1: &RecExpr<SymbolLang>, ex2: &RecExpr<SymbolLang>) -> bool {
         let mut egraph = Prover::create_graph(precond.as_ref(), &ex1, &ex2);
-        let runner = Runner::default().with_iter_limit(8).with_time_limit(Duration::from_secs(60)).with_node_limit(10000).with_egraph(egraph).run(rules);
+        let runner = Runner::default().with_iter_limit(8).with_time_limit(Duration::from_secs(600)).with_node_limit(10000).with_egraph(egraph).run(rules);
         !runner.egraph.equivs(ex1, ex2).is_empty()
     }
 
@@ -656,13 +656,13 @@ impl TheSy {
 
 #[cfg(test)]
 mod test {
-    use std::collections::{HashMap, HashSet};
     use std::iter;
     use std::iter::FromIterator;
     use std::str::FromStr;
     use std::time::SystemTime;
 
     use egg::{EGraph, Pattern, RecExpr, Rewrite, Runner, Searcher, SearchMatches, Symbol, SymbolLang, Var};
+    use indexmap::{IndexMap, IndexSet};
     use itertools::Itertools;
 
     use crate::eggstentions::appliers::DiffApplier;
@@ -752,23 +752,23 @@ mod test {
         syg.increase_depth();
         syg.increase_depth();
         let level0 = syg.egraph.classes()
-            .filter(|c| c.nodes[0].0.children.len() == 0)
-            .map(|c| (c.id, c.nodes[0].0.clone()))
+            .filter(|c| c.nodes[0].children.len() == 0)
+            .map(|c| (c.id, c.nodes[0].clone()))
             .collect_vec();
-        let edges_level0 = level0.iter().map(|c| &c.1).collect::<HashSet<&SymbolLang>>();
+        let edges_level0 = level0.iter().map(|c| &c.1).collect::<IndexSet<&SymbolLang>>();
         assert_eq!(edges_level0.len(), level0.len());
         let level1 = syg.egraph.classes()
-            .filter(|c| c.nodes[0].0.children.len() > 0 || c.nodes[0].0.children.iter().all(|n| level0.iter().find(|x| x.0 == *n).is_some()))
-            .map(|c| (c.id, &c.nodes[0].0))
+            .filter(|c| c.nodes[0].children.len() > 0 || c.nodes[0].children.iter().all(|n| level0.iter().find(|x| x.0 == *n).is_some()))
+            .map(|c| (c.id, &c.nodes[0]))
             .collect_vec();
-        let edges_level1 = level1.iter().map(|c| c.1).collect::<HashSet<&SymbolLang>>();
+        let edges_level1 = level1.iter().map(|c| c.1).collect::<IndexSet<&SymbolLang>>();
         assert_eq!(edges_level1.len(), level1.len());
         let level2 = syg.egraph.classes()
-            .filter(|c| c.nodes[0].0.children.iter().any(|n| level1.iter().find(|x| x.0 == *n).is_some()))
-            .filter(|c| c.nodes[0].0.children.len() > 0 || c.nodes[0].0.children.iter().all(|n| level0.iter().find(|x| x.0 == *n).is_some() || level1.iter().find(|x| x.0 == *n).is_some()))
-            .map(|c| (c.id, &c.nodes[0].0))
+            .filter(|c| c.nodes[0].children.iter().any(|n| level1.iter().find(|x| x.0 == *n).is_some()))
+            .filter(|c| c.nodes[0].children.len() > 0 || c.nodes[0].children.iter().all(|n| level0.iter().find(|x| x.0 == *n).is_some() || level1.iter().find(|x| x.0 == *n).is_some()))
+            .map(|c| (c.id, &c.nodes[0]))
             .collect_vec();
-        let edges_level2 = level2.iter().map(|c| c.1).collect::<HashSet<&SymbolLang>>();
+        let edges_level2 = level2.iter().map(|c| c.1).collect::<IndexSet<&SymbolLang>>();
         assert_eq!(edges_level2.len(), level2.len());
     }
 
@@ -776,7 +776,7 @@ mod test {
     fn test_creates_expected_terms_nat() {
         let nat = create_nat_type();
         let nat_examples = Examples::new(&nat, 2);
-        let ex_map = HashMap::from_iter(iter::once((nat.clone(), nat_examples)));
+        let ex_map = IndexMap::from_iter(iter::once((nat.clone(), nat_examples)));
         let mut syg = {
             TheSy::new_with_ph(
                 vec![nat.clone()],
@@ -838,7 +838,7 @@ mod test {
         let mut syg = TheSy::new_with_ph(
             // For this test dont use full definition
             vec![new_nat.clone()],
-            HashMap::from_iter(iter::once((new_nat.clone(), Examples::new(&new_nat, 0)))),
+            IndexMap::from_iter(iter::once((new_nat.clone(), Examples::new(&new_nat, 0)))),
             vec![Function::new("x".to_string(), vec!["nat".parse().unwrap(), "nat".parse().unwrap()], "nat".parse().unwrap())],
             3,
             None,
@@ -1060,7 +1060,7 @@ mod test {
     }
 
     fn check_types_not_merged(egraph: &EGraph<SymbolLang, ()>) {
-        egraph.classes().flat_map(|c| c.iter_without_colors()
+        egraph.classes().flat_map(|c| c.iter()
             .filter(|n| n.op == Symbol::from_str("typed").unwrap()))
             .grouped(|x| {
                 assert_eq!(x.children.len(), 2);

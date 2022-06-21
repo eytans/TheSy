@@ -3,13 +3,13 @@ use egg::{RecExpr, SymbolLang, Id};
 use crate::thesy::semantics::Definitions;
 use crate::thesy::case_split::CaseSplit;
 use crate::thesy::prover::Prover;
-use std::collections::HashSet;
 use std::fs::File;
 use std::ops::Not;
 use thesy_parser::ast;
 use std::str::FromStr;
 use std::sync::atomic::AtomicBool;
 use std::sync::Mutex;
+use indexmap::IndexSet;
 use thesy_parser::ast::Terminal;
 use crate::eggstentions::reconstruct::reconstruct;
 use crate::TheSyConfig;
@@ -100,7 +100,7 @@ pub fn test_terms(mut definitions: Definitions) -> ProofMode {
     let ph_id2 = thesy.egraph.add_expr(&ph_exp2);
     info!("ph_exp1: {}, ph_exp2: {}", ph_exp1, ph_exp2);
 
-    let classes = thesy.egraph.classes().map(|x| x.id).collect::<HashSet<Id>>();
+    let classes = thesy.egraph.classes().map(|x| x.id).collect::<IndexSet<Id>>();
     if !classes.contains(&thesy.egraph.find(ph_id1)) ||
         !classes.contains(&thesy.egraph.find(ph_id2)) {
         return ProofMode::TermNotCreated;

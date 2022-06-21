@@ -1,5 +1,4 @@
 mod parser {
-    use std::collections::HashMap;
     use std::error::Error;
     use std::fmt;
     use std::fmt::Debug;
@@ -287,7 +286,7 @@ mod parser {
                     Var::from_str(&*("?autovar".to_string() + &*x.to_string())).unwrap()
                 };
 
-                let mut fresh_vars = |exp: RecExpr<ENodeOrVar<SymbolLang>>, vars: &mut HashMap<Var, Var>| {
+                let mut fresh_vars = |exp: RecExpr<ENodeOrVar<SymbolLang>>, vars: &mut IndexMap<Var, Var>| {
                     RecExpr::from(exp.as_ref().iter().cloned().map(|e| match e {
                         ENodeOrVar::ENode(n) => { ENodeOrVar::ENode(n) }
                         ENodeOrVar::Var(v) => {
@@ -306,7 +305,7 @@ mod parser {
                             ENodeOrVar::ENode(s) => { d.constructors.iter().any(|c| c.name == s.op.to_string()) }
                             ENodeOrVar::Var(_) => { false }
                         }) {
-                        let mut vars = HashMap::new();
+                        let mut vars = IndexMap::new();
                         for j in 0..f.params.len() {
                             if i == j { continue; }
                             if let ENodeOrVar::ENode(par_pat) = p.into_tree().children()[j].root() {
