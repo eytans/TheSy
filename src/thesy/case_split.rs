@@ -150,16 +150,16 @@ impl CaseSplit {
         let mut group_by_splits: HashMap<Vec<Id>, HashSet<Id>> = HashMap::new();
         for c in classes {
             let key = split_conclusions.iter().map(|m| m[c]).collect_vec();
-            if !group_by_splits.contains_key(&key) {
-                group_by_splits.insert(key.clone(), HashSet::new());
-            }
-            group_by_splits.get_mut(&key).unwrap().insert(*c);
+            group_by_splits.entry(key).or_default().insert(*c);
         }
         for group in group_by_splits.values().filter(|g| g.len() > 1) {
-            let first = group.iter().next().unwrap();
-            for id in group.iter().dropping(1) {
-                egraph.union(*first, *id);
-            }
+            debug_assert!(group.iter().filter_map(|id| egraph[*id].color()).unique().count() <= 1);
+            let colored = group.into_iter().filter(|id| egraph[**id].color().is_some()).copied().collect_vec();
+            let color = colored.first().map(|id| egraph[*id].color().unwrap());
+            let black = group.into_iter().filter(|id| egraph[**id].color().is_none()).copied().collect_vec();
+            let b_res = black.into_iter().reduce(|a, b| egraph.union(a, b).0);
+            let c_res = colored.into_iter().reduce(|a, b| egraph.colored_union(color.clone().unwrap(), a, b).0);
+            b_res.map(|id| c_res.map(|id2| egraph.colored_union(color.unwrap(), id, id2)));
         }
         egraph.rebuild();
     }
