@@ -140,7 +140,13 @@ impl CaseSplit {
             res.extend(c(egraph, s.search(egraph)));
             egraph.rebuild();
         }
-        let f = res.into_iter().unique().collect_vec();
+        let f = res.into_iter().map(|mut x| {
+            x.root = egraph.opt_colored_find(x.color, x.root);
+            for i in 0..x.splits.len() {
+                x.splits[i] = egraph.opt_colored_find(x.color, x.splits[i]);
+            }
+            x
+        }).unique().collect_vec();
         info!("Found {} splitters", f.len());
         f
     }
@@ -186,7 +192,7 @@ impl CaseSplit {
             return;
         }
 
-        let known_splits: IndexSet<Split, RandomState> = known_splits.iter().map(|e| {
+        let known_splits: IndexSet<Split> = known_splits.iter().map(|e| {
             let mut res = e.clone();
             res.update(egraph);
             res
@@ -202,7 +208,8 @@ impl CaseSplit {
 
         let classes = egraph.classes().map(|c| c.id).collect_vec();
 
-        let colors = splitters.iter().map(|s| s.create_colors(egraph)).collect_vec();
+        let colors = splitters.iter().map(|s: &&Split| s.create_colors(egraph)).collect_vec();
+        egraph.rebuild();
         for s in splitters {
             info!("  {} - root: {}, cases: {}", s, reconstruct_colored(egraph, s.color, s.root, 3).map(|x| x.to_string()).unwrap_or("No reconstruct".to_string()), s.splits.iter().map(|c| reconstruct(egraph, *c, 3).map(|x| x.to_string()).unwrap_or("No reconstruct".to_string())).intersperse(" ".to_string()).collect::<String>());
         }
@@ -252,5 +259,42 @@ impl CaseSplit {
             }).collect_vec();
             Self::merge_conclusions(egraph, &classes, split_conclusions);
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use egg::{Pattern, RecExpr, SymbolLang};
+    use crate::{TheSy, TheSyConfig, Language, tests};
+    use itertools::Itertools;
+    use crate::tests::ProofMode;
+
+    #[test]
+    #[cfg(feature = "split_colored")]
+    fn splits_on_ite() {
+        let mut config = TheSyConfig::from_path("tests/booleans.th".parse().unwrap());
+        let mut case_splitter = TheSy::create_case_splitter(config.definitions.case_splitters.clone());
+        let mut thesy = TheSy::from(&config);
+        thesy.increase_depth();
+        thesy.equiv_reduc(&mut config.definitions.rws);
+        thesy.increase_depth();
+        thesy.equiv_reduc(&mut config.definitions.rws);
+        let mut egraph = thesy.egraph;
+        let ops = vec![SymbolLang::leaf("true"), SymbolLang::leaf("false")];
+        let op_ids = ops.iter().map(|op| op.op_id()).collect_vec();
+        assert!(egraph.detect_vacuity(&op_ids).len() == 0);
+        case_splitter.case_split(&mut egraph, 1, &config.definitions.rws, 4);
+        assert!(egraph.detect_vacuity(&op_ids).len() == 0);
+        case_splitter.case_split(&mut egraph, 2, &config.definitions.rws, 0);
+        assert!(egraph.detect_vacuity(&op_ids).len() == 0);
+    }
+
+    #[test]
+    #[cfg(feature = "split_colored")]
+    fn no_vacuity_in_and_or() {
+        let (thesy, rewrites) = TheSyConfig::from_path("tests/booleans.th".to_string()).run(None);
+        let ops = vec![SymbolLang::leaf("true"), SymbolLang::leaf("false")];
+        let op_ids = ops.iter().map(|op| op.op_id()).collect_vec();
+        assert!(thesy.egraph.detect_vacuity(&op_ids).len() == 0);
     }
 }

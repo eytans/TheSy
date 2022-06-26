@@ -2,7 +2,7 @@ pub mod multisearcher {
     use std::iter::FromIterator;
     use std::str::FromStr;
 
-    use egg::{EGraph, Id, Pattern, Searcher, SearchMatches, Subst, SymbolLang, Var, Language, Analysis, Condition, ImmutableCondition, RcImmutableCondition, ENodeOrVar};
+    use egg::{EGraph, Id, Pattern, Searcher, SearchMatches, Subst, SymbolLang, Var, Language, Analysis, Condition, ImmutableCondition, RcImmutableCondition, ENodeOrVar, ImmutableFunctionCondition};
     use itertools::{Itertools, Either};
 
     use crate::tools::tools::Grouped;
@@ -495,7 +495,13 @@ pub mod multisearcher {
         }
 
         pub fn matcher_from_enode(enode: L) -> Rc<dyn Fn(&EGraph<L, N>, &Subst) -> Option<Id>> {
-            Rc::new(move |graph, sbt| graph.lookup(enode.clone()))
+            Rc::new(move |graph, sbt| {
+                if let Some(c) = sbt.color() {
+                    graph.colored_lookup(c, enode.clone())
+                } else {
+                    graph.lookup(enode.clone())
+                }
+            })
         }
 
         pub fn matcher_from_pattern(p: Pattern<L>)
@@ -509,18 +515,19 @@ pub mod multisearcher {
             -> RcImmutableCondition<L, N> {
             let x = (move |graph: &EGraph<L, N>, id: Id, subst: &Subst| {
                 let m = matcher(graph, subst);
-                m.is_none() || m != negator(graph, subst)
+                let res = m.is_none() || m.map(|id| graph.opt_colored_find(subst.color(), id)) != negator(graph, subst).map(|id| graph.opt_colored_find(subst.color(), id));
+                res
             });
-            RcImmutableCondition::new(x)
+            RcImmutableCondition::new(ImmutableFunctionCondition::new(x, format!("TODO: print matcher and negator").to_string()))
         }
 
         pub fn create_exists_pattern_filterer(searcher: Pattern<L>) -> RcImmutableCondition<L, N> {
             // TODO: partially fill pattern and if not all vars have values then search by eclass
             //       In practice, create special searcher that will take the constant part from
             //       subst and check existence for each subpattern over eclasses found in subst
-            RcImmutableCondition::new(move |graph: &EGraph<L, N>, eclass: Id, subst: &Subst| {
+            RcImmutableCondition::new(ImmutableFunctionCondition::new(move |graph: &EGraph<L, N>, eclass: Id, subst: &Subst| {
                 searcher.rec_lookup(graph, subst).is_some()
-            })
+            }, "".to_string()))
         }
 
         pub fn new(searcher: Rc<dyn Searcher<L, N>>,
@@ -615,6 +622,7 @@ mod tests {
     use egg::{EGraph, RecExpr, Searcher, SymbolLang, Pattern};
 
     use crate::eggstentions::searchers::multisearcher::{MultiDiffSearcher, MultiEqSearcher, FilteringSearcher};
+    use crate::system_case_splits;
 
     #[test]
     fn eq_two_trees_one_common() {
@@ -675,5 +683,26 @@ mod tests {
                 assert_eq!(Some(eclass), m(&graph, &sb));
             }
         }
+    }
+
+    #[cfg(feature = "split_colored")]
+    #[test]
+    fn skip_vacuity_cases() {
+        let mut graph: EGraph<SymbolLang, ()> = EGraph::default();
+        graph.add_expr(&RecExpr::from_str("(ite x 1 2)").unwrap());
+        graph.rebuild();
+        let mut case_splitter = system_case_splits();
+        let pattern: Pattern<SymbolLang> = Pattern::from_str("(ite ?z ?x ?y)").unwrap();
+        println!("{:?}", pattern.search(&graph));
+        let splitters = case_splitter.find_splitters(&mut graph);
+        println!("{:?}", splitters);
+        assert_eq!(splitters.len(), 1);
+        let colors = splitters[0].create_colors(&mut graph);
+        graph.rebuild();
+        println!("{:?}", pattern.search(&graph));
+        let new_splitters = case_splitter.find_splitters(&mut graph);
+        println!("{:?}", new_splitters);
+        assert_eq!(new_splitters.len(), 1);
+
     }
 }

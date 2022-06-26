@@ -41,6 +41,7 @@ use crate::thesy::thesy::TheSy;
 use thesy::semantics::Definitions;
 use crate::tools::tools::choose;
 use std::rc::Rc;
+pub(crate) use crate::thesy::consts::system_case_splits;
 
 #[derive(Clone)]
 pub struct TheSyConfig {

@@ -8,6 +8,6 @@ pub mod example_creator;
 pub mod prover;
 pub mod statistics;
 pub mod case_split;
-mod consts;
+pub(crate) mod consts;
 pub mod semantics;
 

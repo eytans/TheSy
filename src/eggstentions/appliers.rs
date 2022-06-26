@@ -73,7 +73,7 @@ impl<L: Language, N: Analysis<L>> Applier<L, N> for UnionApplier {
             for subst in &mat.substs {
                 let first = self.vars.first().unwrap();
                 let ids = self.vars.iter().skip(1).filter_map(|v| {
-                    let (to, did_something) = egraph.union(*subst.get(*first).unwrap(), *subst.get(*v).unwrap());
+                    let (to, did_something) = egraph.opt_colored_union(subst.color(), *subst.get(*first).unwrap(), *subst.get(*v).unwrap());
                     if did_something {
                         Some(to)
                     } else {
