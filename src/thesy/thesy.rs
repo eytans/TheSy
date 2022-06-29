@@ -496,11 +496,24 @@ impl TheSy {
         if self.prove_goals(&mut splitter_to_use, rules, &mut found_rules, new_rules_index) {
             return found_rules;
         }
+        #[cfg(feature = "keep_splits")]
+        splitter_to_use.as_mut().iter_mut().for_each(|x| x.all_splits.clear());
 
         for depth in 0..max_depth {
             info!("Starting depth {}", depth + 1);
             self.increase_depth();
             let stop_reason = self.equiv_reduc(rules);
+            #[cfg(feature = "keep_splits")]
+            splitter_to_use.as_mut().iter_mut().for_each(|cs| {
+                println!("Number of Splits: {}", cs.all_splits.len());
+                let time = SystemTime::now();
+                for s in cs.all_splits.iter_mut() {
+                    std::mem::swap(&mut self.egraph, s);
+                    self.equiv_reduc(rules);
+                    std::mem::swap(&mut self.egraph, s);
+                }
+                println!("Split equiv_reduc time: {:?}", SystemTime::now().duration_since(time).unwrap());
+            });
 
             // True if goals were proven
             if !cfg!(feature="no_expl_split") {
@@ -516,6 +529,8 @@ impl TheSy {
 
             'outer: while !conjectures.is_empty() {
                 let (_, mut ex1, mut ex2, d) = conjectures.pop().unwrap();
+                #[cfg(feature = "keep_splits")]
+                let clone_len = splitter_to_use.as_ref().map(|x| x.all_splits.len());
                 let measure_key = self.stats.init_measure(|| 0);
                 let mut new_rules = self.datatypes[&d].prove_ind(&mut splitter_to_use, &rules, &ex1, &ex2);
                 if new_rules.is_some() {
@@ -548,11 +563,28 @@ impl TheSy {
 
                     let reduc_depth = 3;
                     let stop_reason = self.equiv_reduc_depth(rules, reduc_depth);
+                    #[cfg(feature = "keep_splits")]
+                    if let Some(stu) = splitter_to_use.as_mut() {
+                        println!("Number of Splits: {}", stu.all_splits.len());
+                        let time = SystemTime::now();
+                        for s in stu.all_splits.iter_mut().take(clone_len.unwrap()) {
+                            std::mem::swap(&mut self.egraph, s);
+                            self.equiv_reduc_depth(rules, reduc_depth);
+                            std::mem::swap(&mut self.egraph, s);
+                        }
+                        println!("Split equiv_reduc time: {:?}", SystemTime::now().duration_since(time).unwrap());
+                    }
                     conjectures = self.get_conjectures();
                 } else {
                     self.stats.update_failed_proof(ex1, ex2, measure_key);
                 }
                 self.stats.measures.remove(&measure_key);
+                #[cfg(feature = "keep_splits")]
+                if let Some(stu) = splitter_to_use.as_mut() {
+                    while stu.all_splits.len() > clone_len.unwrap() {
+                        stu.all_splits.pop();
+                    }
+                }
             }
         }
         for _ in 0..self.system_rws.len() {
@@ -675,7 +707,7 @@ mod test {
     use crate::thesy::consts::ite_rws;
     use crate::thesy::semantics::Definitions;
     use crate::thesy::thesy::TheSy;
-    use crate::{TheSyConfig, tests};
+    use crate::{TheSyConfig, tests, ALLOCATOR};
     use crate::tools::tools::Grouped;
 
     fn create_nat_type() -> DataType {
@@ -1001,6 +1033,8 @@ mod test {
     #[test]
     fn take_drop_equiv_red() {
         init_logging();
+        // Set the limit to 10MiB.
+        ALLOCATOR.set_limit(1000 * 1024 * 1024).unwrap();
 
         let mut conf = TheSyConfig::from_path("theories/goal1.smt2.th".parse().unwrap());
         let mut thesy = TheSy::from(&conf);
@@ -1023,7 +1057,9 @@ mod test {
         assert_ne!(thesy.egraph.find(consx), thesy.egraph.find(ex1));
         assert_ne!(thesy.egraph.find(consxy), thesy.egraph.find(ex2));
         assert_eq!(thesy.egraph.find(nil), thesy.egraph.find(ex0));
+        println!("Currently (before) allocated: {}MB", ALLOCATOR.allocated() as f64 /1e6);
         case_split.case_split(&mut thesy.egraph, 2, &rules, 4);
+        println!("Currently (after) allocated: {}MB", ALLOCATOR.allocated() as f64 /1e6);
         info!("Done case split");
         thesy.egraph.rebuild();
         info!("Done third and final rebuild");

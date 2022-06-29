@@ -19,7 +19,7 @@ use TheSy::thesy::{example_creator};
 use TheSy::thesy::case_split::{CaseSplit, Split};
 use TheSy::thesy::thesy::TheSy as Synth;
 use TheSy::thesy::semantics::Definitions;
-use TheSy::TheSyConfig;
+use TheSy::{thesy, TheSyConfig};
 use TheSy::tools::tools::choose;
 use std::rc::Rc;
 
@@ -92,7 +92,7 @@ fn main() {
 }
 
 #[cfg(feature = "stats")]
-fn export_json(thesy: &TheSy, path: &PathBuf) {
+fn export_json(thesy: &thesy::TheSy, path: &PathBuf) {
     let stat_path = path.with_extension("stats.json");
     serde_json::to_writer(File::create(stat_path).unwrap(), &thesy.stats);
 }

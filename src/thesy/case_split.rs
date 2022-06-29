@@ -35,9 +35,9 @@ impl Split {
     pub fn new(root: Id, splits: Vec<Id>, color: Option<ColorId>) -> Self { Split { root, splits, color } }
 
     pub(crate) fn update(&mut self, egraph: &EGraph<SymbolLang, ()>) {
-        self.root = egraph.find(self.root);
+        self.root = egraph.opt_colored_find(self.color, self.root);
         for i in 0..self.splits.len() {
-            self.splits[i] = egraph.find(self.splits[i]);
+            self.splits[i] = egraph.opt_colored_find(self.color, self.splits[i]);
         }
     }
 
@@ -64,12 +64,18 @@ pub type SplitApplier = Box<dyn FnMut(&mut EGraph<SymbolLang, ()>, Vec<SearchMat
 
 pub struct CaseSplit {
     splitter_rules: Vec<(Rc<dyn Searcher<SymbolLang, ()>>, SplitApplier)>,
+    #[cfg(feature = "keep_splits")]
+    pub(crate) all_splits: Vec<EGraph<SymbolLang, ()>>,
 }
 
 impl CaseSplit {
     pub fn new(splitter_rules: Vec<(Rc<dyn Searcher<SymbolLang, ()>>,
                                     SplitApplier)>) -> Self {
-        CaseSplit { splitter_rules }
+        CaseSplit {
+            splitter_rules,
+            #[cfg(feature = "keep_splits")]
+            all_splits: vec![]
+        }
     }
 
     pub fn from_applier_patterns(case_splitters: Vec<(Rc<dyn Searcher<SymbolLang, ()>>,
@@ -140,15 +146,9 @@ impl CaseSplit {
             res.extend(c(egraph, s.search(egraph)));
             egraph.rebuild();
         }
-        let f = res.into_iter().map(|mut x| {
-            x.root = egraph.opt_colored_find(x.color, x.root);
-            for i in 0..x.splits.len() {
-                x.splits[i] = egraph.opt_colored_find(x.color, x.splits[i]);
-            }
-            x
-        }).unique().collect_vec();
-        info!("Found {} splitters", f.len());
-        f
+        res.iter_mut().for_each(|mut x| x.update(egraph));
+        info!("Found {} splitters", res.len());
+        res.into_iter().unique().collect()
     }
 
     fn merge_conclusions(egraph: &mut EGraph<SymbolLang, ()>, classes: &Vec<Id>, split_conclusions: Vec<IndexMap<Id, Id>>) {
@@ -255,7 +255,10 @@ impl CaseSplit {
             let split_conclusions = Self::split_graph(&*egraph, s).into_iter().map(|g| {
                 let mut g = Self::equiv_reduction(rules, g, run_depth);
                 self.inner_case_split(&mut g, split_depth - 1, &new_known, rules, run_depth);
-                Self::collect_merged(&g, &classes)
+                let res = Self::collect_merged(&g, &classes);
+                #[cfg(feature = "keep_splits")]
+                self.all_splits.push(g);
+                res
             }).collect_vec();
             Self::merge_conclusions(egraph, &classes, split_conclusions);
         }

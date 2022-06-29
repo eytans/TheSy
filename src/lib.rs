@@ -43,6 +43,13 @@ use crate::tools::tools::choose;
 use std::rc::Rc;
 pub(crate) use crate::thesy::consts::system_case_splits;
 
+
+use std::alloc;
+use cap::Cap;
+
+#[global_allocator]
+static ALLOCATOR: Cap<alloc::System> = Cap::new(alloc::System, usize::MAX);
+
 #[derive(Clone)]
 pub struct TheSyConfig {
     pub definitions: Definitions,

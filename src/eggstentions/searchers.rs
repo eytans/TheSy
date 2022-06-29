@@ -491,7 +491,7 @@ pub mod multisearcher {
     impl<L: Language + 'static, N: Analysis<L> + 'static> FilteringSearcher<L, N> {
         pub fn matcher_from_var(var: Var) -> Rc<dyn Fn(&EGraph<L, N>, &Subst) -> Option<Id>> {
             Rc::new(move |graph, sbt|
-                sbt.get(var).copied())
+                sbt.get(var).copied().map(|v| graph.opt_colored_find(sbt.color(), v)))
         }
 
         pub fn matcher_from_enode(enode: L) -> Rc<dyn Fn(&EGraph<L, N>, &Subst) -> Option<Id>> {
@@ -557,7 +557,6 @@ pub mod multisearcher {
         }
 
         fn search(&self, egraph: &EGraph<L, N>) -> Vec<SearchMatches> {
-            warn!("Running {} with {}", self.searcher, self.predicate.describe());
             let origin = self.searcher.search(egraph);
             let res = self.predicate.filter(egraph, origin);
             res
