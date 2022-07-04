@@ -1,4 +1,4 @@
-use egg::{Rewrite, SymbolLang, Pattern, Var, Language, Id, RcImmutableCondition};
+use egg::{Rewrite, SymbolLang, Pattern, Var, Language, Id, RcImmutableCondition, ToCondRc};
 use crate::eggstentions::searchers::multisearcher::{MultiEqSearcher, FilteringSearcher, ToDyn};
 use crate::eggstentions::appliers::{DiffApplier, UnionApplier};
 use std::str::FromStr;
@@ -7,6 +7,7 @@ use crate::thesy::case_split::{CaseSplit, Split, SplitApplier};
 use itertools::Itertools;
 use std::rc::Rc;
 use crate::eggstentions::conditions::AndCondition;
+use crate::searchers::multisearcher::{ENodeMatcher, ToRc, VarMatcher};
 
 pub(crate) fn bool_rws() -> Vec<Rewrite<SymbolLang, ()>> {
     let and_multi_searcher = MultiEqSearcher::new(vec![
@@ -86,13 +87,13 @@ pub fn system_case_splits() -> CaseSplit {
     let ite_searcher = {
         let searcher: Pattern<SymbolLang> = Pattern::from_str("(ite ?z ?x ?y)").unwrap();
         let true_cond = FilteringSearcher::<SymbolLang, ()>::create_non_pattern_filterer(
-            FilteringSearcher::<SymbolLang, ()>::matcher_from_var(Var::from_str("?z").unwrap()),
-            FilteringSearcher::<SymbolLang, ()>::matcher_from_enode(SymbolLang::from_op_str("true", vec![]).unwrap()));
+            VarMatcher::new(Var::from_str("?z").unwrap()).into_rc(),
+            ENodeMatcher::new("true", SymbolLang::from_op_str("true", vec![]).unwrap()).into_rc());
         let false_cond = FilteringSearcher::<SymbolLang, ()>::create_non_pattern_filterer(
-            FilteringSearcher::<SymbolLang, ()>::matcher_from_var(Var::from_str("?z").unwrap()),
-            FilteringSearcher::<SymbolLang, ()>::matcher_from_enode(SymbolLang::from_op_str("false", vec![]).unwrap()));
-        FilteringSearcher::new(searcher.into_rc_dyn(), RcImmutableCondition::new(
-            AndCondition::<SymbolLang, ()>::new(vec![true_cond, false_cond])))
+            VarMatcher::new(Var::from_str("?z").unwrap()).into_rc(),
+            ENodeMatcher::new("false", SymbolLang::from_op_str("false", vec![]).unwrap()).into_rc());
+        FilteringSearcher::new(searcher.into_rc_dyn(),
+            AndCondition::<SymbolLang, ()>::new(vec![true_cond, false_cond]).into_rc())
     };
     let mut res = CaseSplit::from_applier_patterns(vec![(ite_searcher.into_rc_dyn(), Pattern::from_str("?z").unwrap(), vec!["true".parse().unwrap(), "false".parse().unwrap()])]);
 

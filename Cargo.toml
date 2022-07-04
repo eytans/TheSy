@@ -36,7 +36,7 @@ proptest = "1.0.0"
 
 [features]
 default = ["split_colored"]
-#default = ["split_clone"]
+#default = ["split_clone", "keep_splits"]
 stats = ["serde", "serde_json", "egg/serde-1"]
 split_colored = ["egg/colored"]
 split_clone = []

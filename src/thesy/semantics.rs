@@ -2,7 +2,7 @@ use std::fmt::{Debug, Formatter};
 use std::hash::Hash;
 use std::rc::Rc;
 
-use egg::{Pattern, RecExpr, Rewrite, Searcher, SymbolLang, Var, ENodeOrVar, Condition, ImmutableCondition, RcImmutableCondition, Language};
+use egg::{Pattern, RecExpr, Rewrite, Searcher, SymbolLang, Var, ENodeOrVar, Condition, ImmutableCondition, Language, RcImmutableCondition, ToCondRc};
 use itertools::Itertools;
 use thesy_parser::{grammar, ast};
 
@@ -21,6 +21,7 @@ use crate::eggstentions::expression_ops::{IntoTree, RecExpSlice, Tree};
 use crate::eggstentions::conditions::{AndCondition, OrCondition};
 use std::iter::FromIterator;
 use indexmap::{IndexMap, IndexSet};
+use crate::searchers::multisearcher::{PatternMatcher, ToRc, VarMatcher};
 
 lazy_static!(
     static ref split_hole: Terminal = Hole(String::from("splithole"), None);
@@ -119,9 +120,12 @@ impl Definitions {
 
     fn collect_non_pattern_conds(conds: Vec<ast::Condition>) -> Vec<RcImmutableCondition<SymbolLang, ()>> {
         conds.into_iter().map(|(matcher, negation)| {
+            let p1= Self::exp_to_pattern(&matcher);
+            let p2 = Self::exp_to_pattern(&negation);
             FilteringSearcher::create_non_pattern_filterer(
-                FilteringSearcher::matcher_from_pattern(Self::exp_to_pattern(&matcher)),
-                FilteringSearcher::matcher_from_pattern(Self::exp_to_pattern(&negation)))
+                PatternMatcher::new(p1).into_rc(),
+                PatternMatcher::new(p2).into_rc(),
+            )
         }).collect_vec()
     }
 
@@ -147,10 +151,11 @@ impl Definitions {
         };
         let applier = Self::exp_to_pattern(&target);
         let conditions = Self::collect_non_pattern_conds(conds);
+        debug_assert!(conditions.iter().all(|c| c.vars().iter().all(|v| searcher.vars().contains(v))));
         let cond_searcher =
             if conditions.is_empty() { searcher }
             else { FilteringSearcher::new(searcher,
-                                       RcImmutableCondition::new(AndCondition::new(conditions))).into_rc_dyn()
+                       AndCondition::new(conditions).into_rc()).into_rc_dyn()
             };
         (cond_searcher, applier)
     }
@@ -196,15 +201,15 @@ impl Definitions {
         // TODO: Careful! currently have a hacky way to make pattern expression holes match the
         //       searcher for case split. In the future make this generic.
         let cond = AndCondition::new(patterns_grouped.into_iter().map(|(name, pats)| {
-            RcImmutableCondition::new(OrCondition::new(pats.into_iter().map(|exp| {
+            OrCondition::new(pats.into_iter().map(|exp| {
                 assert!(exp.holes().iter().find(|h| h.ident() == split_hole.ident()).is_none());
                 let mut new_children = exp.children().iter().cloned().collect_vec();
                 new_children[i] = Leaf(split_hole.clone());
                 let mut new_exp = Op(exp.root().clone(), new_children);
                 // TODO: new_exp should change param names to fit the seacher being created
                 let subpattern = SubPattern::new(orig.clone(), Self::exp_to_pattern(&new_exp));
-                RcImmutableCondition::new(subpattern)
-            }).collect_vec()))
+                subpattern.into_rc()
+            }).collect_vec()).into_rc()
         }).collect_vec());
         cond
     }
@@ -264,12 +269,14 @@ impl From<Vec<Statement>> for Definitions {
                 Statement::CaseSplit(searcher, expr, pats, conditions) => {
                     let searcher = Pattern::from_str(&*searcher.to_sexp_string()).unwrap().into_rc_dyn();
                     let conditions = conditions.into_iter().map(|(m, n)| {
+                        let mp = Definitions::exp_to_pattern(&m);
+                        let np = Definitions::exp_to_pattern(&n);
                         FilteringSearcher::create_non_pattern_filterer(
-                            FilteringSearcher::matcher_from_pattern(Definitions::exp_to_pattern(&m)),
-                            FilteringSearcher::matcher_from_pattern(Definitions::exp_to_pattern(&n)))
+                            PatternMatcher::new(mp).into_rc(),
+                            PatternMatcher::new(np).into_rc())
                     }).collect_vec();
                     let cond_searcher = FilteringSearcher::new(searcher,
-                                                               RcImmutableCondition::new(AndCondition::new(conditions)));
+                                                               AndCondition::new(conditions).into_rc());
                     res.case_splitters.push((
                         cond_searcher.into_rc_dyn(),
                         Self::exp_to_pattern(&expr),
@@ -333,17 +340,19 @@ impl From<Vec<Statement>> for Definitions {
                 let referenced_fixed_groups = fixed_pattern_groups.iter()
                     .map(|(c, p)| (c.clone().clone(), p.iter().collect_vec()))
                     .collect();
-                let cond = RcImmutableCondition::new(Self::condition_from_grouped_patterns(&func_pattern.to_expression(), i, referenced_fixed_groups));
+                let cond = Self::condition_from_grouped_patterns(&func_pattern.to_expression(), i, referenced_fixed_groups).into_rc();
                 let param_hole = split_hole.clone();
-                let const_cond = RcImmutableCondition::new(AndCondition::new(
+                let const_cond = AndCondition::new(
                     dt.constructors.iter().map(|c| {
+                        let v = Var::from_str(&param_hole.to_string()).unwrap();
+                        let p = pattern_for_func_app(c, i);
                         FilteringSearcher::create_non_pattern_filterer(
-                            FilteringSearcher::matcher_from_var(Var::from_str(&param_hole.to_string()).unwrap()),
-                            FilteringSearcher::matcher_from_pattern(pattern_for_func_app(c, i))
-                        )
+                            VarMatcher::new(v).into_rc(),
+                            PatternMatcher::new(p).into_rc())
                     }).collect_vec()
-                ));
-                let final_condition = RcImmutableCondition::new(AndCondition::new(vec![const_cond, cond]));
+                ).into_rc();
+
+                let final_condition = AndCondition::new(vec![const_cond, cond]).into_rc();
                 let splitters = Self::create_splitters(dt, &param_hole).iter()
                     .map(Self::exp_to_pattern).collect_vec();
                 temp.push((

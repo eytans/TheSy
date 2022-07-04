@@ -2,7 +2,7 @@ pub mod multisearcher {
     use std::iter::FromIterator;
     use std::str::FromStr;
 
-    use egg::{EGraph, Id, Pattern, Searcher, SearchMatches, Subst, SymbolLang, Var, Language, Analysis, Condition, ImmutableCondition, RcImmutableCondition, ENodeOrVar, ImmutableFunctionCondition};
+    use egg::{EGraph, Id, Pattern, Searcher, SearchMatches, Subst, SymbolLang, Var, Language, Analysis, Condition, ImmutableCondition, ENodeOrVar, ImmutableFunctionCondition, RcImmutableCondition, ToCondRc, ColorId};
     use itertools::{Itertools, Either};
 
     use crate::tools::tools::Grouped;
@@ -10,11 +10,207 @@ pub mod multisearcher {
     use std::fmt::Debug;
     use smallvec::alloc::fmt::Formatter;
     use std::marker::PhantomData;
+    use std::ops::Deref;
+    use std::path::Display;
     use std::rc::Rc;
+    use std::time::Instant;
     use indexmap::{IndexMap, IndexSet};
     use thesy_parser::ast::Expression;
     use crate::eggstentions::expression_ops::{IntoTree, RecExpSlice, Tree};
     use crate::tools::tools;
+
+    pub trait Matcher<L: Language + 'static, N: Analysis<L> + 'static>: ToRc<L, N> {
+        fn match_<'b>(&self, egraph: &'b EGraph<L, N>, subst: &'b Subst) -> IndexSet<Id>;
+        fn describe(&self) -> String;
+    }
+
+    impl<L: 'static + Language, N: 'static + Analysis<L>> std::fmt::Display for dyn Matcher<L, N> {
+        fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+            write!(f, "{}", self.describe())
+        }
+    }
+
+    pub struct SearcherMatcher<L: Language, N: Analysis<L>> {
+        pub(crate) searcher: Rc<dyn Fn(&EGraph<L, N>, &Subst) -> IndexSet<Id>>,
+        pub(crate) desc: &'static str,
+        phantom: PhantomData<L>,
+    }
+
+    impl<L: Language, N: Analysis<L>> SearcherMatcher<L, N> {
+        pub fn new<F>(desc: &'static str, f: F) -> Self
+            where
+                F: Fn(&EGraph<L, N>, &Subst) -> IndexSet<Id> + 'static,
+        {
+            SearcherMatcher {
+                searcher: Rc::new(f),
+                desc,
+                phantom: Default::default(),
+            }
+        }
+    }
+
+    impl<L: Language + 'static, N: Analysis<L> + 'static> ToRc<L, N> for SearcherMatcher<L, N> {}
+
+    impl<L: Language + 'static, N: Analysis<L> + 'static>  Matcher<L, N> for SearcherMatcher<L, N> {
+        fn match_<'b>(&self, graph: &'b EGraph<L, N>, subst: &'b Subst) -> IndexSet<Id> {
+            (self.searcher)(graph, subst)
+        }
+
+        fn describe(&self) -> String {
+            self.desc.to_string()
+        }
+    }
+
+    pub struct VarMatcher<L: Language, N: Analysis<L>> {
+        pub(crate) var: Var,
+        phantom: PhantomData<(N, L)>,
+    }
+
+    impl<L: Language, N: Analysis<L>> VarMatcher<L, N> {
+        pub fn new(var: Var) -> Self {
+            VarMatcher {
+                var,
+                phantom: Default::default(),
+            }
+        }
+    }
+
+    impl<L: Language + 'static, N: Analysis<L> + 'static> ToRc<L, N> for VarMatcher<L, N> {}
+
+    impl<L: Language + 'static, N: Analysis<L> + 'static> Matcher<L, N> for VarMatcher<L, N> {
+        fn match_<'b>(&self, graph: &'b EGraph<L, N>, subst: &'b Subst) -> IndexSet<Id> {
+            subst.get(self.var).copied().map(|v| graph.opt_colored_find(subst.color(), v))
+                .into_iter().collect()
+        }
+
+        fn describe(&self) -> String {
+            self.var.to_string()
+        }
+    }
+
+    pub struct ENodeMatcher<L: Language, N: Analysis<L>> {
+        pub(crate) enode: L,
+        pub(crate) desc: &'static str,
+        phantom: PhantomData<N>,
+    }
+
+    impl<L: Language, N: Analysis<L>> ENodeMatcher<L, N> {
+        pub fn new(desc: &'static str, enode: L) -> Self {
+            ENodeMatcher {
+                enode,
+                desc,
+                phantom: Default::default(),
+            }
+        }
+    }
+
+    impl<L: Language + 'static, N: Analysis<L> + 'static> ToRc<L, N> for ENodeMatcher<L, N> {}
+
+    impl<L: Language + 'static, N: Analysis<L> + 'static> Matcher<L, N> for ENodeMatcher<L, N> {
+        fn match_<'b>(&self, graph: &'b EGraph<L, N>, subst: &'b Subst) -> IndexSet<Id> {
+            if let Some(c) = subst.color() {
+                graph.colored_lookup(c, self.enode.clone())
+            } else {
+                graph.lookup(self.enode.clone())
+            }
+                .into_iter().collect()
+        }
+
+        fn describe(&self) -> String {
+            self.desc.to_string()
+        }
+    }
+
+    pub struct PatternMatcher<L: Language, N: Analysis<L>> {
+        pub(crate) pattern: Pattern<L>,
+        phantom: PhantomData<N>,
+    }
+
+    impl<L: Language, N: Analysis<L>> PatternMatcher<L, N> {
+        pub fn new(pattern: Pattern<L>) -> Self {
+            PatternMatcher {
+                pattern,
+                phantom: Default::default(),
+            }
+        }
+    }
+
+    impl<L: Language + 'static, N: Analysis<L> + 'static> ToRc<L, N> for PatternMatcher<L, N> {}
+
+    impl<L: Language + 'static, N: Analysis<L> + 'static> Matcher<L, N> for PatternMatcher<L, N> {
+        fn match_<'b>(&self, graph: &'b EGraph<L, N>, subst: &'b Subst) -> IndexSet<Id> {
+            let mut time = None;
+            if cfg!(debug_assertions) {
+                time = Some(Instant::now());
+            }
+            let res = self.pattern.search(graph).into_iter().filter_map(|x| {
+                x.substs.iter().any(|s| graph.subst_agrees(s, subst, true)).then(|| x.eclass)
+            }).collect();
+            if cfg!(debug_assertions) {
+                if time.unwrap().elapsed().as_secs() > 1 {
+                    warn!("Matcher Pattern search took {} seconds", time.unwrap().elapsed().as_secs());
+                }
+            }
+            res
+        }
+
+        fn describe(&self) -> String {
+            self.pattern.to_string()
+        }
+    }
+
+    pub type RcMatcher<L, N> = Rc<dyn Matcher<L, N>>;
+
+    impl<L: Language + 'static, N: Analysis<L> + 'static> ToRc<L, N> for Rc<dyn Matcher<L, N>> {}
+
+    impl<L: Language + 'static, N: Analysis<L> + 'static> Matcher<L, N> for Rc<dyn Matcher<L, N>> {
+        fn match_<'b>(&self, graph: &'b EGraph<L, N>, subst: &'b Subst) -> IndexSet<Id> {
+            let res = self.deref().match_(graph, subst);
+            res
+        }
+
+        fn describe(&self) -> String {
+            self.deref().describe()
+        }
+    }
+
+    pub struct DisjointMatcher<L: Language, N: Analysis<L>> {
+        pub(crate) matcher1: Rc<dyn Matcher<L, N>>,
+        pub(crate) matcher2: Rc<dyn Matcher<L, N>>,
+    }
+
+    impl<L: Language, N: Analysis<L>> DisjointMatcher<L, N> {
+        pub fn new(matcher1: Rc<dyn Matcher<L, N>>, matcher2: Rc<dyn Matcher<L, N>>) -> Self {
+            DisjointMatcher {
+                matcher1,
+                matcher2,
+            }
+        }
+    }
+
+    impl<L: Language + 'static, N: Analysis<L> + 'static> ToRc<L, N> for DisjointMatcher<L, N> {}
+
+    impl<L: Language + 'static, N: Analysis<L> + 'static> Matcher<L, N> for DisjointMatcher<L, N> {
+        fn match_<'b>(&self, graph: &'b EGraph<L, N>, subst: &'b Subst) -> IndexSet<Id> {
+            let mut time = None;
+            if cfg!(debug_assertions) {
+                time = Some(Instant::now());
+            }
+            let res = self.matcher1.match_(graph, subst).into_iter().filter(|&x| {
+                !self.matcher2.match_(graph, subst).contains(&x)
+            }).collect();
+            if cfg!(debug_assertions) {
+                if time.unwrap().elapsed().as_secs() > 1 {
+                    warn!("Matcher Disjoint search took {} seconds", time.unwrap().elapsed().as_secs());
+                }
+            }
+            res
+        }
+
+        fn describe(&self) -> String {
+            format!("{} != {}", self.matcher1.describe(), self.matcher2.describe())
+        }
+    }
 
     pub struct EitherSearcher<L: Language, N: Analysis<L>, A: Searcher<L, N> + Debug, B: Searcher<L, N> + Debug> {
         node: Either<A, B>,
@@ -274,6 +470,7 @@ pub mod multisearcher {
     impl<A: Searcher<SymbolLang, ()>> MultiDiffSearcher<A> {
         pub fn new(mut patterns: Vec<A>) -> MultiDiffSearcher<A> {
             let common_vars = get_common_vars(&mut patterns);
+            assert!(!patterns.is_empty());
             MultiDiffSearcher { patterns, common_vars }
         }
     }
@@ -455,6 +652,8 @@ pub mod multisearcher {
         }
     }
 
+    impl<L: Language, N: Analysis<L>> egg::ToCondRc<L, N> for SubPattern<L> {}
+
     impl<L: Language, N: Analysis<L>> ImmutableCondition<L, N> for SubPattern<L> {
         fn check_imm(&self, egraph: &EGraph<L, N>, eclass: Id, subst: &Subst) -> bool {
             let mut res = true;
@@ -477,7 +676,30 @@ pub mod multisearcher {
         }
 
         fn describe(&self) -> String {
-            format!("{} if {}", self.orig.to_string(), self.patterns.iter().map(|(v, p)| format!("{}@{}", p, v)).join(" && "))
+            format!("{} -> {}", self.patterns.iter().map(|(v, p)| format!("{}@{}", p, v)).join(" && "), self.orig.to_string())
+        }
+    }
+
+    pub struct DisjointMatchCondition<L: Language, N: Analysis<L>> {
+        disjointer: Rc<dyn Matcher<L, N>>,
+    }
+
+    impl<L: Language + 'static, N: Analysis<L> + 'static> DisjointMatchCondition<L, N> {
+        pub fn new(disjointer: DisjointMatcher<L, N>) -> Self {
+            DisjointMatchCondition { disjointer: disjointer.into_rc() }
+        }
+    }
+
+    impl<L: Language, N: Analysis<L>> ToCondRc<L, N> for DisjointMatchCondition<L, N> {}
+
+    impl<L: Language + 'static, N: Analysis<L> + 'static> ImmutableCondition<L, N> for DisjointMatchCondition<L, N> {
+        fn check_imm(&self, egraph: &EGraph<L, N>, eclass: Id, subst: &Subst) -> bool {
+            let cloned = subst.clone();
+            self.disjointer.match_(egraph, &cloned).is_empty()
+        }
+
+        fn describe(&self) -> String {
+            format!("{}", self.disjointer.describe())
         }
     }
 
@@ -488,46 +710,24 @@ pub mod multisearcher {
         phantom_ln: PhantomData<(L, N)>,
     }
 
-    impl<L: Language + 'static, N: Analysis<L> + 'static> FilteringSearcher<L, N> {
-        pub fn matcher_from_var(var: Var) -> Rc<dyn Fn(&EGraph<L, N>, &Subst) -> Option<Id>> {
-            Rc::new(move |graph, sbt|
-                sbt.get(var).copied().map(|v| graph.opt_colored_find(sbt.color(), v)))
-        }
-
-        pub fn matcher_from_enode(enode: L) -> Rc<dyn Fn(&EGraph<L, N>, &Subst) -> Option<Id>> {
-            Rc::new(move |graph, sbt| {
-                if let Some(c) = sbt.color() {
-                    graph.colored_lookup(c, enode.clone())
-                } else {
-                    graph.lookup(enode.clone())
-                }
-            })
-        }
-
-        pub fn matcher_from_pattern(p: Pattern<L>)
-            -> Rc<dyn Fn(&EGraph<L, N>, &Subst) -> Option<Id>> {
-            // The parser asserts all vars are present.
-            Rc::new(move |graph, sbt| p.rec_lookup(graph, sbt))
-        }
-
-        pub fn create_non_pattern_filterer(matcher: Rc<dyn Fn(&EGraph<L, N>, &Subst) -> Option<Id>>,
-                                           negator: Rc<dyn Fn(&EGraph<L, N>, &Subst) -> Option<Id>>)
+    impl<'a, L: Language + 'static, N: Analysis<L> + 'static> FilteringSearcher<L, N> {
+        pub fn create_non_pattern_filterer(matcher: RcMatcher<L, N>,
+                                           negator: RcMatcher<L, N>)
             -> RcImmutableCondition<L, N> {
-            let x = (move |graph: &EGraph<L, N>, id: Id, subst: &Subst| {
-                let m = matcher(graph, subst);
-                let res = m.is_none() || m.map(|id| graph.opt_colored_find(subst.color(), id)) != negator(graph, subst).map(|id| graph.opt_colored_find(subst.color(), id));
-                res
-            });
-            RcImmutableCondition::new(ImmutableFunctionCondition::new(x, format!("TODO: print matcher and negator").to_string()))
+            let dis_matcher = DisjointMatcher::new(matcher, negator);
+            DisjointMatchCondition::new(dis_matcher).into_rc()
         }
 
         pub fn create_exists_pattern_filterer(searcher: Pattern<L>) -> RcImmutableCondition<L, N> {
             // TODO: partially fill pattern and if not all vars have values then search by eclass
             //       In practice, create special searcher that will take the constant part from
             //       subst and check existence for each subpattern over eclasses found in subst
-            RcImmutableCondition::new(ImmutableFunctionCondition::new(move |graph: &EGraph<L, N>, eclass: Id, subst: &Subst| {
-                searcher.rec_lookup(graph, subst).is_some()
-            }, "".to_string()))
+            let searcher_name = searcher.pretty(500);
+            let matcher = PatternMatcher::new(searcher);
+            ImmutableFunctionCondition::new(Rc::new(move |graph: &EGraph<L, N>, eclass: Id, subst: &Subst| {
+                let m = matcher.match_(graph, subst);
+                m.contains(&eclass)
+            }), format!("Checking id is in the results of {searcher_name}").to_string()).into_rc()
         }
 
         pub fn new(searcher: Rc<dyn Searcher<L, N>>,
@@ -582,6 +782,15 @@ pub mod multisearcher {
         fn into_rc_dyn(self) -> Rc<dyn Searcher<L, N>> {
             let dyn_s: Rc<dyn Searcher<L, N>> = Rc::new(self);
             dyn_s
+        }
+    }
+
+    pub trait ToRc<L: Language + 'static, N: Analysis<L> + 'static> {
+        fn into_rc(self) -> Rc<dyn Matcher<L, N>>
+        where
+            Self: Sized + Matcher<L, N> + 'static,
+        {
+            Rc::new(self)
         }
     }
 
@@ -679,7 +888,7 @@ mod tests {
         for sm in results {
             let eclass = sm.eclass;
             for sb in sm.substs {
-                assert_eq!(Some(eclass), m(&graph, &sb));
+                assert_eq!(m(&graph, &sb).contains(&eclass), true);
             }
         }
     }

@@ -321,13 +321,13 @@ impl Prover {
             let is_var = root.op.to_string().starts_with("?");
             if (!ids.is_empty()) && is_var {
                 // Special case of vairable function
-                let func_id = res.add(ENodeOrVar::ENode(SymbolLang::new(root.op.to_string(), vec![])));
+                let func_id = res.add(ENodeOrVar::ENode(SymbolLang::new(root.op.to_string(), vec![]), None));
                 ids.insert(0, func_id);
-                res.add(ENodeOrVar::ENode(SymbolLang::new("apply", ids)))
+                res.add(ENodeOrVar::ENode(SymbolLang::new("apply", ids), None))
             } else if is_var {
                 res.add(ENodeOrVar::Var(Var::from_str(&*root.op.to_string()).unwrap()))
             } else {
-                res.add(ENodeOrVar::ENode(root.clone()))
+                res.add(ENodeOrVar::ENode(root.clone(), None))
             }
         }
         add_to_exp(&mut res_exp, &exp.into_tree(), &induction_ph.name, sub_ind);

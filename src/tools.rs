@@ -80,27 +80,6 @@ pub mod tools {
             res
         }
     }
-
-    pub fn pattern_to_matcher<L: 'static + Language, N: Analysis<L>>(pattern: Pattern<L>) -> Rc<dyn Fn(&EGraph<L, N>, &Subst) -> Option<Id>> {
-        Rc::new(move |g: &EGraph<L, N>, s: &Subst| {
-            assert!(pattern.ast.as_ref().len() > 0, "Pattern must not be empty");
-            let mut res: Vec<Option<Id>> = Vec::with_capacity(pattern.ast.as_ref().len());
-            for x in pattern.ast.as_ref() {
-                match x {
-                    ENodeOrVar::ENode(n) => {
-                        if n.children().iter().all(|c| res[usize::from(*c)].is_some()) {
-                            let new_n = n.clone().map_children(|c| res[usize::from(c)].unwrap());
-                            res.push(g.lookup(new_n));
-                        } else {
-                            res.push(None);
-                        }
-                    }
-                    ENodeOrVar::Var(v) => { res.push(s.get(*v).copied()); }
-                }
-            }
-            *res.last().unwrap()
-        })
-    }
 }
 
 #[cfg(test)]

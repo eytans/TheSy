@@ -1,4 +1,4 @@
-use egg::{ImmutableCondition, Condition, EGraph, Var, Subst, Id, Language, Analysis, RcImmutableCondition};
+use egg::{ImmutableCondition, Condition, EGraph, Var, Subst, Id, Language, Analysis, RcImmutableCondition, ToCondRc};
 use itertools::Itertools;
 use std::fmt::Formatter;
 use std::rc::Rc;
@@ -12,6 +12,8 @@ impl<L: Language, N: Analysis<L>> AndCondition<L, N> {
         AndCondition {conditions}
     }
 }
+
+impl<L: Language, N: Analysis<L>> ToCondRc<L, N> for AndCondition<L, N> {}
 
 impl<L: Language, N: Analysis<L>> ImmutableCondition<L, N> for AndCondition<L, N> {
     fn check_imm(&self, egraph: &EGraph<L, N>, eclass: Id, subst: &Subst) -> bool {
@@ -36,6 +38,8 @@ impl<L: Language, N: Analysis<L>> OrCondition<L, N> {
         OrCondition {conditions}
     }
 }
+
+impl<L: Language, N: Analysis<L>> ToCondRc<L, N> for OrCondition<L, N> {}
 
 impl<L: Language, N: Analysis<L>> ImmutableCondition<L, N> for OrCondition<L, N> {
     fn check_imm(&self, egraph: &EGraph<L, N>, eclass: Id, subst: &Subst) -> bool {
