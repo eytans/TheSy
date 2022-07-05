@@ -179,12 +179,19 @@ pub mod multisearcher {
         pub(crate) matcher2: Rc<dyn Matcher<L, N>>,
     }
 
-    impl<L: Language, N: Analysis<L>> DisjointMatcher<L, N> {
+    impl<L: Language + 'static, N: Analysis<L> + 'static> DisjointMatcher<L, N> {
         pub fn new(matcher1: Rc<dyn Matcher<L, N>>, matcher2: Rc<dyn Matcher<L, N>>) -> Self {
             DisjointMatcher {
                 matcher1,
                 matcher2,
             }
+        }
+
+        pub fn is_disjoint<'b>(&self, graph: &'b EGraph<L, N>, subst: &'b Subst) -> bool {
+            let res = self.matcher1.match_(graph, subst).into_iter().all(|x| {
+                !self.matcher2.match_(graph, subst).contains(&x)
+            });
+            res
         }
     }
 
@@ -192,10 +199,13 @@ pub mod multisearcher {
 
     impl<L: Language + 'static, N: Analysis<L> + 'static> Matcher<L, N> for DisjointMatcher<L, N> {
         fn match_<'b>(&self, graph: &'b EGraph<L, N>, subst: &'b Subst) -> IndexSet<Id> {
+            println!("DisjointMatcher::match_ {} != {}", self.matcher1.describe(), self.matcher2.describe());
             let mut time = None;
             if cfg!(debug_assertions) {
                 time = Some(Instant::now());
             }
+            println!("DisjointMatcher::match1_ {:?}", self.matcher1.match_(graph, subst));
+            println!("DisjointMatcher::match2_ {:?}", self.matcher2.match_(graph, subst));
             let res = self.matcher1.match_(graph, subst).into_iter().filter(|&x| {
                 !self.matcher2.match_(graph, subst).contains(&x)
             }).collect();
@@ -681,12 +691,12 @@ pub mod multisearcher {
     }
 
     pub struct DisjointMatchCondition<L: Language, N: Analysis<L>> {
-        disjointer: Rc<dyn Matcher<L, N>>,
+        disjointer: DisjointMatcher<L, N>,
     }
 
     impl<L: Language + 'static, N: Analysis<L> + 'static> DisjointMatchCondition<L, N> {
         pub fn new(disjointer: DisjointMatcher<L, N>) -> Self {
-            DisjointMatchCondition { disjointer: disjointer.into_rc() }
+            DisjointMatchCondition { disjointer }
         }
     }
 
@@ -695,7 +705,7 @@ pub mod multisearcher {
     impl<L: Language + 'static, N: Analysis<L> + 'static> ImmutableCondition<L, N> for DisjointMatchCondition<L, N> {
         fn check_imm(&self, egraph: &EGraph<L, N>, eclass: Id, subst: &Subst) -> bool {
             let cloned = subst.clone();
-            self.disjointer.match_(egraph, &cloned).is_empty()
+            self.disjointer.is_disjoint(egraph, &cloned)
         }
 
         fn describe(&self) -> String {
@@ -830,6 +840,7 @@ mod tests {
     use egg::{EGraph, RecExpr, Searcher, SymbolLang, Pattern};
 
     use crate::eggstentions::searchers::multisearcher::{MultiDiffSearcher, MultiEqSearcher, FilteringSearcher};
+    use crate::searchers::multisearcher::{Matcher, PatternMatcher};
     use crate::system_case_splits;
 
     #[test]
@@ -883,12 +894,12 @@ mod tests {
         graph.add_expr(&RecExpr::from_str("(+ 21 (+ 22 23))").unwrap());
         graph.add_expr(&RecExpr::from_str("(+ 11 (+ 12 13))").unwrap());
         let p: Pattern<SymbolLang> = Pattern::from_str("(+ ?z (+ ?x ?y))").unwrap();
-        let m = FilteringSearcher::matcher_from_pattern(p.clone());
+        let m = PatternMatcher::new(p.clone());
         let results = p.search(&graph);
         for sm in results {
             let eclass = sm.eclass;
             for sb in sm.substs {
-                assert_eq!(m(&graph, &sb).contains(&eclass), true);
+                assert_eq!(m.match_(&graph, &sb).contains(&eclass), true);
             }
         }
     }
