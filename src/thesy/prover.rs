@@ -9,9 +9,10 @@ use permutohedron::heap_recursive;
 
 use crate::eggstentions::appliers::DiffApplier;
 use crate::eggstentions::expression_ops::{IntoTree, RecExpSlice, Tree};
-use crate::eggstentions::searchers::multisearcher::{EitherSearcher, MultiDiffSearcher, MultiEqSearcher};
+use crate::eggstentions::searchers::multisearcher::{EitherSearcher, MultiDiffSearcher};
 use crate::eggstentions::pretty_string::PrettyString;
 use crate::lang::{DataType, Function};
+use crate::searchers::multisearcher::{ENodeMatcher, FilteringSearcher, MatcherContainsCondition, ToDyn, ToRc};
 use crate::thesy::TheSy;
 use crate::thesy::case_split::CaseSplit;
 
@@ -62,11 +63,7 @@ impl Prover {
                     .map(|(i, t)|
                         (format!("?param_{}", i).to_string(), *t == datatype.as_exp())
                     ).collect_vec();
-                let contr_pattern = Pattern::from_str(&*format!("({} {})", c.name, params.iter().map(|s| s.0.clone()).intersperse(" ".to_string()).collect::<String>())).unwrap();
-                let searcher = MultiEqSearcher::new(vec![
-                    contr_pattern,
-                    Pattern::from_str("?root").unwrap(),
-                ]);
+                let contr_pattern = Pattern::from_str(&*format!("root@({} {})", c.name, params.iter().map(|s| s.0.clone()).intersperse(" ".to_string()).collect::<String>())).unwrap();
 
                 let appliers = params.iter()
                     .filter(|x| x.1)
@@ -76,7 +73,7 @@ impl Prover {
 
                 // rules
                 appliers.map(|a| {
-                    Rewrite::new(format!("{}_{}", c.name, a.0), searcher.clone(), a.1).unwrap()
+                    Rewrite::new(format!("{}_{}", c.name, a.0), contr_pattern.clone(), a.1).unwrap()
                 }).collect_vec()
             });
         let mut res = contructor_rules.collect_vec();
@@ -284,7 +281,8 @@ impl Prover {
         let pret = clean_term1.pretty(500);
         let pret2 = clean_term2.pretty(500);
         let mut searchers = vec![EitherSearcher::left(Pattern::from_str(&*format!("({} {} {})", Self::wfo_op(), ind_replacer, induction_ph.name)).unwrap())];
-        precond.map(|p| searchers.push(EitherSearcher::right(MultiEqSearcher::new(vec![Pattern::from(p.as_ref()), Pattern::from_str("true").unwrap()]))));
+        precond.map(|p| searchers.push(EitherSearcher::right(
+            FilteringSearcher::searcher_is_true(Pattern::from(p.as_ref())))));
         let precondition = MultiDiffSearcher::new(searchers);
         let precond_pret = precondition.pretty_string();
         let mut res = vec![];

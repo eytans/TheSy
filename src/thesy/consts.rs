@@ -1,5 +1,5 @@
 use egg::{Rewrite, SymbolLang, Pattern, Var, Language, Id, RcImmutableCondition, ToCondRc};
-use crate::eggstentions::searchers::multisearcher::{MultiEqSearcher, FilteringSearcher, ToDyn};
+use crate::eggstentions::searchers::multisearcher::{FilteringSearcher, ToDyn};
 use crate::eggstentions::appliers::{DiffApplier, UnionApplier};
 use std::str::FromStr;
 use crate::thesy::{case_split, TheSy};
@@ -7,13 +7,13 @@ use crate::thesy::case_split::{CaseSplit, Split, SplitApplier};
 use itertools::Itertools;
 use std::rc::Rc;
 use crate::eggstentions::conditions::AndCondition;
-use crate::searchers::multisearcher::{ENodeMatcher, ToRc, VarMatcher};
+use crate::searchers::multisearcher::{ENodeMatcher, MatcherContainsCondition, ToRc, VarMatcher};
 
 pub(crate) fn bool_rws() -> Vec<Rewrite<SymbolLang, ()>> {
-    let and_multi_searcher = MultiEqSearcher::new(vec![
-        Pattern::from_str("true").unwrap(),
-        Pattern::from_str("(and ?x ?y)").unwrap(),
-    ]);
+    let and_multi_searcher = {
+        let p: Pattern<SymbolLang> = "(and ?x ?y)".parse().unwrap();
+        FilteringSearcher::searcher_is_true(p)
+    };
 
     let and_implies = rewrite!("and_implies"; {and_multi_searcher.clone()} => "(= ?x true)");
     let and_implies2 = rewrite!("and_implies2"; {and_multi_searcher} => "(= ?y true)");
@@ -46,8 +46,8 @@ pub(crate) fn less_rws() -> Vec<Rewrite<SymbolLang, ()>> {
     ]
 }
 
-fn cons_conc_searcher() -> MultiEqSearcher<Pattern<SymbolLang>> {
-    MultiEqSearcher::new(vec!["true".parse().unwrap(), "(is-cons ?x)".parse().unwrap()])
+fn cons_conc_searcher() -> FilteringSearcher<SymbolLang, ()> {
+    FilteringSearcher::searcher_is_true("(is-cons ?x)".parse::<Pattern<SymbolLang>>().unwrap())
 }
 
 fn cons_conclusion() -> DiffApplier<Pattern<SymbolLang>> {
@@ -66,7 +66,7 @@ pub(crate) fn is_rws() -> Vec<Rewrite<SymbolLang, ()>> {
 }
 
 pub(crate) fn equality_rws() -> Vec<Rewrite<SymbolLang, ()>> {
-    let eq_searcher = MultiEqSearcher::new(vec![Pattern::from_str("true").unwrap(), Pattern::from_str("(= ?x ?y)").unwrap()]);
+    let eq_searcher = FilteringSearcher::searcher_is_true(Pattern::from_str("(= ?x ?y)").unwrap());
     let union_applier = UnionApplier::new(vec![Var::from_str("?x").unwrap(), Var::from_str("?y").unwrap()]);
     vec![
         rewrite!("equality"; "(= ?x ?x)" => "true"),
@@ -97,10 +97,7 @@ pub fn system_case_splits() -> CaseSplit {
     };
     let mut res = CaseSplit::from_applier_patterns(vec![(ite_searcher.into_rc_dyn(), Pattern::from_str("?z").unwrap(), vec!["true".parse().unwrap(), "false".parse().unwrap()])]);
 
-    let or_multi_searcher = MultiEqSearcher::new(vec![
-        Pattern::from_str("true").unwrap(),
-        Pattern::from_str("(or ?x ?y)").unwrap(),
-    ]);
+    let or_multi_searcher = FilteringSearcher::searcher_is_true(Pattern::from_str("(or ?x ?y)").unwrap());
 
     let x_var = Var::from_str("?x").unwrap();
     let y_var = Var::from_str("?y").unwrap();

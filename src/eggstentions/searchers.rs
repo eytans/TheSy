@@ -7,11 +7,11 @@ pub mod multisearcher {
 
     use crate::tools::tools::Grouped;
     use crate::eggstentions::pretty_string::PrettyString;
-    use std::fmt::Debug;
+    use std::fmt::{Debug, Display};
+    use std::io::Read;
     use smallvec::alloc::fmt::Formatter;
     use std::marker::PhantomData;
     use std::ops::Deref;
-    use std::path::Display;
     use std::rc::Rc;
     use std::time::Instant;
     use indexmap::{IndexMap, IndexSet};
@@ -254,6 +254,14 @@ pub mod multisearcher {
             }
         }
 
+        fn colored_search_eclass(&self, egraph: &EGraph<L, N>, eclass: Id, color: ColorId) -> Vec<SearchMatches> {
+            if self.node.is_left() {
+                self.node.as_ref().left().unwrap().colored_search_eclass(egraph, eclass, color)
+            } else {
+                self.node.as_ref().right().unwrap().colored_search_eclass(egraph, eclass, color)
+            }
+        }
+
         fn vars(&self) -> Vec<Var> {
             if self.node.is_left() {
                 self.node.as_ref().left().unwrap().vars()
@@ -294,11 +302,11 @@ pub mod multisearcher {
 
     impl<L: Language, N: Analysis<L>, A: Searcher<L, N> + Debug, B: Searcher<L, N> + Debug> Debug for EitherSearcher<L, N, A, B> {
         fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-            self.node.fmt(f)
+            Debug::fmt(&self.node, f)
         }
     }
 
-    fn get_common_vars(patterns: &mut Vec<impl Searcher<SymbolLang, ()>>) -> IndexMap<Var, usize> {
+    fn sort_by_common_vars(patterns: &mut Vec<impl Searcher<SymbolLang, ()>>) -> IndexMap<Var, usize> {
         let common_vars = patterns.iter().flat_map(|p| p.vars())
             .grouped(|v| v.clone()).iter()
             .filter_map(|(k, v)|
@@ -479,20 +487,13 @@ pub mod multisearcher {
 
     impl<A: Searcher<SymbolLang, ()>> MultiDiffSearcher<A> {
         pub fn new(mut patterns: Vec<A>) -> MultiDiffSearcher<A> {
-            let common_vars = get_common_vars(&mut patterns);
+            let common_vars = sort_by_common_vars(&mut patterns);
             assert!(!patterns.is_empty());
             MultiDiffSearcher { patterns, common_vars }
         }
     }
 
     impl<S: Searcher<SymbolLang, ()> + 'static> ToDyn<SymbolLang, ()> for MultiDiffSearcher<S> {
-        fn into_rc_dyn(self) -> Rc<dyn Searcher<SymbolLang, ()>> {
-            let dyn_s: Rc<dyn Searcher<SymbolLang, ()>> = Rc::new(self);
-            dyn_s
-        }
-    }
-
-    impl<S: Searcher<SymbolLang, ()> + 'static> ToDyn<SymbolLang, ()> for MultiEqSearcher<S> {
         fn into_rc_dyn(self) -> Rc<dyn Searcher<SymbolLang, ()>> {
             let dyn_s: Rc<dyn Searcher<SymbolLang, ()>> = Rc::new(self);
             dyn_s
@@ -713,6 +714,31 @@ pub mod multisearcher {
         }
     }
 
+    pub struct MatcherContainsCondition<L: Language + 'static, N: Analysis<L> + 'static> {
+        matcher: Rc<dyn Matcher<L, N>>,
+    }
+
+    impl <L: Language + 'static, N: Analysis<L> + 'static> MatcherContainsCondition<L, N> {
+        pub fn new(matcher: Rc<dyn Matcher<L, N>>) -> Self {
+            MatcherContainsCondition { matcher }
+        }
+    }
+
+    impl<L: Language + 'static, N: Analysis<L> + 'static> ToCondRc<L, N> for MatcherContainsCondition<L, N> {}
+
+    impl<L: Language + 'static, N: Analysis<L> + 'static> ImmutableCondition<L, N> for MatcherContainsCondition<L, N> {
+        fn check_imm(&self, egraph: &EGraph<L, N>, eclass: Id, subst: &Subst) -> bool {
+            let fixed = egraph.opt_colored_find(subst.color(), eclass);
+            (self.matcher.match_(egraph, subst)).iter()
+                .map(|id| egraph.opt_colored_find(subst.color(), *id))
+                .any(|id| id == fixed)
+        }
+
+        fn describe(&self) -> String {
+            format!("({}).root.contains(subst_root)", self.matcher.describe())
+        }
+    }
+
     #[derive(Clone)]
     pub struct FilteringSearcher<L: Language, N: Analysis<L>> {
         searcher: Rc<dyn Searcher<L, N>>,
@@ -732,12 +758,8 @@ pub mod multisearcher {
             // TODO: partially fill pattern and if not all vars have values then search by eclass
             //       In practice, create special searcher that will take the constant part from
             //       subst and check existence for each subpattern over eclasses found in subst
-            let searcher_name = searcher.pretty(500);
             let matcher = PatternMatcher::new(searcher);
-            ImmutableFunctionCondition::new(Rc::new(move |graph: &EGraph<L, N>, eclass: Id, subst: &Subst| {
-                let m = matcher.match_(graph, subst);
-                m.contains(&eclass)
-            }), format!("Checking id is in the results of {searcher_name}").to_string()).into_rc()
+            MatcherContainsCondition::new(matcher.into_rc()).into_rc()
         }
 
         pub fn new(searcher: Rc<dyn Searcher<L, N>>,
@@ -755,9 +777,25 @@ pub mod multisearcher {
         }
     }
 
+    impl FilteringSearcher<SymbolLang, ()> {
+        pub fn searcher_is_true<S: Searcher<SymbolLang, ()> + 'static>(s: S) -> Self {
+            FilteringSearcher::new(
+                Rc::new(s),
+                MatcherContainsCondition::new(ENodeMatcher::new("true",
+                                                                SymbolLang::leaf("true")).into_rc()).into_rc()
+            )
+        }
+    }
+
     impl<L: Language + 'static, N: Analysis<L> + 'static> std::fmt::Display for FilteringSearcher<L, N> {
         fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
             write!(f, "{} if {}", self.searcher, self.predicate.describe())
+        }
+    }
+
+    impl<L: Language + 'static, N: Analysis<L> + 'static> std::fmt::Debug for FilteringSearcher<L, N> {
+        fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+            Display::fmt(self, f)
         }
     }
 
@@ -838,14 +876,19 @@ mod tests {
     use std::str::FromStr;
 
     use egg::{EGraph, RecExpr, Searcher, SymbolLang, Pattern};
+    use crate::conditions::AndCondition;
 
-    use crate::eggstentions::searchers::multisearcher::{MultiDiffSearcher, MultiEqSearcher, FilteringSearcher};
-    use crate::searchers::multisearcher::{Matcher, PatternMatcher};
+    use crate::eggstentions::searchers::multisearcher::{MultiDiffSearcher, FilteringSearcher};
+    use crate::searchers::multisearcher::{Matcher, PatternMatcher, ToDyn};
     use crate::system_case_splits;
 
     #[test]
     fn eq_two_trees_one_common() {
-        let searcher = MultiEqSearcher::from_str("(a ?b ?c) ||| (a ?c ?d)").unwrap();
+        let matcher = FilteringSearcher::create_exists_pattern_filterer("(a ?c ?d)".parse().unwrap());
+        let searcher = {
+            let pattern: Pattern<SymbolLang> = "(a ?b ?c)".parse().unwrap();
+            FilteringSearcher::new(pattern.into_rc_dyn(), matcher)
+        };
         let mut egraph: EGraph<SymbolLang, ()> = egg::EGraph::default();
         let x = egraph.add_expr(&RecExpr::from_str("x").unwrap());
         let z = egraph.add_expr(&RecExpr::from_str("z").unwrap());

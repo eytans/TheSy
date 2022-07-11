@@ -11,7 +11,7 @@ use std::path::PathBuf;
 use thesy_parser::ast::{Expression, Statement, Identifier, Annotation, Terminal};
 use thesy_parser::ast::Definitions::Defs;
 use std::str::FromStr;
-use crate::eggstentions::searchers::multisearcher::{MultiEqSearcher, MultiDiffSearcher, EitherSearcher, FilteringSearcher, ToDyn, PointerSearcher, SubPattern};
+use crate::eggstentions::searchers::multisearcher::{MultiDiffSearcher, EitherSearcher, FilteringSearcher, ToDyn, PointerSearcher, SubPattern};
 use crate::thesy::TheSy;
 use crate::eggstentions::appliers::DiffApplier;
 use thesy_parser::ast::Terminal::{Id, Hole};
@@ -135,8 +135,7 @@ impl Definitions {
                                conds: Vec<thesy_parser::ast::Condition>)
                                -> (Rc<dyn Searcher<SymbolLang, ()>>, Pattern<SymbolLang>) {
         let precond_searcher = precond.as_ref().map(|e| {
-            MultiEqSearcher::new(vec![Self::exp_to_pattern(e),
-                                      Pattern::from_str("true").unwrap()])
+            FilteringSearcher::searcher_is_true(Self::exp_to_pattern(e))
         });
         let searcher = {
             let s = Self::exp_to_pattern(&source);
