@@ -338,158 +338,45 @@ pub mod multisearcher {
     }
 
     // Aggregate product of equal common var substs
-    fn aggregate_substs(possibilities: &[IndexMap<Vec<Option<Id>>, Vec<Subst>>],
-                        limits: Vec<&Option<Id>>,
-                        all_vars: &Vec<Var>) -> Vec<Subst> {
-        let current = possibilities.first().unwrap();
-        // TODO: if matches can be taken directly from limitations then do so
+    fn aggregate_substs(matches_by_subst: &[Vec<(Vec<Option<Id>>, Vec<(Id, Subst)>)>],
+                        limits: Vec<Option<Id>>,
+                        all_vars: &Vec<Var>) -> Vec<(Id, Subst)> {
+        let current = matches_by_subst.first().unwrap();
         let matches = current.iter()
             .filter(|(keys, _)| limits.iter().zip(keys.iter())
                 .all(|(lim, key)| lim.as_ref().map_or(true, |l| key.as_ref().map_or(true, |k| k == l))));
-        if possibilities.len() > 1 {
+        if matches_by_subst.len() > 1 {
             let mut collected = Vec::new();
             for (key, val) in matches {
-                let new_limit: Vec<&Option<Id>> = limits.iter().zip(key)
+                let new_limit = limits.iter().zip(key)
                     .map(|(l, k)| if l.is_some() { l } else { k })
-                    .collect();
+                    .cloned()
+                    .collect_vec();
 
-                let rec_res = aggregate_substs(&possibilities[1..],
+                let rec_res = aggregate_substs(&matches_by_subst[1..],
                                                new_limit,
                                                all_vars);
                 collected.extend(rec_res.iter().cartesian_product(val)
-                    .map(|(s1, s2)| merge_substs(all_vars, s1, s2)));
+                    .map(|((id1, s1), (_, s2))| (id1, merge_substs(all_vars, s1, s2))));
             }
             collected
         } else {
-            matches.flat_map(|(_, v)| v.iter().map(|s| merge_substs(all_vars, s, s))).collect()
+            // TODO: I changed this from merge_substs(s, s). Might get an error later on missing vars.
+            matches.flat_map(|(_, v)| v.iter().map(|(id, s)| (**id, s.clone()))).collect()
         }
     }
 
-    fn group_by_common_vars(mut search_results: Vec<&mut SearchMatches>, common_vars: &IndexMap<Var, usize>)
-                            -> Vec<IndexMap<Vec<Option<Id>>, Vec<Subst>>> {
-        let mut by_vars: Vec<IndexMap<Vec<Option<Id>>, Vec<Subst>>> = Vec::new();
-        for matches in search_results.iter_mut() {
-            let cur_map: IndexMap<Vec<Option<Id>>, Vec<Subst>> = {
-                let substs: Vec<Subst> = std::mem::replace(&mut matches.substs, Vec::new());
-                let grouped = substs.into_iter().grouped(|s| common_vars.keys()
-                    .map(|v| s.get(v.clone()).map(|i| i.clone()))
-                    .collect::<Vec<Option<Id>>>());
-                grouped
-            };
-            by_vars.push(cur_map);
-        }
-        by_vars
-    }
-
-    pub struct MultiEqSearcher<A: Searcher<SymbolLang, ()>> {
-        patterns: Vec<A>,
-        common_vars: IndexMap<Var, usize>,
-    }
-
-    impl<A: Searcher<SymbolLang, ()>> std::fmt::Display for MultiEqSearcher<A> {
-        fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-            write!(f, "{}", self.patterns.iter().map(|x| x.to_string()).join(" =:= "))
-        }
-    }
-
-    impl<A: Searcher<SymbolLang, ()>> MultiEqSearcher<A> {
-        pub(crate) fn new(mut patterns: Vec<A>) -> MultiEqSearcher<A> {
-            let common_vars = get_common_vars(&mut patterns);
-            MultiEqSearcher { patterns, common_vars }
-        }
-    }
-
-    impl<A: Searcher<SymbolLang, ()> + PrettyString> PrettyString for MultiEqSearcher<A> {
-        fn pretty_string(&self) -> String {
-            self.patterns.iter().map(|p| p.pretty_string()).intersperse(" ||| ".to_string()).collect()
-        }
-    }
-
-    impl<A: Searcher<SymbolLang, ()>> Searcher<SymbolLang, ()> for MultiEqSearcher<A> {
-        fn search_eclass(&self, _: &EGraph<SymbolLang, ()>, _: Id) -> Option<SearchMatches> {
-            unimplemented!()
-        }
-
-        fn search(&self, egraph: &EGraph<SymbolLang, ()>) -> Vec<SearchMatches> {
-            if self.patterns.len() == 1 {
-                return self.patterns[0].search(egraph);
-            }
-
-            let mut search_results = {
-                let mut res = Vec::new();
-                for p in self.patterns.iter() {
-                    let mut current = IndexMap::new();
-                    let searched = p.search(egraph);
-                    for s in searched {
-                        assert!(!current.contains_key(&s.eclass));
-                        current.insert(s.eclass, s);
-                    }
-                    res.push(current);
-                }
-                res
-            };
-
-            let mut ids = search_results[0].keys().cloned().collect::<IndexSet<Id>>();
-            for r in search_results.iter().skip(1) {
-                ids = ids.into_iter().filter(|k| r.contains_key(k)).collect();
-            }
-
-            ids.iter().filter_map(|k| {
-                let eclass = *k;
-                let mut inner_results = search_results.iter_mut().map(|m| m.remove(k).unwrap()).collect::<Vec<SearchMatches>>();
-                // Take all search results and foreach pattern find the common variables and split by them.
-                let by_vars = group_by_common_vars(
-                    inner_results.iter_mut().collect(),
-                    &self.common_vars);
-
-                let initial_limits = (0..self.common_vars.len()).map(|_| &None).collect();
-                let res = aggregate_substs(&by_vars[..], initial_limits, &self.vars());
-                if res.is_empty() { None } else { Some(SearchMatches { substs: res, eclass }) }
-            }).collect()
-        }
-
-        fn vars(&self) -> Vec<Var> {
-            Vec::from_iter(self.patterns.iter().flat_map(|p| p.vars()))
-        }
-    }
-
-    impl FromStr for MultiEqSearcher<Pattern<SymbolLang>> {
-        type Err = String;
-
-        fn from_str(s: &str) -> Result<Self, Self::Err> {
-            let patterns = s.split("|||")
-                .map(|p| Pattern::from_str(p).unwrap())
-                .collect::<Vec<Pattern<SymbolLang>>>();
-            if patterns.len() == 1 {
-                Err(String::from("Need at least two patterns"))
-            } else {
-                Ok(MultiEqSearcher::new(patterns))
-            }
-        }
-    }
-
-    impl<A: Searcher<SymbolLang, ()> + Clone> Clone for MultiEqSearcher<A> {
-        fn clone(&self) -> Self {
-            MultiEqSearcher::new(self.patterns.clone())
-        }
-    }
-
-    impl<A: Searcher<SymbolLang, ()> + Debug> Debug for MultiEqSearcher<A> {
-        fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-            f.debug_list().entries(&self.patterns).finish()
-        }
-    }
-
+    /// Uses multiple searchers with results agreeing on vars but not on root
     pub struct MultiDiffSearcher<A: Searcher<SymbolLang, ()>> {
         patterns: Vec<A>,
-        common_vars: IndexMap<Var, usize>,
+        common_vars_priorities: IndexMap<Var, usize>,
     }
 
     impl<A: Searcher<SymbolLang, ()>> MultiDiffSearcher<A> {
         pub fn new(mut patterns: Vec<A>) -> MultiDiffSearcher<A> {
             let common_vars = sort_by_common_vars(&mut patterns);
             assert!(!patterns.is_empty());
-            MultiDiffSearcher { patterns, common_vars }
+            MultiDiffSearcher { patterns, common_vars_priorities: common_vars }
         }
     }
 
@@ -522,54 +409,78 @@ pub mod multisearcher {
                 return self.patterns[0].search(egraph);
             }
 
-            // TODO: we dont need a IndexMap here
-            let mut search_results = {
-                let mut res = Vec::new();
-                for p in self.patterns.iter() {
-                    let mut current = IndexMap::new();
-                    let searched = p.search(egraph);
-                    for s in searched {
-                        assert!(!current.contains_key(&s.eclass));
-                        current.insert(s.eclass, s);
+            let mut search_results =
+                self.patterns.iter().map(|p| {
+                    // For each color collect all substitutions by common var assignments
+                    let mut res: IndexMap<Option<ColorId>, Vec<_>> = IndexMap::new();
+                    for m in p.search(egraph) {
+                        let class = m.eclass;
+                        let by_vars = m.substs.into_iter()
+                            .map(|s|
+                                (self.common_vars_priorities.keys().map(|v| s.get(*v)
+                                    .map(|id| egraph.opt_colored_find(s.color(), *id))).collect_vec(),
+                                 class,
+                                 s))
+                            .sorted()
+                            .group_by(|(v, c, s)| (s.color(), v)).into_iter()
+                            .grouped(|x| x.0.0);
+                        for (color, vars) in by_vars {
+                            res.entry(color).or_default().extend(vars.into_iter().map(|((c, vars), g)| {
+                                (vars, g.map(|(var, c, s)| (c, s)).collect_vec())
+                            }));
+                        }
                     }
-                    res.push(current);
-                }
-                res
-            };
+                    res
+                }).collect_vec();
 
             // To reuse group_by_common_vars we will merge all results to a single searchmatches.
             // We don't really care which eclass we use so we will choose the first one.
             // It is a really stupid way to do it but we will run the grouping for each eclass from
             // the first one.
-
-            let mut it = search_results.into_iter();
-            let mut first = it.next();
-            // I want to merge all subst except from first
-            let mut all_matches = it.map(|mut m| m.into_iter()
-                .map(|x| x.1)
-                .fold1(|mut s1, mut s2| {
-                    s1.substs.extend(s2.substs.into_iter());
-                    s1
-                }).unwrap_or(SearchMatches { substs: Vec::new(), eclass: Id::default() }))
-                .collect::<Vec<SearchMatches>>();
-            if all_matches.iter().any(|s| s.substs.is_empty()) {
-                return Vec::new();
-            }
-
-            let mut all_combinations = group_by_common_vars(
-                all_matches.iter_mut().collect(),
-                &self.common_vars);
-            first.unwrap().into_iter().filter_map(|(k, mut matches)| {
-                let eclass = k;
-                let first_grouped = group_by_common_vars(vec![&mut matches], &self.common_vars).pop().unwrap();
-                all_combinations.push(first_grouped);
-                let initial_limits = (0..self.common_vars.len()).map(|_| &None).collect();
-                let res = aggregate_substs(&all_combinations[..], initial_limits, &self.vars());
-                all_combinations.pop();
-                if res.is_empty() { None } else {
-                    Some(SearchMatches { substs: res, eclass })
+            egraph.colors().map(|c| Some(c.get_id()))
+                .chain(std::iter::once(None)).flat_map(|c_id| {
+                fn collect_results(map: &IndexMap<Option<ColorId>, Vec<(&Vec<Option<Id>>, Vec<(Id, Subst)>)>>)
+                    -> Vec<(Vec<Option<Id>>, Vec<(Id, Subst)>)> {
+                    let mut res = map[&c_id].iter().map(|(vars, g)|
+                        ((*vars).clone(), g.clone())).collect_vec();
+                    if c_id.is_some() {
+                        for (vars, g) in map[&None].iter() {
+                            let new_vars = vars.iter()
+                                .map(|opt_id| opt_id.map(|id|
+                                    egraph.opt_colored_find(c_id, id)))
+                                .collect_vec();
+                            res.push((new_vars, g.clone()));
+                        }
+                    }
+                    res.sort_by_key(|(vars, _)| vars);
+                    res.dedup_by(|(vars, g1), (vars2, g2)|
+                        vars == vars2 && {
+                            g2.extend(g1.into_iter());
+                            true
+                        });
+                    res
                 }
+                let mut it = search_results.iter().map(|res| collect_results(res));
+                let mut first = it.next().unwrap();
+                let all_combinations = it.collect_vec();
+
+                first.into_iter().flat_map(|(vars, matches)| {
+                    let res = aggregate_substs(&all_combinations[..], initial_limits, &self.vars());
+                    if res.is_empty() {
+                        vec![]
+                    } else {
+                        res.into_iter().group_by(|x| x.0).into_iter()
+                            .map(|(id, s)| SearchMatches {
+                                eclass: id,
+                                substs: s.into_iter().map(|(_, s)| s).collect(),
+                            }).collect_vec()
+                    }
+                })
             }).collect()
+        }
+
+        fn colored_search_eclass(&self, egraph: &EGraph<SymbolLang, ()>, eclass: Id, color: ColorId) -> Vec<SearchMatches> {
+            unimplemented!()
         }
 
         fn vars(&self) -> Vec<Var> {
