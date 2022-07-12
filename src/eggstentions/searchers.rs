@@ -317,21 +317,22 @@ pub mod multisearcher {
             p.vars().iter().map(|v| common_vars.get(v).unwrap_or(&0)).sum()
         }
 
-        patterns.sort_by_key(|p| count_commons(p, &common_vars));
+        // patterns.sort_by_key(|p| count_commons(p, &common_vars));
         common_vars
     }
 
     fn merge_substs(vars: &Vec<Var>, sub1: &Subst, sub2: &Subst) -> Subst {
-        let mut res = Subst::with_capacity(vars.len());
+        let mut res = Subst::colored_with_capacity(vars.len(), sub1.color().or_else(|| sub2.color()));
         for v in vars {
-            let v1 = v.clone();
+            let v1 = *v;
             let s1 = sub1.get(v1);
             let s2 = sub2.get(v1);
             if s1.is_some() || s2.is_some() {
-                if s1.is_some() && s2.is_some() {
-                    assert_eq!(s1.as_ref(), s2.as_ref());
-                }
-                res.insert(v1, s1.unwrap_or_else(|| s2.unwrap()).clone());
+                // TODO: Assert with egraph they agree on color
+                // if s1.is_some() && s2.is_some() {
+                //     assert_eq!(s1.as_ref().unwrap(), s2.as_ref().unwrap());
+                // }
+                res.insert(v1, *s1.unwrap_or_else(|| s2.unwrap()));
             }
         }
         res
@@ -357,12 +358,12 @@ pub mod multisearcher {
                                                new_limit,
                                                all_vars);
                 collected.extend(rec_res.iter().cartesian_product(val)
-                    .map(|((id1, s1), (_, s2))| (id1, merge_substs(all_vars, s1, s2))));
+                    .map(|((_, s1), (id, s2))| (*id, merge_substs(all_vars, s1, s2))));
             }
             collected
         } else {
             // TODO: I changed this from merge_substs(s, s). Might get an error later on missing vars.
-            matches.flat_map(|(_, v)| v.iter().map(|(id, s)| (**id, s.clone()))).collect()
+            matches.flat_map(|(_, v)| v.iter().map(|(id, s)| (*id, s.clone()))).collect()
         }
     }
 
@@ -415,18 +416,20 @@ pub mod multisearcher {
                     let mut res: IndexMap<Option<ColorId>, Vec<_>> = IndexMap::new();
                     for m in p.search(egraph) {
                         let class = m.eclass;
-                        let by_vars = m.substs.into_iter()
-                            .map(|s|
-                                (self.common_vars_priorities.keys().map(|v| s.get(*v)
-                                    .map(|id| egraph.opt_colored_find(s.color(), *id))).collect_vec(),
-                                 class,
-                                 s))
-                            .sorted()
-                            .group_by(|(v, c, s)| (s.color(), v)).into_iter()
-                            .grouped(|x| x.0.0);
+                        let by_vars = {
+                            let groups = m.substs.into_iter()
+                                .map(|s|
+                                    (self.common_vars_priorities.keys().map(|v| s.get(*v)
+                                        .map(|id| egraph.opt_colored_find(s.color(), *id))).collect_vec(),
+                                     class,
+                                     s))
+                                .sorted()
+                                .group_by(|(v, c, s)| (s.color(), v.clone()));
+                            groups.into_iter().map(|(k, v)| (k, v.collect_vec())).grouped(|x| x.0.0)
+                        };
                         for (color, vars) in by_vars {
                             res.entry(color).or_default().extend(vars.into_iter().map(|((c, vars), g)| {
-                                (vars, g.map(|(var, c, s)| (c, s)).collect_vec())
+                                (vars, g.into_iter().map(|(var, c, s)| (c, s)).collect_vec())
                             }));
                         }
                     }
@@ -439,12 +442,13 @@ pub mod multisearcher {
             // the first one.
             egraph.colors().map(|c| Some(c.get_id()))
                 .chain(std::iter::once(None)).flat_map(|c_id| {
-                fn collect_results(map: &IndexMap<Option<ColorId>, Vec<(&Vec<Option<Id>>, Vec<(Id, Subst)>)>>)
-                    -> Vec<(Vec<Option<Id>>, Vec<(Id, Subst)>)> {
-                    let mut res = map[&c_id].iter().map(|(vars, g)|
+                let empty = vec![];
+                let collect_results: Box<dyn Fn(&IndexMap<Option<ColorId>, Vec<(Vec<Option<Id>>, Vec<(Id, Subst)>)>>)
+                    -> Vec<(Vec<Option<Id>>, Vec<(Id, Subst)>)>> = Box::new(|map: &IndexMap<Option<ColorId>, Vec<(Vec<Option<Id>>, Vec<(Id, Subst)>)>>| {
+                    let mut res = map.get(&c_id).unwrap_or_else(|| &empty).iter().map(|(vars, g)|
                         ((*vars).clone(), g.clone())).collect_vec();
                     if c_id.is_some() {
-                        for (vars, g) in map[&None].iter() {
+                        for (vars, g) in map.get(&None).unwrap_or_else(|| &empty).iter() {
                             let new_vars = vars.iter()
                                 .map(|opt_id| opt_id.map(|id|
                                     egraph.opt_colored_find(c_id, id)))
@@ -452,30 +456,27 @@ pub mod multisearcher {
                             res.push((new_vars, g.clone()));
                         }
                     }
-                    res.sort_by_key(|(vars, _)| vars);
+                    res.sort_by(|(vars1, _), (vars2, _)| vars1.cmp(vars2));
                     res.dedup_by(|(vars, g1), (vars2, g2)|
                         vars == vars2 && {
-                            g2.extend(g1.into_iter());
+                            g2.extend(std::mem::take(g1));
                             true
                         });
                     res
-                }
-                let mut it = search_results.iter().map(|res| collect_results(res));
-                let mut first = it.next().unwrap();
-                let all_combinations = it.collect_vec();
+                });
 
-                first.into_iter().flat_map(|(vars, matches)| {
-                    let res = aggregate_substs(&all_combinations[..], initial_limits, &self.vars());
-                    if res.is_empty() {
-                        vec![]
-                    } else {
-                        res.into_iter().group_by(|x| x.0).into_iter()
-                            .map(|(id, s)| SearchMatches {
-                                eclass: id,
-                                substs: s.into_iter().map(|(_, s)| s).collect(),
-                            }).collect_vec()
-                    }
-                })
+                let all_combinations = search_results.iter().map(|res| (*collect_results)(res)).collect_vec();
+                let initial_limits = self.common_vars_priorities.iter().map(|_| None).collect_vec();
+                let res = aggregate_substs(&all_combinations[..], initial_limits, &self.vars());
+                if res.is_empty() {
+                    vec![]
+                } else {
+                    res.into_iter().group_by(|x| x.0).into_iter()
+                        .map(|(id, s)| SearchMatches {
+                            eclass: id,
+                            substs: s.into_iter().map(|(_, s)| s).collect(),
+                        }).collect_vec()
+                }
             }).collect()
         }
 
@@ -657,6 +658,12 @@ pub mod multisearcher {
         phantom_ln: PhantomData<(L, N)>,
     }
 
+    impl<L: Language, N: Analysis<L>> PrettyString for FilteringSearcher<L, N> {
+        fn pretty_string(&self) -> String {
+            format!("{}[{}]", self.searcher, self.predicate.describe())
+        }
+    }
+
     impl<'a, L: Language + 'static, N: Analysis<L> + 'static> FilteringSearcher<L, N> {
         pub fn create_non_pattern_filterer(matcher: RcMatcher<L, N>,
                                            negator: RcMatcher<L, N>)
@@ -721,6 +728,10 @@ pub mod multisearcher {
             res
         }
 
+        fn colored_search_eclass(&self, egraph: &EGraph<L, N>, eclass: Id, color: ColorId) -> Vec<SearchMatches> {
+            unimplemented!()
+        }
+
         fn vars(&self) -> Vec<Var> {
             self.searcher.vars()
         }
@@ -774,6 +785,10 @@ pub mod multisearcher {
 
         fn search(&self, egraph: &EGraph<L, N>) -> Vec<SearchMatches> {
             self.searcher.search(egraph)
+        }
+
+        fn colored_search_eclass(&self, egraph: &EGraph<L, N>, eclass: Id, color: ColorId) -> Vec<SearchMatches> {
+            self.searcher.colored_search_eclass(egraph, eclass, color)
         }
 
         fn vars(&self) -> Vec<Var> {

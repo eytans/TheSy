@@ -55,7 +55,6 @@ impl Prover {
 
     /// create well founded order rewrites for constructors of Datatype `datatype`.
     fn wfo_datatype(datatype: &DataType) -> Vec<Rewrite<SymbolLang, ()>> {
-        // TODO: all buit values are bigger then base values
         let contructor_rules = datatype.constructors.iter()
             .filter(|c| !c.params.is_empty())
             .flat_map(|c| {
@@ -63,7 +62,7 @@ impl Prover {
                     .map(|(i, t)|
                         (format!("?param_{}", i).to_string(), *t == datatype.as_exp())
                     ).collect_vec();
-                let contr_pattern = Pattern::from_str(&*format!("root@({} {})", c.name, params.iter().map(|s| s.0.clone()).intersperse(" ".to_string()).collect::<String>())).unwrap();
+                let contr_pattern = Pattern::from_str(&*format!("(|@|?root|@|{} {})", c.name, params.iter().map(|s| s.0.clone()).intersperse(" ".to_string()).collect::<String>())).unwrap();
 
                 let appliers = params.iter()
                     .filter(|x| x.1)
