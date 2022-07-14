@@ -188,8 +188,9 @@ pub mod multisearcher {
         }
 
         pub fn is_disjoint<'b>(&self, graph: &'b EGraph<L, N>, subst: &'b Subst) -> bool {
+            let match_2 = self.matcher2.match_(graph, subst);
             let res = self.matcher1.match_(graph, subst).into_iter().all(|x| {
-                !self.matcher2.match_(graph, subst).contains(&x)
+                !match_2.contains(&x)
             });
             res
         }
@@ -474,7 +475,7 @@ pub mod multisearcher {
                     res.into_iter().group_by(|x| x.0).into_iter()
                         .map(|(id, s)| SearchMatches {
                             eclass: id,
-                            substs: s.into_iter().map(|(_, s)| s).collect(),
+                            substs: s.into_iter().map(|(_, s)| s).unique().collect(),
                         }).collect_vec()
                 }
             }).collect()
