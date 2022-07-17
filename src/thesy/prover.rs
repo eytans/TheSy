@@ -12,7 +12,7 @@ use crate::eggstentions::expression_ops::{IntoTree, RecExpSlice, Tree};
 use crate::eggstentions::searchers::multisearcher::{EitherSearcher, MultiDiffSearcher};
 use crate::eggstentions::pretty_string::PrettyString;
 use crate::lang::{DataType, Function};
-use crate::searchers::multisearcher::{ENodeMatcher, FilteringSearcher, MatcherContainsCondition, ToDyn, ToRc};
+use crate::searchers::multisearcher::{FilteringSearcher, MatcherContainsCondition, ToDyn, ToRc};
 use crate::thesy::TheSy;
 use crate::thesy::case_split::CaseSplit;
 
@@ -138,6 +138,7 @@ impl Prover {
 
     pub fn prove_base_split_d(&self, case_splitter: &mut Option<&mut CaseSplit>, rules: &[Rewrite<SymbolLang, ()>], precond: Option<&RecExpr<SymbolLang>>, ex1: &RecExpr<SymbolLang>, ex2: &RecExpr<SymbolLang>, split_d: usize) -> bool {
         if self.not_containing_ind_var(ex1) && self.not_containing_ind_var(ex2) {
+            warn!("prove_base: no ind var in ex1 and ex2");
             return false;
         }
         // create graph containing both expressions

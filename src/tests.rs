@@ -1,5 +1,5 @@
-use crate::thesy::TheSy;
-use egg::{RecExpr, SymbolLang, Id};
+use crate::thesy::{semantics, TheSy};
+use egg::{RecExpr, SymbolLang, Id, Rewrite};
 use crate::thesy::semantics::Definitions;
 use crate::thesy::case_split::CaseSplit;
 use crate::thesy::prover::Prover;
@@ -10,9 +10,9 @@ use std::str::FromStr;
 use std::sync::atomic::AtomicBool;
 use std::sync::Mutex;
 use indexmap::IndexSet;
-use thesy_parser::ast::Terminal;
+use thesy_parser::ast::{Expression, Terminal};
 use crate::eggstentions::reconstruct::reconstruct;
-use crate::TheSyConfig;
+use crate::{tests, TheSyConfig};
 
 lazy_static!(
     static ref log_initialized: Mutex<bool> = Mutex::new(false);
@@ -55,7 +55,8 @@ pub enum ProofMode {
 // TODO: maybe hint on recursion
 pub fn test_terms(mut definitions: Definitions) -> ProofMode {
     let mut thesy: TheSy = TheSy::from(&definitions);
-    let mut case_splitter = TheSy::create_case_splitter(definitions.case_splitters);
+    let mut case_splitter = TheSy::create_case_splitter(definitions.case_splitters.clone());
+    warn!("Case splitters: {:?}", &case_splitter);
     let mut rws = thesy.system_rws.clone();
     rws.extend_from_slice(&definitions.rws);
     assert_eq!(1, definitions.goals.len());
@@ -69,33 +70,20 @@ pub fn test_terms(mut definitions: Definitions) -> ProofMode {
     let mut egraph = Prover::create_graph(precond.as_ref(), &ex1, &ex2);
 
     // Attempt prove by case split
-    case_splitter.case_split(&mut egraph, 3, &rws, 8);
+    case_splitter.case_split(&mut egraph, 3, &rws, 12);
     if egraph.add_expr(ex1) == egraph.add_expr(ex2) {
         return ProofMode::CaseSplit;
     }
 
-    // Take ast expressions and translate to placeholder by annotations
-    let exp_translator = |t: &Terminal| {
-        if let Some(a) = t.anno() {
-            Terminal::Id(
-                TheSy::get_ph(&RecExpr::from_str(
-                    &*a.get_type().unwrap().to_sexp_string()
-                ).unwrap(),
-                              a.get_ph().unwrap(),
-                ).name, Some(a.clone()))
-        } else {
-            t.clone()
-        }
-    };
+    // let ph_precond = ast_precond.map(|e| e.map(exp_translator));
+    let ph_exp1 = translate_expression(&mut ast_exp1);
+    let ph_exp2 = translate_expression(&mut ast_exp2);
 
     // Create term succeeds
     thesy.increase_depth();
     thesy.equiv_reduc(&mut rws);
     thesy.increase_depth();
 
-    // let ph_precond = ast_precond.map(|e| e.map(exp_translator));
-    let ph_exp1 = RecExpr::from_str(&*ast_exp1.map(&exp_translator).to_sexp_string()).unwrap();
-    let ph_exp2 = RecExpr::from_str(&*ast_exp2.map(&exp_translator).to_sexp_string()).unwrap();
     let ph_id1 = thesy.egraph.add_expr(&ph_exp1);
     let ph_id2 = thesy.egraph.add_expr(&ph_exp2);
     info!("ph_exp1: {}, ph_exp2: {}", ph_exp1, ph_exp2);
@@ -122,21 +110,65 @@ pub fn test_terms(mut definitions: Definitions) -> ProofMode {
         return ProofMode::ExamplesFailed;
     }
 
-    for d in &definitions.datatypes {
-        // Check exploration results
 
-        // Attempt proof
-        let prover = &thesy.datatypes[d];
-        let res = prover.prove_all_split_d(&mut Some(&mut case_splitter),
-                                           &rws,
-                                           Option::from(precond),
-                                           &ph_exp1,
-                                           &ph_exp2,
-                                           1);
-        if res.is_some() {
-            return ProofMode::Prover;
-        }
+    test_prover(&definitions)[0]
+}
+
+fn translate_expression(ast_exp1: &mut Expression) -> RecExpr<SymbolLang> {
+    RecExpr::from_str(&*ast_exp1.map(&mut |t| terminal_ph_translator(t)).to_sexp_string()).unwrap()
+}
+
+fn terminal_ph_translator(t: &Terminal) -> Terminal {
+    if let Some(a) = t.anno() {
+        Terminal::Id(
+            TheSy::get_ph(&RecExpr::from_str(
+                &*a.get_type().unwrap().to_sexp_string()
+            ).unwrap(),
+                          a.get_ph().unwrap(),
+            ).name, Some(a.clone()))
+    } else {
+        t.clone()
     }
+}
 
-    return ProofMode::Failed;
+
+pub fn test_prover(definitions: &Definitions) -> Vec<ProofMode> {
+    let mut thesy: TheSy = TheSy::from(definitions);
+    let mut case_splitter = TheSy::create_case_splitter(definitions.case_splitters.clone());
+    warn!("Case splitters: {:?}", &case_splitter);
+    let mut rws = thesy.system_rws.clone();
+    rws.extend_from_slice(&definitions.rws);
+
+    let mut res = Vec::new();
+    for (c, g) in definitions.conjectures.iter().zip(definitions.goals.iter()) {
+        let (vars, holes, precond, ex1, ex2) = c;
+        let (mut ast_precond, mut ast_exp1, mut ast_exp2) = g.clone();
+        // let ph_precond = ast_precond.map(|e| e.map(exp_translator));
+        let ph_exp1 = translate_expression(&mut ast_exp1);
+        let ph_exp2 = translate_expression(&mut ast_exp2);
+
+        let mut proof_res = None;
+        for d in &definitions.datatypes {
+            // Check exploration results
+
+            // Attempt proof
+            let prover = &thesy.datatypes[d];
+            warn!("Proving goal with {}", d);
+            let temp = prover.prove_all_split_d(&mut Some(&mut case_splitter),
+                                               &rws,
+                                               Option::from(precond),
+                                               &ph_exp1,
+                                               &ph_exp2,
+                                               1);
+            if temp.is_some() {
+                proof_res = Some(ProofMode::Prover);
+                break;
+            }
+        }
+        if proof_res.is_none() {
+            proof_res = Some(ProofMode::Failed);
+        }
+        res.push(proof_res.unwrap());
+    }
+    res
 }

@@ -113,7 +113,7 @@ impl Definitions {
         }
     }
 
-    fn exp_to_pattern(exp: &Expression) -> Pattern<SymbolLang> {
+    pub fn exp_to_pattern(exp: &Expression) -> Pattern<SymbolLang> {
         let exp_s = exp.to_sexp_string();
         Pattern::from_str(&*exp_s).unwrap()
     }
@@ -328,7 +328,7 @@ impl From<Vec<Statement>> for Definitions {
                                 subs.push((exp_c.to_string(), hole.to_string()));
                             }
                         }
-                        let new_pat = fixed_pattern.map(&|t: &Terminal| subs.iter()
+                        let new_pat = fixed_pattern.map(&mut |t: &Terminal| subs.iter()
                             .find(|&(a, b)| a == &t.to_string())
                             .map(|(a, b)| Hole(b.replace("?", ""), t.anno().clone()))
                             .unwrap_or(t.clone()));
@@ -503,9 +503,9 @@ impl Definitions {
 
         self.conjectures.push((type_map, holes,
                                precond.map(|t|
-                                   RecExpr::from_str(&*t.map(&hole_to_id).to_sexp_string()).unwrap()),
-                               RecExpr::from_str(&*exp1.map(&hole_to_id).to_sexp_string()).unwrap(),
-                               RecExpr::from_str(&*exp2.map(&hole_to_id).to_sexp_string()).unwrap()));
+                                   RecExpr::from_str(&*t.map(&mut hole_to_id).to_sexp_string()).unwrap()),
+                               RecExpr::from_str(&*exp1.map(&mut hole_to_id).to_sexp_string()).unwrap(),
+                               RecExpr::from_str(&*exp2.map(&mut hole_to_id).to_sexp_string()).unwrap()));
     }
 
     fn make_rw(&mut self,

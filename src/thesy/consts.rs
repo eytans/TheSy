@@ -7,7 +7,7 @@ use crate::thesy::case_split::{CaseSplit, Split, SplitApplier};
 use itertools::Itertools;
 use std::rc::Rc;
 use crate::eggstentions::conditions::AndCondition;
-use crate::searchers::multisearcher::{ENodeMatcher, MatcherContainsCondition, ToRc, VarMatcher};
+use crate::searchers::multisearcher::{MatcherContainsCondition, PatternMatcher, ToRc, VarMatcher};
 
 pub(crate) fn bool_rws() -> Vec<Rewrite<SymbolLang, ()>> {
     let and_multi_searcher = {
@@ -88,10 +88,10 @@ pub fn system_case_splits() -> CaseSplit {
         let searcher: Pattern<SymbolLang> = Pattern::from_str("(ite ?z ?x ?y)").unwrap();
         let true_cond = FilteringSearcher::<SymbolLang, ()>::create_non_pattern_filterer(
             VarMatcher::new(Var::from_str("?z").unwrap()).into_rc(),
-            ENodeMatcher::new("true", SymbolLang::from_op_str("true", vec![]).unwrap()).into_rc());
+            PatternMatcher::new("true".parse().unwrap()).into_rc());
         let false_cond = FilteringSearcher::<SymbolLang, ()>::create_non_pattern_filterer(
             VarMatcher::new(Var::from_str("?z").unwrap()).into_rc(),
-            ENodeMatcher::new("false", SymbolLang::from_op_str("false", vec![]).unwrap()).into_rc());
+            PatternMatcher::new("false".parse().unwrap()).into_rc());
         FilteringSearcher::new(searcher.into_rc_dyn(),
             AndCondition::<SymbolLang, ()>::new(vec![true_cond, false_cond]).into_rc())
     };

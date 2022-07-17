@@ -88,38 +88,38 @@ pub mod multisearcher {
         }
     }
 
-    pub struct ENodeMatcher<L: Language, N: Analysis<L>> {
-        pub(crate) enode: L,
-        pub(crate) desc: &'static str,
-        phantom: PhantomData<N>,
-    }
-
-    impl<L: Language, N: Analysis<L>> ENodeMatcher<L, N> {
-        pub fn new(desc: &'static str, enode: L) -> Self {
-            ENodeMatcher {
-                enode,
-                desc,
-                phantom: Default::default(),
-            }
-        }
-    }
-
-    impl<L: Language + 'static, N: Analysis<L> + 'static> ToRc<L, N> for ENodeMatcher<L, N> {}
-
-    impl<L: Language + 'static, N: Analysis<L> + 'static> Matcher<L, N> for ENodeMatcher<L, N> {
-        fn match_<'b>(&self, graph: &'b EGraph<L, N>, subst: &'b Subst) -> IndexSet<Id> {
-            if let Some(c) = subst.color() {
-                graph.colored_lookup(c, self.enode.clone())
-            } else {
-                graph.lookup(self.enode.clone())
-            }
-                .into_iter().collect()
-        }
-
-        fn describe(&self) -> String {
-            self.desc.to_string()
-        }
-    }
+    // pub struct ENodeMatcher<L: Language, N: Analysis<L>> {
+    //     pub(crate) enode: L,
+    //     pub(crate) desc: &'static str,
+    //     phantom: PhantomData<N>,
+    // }
+    //
+    // impl<L: Language, N: Analysis<L>> ENodeMatcher<L, N> {
+    //     pub fn new(desc: &'static str, enode: L) -> Self {
+    //         ENodeMatcher {
+    //             enode,
+    //             desc,
+    //             phantom: Default::default(),
+    //         }
+    //     }
+    // }
+    //
+    // impl<L: Language + 'static, N: Analysis<L> + 'static> ToRc<L, N> for ENodeMatcher<L, N> {}
+    //
+    // impl<L: Language + 'static, N: Analysis<L> + 'static> Matcher<L, N> for ENodeMatcher<L, N> {
+    //     fn match_<'b>(&self, graph: &'b EGraph<L, N>, subst: &'b Subst) -> IndexSet<Id> {
+    //         if let Some(c) = subst.color() {
+    //             graph.colored_lookup(c, self.enode.clone())
+    //         } else {
+    //             graph.lookup(self.enode.clone())
+    //         }
+    //             .into_iter().collect()
+    //     }
+    //
+    //     fn describe(&self) -> String {
+    //         self.desc.to_string()
+    //     }
+    // }
 
     pub struct PatternMatcher<L: Language, N: Analysis<L>> {
         pub(crate) pattern: Pattern<L>,
@@ -143,8 +143,24 @@ pub mod multisearcher {
             if cfg!(debug_assertions) {
                 time = Some(Instant::now());
             }
-            let res = self.pattern.search(graph).into_iter().filter_map(|x| {
-                x.substs.iter().any(|s| graph.subst_agrees(s, subst, true)).then(|| x.eclass)
+            // TODO: Support hierarchical colors.
+            let res = self.pattern.search(graph).into_iter().flat_map(|x| {
+                let mut black_subs = None;
+                let mut colored_subs = None;
+                for s in x.substs.iter()
+                    .filter(|s| s.color().is_none() || (s.color() == subst.color())) {
+                    if graph.subst_agrees(s, subst, true) {
+                        if s.color().is_some() {
+                            colored_subs = Some(graph.colored_find(s.color().unwrap(), x.eclass));
+                        } else {
+                            black_subs = Some(graph.find(x.eclass));
+                        }
+                    }
+                    if black_subs.is_some() && (colored_subs.is_some() || subst.color().is_none()) {
+                        break;
+                    }
+                }
+                vec![black_subs, colored_subs].into_iter().filter_map(|s| s)
             }).collect();
             if cfg!(debug_assertions) {
                 if time.unwrap().elapsed().as_secs() > 1 {
@@ -255,7 +271,7 @@ pub mod multisearcher {
             }
         }
 
-        fn colored_search_eclass(&self, egraph: &EGraph<L, N>, eclass: Id, color: ColorId) -> Vec<SearchMatches> {
+        fn colored_search_eclass(&self, egraph: &EGraph<L, N>, eclass: Id, color: ColorId) -> Option<SearchMatches> {
             if self.node.is_left() {
                 self.node.as_ref().left().unwrap().colored_search_eclass(egraph, eclass, color)
             } else {
@@ -481,7 +497,7 @@ pub mod multisearcher {
             }).collect()
         }
 
-        fn colored_search_eclass(&self, egraph: &EGraph<SymbolLang, ()>, eclass: Id, color: ColorId) -> Vec<SearchMatches> {
+        fn colored_search_eclass(&self, egraph: &EGraph<SymbolLang, ()>, eclass: Id, color: ColorId) -> Option<SearchMatches> {
             unimplemented!()
         }
 
@@ -586,13 +602,21 @@ pub mod multisearcher {
                 let eclass = subst.get(var.clone()).unwrap_or_else(|| {
                     panic!("{} not found in {}", var, subst)
                 });
-                let subs = pattern.search_eclass(egraph, *eclass);
+                let subs = if let Some(c) = subst.color() {
+                    pattern.colored_search_eclass(egraph, *eclass, c)
+                } else {
+                    pattern.search_eclass(egraph, *eclass)
+                };
                 res &= subs.is_some();
                 if pattern.vars().iter().any(|v| subst.get(*v).is_some()) {
                     res &= subs.unwrap().substs.iter().any(|s| {
                         pattern.vars().iter()
                             .filter(|v| subst.get(**v).is_some())
-                            .all(|v| s.get(*v) == subst.get(*v))
+                            .all(|v| {
+                                debug_assert_eq!(egraph.opt_colored_find(s.color(), *s.get(*v).unwrap()), *s.get(*v).unwrap());
+                                debug_assert_eq!(egraph.opt_colored_find(subst.color(), *subst.get(*v).unwrap()), *subst.get(*v).unwrap());
+                                s.get(*v) == subst.get(*v)
+                            })
                     })
                 }
             }
@@ -700,8 +724,7 @@ pub mod multisearcher {
         pub fn searcher_is_true<S: Searcher<SymbolLang, ()> + 'static>(s: S) -> Self {
             FilteringSearcher::new(
                 Rc::new(s),
-                MatcherContainsCondition::new(ENodeMatcher::new("true",
-                                                                SymbolLang::leaf("true")).into_rc()).into_rc()
+                MatcherContainsCondition::new(PatternMatcher::new("true".parse().unwrap()).into_rc()).into_rc()
             )
         }
     }
@@ -729,7 +752,7 @@ pub mod multisearcher {
             res
         }
 
-        fn colored_search_eclass(&self, egraph: &EGraph<L, N>, eclass: Id, color: ColorId) -> Vec<SearchMatches> {
+        fn colored_search_eclass(&self, egraph: &EGraph<L, N>, eclass: Id, color: ColorId) -> Option<SearchMatches> {
             unimplemented!()
         }
 
@@ -788,7 +811,7 @@ pub mod multisearcher {
             self.searcher.search(egraph)
         }
 
-        fn colored_search_eclass(&self, egraph: &EGraph<L, N>, eclass: Id, color: ColorId) -> Vec<SearchMatches> {
+        fn colored_search_eclass(&self, egraph: &EGraph<L, N>, eclass: Id, color: ColorId) -> Option<SearchMatches> {
             self.searcher.colored_search_eclass(egraph, eclass, color)
         }
 

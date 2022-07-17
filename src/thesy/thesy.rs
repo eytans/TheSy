@@ -1144,6 +1144,15 @@ mod test {
     }
 
     #[test]
+    fn test_prove_split_and_or() {
+        init_logging();
+
+        let defs = TheSyConfig::from_path("tests/booleans.th".to_string()).definitions;
+        let proofs = tests::test_prover(&defs);
+        assert!(!proofs.contains(&ProofMode::Failed));
+    }
+
+    #[test]
     fn test_split_and_or() {
         init_logging();
 
@@ -1151,16 +1160,18 @@ mod test {
         let mut conjectures = std::mem::take(&mut defs.conjectures);
         let mut goals = std::mem::take(&mut defs.goals);
         for (c, g) in conjectures.into_iter().zip(goals.into_iter()) {
-            info!("proving {}{} = {}",
+            let proof_text = format!("proving {}{} = {}",
                   g.0.as_ref().map_or("".to_string(), |e| e.to_string() + "|> "),
                   &g.1,
                   &g.2);
+            info!("{}", proof_text);
             defs.goals = vec![g];
             defs.conjectures = vec![c];
             let proof = tests::test_terms(defs.clone());
-            assert_ne!(ProofMode::ExamplesFailed, proof);
-            assert_ne!(ProofMode::Failed, proof);
-            assert_ne!(ProofMode::TermNotCreated, proof);
+            warn!("Proof mode {:?} for {}", proof, proof_text);
+            assert_ne!(ProofMode::ExamplesFailed, proof, "Examples failed for {}", proof_text);
+            assert_ne!(ProofMode::Failed, proof, "Proof failed for {}", proof_text);
+            assert_ne!(ProofMode::TermNotCreated, proof, "Terms not created for {}", proof_text);
         }
     }
 
