@@ -5,6 +5,6 @@ fun Or a: boolean b: boolean -> boolean => (ite (#=# ?a T) T ?b)
 fun Not a: boolean -> boolean => (ite (#=# ?a T) F T)
 
 prove (And v: {ph( 0 ), boolean} T) = v: {ph( 0 ), boolean}
-prove (And v: {ph( 0 ), boolean} F) = F
-prove (Or v: {ph( 0 ), boolean} T) = T
-prove (Or v: {ph( 0 ), boolean} F) = v: {ph( 0 ), boolean}
+;prove (And v: {ph( 0 ), boolean} F) = F
+;prove (Or v: {ph( 0 ), boolean} T) = T
+;prove (Or v: {ph( 0 ), boolean} F) = v: {ph( 0 ), boolean}

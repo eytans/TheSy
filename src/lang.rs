@@ -1,7 +1,7 @@
 use egg::{Id, Language, RecExpr, Symbol, SymbolLang};
 use itertools::Itertools;
 
-use crate::eggstentions::expression_ops::{IntoTree, Tree};
+use egg::expression_ops::{IntoTree, Tree};
 use std::fmt::{Display, Formatter};
 
 #[derive(Clone, Hash, PartialEq, Eq, Debug)]

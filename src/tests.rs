@@ -11,7 +11,7 @@ use std::sync::atomic::AtomicBool;
 use std::sync::Mutex;
 use indexmap::IndexSet;
 use thesy_parser::ast::{Expression, Terminal};
-use crate::eggstentions::reconstruct::reconstruct;
+use egg::reconstruct::reconstruct;
 use crate::{tests, TheSyConfig};
 
 lazy_static!(

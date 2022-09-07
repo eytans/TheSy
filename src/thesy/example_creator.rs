@@ -1,7 +1,7 @@
 use egg::{RecExpr, SymbolLang};
 use itertools::Itertools;
 
-use crate::eggstentions::expression_ops::{IntoTree};
+use egg::expression_ops::{IntoTree};
 use crate::lang::{DataType, Function};
 use std::collections::hash_map::RandomState;
 use indexmap::IndexMap;

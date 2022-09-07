@@ -14,16 +14,16 @@ mod parser {
     use smallvec::alloc::fmt::Formatter;
     use symbolic_expressions::{Sexp, SexpError};
 
-    use crate::eggstentions::appliers::DiffApplier;
-    use crate::eggstentions::expression_ops::{IntoTree, Tree};
-    use crate::eggstentions::pretty_string::PrettyString;
-    use crate::eggstentions::searchers::multisearcher::{aggregate_conditions, EitherSearcher, FilteringSearcher, MatchFilter, MultiDiffSearcher, MultiEqSearcher, PointerSearcher, ToDyn};
+    use egg::appliers::DiffApplier;
+    use egg::expression_ops::{IntoTree, Tree};
+    use egg::pretty_string::PrettyString;
+    use egg::searchers::{aggregate_conditions, EitherSearcher, FilteringSearcher, MatchFilter, MultiDiffSearcher, MultiEqSearcher, PointerSearcher, ToDyn};
     use crate::lang::{DataType, Function};
     use crate::thesy::case_split;
     use crate::thesy::thesy_parser::parser::TheSyParseErr::IOError;
     use crate::thesy::semantics::Definitions;
     use crate::thesy::thesy_parser::parser::TheSyParseErr::UnknownError;
-    use crate::tools::tools::combinations;
+    use egg::tools::tools::combinations;
 
     #[derive(Debug)]
     pub enum TheSyParseErr {

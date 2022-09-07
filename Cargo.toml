@@ -9,7 +9,7 @@ edition = "2018"
 [dependencies]
 egg = { path = "../egg" }
 thesy_parser = { git = "https://github.com/eytans/TheSyParser.git", branch = "main" }
-#thesy_parser = { path = "../TheSyParser" }
+#thesy_parser = { path = "../../CLionProjects/TheSyParser" }
 cached = "0.18.0"
 itertools= "0.10.3"
 symbolic_expressions = "5.0.3"
@@ -47,5 +47,5 @@ keep_splits= []
 #[build]
 #rustflags = ["-C", "link-args=-Wl,-stack_size,0x100000000"]    # custom flags to pass to all compiler invocations
 
-#[profile.test]
-#opt-level = 3
+[profile.test]
+opt-level = 2

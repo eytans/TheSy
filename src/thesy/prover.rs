@@ -7,12 +7,12 @@ use log::{debug, info};
 use permutohedron::control::Control;
 use permutohedron::heap_recursive;
 
-use crate::eggstentions::appliers::DiffApplier;
-use crate::eggstentions::expression_ops::{IntoTree, RecExpSlice, Tree};
-use crate::eggstentions::searchers::multisearcher::{EitherSearcher, MultiDiffSearcher};
-use crate::eggstentions::pretty_string::PrettyString;
+use egg::appliers::DiffApplier;
+use egg::expression_ops::{IntoTree, RecExpSlice, Tree};
+use egg::searchers::{EitherSearcher, MultiDiffSearcher};
+use egg::pretty_string::PrettyString;
 use crate::lang::{DataType, Function};
-use crate::searchers::multisearcher::{FilteringSearcher, MatcherContainsCondition, ToDyn, ToRc};
+use egg::searchers::{FilteringSearcher, MatcherContainsCondition, ToDyn, ToRc};
 use crate::thesy::TheSy;
 use crate::thesy::case_split::CaseSplit;
 
@@ -143,12 +143,15 @@ impl Prover {
         }
         // create graph containing both expressions
         let (orig_egraph, ind_id) = self.create_proof_graph(precond, &ex1, &ex2);
-        self.datatype.constructors.iter().filter(|c| c.params.is_empty()).all(|c| {
+        self.datatype.constructors.iter().filter(|c| c.params.is_empty()).dropping(1).all(|c| {
+            warn!("prove_base: checking constructor {}", c.name);
             let mut egraph = orig_egraph.clone();
             let contr_id = egraph.add_expr(&c.as_exp());
             egraph.union(contr_id, ind_id);
             let mut runner: Runner<SymbolLang, ()> = Runner::new(()).with_egraph(egraph).with_iter_limit(Self::RUN_DEPTH).run(&rules[..]);
+            runner.egraph.dot().to_dot(format!("before_split_prove_base_split_d_{}_[{:?}]{}={}_{}.dot", !runner.egraph.equivs(&ex1, &ex2).is_empty(), precond, ex1, ex2, c.name)).unwrap();
             case_splitter.iter_mut().for_each(|c| c.case_split(&mut runner.egraph, split_d, &rules, Self::CASE_ITERN));
+            runner.egraph.dot().to_dot(format!("prove_base_split_d_{}_[{:?}]{}={}_{}.dot", !runner.egraph.equivs(&ex1, &ex2).is_empty(), precond, ex1, ex2, c.name)).unwrap();
             !runner.egraph.equivs(&ex1, &ex2).is_empty()
         })
     }
@@ -250,6 +253,7 @@ impl Prover {
     pub fn prove_all_split_d(&self, case_splitter: &mut Option<&mut CaseSplit>, rules: &[Rewrite<SymbolLang, ()>], precond: Option<&RecExpr<SymbolLang>>, ex1: &RecExpr<SymbolLang>, ex2: &RecExpr<SymbolLang>, split_d: usize)
                              -> Option<Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, Rewrite<SymbolLang, ()>)>> {
         if self.prove_base_split_d(case_splitter, rules, precond, ex1, ex2, split_d) {
+            warn!("Basic succeeded");
             self.prove_ind_split_d(case_splitter, rules, precond, ex1, ex2, split_d)
         } else {
             None

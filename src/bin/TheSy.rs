@@ -14,13 +14,13 @@ use structopt::StructOpt;
 
 use egg::*;
 
-use TheSy::eggstentions::pretty_string::PrettyString;
+use egg::pretty_string::PrettyString;
 use TheSy::thesy::{example_creator};
 use TheSy::thesy::case_split::{CaseSplit, Split};
 use TheSy::thesy::thesy::TheSy as Synth;
 use TheSy::thesy::semantics::Definitions;
 use TheSy::{thesy, TheSyConfig};
-use TheSy::tools::tools::choose;
+use egg::tools::tools::choose;
 use std::rc::Rc;
 
 /// Arguments to use to run thesy

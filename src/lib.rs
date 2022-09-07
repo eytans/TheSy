@@ -11,12 +11,10 @@ extern crate global_counter;
 #[macro_use]
 extern crate lazy_static;
 
-pub mod eggstentions;
-pub mod tools;
 pub mod thesy;
 mod lang;
-mod tree;
 mod tests;
+mod utils;
 
 // mod smtlib_translator;
 
@@ -34,12 +32,12 @@ use structopt::StructOpt;
 
 use egg::*;
 
-use crate::eggstentions::pretty_string::PrettyString;
+use egg::pretty_string::PrettyString;
 use crate::thesy::{example_creator};
 use crate::thesy::case_split::{CaseSplit, Split};
 use crate::thesy::thesy::TheSy;
 use thesy::semantics::Definitions;
-use crate::tools::tools::choose;
+use egg::tools::tools::choose;
 use std::rc::Rc;
 pub(crate) use crate::thesy::consts::system_case_splits;
 
@@ -182,7 +180,3 @@ impl From<&TheSyConfig> for TheSy {
                            if conf.proof_mode { conjectures } else { None })
     }
 }
-
-pub use {
-    eggstentions::*
-};

@@ -11,17 +11,18 @@ use std::path::PathBuf;
 use thesy_parser::ast::{Expression, Statement, Identifier, Annotation, Terminal};
 use thesy_parser::ast::Definitions::Defs;
 use std::str::FromStr;
-use crate::eggstentions::searchers::multisearcher::{MultiDiffSearcher, EitherSearcher, FilteringSearcher, ToDyn, PointerSearcher, SubPattern};
+use egg::searchers::{MultiDiffSearcher, EitherSearcher, FilteringSearcher, ToDyn, PointerSearcher};
 use crate::thesy::TheSy;
-use crate::eggstentions::appliers::DiffApplier;
+use egg::appliers::DiffApplier;
 use thesy_parser::ast::Terminal::{Id, Hole};
 use thesy_parser::ast::Expression::{Op, Leaf};
 use multimap::MultiMap;
-use crate::eggstentions::expression_ops::{IntoTree, RecExpSlice, Tree};
-use crate::eggstentions::conditions::{AndCondition, OrCondition};
+use egg::expression_ops::{IntoTree, RecExpSlice, Tree};
+use egg::conditions::{AndCondition, OrCondition};
 use std::iter::FromIterator;
 use indexmap::{IndexMap, IndexSet};
-use crate::searchers::multisearcher::{PatternMatcher, ToRc, VarMatcher};
+use egg::searchers::{PatternMatcher, ToRc, VarMatcher};
+use crate::utils::SubPattern;
 
 lazy_static!(
     static ref split_hole: Terminal = Hole(String::from("splithole"), None);

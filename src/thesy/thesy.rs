@@ -12,17 +12,17 @@ use itertools::Itertools;
 use log::{info, warn};
 use multimap::MultiMap;
 
-use crate::eggstentions::costs::{MinRep, RepOrder};
-use crate::eggstentions::expression_ops::{IntoTree, Tree};
-use crate::eggstentions::pretty_string::PrettyString;
-use crate::eggstentions::searchers::multisearcher::MultiDiffSearcher;
+use egg::costs::{MinRep, RepOrder};
+use egg::{IntoTree, Tree};
+use egg::pretty_string::PrettyString;
+use egg::searchers::MultiDiffSearcher;
 use crate::lang::*;
 use crate::thesy::{case_split, consts};
 use crate::thesy::case_split::{CaseSplit, Split, SplitApplier};
 use crate::thesy::example_creator::Examples;
 use crate::thesy::prover::Prover;
 use crate::thesy::statistics::Stats;
-use crate::tools::tools::choose;
+use egg::tools::tools::choose;
 
 /// Theory Synthesizer - Explores a given theory finding and proving new lemmas.
 pub struct TheSy {
@@ -454,6 +454,7 @@ impl TheSy {
         let mut res = None;
         let mut index = 0;
         'outer: for (i, conjs) in lemmas.iter().enumerate() {
+            debug!("Checking goal {}", i);
             for (precond, ex1, ex2) in conjs {
                 for p in self.datatypes.values() {
                     let start = if cfg!(feature = "stats") {
@@ -462,6 +463,7 @@ impl TheSy {
                     res = p.prove_all_split_d(case_splitter, rules, Option::from(precond), ex1, ex2, 3);
                     index = i;
                     if res.is_some() {
+                        warn!("Proved goal {} - {:?} -> {} = {}", i, precond, ex1, ex2);
                         if cfg!(feature = "stats") {
                             self.stats.goals_proved.push((ex1.pretty(500), ex2.pretty(500), SystemTime::now().duration_since(start.unwrap()).unwrap()));
                         }
@@ -493,6 +495,7 @@ impl TheSy {
         let new_rules_index = rules.len();
         let mut splitter_to_use = case_spliter.as_mut();
 
+        warn!("Running prove goals");
         if self.prove_goals(&mut splitter_to_use, rules, &mut found_rules, new_rules_index) {
             return found_rules;
         }
@@ -557,6 +560,7 @@ impl TheSy {
                         rules.insert(new_rules_index, r.3);
                     }
 
+                    warn!("Running prove goals");
                     if self.prove_goals(&mut splitter_to_use, rules, &mut found_rules, new_rules_index) {
                         return found_rules;
                     }
@@ -651,6 +655,7 @@ impl TheSy {
                 // inserting like this so new rule will apply before running into node limit.
                 rules.insert(new_rules_index, r.3);
             }
+            warn!("Running prove goals");
             if self.prove_goals(&mut splitter_to_use, rules, found_rules, new_rules_index) {
                 return true;
             }
@@ -697,9 +702,9 @@ mod test {
     use indexmap::{IndexMap, IndexSet};
     use itertools::Itertools;
 
-    use crate::eggstentions::appliers::DiffApplier;
-    use crate::eggstentions::reconstruct::{reconstruct, reconstruct_all};
-    use crate::eggstentions::searchers::multisearcher::ToDyn;
+    use egg::appliers::DiffApplier;
+    use egg::reconstruct::{reconstruct, reconstruct_all};
+    use egg::searchers::ToDyn;
     use crate::lang::{DataType, Function};
     use crate::tests::{init_logging, ProofMode};
     use crate::thesy::{consts, Examples};
@@ -708,7 +713,7 @@ mod test {
     use crate::thesy::semantics::Definitions;
     use crate::thesy::thesy::TheSy;
     use crate::{TheSyConfig, tests, ALLOCATOR};
-    use crate::tools::tools::Grouped;
+    use egg::tools::tools::Grouped;
 
     fn create_nat_type() -> DataType {
         DataType::new("nat".to_string(), vec![

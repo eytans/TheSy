@@ -1,13 +1,13 @@
-use egg::{Rewrite, SymbolLang, Pattern, Var, Language, Id, RcImmutableCondition, ToCondRc};
-use crate::eggstentions::searchers::multisearcher::{FilteringSearcher, ToDyn};
-use crate::eggstentions::appliers::{DiffApplier, UnionApplier};
+use egg::{Rewrite, SymbolLang, Pattern, Var, Language, Id, RcImmutableCondition, ToCondRc, OpId, Symbol};
+use egg::searchers::{FilteringSearcher, ToDyn};
+use egg::appliers::{DiffApplier, UnionApplier};
 use std::str::FromStr;
 use crate::thesy::{case_split, TheSy};
 use crate::thesy::case_split::{CaseSplit, Split, SplitApplier};
 use itertools::Itertools;
 use std::rc::Rc;
-use crate::eggstentions::conditions::AndCondition;
-use crate::searchers::multisearcher::{MatcherContainsCondition, PatternMatcher, ToRc, VarMatcher};
+use egg::conditions::AndCondition;
+use egg::searchers::{MatcherContainsCondition, PatternMatcher, ToRc, VarMatcher};
 
 pub(crate) fn bool_rws() -> Vec<Rewrite<SymbolLang, ()>> {
     let and_multi_searcher = {
