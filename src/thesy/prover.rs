@@ -143,8 +143,8 @@ impl Prover {
         }
         // create graph containing both expressions
         let (orig_egraph, ind_id) = self.create_proof_graph(precond, &ex1, &ex2);
-        self.datatype.constructors.iter().filter(|c| c.params.is_empty()).dropping(1).all(|c| {
-            warn!("prove_base: checking constructor {}", c.name);
+        self.datatype.constructors.iter().filter(|c| c.params.is_empty()).all(|c| {
+            info!("prove_base: checking constructor {}", c.name);
             let mut egraph = orig_egraph.clone();
             let contr_id = egraph.add_expr(&c.as_exp());
             egraph.union(contr_id, ind_id);

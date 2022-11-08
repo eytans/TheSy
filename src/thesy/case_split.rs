@@ -167,14 +167,8 @@ impl CaseSplit {
             let key = split_conclusions.iter().map(|m| m[c]).collect_vec();
             group_by_splits.entry(key).or_default().insert(*c);
         }
-        warn!("Splits conclusiongs: {:?}", split_conclusions);
-        warn!("group by splits {:?}", group_by_splits);
         for group in group_by_splits.values().filter(|g| g.len() > 1) {
             // print group and reconstruct each member
-            warn!("group: {:?}", group);
-            for g in group.iter() {
-                warn!("{g:?} is {}", reconstruct(egraph, *g, 3).unwrap());
-            }
             debug_assert!(group.iter().filter_map(|id| egraph[*id].color()).unique().count() <= 1);
             // TODO: might need to look into hierarchical colors conclusions.
             let colored = group.into_iter().filter(|id| egraph[**id].color().is_some()).copied().collect_vec();

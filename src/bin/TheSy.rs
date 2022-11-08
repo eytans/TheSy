@@ -59,9 +59,12 @@ fn main() {
     let args = CliOpt::from_args();
 
     let log_path = args.path.with_extension("log");
+    let mut thesy_config: simplelog::Config = ConfigBuilder::new().add_filter_ignore_str("egg").build();
+    let mut egg_config: simplelog::Config = ConfigBuilder::new().add_filter_allow_str("egg").build();
     CombinedLogger::init(
         vec![
-            TermLogger::new(LevelFilter::Debug, Config::default(), TerminalMode::Mixed, ColorChoice::Auto),
+            TermLogger::new(LevelFilter::Debug, thesy_config, TerminalMode::Mixed, ColorChoice::Auto),
+            TermLogger::new(LevelFilter::Warn, egg_config, TerminalMode::Mixed, ColorChoice::Auto),
             WriteLogger::new(LevelFilter::Info, Config::default(), File::create(log_path).unwrap()),
         ]
     ).unwrap();

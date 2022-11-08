@@ -22,13 +22,13 @@ pub fn init_logging() {
 
     let mut lock = log_initialized.lock().unwrap();
     if lock.not() {
-        // let mut builder = ConfigBuilder::new();
-        // builder.add_filter_ignore("egg".parse().unwrap());
-        // let config = builder.build();
+        let mut thesy_config: simplelog::Config = ConfigBuilder::new().add_filter_ignore_str("egg").build();
+        let mut egg_config: simplelog::Config = ConfigBuilder::new().add_filter_allow_str("egg").build();
         let logger = CombinedLogger::init(
             vec![
-                TermLogger::new(LevelFilter::Info, Config::default(), TerminalMode::Mixed, ColorChoice::Auto),
-                WriteLogger::new(LevelFilter::Info, Config::default(), File::create("my_rust_bin.log").unwrap())
+                TermLogger::new(LevelFilter::Debug, thesy_config, TerminalMode::Mixed, ColorChoice::Auto),
+                TermLogger::new(LevelFilter::Warn, egg_config, TerminalMode::Mixed, ColorChoice::Auto),
+                WriteLogger::new(LevelFilter::Info, Config::default(), File::create("my_rust_bin.log").unwrap()),
             ]
         );
         if logger.is_err() {
