@@ -8,7 +8,7 @@ use std::fmt;
 use std::fmt::Debug;
 use indexmap::{IndexMap, IndexSet};
 use smallvec::alloc::fmt::Formatter;
-use egg::reconstruct::{reconstruct, reconstruct_colored};
+use egg::reconstruct::{reconstruct, reconstruct_all, reconstruct_colored};
 use egg::appliers::DiffApplier;
 use egg::searchers::{FilteringSearcher, ToRc};
 use egg::searchers::Matcher;
@@ -171,6 +171,7 @@ impl CaseSplit {
             // print group and reconstruct each member
             debug_assert!(group.iter().filter_map(|id| egraph[*id].color()).unique().count() <= 1);
             // TODO: might need to look into hierarchical colors conclusions.
+            // TODO: What about split conclusion from only colored matches?
             let colored = group.into_iter().filter(|id| egraph[**id].color().is_some()).copied().collect_vec();
             let color = colored.first().map(|id| egraph[*id].color().unwrap());
             let black = group.into_iter().filter(|id| egraph[**id].color().is_none()).copied().collect_vec();
@@ -260,7 +261,8 @@ impl CaseSplit {
 
         egraph.rebuild();
         for s in splitters {
-            warn!("  {} - root: {}, cases: {}", s, reconstruct_colored(egraph, s.color, s.root, 2).map(|x| x.to_string()).unwrap_or("No reconstruct".to_string()), s.splits.iter().map(|c| reconstruct(egraph, *c, 3).map(|x| x.to_string()).unwrap_or("No reconstruct".to_string())).intersperse(" ".to_string()).collect::<String>());
+            let trns = reconstruct_all(egraph, s.color, 2);
+            warn!("  {} - root: {}, cases: {}", s, trns.get(&s.root).map(|x| x.to_string()).unwrap_or("No reconstruct".to_string()), s.splits.iter().map(|c| trns.get(c).map(|x| x.to_string()).unwrap_or("No reconstruct".to_string())).intersperse(" ".to_string()).collect::<String>());
         }
         warn!("Created colors: {:?}", colors);
         // When the API is limited the code is mentally inhibited
@@ -271,12 +273,6 @@ impl CaseSplit {
             .for_each(|c|
                 egraph.colored_dot(*c)
                     .to_dot(format!("after_case_split_color_{}.dot", c)).unwrap()));
-        let pattern_results = Pattern::from_str("(= ?x ?y)").unwrap().search(egraph);
-        warn!("Results for (= ?x ?y) : {:?}", pattern_results);
-        let filtering_searcher = FilteringSearcher::searcher_is_true(Pattern::from_str("(= ?x ?y)").unwrap());
-        let matcher = crate::searchers::PatternMatcher::new("true".parse().unwrap());
-        warn!("Matcher results are: {:?}", matcher.match_(egraph, &pattern_results[0].substs[0]));
-        warn!("Results for (= ?x ?y) == true : {:?}", filtering_searcher.search(egraph));
         for cs in colors {
             let split_conclusions = cs.iter()
                 .map(|c| {
