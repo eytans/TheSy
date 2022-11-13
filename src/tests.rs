@@ -13,6 +13,7 @@ use indexmap::IndexSet;
 use thesy_parser::ast::{Expression, Terminal};
 use egg::reconstruct::reconstruct;
 use crate::{tests, TheSyConfig};
+use crate::lang::ThExpr;
 
 lazy_static!(
     static ref log_initialized: Mutex<bool> = Mutex::new(false);
@@ -114,7 +115,7 @@ pub fn test_terms(mut definitions: Definitions) -> ProofMode {
     test_prover(&definitions)[0]
 }
 
-fn translate_expression(ast_exp1: &mut Expression) -> RecExpr<SymbolLang> {
+fn translate_expression(ast_exp1: &mut Expression) -> ThExpr {
     RecExpr::from_str(&*ast_exp1.map(&mut |t| terminal_ph_translator(t)).to_sexp_string()).unwrap()
 }
 

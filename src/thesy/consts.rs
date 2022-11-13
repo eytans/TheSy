@@ -1,5 +1,5 @@
 use egg::{Rewrite, SymbolLang, Pattern, Var, Language, Id, RcImmutableCondition, ToCondRc, OpId, Symbol};
-use egg::searchers::{FilteringSearcher, ToDyn};
+use egg::searchers::{FilteringSearcher, MultiDiffSearcher, ToDyn};
 use egg::appliers::{DiffApplier, UnionApplier};
 use std::str::FromStr;
 use crate::thesy::{case_split, TheSy};
@@ -8,8 +8,9 @@ use itertools::Itertools;
 use std::rc::Rc;
 use egg::conditions::AndCondition;
 use egg::searchers::{MatcherContainsCondition, PatternMatcher, ToRc, VarMatcher};
+use crate::lang::ThRewrite;
 
-pub(crate) fn bool_rws() -> Vec<Rewrite<SymbolLang, ()>> {
+pub(crate) fn bool_rws() -> Vec<ThRewrite> {
     let and_multi_searcher = {
         let p: Pattern<SymbolLang> = "(and ?x ?y)".parse().unwrap();
         FilteringSearcher::searcher_is_true(p)
@@ -38,7 +39,7 @@ pub(crate) fn bool_rws() -> Vec<Rewrite<SymbolLang, ()>> {
 }
 
 // Also common that less is skipped
-pub(crate) fn less_rws() -> Vec<Rewrite<SymbolLang, ()>> {
+pub(crate) fn less_rws() -> Vec<ThRewrite> {
     vec![
         rewrite!("less-zero"; "(less ?x zero)" => "false"),
         rewrite!("less-zs"; "(less zero (succ ?x))" => "true"),
@@ -54,7 +55,7 @@ fn cons_conclusion() -> DiffApplier<Pattern<SymbolLang>> {
     DiffApplier::new("(cons (isconsex ?x))".parse().unwrap())
 }
 
-pub(crate) fn is_rws() -> Vec<Rewrite<SymbolLang, ()>> {
+pub(crate) fn is_rws() -> Vec<ThRewrite> {
     vec![
         rewrite!("is_cons_true"; {FilteringSearcher::from(Pattern::from_str("(is-cons ?x)").unwrap(), FilteringSearcher::create_exists_pattern_filterer("(cons ?y)".parse::<Pattern<SymbolLang>>().unwrap()))} => "true"),
         rewrite!("is_cons_false"; {FilteringSearcher::from(Pattern::from_str("(is-cons ?x)").unwrap(), FilteringSearcher::create_exists_pattern_filterer("nil".parse::<Pattern<SymbolLang>>().unwrap()))} => "false"),
@@ -65,7 +66,7 @@ pub(crate) fn is_rws() -> Vec<Rewrite<SymbolLang, ()>> {
     ]
 }
 
-pub(crate) fn equality_rws() -> Vec<Rewrite<SymbolLang, ()>> {
+pub(crate) fn equality_rws() -> Vec<ThRewrite> {
     let eq_searcher = FilteringSearcher::searcher_is_true(Pattern::from_str("(= ?x ?y)").unwrap());
     let union_applier = UnionApplier::new(vec![Var::from_str("?x").unwrap(), Var::from_str("?y").unwrap()]);
     vec![
@@ -76,7 +77,7 @@ pub(crate) fn equality_rws() -> Vec<Rewrite<SymbolLang, ()>> {
     ]
 }
 
-pub(crate) fn ite_rws() -> Vec<Rewrite<SymbolLang, ()>> {
+pub(crate) fn ite_rws() -> Vec<ThRewrite> {
     vec![
         rewrite!("ite_true"; "(ite true ?x ?y)" => "?x"),
         rewrite!("ite_false"; "(ite false ?x ?y)" => "?y"),

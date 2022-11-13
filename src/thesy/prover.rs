@@ -1,4 +1,5 @@
 use std::cmp::max;
+use std::ptr::eq;
 use std::str::FromStr;
 
 use egg::{EGraph, ENodeOrVar, Id, Language, Pattern, RecExpr, Rewrite, Runner, Symbol, SymbolLang, Var};
@@ -11,7 +12,7 @@ use egg::appliers::DiffApplier;
 use egg::expression_ops::{IntoTree, RecExpSlice, Tree};
 use egg::searchers::{EitherSearcher, MultiDiffSearcher};
 use egg::pretty_string::PrettyString;
-use crate::lang::{DataType, Function};
+use crate::lang::{DataType, Function, ThEGraph, ThExpr, ThRewrite};
 use egg::searchers::{FilteringSearcher, MatcherContainsCondition, ToDyn, ToRc};
 use crate::thesy::TheSy;
 use crate::thesy::case_split::CaseSplit;
@@ -19,7 +20,7 @@ use crate::thesy::case_split::CaseSplit;
 #[derive(Clone, Debug)]
 pub struct Prover {
     datatype: DataType,
-    wfo_rules: Vec<Rewrite<SymbolLang, ()>>,
+    wfo_rules: Vec<ThRewrite>,
     ind_var: Function,
     split_depth: usize,
     split_itern: usize
@@ -45,7 +46,7 @@ impl Prover {
 
     fn wfo_op() -> &'static str { "ltwf" }
 
-    fn wfo_trans() -> Rewrite<SymbolLang, ()> {
+    fn wfo_trans() -> ThRewrite {
         let searcher = MultiDiffSearcher::new(vec![
             Pattern::from_str(&*format!("({} ?z ?x)", Self::wfo_op())).unwrap(),
             Pattern::from_str(&*format!("({} ?x ?y)", Self::wfo_op())).unwrap()]);
@@ -54,7 +55,7 @@ impl Prover {
     }
 
     /// create well founded order rewrites for constructors of Datatype `datatype`.
-    fn wfo_datatype(datatype: &DataType) -> Vec<Rewrite<SymbolLang, ()>> {
+    fn wfo_datatype(datatype: &DataType) -> Vec<ThRewrite> {
         let contructor_rules = datatype.constructors.iter()
             .filter(|c| !c.params.is_empty())
             .flat_map(|c| {
@@ -80,12 +81,12 @@ impl Prover {
         res
     }
 
-    fn not_containing_ind_var(&self, ex: &RecExpr<SymbolLang>) -> bool {
+    fn not_containing_ind_var(&self, ex: &ThExpr) -> bool {
         ex.as_ref().iter().find(|s| s.op.to_string() == self.ind_var.name).is_none()
     }
 
-    pub fn create_graph(precond: Option<&RecExpr<SymbolLang>>, ex1: &&RecExpr<SymbolLang>, ex2: &&RecExpr<SymbolLang>) -> EGraph<SymbolLang, ()> {
-        let mut orig_egraph: EGraph<SymbolLang, ()> = EGraph::default();
+    pub fn create_graph(precond: Option<&ThExpr>, ex1: &&ThExpr, ex2: &&ThExpr) -> ThEGraph {
+        let mut orig_egraph: ThEGraph = EGraph::default();
         let _ = orig_egraph.add_expr(&ex1);
         let _ = orig_egraph.add_expr(&ex2);
         if precond.is_some() {
@@ -98,13 +99,13 @@ impl Prover {
         orig_egraph
     }
 
-    fn create_proof_graph(&self, precond: Option<&RecExpr<SymbolLang>>, ex1: &&RecExpr<SymbolLang>, ex2: &&RecExpr<SymbolLang>) -> (EGraph<SymbolLang, ()>, Id) {
+    fn create_proof_graph(&self, precond: Option<&ThExpr>, ex1: &&ThExpr, ex2: &&ThExpr) -> (ThEGraph, Id) {
         let orig_egraph = Self::create_graph(precond, ex1, ex2);
         let ind_id = orig_egraph.lookup(SymbolLang::new(&self.ind_var.name, vec![])).unwrap();
         (orig_egraph, ind_id)
     }
 
-    fn replace_at_indexes(ex: &RecExpr<SymbolLang>, ph_indices: Vec<(usize, String)>) -> RecExpr<SymbolLang> {
+    fn replace_at_indexes(ex: &ThExpr, ph_indices: Vec<(usize, String)>) -> ThExpr {
         let mut res = ex.as_ref().iter().cloned().collect_vec();
         for (i, new_ph) in ph_indices {
             res[i].op = Symbol::from(new_ph);
@@ -112,31 +113,31 @@ impl Prover {
         RecExpr::from(res)
     }
 
-    fn collect_ph1s(&self, ex: &RecExpr<SymbolLang>) -> Vec<usize> {
+    fn collect_ph1s(&self, ex: &ThExpr) -> Vec<usize> {
         ex.as_ref().iter().enumerate()
             .filter(|s| s.1.op.as_str() == TheSy::get_ph(&self.datatype.as_exp(), 1).name)
             .map(|s| s.0).collect_vec()
     }
 
-    pub fn rw_from_exp(precond: Option<&RecExpr<SymbolLang>>, ex1: &RecExpr<SymbolLang>, ex2: &RecExpr<SymbolLang>, ind_var: &Function) -> Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, Rewrite<SymbolLang, ()>)> {
+    pub fn rw_from_exp(precond: Option<&ThExpr>, ex1: &ThExpr, ex2: &ThExpr, ind_var: &Function) -> Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, ThRewrite)> {
         let fixed_precond = precond.map(|p| Self::pattern_from_exp(p, &ind_var, &("?".to_owned() + &ind_var.name)));
         let fixed_ex1 = Self::pattern_from_exp(ex1, ind_var, &("?".to_owned() + &ind_var.name));
         let fixed_ex2 = Self::pattern_from_exp(ex2, ind_var, &("?".to_owned() + &ind_var.name));
         let precond_text = fixed_precond.as_ref().map_or("".to_owned(), |p| p.pretty_string() + " |> ");
         let text1 = precond_text.to_owned() + &*fixed_ex1.pretty(80) + " => " + &*fixed_ex2.pretty(80);
         let text2 = precond_text.to_owned() + &*fixed_ex2.pretty(80) + " => " + &*fixed_ex1.pretty(80);
-        let mut new_rules: Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, Rewrite<SymbolLang, ()>)> = vec![];
+        let mut new_rules: Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, ThRewrite)> = vec![];
         // TODO: dont do it so half assed
         Prover::push_rw(fixed_precond.clone(), &fixed_ex1, &fixed_ex2, text1, &mut new_rules);
         Prover::push_rw(fixed_precond, &fixed_ex2, &fixed_ex1, text2, &mut new_rules);
         new_rules
     }
 
-    pub fn prove_base(&self, case_splitter: &mut Option<&mut CaseSplit>, rules: &[Rewrite<SymbolLang, ()>], ex1: &RecExpr<SymbolLang>, ex2: &RecExpr<SymbolLang>) -> bool {
+    pub fn prove_base(&self, case_splitter: &mut Option<&mut CaseSplit>, rules: &[ThRewrite], ex1: &ThExpr, ex2: &ThExpr) -> bool {
         self.prove_base_split_d(case_splitter, rules, None, ex1, ex2, Self::CASE_SPLIT_DEPTH)
     }
 
-    pub fn prove_base_split_d(&self, case_splitter: &mut Option<&mut CaseSplit>, rules: &[Rewrite<SymbolLang, ()>], precond: Option<&RecExpr<SymbolLang>>, ex1: &RecExpr<SymbolLang>, ex2: &RecExpr<SymbolLang>, split_d: usize) -> bool {
+    pub fn prove_base_split_d(&self, case_splitter: &mut Option<&mut CaseSplit>, rules: &[ThRewrite], precond: Option<&ThExpr>, ex1: &ThExpr, ex2: &ThExpr, split_d: usize) -> bool {
         if self.not_containing_ind_var(ex1) && self.not_containing_ind_var(ex2) {
             warn!("prove_base: no ind var in ex1 and ex2");
             return false;
@@ -156,8 +157,8 @@ impl Prover {
         })
     }
 
-    pub fn generalize_prove(&self, case_splitter: &mut Option<&mut CaseSplit>, rules: &[Rewrite<SymbolLang, ()>], orig_ex1: &RecExpr<SymbolLang>, orig_ex2: &RecExpr<SymbolLang>)
-                            -> Option<Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, Rewrite<SymbolLang, ()>)>> {
+    pub fn generalize_prove(&self, case_splitter: &mut Option<&mut CaseSplit>, rules: &[ThRewrite], orig_ex1: &ThExpr, orig_ex2: &ThExpr)
+                            -> Option<Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, ThRewrite)>> {
         // TODO: generalize non induction vars
         let mut ex1 = orig_ex1.into_tree().to_clean_exp();
         let mut ex2 = orig_ex2.into_tree().to_clean_exp();
@@ -203,8 +204,8 @@ impl Prover {
     }
 
     /// Returns Some if found rules otherwise None. Receives expressions without vars.
-    pub fn prove_ind(&self, case_splitter: &mut Option<&mut CaseSplit>, rules: &[Rewrite<SymbolLang, ()>], ex1: &RecExpr<SymbolLang>, ex2: &RecExpr<SymbolLang>)
-                     -> Option<Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, Rewrite<SymbolLang, ()>)>> {
+    pub fn prove_ind(&self, case_splitter: &mut Option<&mut CaseSplit>, rules: &[ThRewrite], ex1: &ThExpr, ex2: &ThExpr)
+                     -> Option<Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, ThRewrite)>> {
         self.prove_ind_split_d(case_splitter, rules, None, ex1, ex2, Self::CASE_SPLIT_DEPTH)
     }
 
@@ -213,8 +214,8 @@ impl Prover {
    /// representing well founded order on the induction variable.
    /// Need to replace the induction variable with an expression representing a constructor and
    /// well founded order on the params of the constructor.
-    pub fn prove_ind_split_d(&self, case_splitter: &mut Option<&mut CaseSplit>, rules: &[Rewrite<SymbolLang, ()>], precond: Option<&RecExpr<SymbolLang>>, ex1: &RecExpr<SymbolLang>, ex2: &RecExpr<SymbolLang>, split_d: usize)
-                             -> Option<Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, Rewrite<SymbolLang, ()>)>> {
+    pub fn prove_ind_split_d(&self, case_splitter: &mut Option<&mut CaseSplit>, rules: &[ThRewrite], precond: Option<&ThExpr>, ex1: &ThExpr, ex2: &ThExpr, split_d: usize)
+                             -> Option<Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, ThRewrite)>> {
         if self.not_containing_ind_var(ex1) && self.not_containing_ind_var(ex2) {
             return None;
         }
@@ -245,13 +246,13 @@ impl Prover {
         }
     }
 
-    pub fn prove_all(&self, case_splitter: &mut Option<&mut CaseSplit>, rules: &[Rewrite<SymbolLang, ()>], ex1: &RecExpr<SymbolLang>, ex2: &RecExpr<SymbolLang>)
-                     -> Option<Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, Rewrite<SymbolLang, ()>)>> {
+    pub fn prove_all(&self, case_splitter: &mut Option<&mut CaseSplit>, rules: &[ThRewrite], ex1: &ThExpr, ex2: &ThExpr)
+                     -> Option<Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, ThRewrite)>> {
         self.prove_all_split_d(case_splitter, rules, None, ex1, ex2, Self::CASE_SPLIT_DEPTH)
     }
 
-    pub fn prove_all_split_d(&self, case_splitter: &mut Option<&mut CaseSplit>, rules: &[Rewrite<SymbolLang, ()>], precond: Option<&RecExpr<SymbolLang>>, ex1: &RecExpr<SymbolLang>, ex2: &RecExpr<SymbolLang>, split_d: usize)
-                             -> Option<Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, Rewrite<SymbolLang, ()>)>> {
+    pub fn prove_all_split_d(&self, case_splitter: &mut Option<&mut CaseSplit>, rules: &[ThRewrite], precond: Option<&ThExpr>, ex1: &ThExpr, ex2: &ThExpr, split_d: usize)
+                             -> Option<Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, ThRewrite)>> {
         if self.prove_base_split_d(case_splitter, rules, precond, ex1, ex2, split_d) {
             warn!("Basic succeeded");
             self.prove_ind_split_d(case_splitter, rules, precond, ex1, ex2, split_d)
@@ -260,7 +261,7 @@ impl Prover {
         }
     }
 
-    fn push_rw(precond: Option<Pattern<SymbolLang>>, fixed_ex1: &Pattern<SymbolLang>, fixed_ex2: &Pattern<SymbolLang>, text1: String, new_rules: &mut Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, Rewrite<SymbolLang, ()>)>) {
+    fn push_rw(precond: Option<Pattern<SymbolLang>>, fixed_ex1: &Pattern<SymbolLang>, fixed_ex2: &Pattern<SymbolLang>, text1: String, new_rules: &mut Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, ThRewrite)>) {
         if !fixed_ex1.ast.as_ref().last().unwrap().is_leaf() {
             let rw = if precond.is_some() {
                 Rewrite::new(text1.clone(), MultiDiffSearcher::new(vec![precond.clone().unwrap(), fixed_ex1.clone()]), fixed_ex2.clone())
@@ -276,7 +277,7 @@ impl Prover {
         }
     }
 
-    fn create_hypothesis(induction_ph: &Function, precond: Option<&RecExpr<SymbolLang>>, ex1: &RecExpr<SymbolLang>, ex2: &RecExpr<SymbolLang>) -> Vec<Rewrite<SymbolLang, ()>> {
+    fn create_hypothesis(induction_ph: &Function, precond: Option<&ThExpr>, ex1: &ThExpr, ex2: &ThExpr) -> Vec<ThRewrite> {
         assert!(!induction_ph.name.starts_with("?"));
         // used somevar but wasnt recognised as var
         let ind_replacer = "?somevar".to_string();
@@ -314,7 +315,7 @@ impl Prover {
         res
     }
 
-    pub fn pattern_from_exp(exp: &RecExpr<SymbolLang>, induction_ph: &Function, sub_ind: &String) -> Pattern<SymbolLang> {
+    pub fn pattern_from_exp(exp: &ThExpr, induction_ph: &Function, sub_ind: &String) -> Pattern<SymbolLang> {
         let mut res_exp: RecExpr<ENodeOrVar<SymbolLang>> = RecExpr::default();
         fn add_to_exp(res: &mut RecExpr<ENodeOrVar<SymbolLang>>, inp: &RecExpSlice<SymbolLang>, induction_ph: &String, sub_ind: &String) -> Id {
             let mut ids = inp.children().iter().map(|c| add_to_exp(res, c, induction_ph, sub_ind)).collect_vec();

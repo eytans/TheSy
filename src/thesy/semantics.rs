@@ -6,7 +6,7 @@ use egg::{Pattern, RecExpr, Rewrite, Searcher, SymbolLang, Var, ENodeOrVar, Cond
 use itertools::Itertools;
 use thesy_parser::{grammar, ast};
 
-use crate::lang::{DataType, Function};
+use crate::lang::{DataType, Function, ThExpr, ThRewrite};
 use std::path::PathBuf;
 use thesy_parser::ast::{Expression, Statement, Identifier, Annotation, Terminal};
 use thesy_parser::ast::Definitions::Defs;
@@ -61,9 +61,9 @@ pub struct Definitions {
     /// All function declereations as (name, type)
     pub functions: Vec<Function>,
     /// Rewrites defined by (assert forall)
-    pub rws: Vec<Rewrite<SymbolLang, ()>>,
+    pub rws: Vec<ThRewrite>,
     /// Terms to prove, given as not forall, (vars - types, holes, precondition, ex1, ex2)
-    pub conjectures: Vec<(IndexMap<RecExpr<SymbolLang>, RecExpr<SymbolLang>>, IndexSet<RecExpr<SymbolLang>>, Option<RecExpr<SymbolLang>>, RecExpr<SymbolLang>, RecExpr<SymbolLang>)>,
+    pub conjectures: Vec<(IndexMap<ThExpr, ThExpr>, IndexSet<ThExpr>, Option<ThExpr>, ThExpr, ThExpr)>,
     /// Logic of when to apply case split
     pub case_splitters: Vec<(Rc<dyn Searcher<SymbolLang, ()>>, Pattern<SymbolLang>, Vec<Pattern<SymbolLang>>)>,
     /// patterns used to deduce case splits
@@ -514,7 +514,7 @@ impl Definitions {
                precond: Option<Expression>,
                source: Expression,
                target: Expression,
-               conds: Vec<thesy_parser::ast::Condition>) -> Rewrite<SymbolLang, ()> {
+               conds: Vec<thesy_parser::ast::Condition>) -> ThRewrite {
         let (cond_searcher, applier) =
             Self::create_searcher_applier(precond, source.clone(), target, conds);
         if let Op(op, params) = &source {

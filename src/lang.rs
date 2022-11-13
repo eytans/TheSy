@@ -1,13 +1,19 @@
-use egg::{Id, Language, RecExpr, Symbol, SymbolLang};
+use egg::{EGraph, Id, Language, RecExpr, Rewrite, Symbol, SymbolLang};
 use itertools::Itertools;
 
 use egg::expression_ops::{IntoTree, Tree};
 use std::fmt::{Display, Formatter};
 
+pub type ThNode = SymbolLang;
+pub type ThAnl = ();
+pub type ThExpr = RecExpr<ThNode>;
+pub type ThEGraph = EGraph<ThNode, ThAnl>;
+pub type ThRewrite = Rewrite<ThNode, ThAnl>;
+
 #[derive(Clone, Hash, PartialEq, Eq, Debug)]
 pub struct DataType {
     pub name: String,
-    pub type_params: Vec<RecExpr<SymbolLang>>,
+    pub type_params: Vec<ThExpr>,
     // TODO: change to Function instead of rec expr
     /// Constructor name applied on types
     pub constructors: Vec<Function>,
@@ -23,9 +29,9 @@ impl Display for DataType {
 #[derive(Clone, Hash, PartialEq, Eq, Debug)]
 pub struct Function {
     pub name: String,
-    pub params: Vec<RecExpr<SymbolLang>>,
+    pub params: Vec<ThExpr>,
     /// Constructor name applied on types
-    pub ret_type: RecExpr<SymbolLang>,
+    pub ret_type: ThExpr,
 }
 
 impl Display for Function {
@@ -40,11 +46,11 @@ impl Display for Function {
 }
 
 impl Function {
-    pub fn new(name: String, params: Vec<RecExpr<SymbolLang>>, ret_type: RecExpr<SymbolLang>) -> Function {
+    pub fn new(name: String, params: Vec<ThExpr>, ret_type: ThExpr) -> Function {
         Function { name, params, ret_type }
     }
 
-    pub fn as_exp(&self) -> RecExpr<SymbolLang> {
+    pub fn as_exp(&self) -> ThExpr {
         let as_type = self.get_type();
         let mut children = as_type.as_ref().iter().cloned().dropping_back(1).collect_vec();
         let mut new_last = as_type.as_ref().last().unwrap().clone();
@@ -53,7 +59,7 @@ impl Function {
         RecExpr::from(children)
     }
 
-    pub fn get_type(&self) -> RecExpr<SymbolLang> {
+    pub fn get_type(&self) -> ThExpr {
         let mut children = vec![];
         let mut indices = vec![];
         for p in &self.params {
@@ -70,7 +76,7 @@ impl Function {
         }
     }
 
-    pub fn apply_params(&self, params: Vec<RecExpr<SymbolLang>>) -> RecExpr<SymbolLang> {
+    pub fn apply_params(&self, params: Vec<ThExpr>) -> ThExpr {
         let mut res = RecExpr::default();
         let mut indices = vec![];
         for p in params {
@@ -85,8 +91,8 @@ impl Function {
     }
 }
 
-impl From<RecExpr<SymbolLang>> for Function {
-    fn from(exp: RecExpr<SymbolLang>) -> Self {
+impl From<ThExpr> for Function {
+    fn from(exp: ThExpr) -> Self {
         let tree = exp.into_tree();
         Function::new(tree.root().op.to_string(),
                       tree.children().iter().dropping_back(1)
@@ -100,11 +106,11 @@ impl DataType {
         DataType { name, type_params: vec![], constructors }
     }
 
-    pub fn generic(name: String, type_params: Vec<RecExpr<SymbolLang>>, constructors: Vec<Function>) -> DataType {
+    pub fn generic(name: String, type_params: Vec<ThExpr>, constructors: Vec<Function>) -> DataType {
         DataType { name, type_params, constructors }
     }
 
-    pub fn as_exp(&self) -> RecExpr<SymbolLang> {
+    pub fn as_exp(&self) -> ThExpr {
         let mut res = vec![];
         let children = self.type_params.iter().map(|e| {
             res.extend(e.as_ref().iter().cloned());

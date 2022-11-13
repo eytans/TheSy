@@ -12,6 +12,7 @@ use egg::reconstruct::{reconstruct, reconstruct_all, reconstruct_colored};
 use egg::appliers::DiffApplier;
 use egg::searchers::{FilteringSearcher, ToRc};
 use egg::searchers::Matcher;
+use crate::lang::{ThEGraph, ThRewrite};
 
 
 /// To be used as the op of edges representing potential split
@@ -38,7 +39,7 @@ pub struct Split {
 impl Split {
     pub fn new(root: Id, splits: Vec<Id>, color: Option<ColorId>) -> Self { Split { root, splits, color } }
 
-    pub(crate) fn update(&mut self, egraph: &EGraph<SymbolLang, ()>) {
+    pub(crate) fn update(&mut self, egraph: &ThEGraph) {
         self.root = egraph.opt_colored_find(self.color, self.root);
         for i in 0..self.splits.len() {
             self.splits[i] = egraph.opt_colored_find(self.color, self.splits[i]);
@@ -64,12 +65,12 @@ impl fmt::Display for Split {
     }
 }
 
-pub type SplitApplier = Box<dyn FnMut(&mut EGraph<SymbolLang, ()>, Vec<SearchMatches>) -> Vec<Split>>;
+pub type SplitApplier = Box<dyn FnMut(&mut ThEGraph, Vec<SearchMatches>) -> Vec<Split>>;
 
 pub struct CaseSplit {
     splitter_rules: Vec<(Rc<dyn Searcher<SymbolLang, ()>>, SplitApplier)>,
     #[cfg(feature = "keep_splits")]
-    pub(crate) all_splits: Vec<EGraph<SymbolLang, ()>>,
+    pub(crate) all_splits: Vec<ThEGraph>,
 }
 
 impl Debug for CaseSplit {
@@ -94,7 +95,7 @@ impl CaseSplit {
         let mut res = CaseSplit::new(case_splitters.into_iter()
             .map(|(searcher, pattern, split_evaluators)| {
                 let diff_pattern = DiffApplier::new(pattern);
-                let applier: SplitApplier = Box::new(move |graph: &mut EGraph<SymbolLang, ()>, sms: Vec<SearchMatches>| {
+                let applier: SplitApplier = Box::new(move |graph: &mut ThEGraph, sms: Vec<SearchMatches>| {
                     let mut res = vec![];
                     for sm in sms {
                         for subst in &sm.substs {
@@ -117,8 +118,8 @@ impl CaseSplit {
     }
 
     // TODO: can this be an iterator?
-    fn split_graph(egraph: &EGraph<SymbolLang, ()>,
-                   split: &Split) -> Vec<EGraph<SymbolLang, ()>> {
+    fn split_graph(egraph: &ThEGraph,
+                   split: &Split) -> Vec<ThEGraph> {
         split.splits.iter().map(|child| {
             let mut new_graph = egraph.clone();
             new_graph.union(split.root, *child);
@@ -126,9 +127,9 @@ impl CaseSplit {
         }).collect_vec()
     }
 
-    fn equiv_reduction(rules: &[Rewrite<SymbolLang, ()>],
-                       egraph: EGraph<SymbolLang, ()>,
-                       run_depth: usize) -> EGraph<SymbolLang, ()> {
+    fn equiv_reduction(rules: &[ThRewrite],
+                       egraph: ThEGraph,
+                       run_depth: usize) -> ThEGraph {
         let mut runner = Runner::default().with_time_limit(Duration::from_secs(60 * 10)).with_node_limit(egraph.total_number_of_nodes() + 200000).with_egraph(egraph).with_iter_limit(run_depth);
         runner = runner.run(rules);
         match runner.stop_reason.as_ref().unwrap() {
@@ -150,7 +151,7 @@ impl CaseSplit {
         runner.egraph
     }
 
-    pub fn find_splitters(&mut self, egraph: &mut EGraph<SymbolLang, ()>) -> Vec<Split> {
+    pub fn find_splitters(&mut self, egraph: &mut ThEGraph) -> Vec<Split> {
         let mut res = vec![];
         for (s, c) in &mut self.splitter_rules {
             res.extend(c(egraph, s.search(egraph)));
@@ -161,7 +162,7 @@ impl CaseSplit {
         res.into_iter().unique().collect()
     }
 
-    fn merge_conclusions(egraph: &mut EGraph<SymbolLang, ()>, classes: &Vec<Id>, split_conclusions: Vec<IndexMap<Id, Id>>) {
+    fn merge_conclusions(egraph: &mut ThEGraph, classes: &Vec<Id>, split_conclusions: Vec<IndexMap<Id, Id>>) {
         let mut group_by_splits: IndexMap<Vec<Id>, IndexSet<Id>> = IndexMap::new();
         for c in classes {
             let key = split_conclusions.iter().map(|m| m[c]).collect_vec();
@@ -182,15 +183,15 @@ impl CaseSplit {
         egraph.rebuild();
     }
 
-    fn collect_merged(egraph: &EGraph<SymbolLang, ()>, classes: &Vec<Id>) -> IndexMap<Id, Id> {
+    fn collect_merged(egraph: &ThEGraph, classes: &Vec<Id>) -> IndexMap<Id, Id> {
         classes.iter().map(|c| (*c, egraph.find(*c))).collect::<IndexMap<Id, Id>>()
     }
 
-    fn collect_colored_merged(egraph: &EGraph<SymbolLang, ()>, classes: &Vec<Id>, color: ColorId) -> IndexMap<Id, Id> {
+    fn collect_colored_merged(egraph: &ThEGraph, classes: &Vec<Id>, color: ColorId) -> IndexMap<Id, Id> {
         classes.iter().map(|eclass| (*eclass, egraph.colored_find(color, *eclass))).collect::<IndexMap<Id, Id>>()
     }
 
-    pub fn case_split(&mut self, egraph: &mut EGraph<SymbolLang, ()>, split_depth: usize, rules: &[Rewrite<SymbolLang, ()>], run_depth: usize) {
+    pub fn case_split(&mut self, egraph: &mut ThEGraph, split_depth: usize, rules: &[ThRewrite], run_depth: usize) {
         if !cfg!(feature = "no_split") {
             if cfg!(feature = "split_clone") {
                 self.inner_case_split(egraph, split_depth, &Default::default(), rules, run_depth)
@@ -203,7 +204,7 @@ impl CaseSplit {
         }
     }
 
-    fn colored_case_split(&mut self, egraph: &mut EGraph<SymbolLang, ()>, split_depth: usize, mut known_splits_by_color: IndexMap<Option<ColorId>, IndexSet<Split>>, rules: &[Rewrite<SymbolLang, ()>], run_depth: usize) {
+    fn colored_case_split(&mut self, egraph: &mut ThEGraph, split_depth: usize, mut known_splits_by_color: IndexMap<Option<ColorId>, IndexSet<Split>>, rules: &[ThRewrite], run_depth: usize) {
         if split_depth == 0 {
             return;
         }
@@ -283,7 +284,7 @@ impl CaseSplit {
         }
     }
 
-    fn inner_case_split(&mut self, egraph: &mut EGraph<SymbolLang, ()>, split_depth: usize, known_splits: &IndexSet<Split>, rules: &[Rewrite<SymbolLang, ()>], run_depth: usize) {
+    fn inner_case_split(&mut self, egraph: &mut ThEGraph, split_depth: usize, known_splits: &IndexSet<Split>, rules: &[ThRewrite], run_depth: usize) {
         if split_depth == 0 {
             return;
         }

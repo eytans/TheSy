@@ -44,6 +44,7 @@ pub(crate) use crate::thesy::consts::system_case_splits;
 
 use std::alloc;
 use cap::Cap;
+use crate::lang::ThRewrite;
 
 #[global_allocator]
 static ALLOCATOR: Cap<alloc::System> = Cap::new(alloc::System, usize::MAX);
@@ -53,7 +54,7 @@ pub struct TheSyConfig {
     pub definitions: Definitions,
     ph_count: usize,
     dependencies: Vec<TheSyConfig>,
-    dep_results: Vec<Vec<Rewrite<SymbolLang, ()>>>,
+    dep_results: Vec<Vec<ThRewrite>>,
     output: PathBuf,
     prerun: bool,
     proof_mode: bool,
@@ -88,7 +89,7 @@ impl TheSyConfig {
     }
 
     /// Run thesy using current configuration returning (thesy instance, previous + new rewrites)
-    pub fn run(&mut self, max_depth: Option<usize>) -> (TheSy, Vec<Rewrite<SymbolLang, ()>>) {
+    pub fn run(&mut self, max_depth: Option<usize>) -> (TheSy, Vec<ThRewrite>) {
         self.collect_dependencies();
         let mut rules = self.definitions.rws.clone();
         rules.extend(self.dep_results.iter().flatten().cloned());

@@ -2,27 +2,27 @@ use egg::{RecExpr, SymbolLang};
 use itertools::Itertools;
 
 use egg::expression_ops::{IntoTree};
-use crate::lang::{DataType, Function};
+use crate::lang::{DataType, Function, ThExpr};
 use std::collections::hash_map::RandomState;
 use indexmap::IndexMap;
 
 #[derive(Clone, Debug)]
 pub struct Examples {
     pub datatype: DataType,
-    examples: Vec<RecExpr<SymbolLang>>,
-    example_vars: Vec<IndexMap<Function, Vec<RecExpr<SymbolLang>>>>,
+    examples: Vec<ThExpr>,
+    example_vars: Vec<IndexMap<Function, Vec<ThExpr>>>,
 }
 
 impl Examples {
     /// For now I will create full examples?
 /// Will be very expensive for trees but will deal with that later
-    pub fn examples(&self) -> &[RecExpr<SymbolLang>] {
+    pub fn examples(&self) -> &[ThExpr] {
         &self.examples
     }
 
     pub fn new(datatype: &DataType, max_depth: usize) -> Self {
-        let mut constructor_phs: Vec<IndexMap<Function, Vec<RecExpr<SymbolLang>>, RandomState>> = Default::default();
-        let mut ph_counts: IndexMap<RecExpr<SymbolLang>, usize> = IndexMap::new();
+        let mut constructor_phs: Vec<IndexMap<Function, Vec<ThExpr>, RandomState>> = Default::default();
+        let mut ph_counts: IndexMap<ThExpr, usize> = IndexMap::new();
         let mut res = datatype.constructors.iter()
             .filter(|f| !f.params.contains(&datatype.as_exp()))
             .map(|f| f.apply_params(f.params.iter().map(|p| {
@@ -44,7 +44,7 @@ impl Examples {
                         if p.into_tree() != datatype.as_exp().into_tree() {
                             let index = *ph_counts.entry(p.clone()).or_insert(0);
                             *ph_counts.get_mut(p).unwrap() += 1;
-                            let new_ph: RecExpr<SymbolLang> = format!("autovar_{}_{}", p.into_tree().to_spaceless_string(), index).parse().unwrap();
+                            let new_ph: ThExpr = format!("autovar_{}_{}", p.into_tree().to_spaceless_string(), index).parse().unwrap();
                             constructor_phs.last_mut().unwrap().entry(constr.clone().clone()).or_insert(vec![]).push(new_ph.clone());
                             new_ph
                         } else {
