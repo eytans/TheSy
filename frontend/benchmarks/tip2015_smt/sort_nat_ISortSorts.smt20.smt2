@@ -1,0 +1,31 @@
+(declare-datatype Nat ((zero) (succ (p Nat))))
+(declare-datatype list ((nil) (cons (head Nat) (tail list))))
+(declare-fun leq (Nat Nat) Bool)
+(declare-fun ordered (list) Bool)
+(declare-fun insert2 (Nat list) list)
+(declare-fun isort (list) list)
+(assert (ordered nil))
+(assert (= (isort nil) nil))
+(assert (forall ((y Nat)) (leq zero y)))
+(assert (forall ((z Nat)) (not (leq (succ z) zero))))
+(assert
+  (forall ((z Nat) (x2 Nat))
+    (= (leq (succ z) (succ x2)) (leq z x2))))
+(assert (forall ((y Nat)) (ordered (cons y nil))))
+(assert
+  (forall ((y Nat) (y2 Nat) (xs list))
+    (= (ordered (cons y (cons y2 xs)))
+      (and (leq y y2) (ordered (cons y2 xs))))))
+(assert (forall ((x Nat)) (= (insert2 x nil) (cons x nil))))
+(assert
+  (forall ((x Nat) (z Nat) (xs list))
+    (=> (not (leq x z))
+      (= (insert2 x (cons z xs)) (cons z (insert2 x xs))))))
+(assert
+  (forall ((x Nat) (z Nat) (xs list))
+    (=> (leq x z) (= (insert2 x (cons z xs)) (cons x (cons z xs))))))
+(assert
+  (forall ((y Nat) (xs list))
+    (= (isort (cons y xs)) (insert2 y (isort xs)))))
+(assert (not (forall ((xs list)) (ordered (isort xs)))))
+(check-sat)

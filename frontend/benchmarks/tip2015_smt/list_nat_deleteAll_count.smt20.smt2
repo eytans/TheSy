@@ -1,0 +1,63 @@
+(declare-sort sk 0)
+(declare-sort fun1 0)
+(declare-sort fun12 0)
+(declare-sort fun13 0)
+(declare-datatype list ((nil) (cons (head sk) (tail list))))
+(declare-datatype Nat ((zero) (succ (p Nat))))
+(declare-fun plus (Nat Nat) Nat)
+(declare-fun leq (Nat Nat) Bool)
+(declare-fun deleteBy (fun12 sk list) list)
+(declare-fun deleteAll (sk list) list)
+(declare-fun count (sk list) Nat)
+(declare-fun lam (sk) fun13)
+(declare-const lam2 fun12)
+(declare-fun apply1 (fun1 sk) sk)
+(declare-fun apply12 (fun12 sk) fun13)
+(declare-fun apply13 (fun13 sk) Bool)
+(assert
+  (forall ((x Nat) (y Nat) (z Nat))
+    (= (plus x (plus y z)) (plus (plus x y) z))))
+(assert (forall ((x Nat) (y Nat)) (= (plus x y) (plus y x))))
+(assert (forall ((x Nat)) (= (plus x zero) x)))
+(assert (forall ((x Nat)) (= (plus zero x) x)))
+(assert (forall ((y Nat)) (= (plus zero y) y)))
+(assert
+  (forall ((y Nat) (z Nat)) (= (plus (succ z) y) (succ (plus z y)))))
+(assert (forall ((y Nat)) (leq zero y)))
+(assert (forall ((z Nat)) (not (leq (succ z) zero))))
+(assert
+  (forall ((z Nat) (x2 Nat))
+    (= (leq (succ z) (succ x2)) (leq z x2))))
+(assert (forall ((x fun12) (y sk)) (= (deleteBy x y nil) nil)))
+(assert
+  (forall ((x fun12) (y sk) (y2 sk) (ys list))
+    (=> (apply13 (apply12 x y) y2)
+      (= (deleteBy x y (cons y2 ys)) ys))))
+(assert
+  (forall ((x fun12) (y sk) (y2 sk) (ys list))
+    (=> (not (apply13 (apply12 x y) y2))
+      (= (deleteBy x y (cons y2 ys)) (cons y2 (deleteBy x y ys))))))
+(assert (forall ((x sk)) (= (deleteAll x nil) nil)))
+(assert
+  (forall ((x sk) (z sk) (ys list))
+    (=> (= x z) (= (deleteAll x (cons z ys)) (deleteAll x ys)))))
+(assert
+  (forall ((x sk) (z sk) (ys list))
+    (=> (distinct x z)
+      (= (deleteAll x (cons z ys)) (cons z (deleteAll x ys))))))
+(assert (forall ((x sk)) (= (count x nil) zero)))
+(assert
+  (forall ((x sk) (z sk) (ys list))
+    (=> (= x z)
+      (= (count x (cons z ys)) (plus (succ zero) (count x ys))))))
+(assert
+  (forall ((x sk) (z sk) (ys list))
+    (=> (distinct x z) (= (count x (cons z ys)) (count x ys)))))
+(assert (forall ((y sk)) (= (apply12 lam2 y) (lam y))))
+(assert (forall ((y sk) (z sk)) (= (apply13 (lam y) z) (= y z))))
+(assert
+  (not
+    (forall ((x sk) (xs list))
+      (=> (= (deleteAll x xs) (deleteBy lam2 x xs))
+        (leq (count x xs) (succ zero))))))
+(check-sat)

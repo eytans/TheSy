@@ -1,0 +1,30 @@
+(declare-sort sk2 0)
+(declare-sort sk 0)
+(declare-datatype list ((nil) (cons (head sk) (tail list))))
+(declare-datatype Nat ((zero) (succ (p Nat))))
+(declare-fun snoc (sk list) list)
+(declare-fun rotate (Nat list) list)
+(declare-fun plus (Nat Nat) Nat)
+(declare-fun length (list) Nat)
+(assert
+  (forall ((x Nat) (y Nat) (z Nat))
+    (= (plus x (plus y z)) (plus (plus x y) z))))
+(assert (forall ((x Nat) (y Nat)) (= (plus x y) (plus y x))))
+(assert (forall ((x Nat)) (= (plus x zero) x)))
+(assert (forall ((x Nat)) (= (plus zero x) x)))
+(assert (forall ((y Nat)) (= (plus zero y) y)))
+(assert
+  (forall ((y Nat) (z Nat)) (= (plus (succ z) y) (succ (plus z y)))))
+(assert (forall ((x sk)) (= (snoc x nil) (cons x nil))))
+(assert
+  (forall ((x sk) (z sk) (ys list))
+    (= (snoc x (cons z ys)) (cons z (snoc x ys)))))
+(assert (forall ((y list)) (= (rotate zero y) y)))
+(assert (forall ((z Nat)) (= (rotate (succ z) nil) nil)))
+(assert
+  (forall ((z Nat) (z2 sk) (xs1 list))
+    (= (rotate (succ z) (cons z2 xs1)) (rotate z (snoc z2 xs1)))))
+(assert (= (length nil) zero))
+(assert
+  (forall ((y sk) (l list))
+    (= (length (cons y l)) (plus (succ zero) (length l)))))

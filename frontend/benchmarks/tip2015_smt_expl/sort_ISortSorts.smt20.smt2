@@ -1,0 +1,25 @@
+(declare-sort sk2 0)
+(declare-sort sk 0)
+(declare-datatype list2 ((nil2) (cons2 (head2 Int) (tail2 list2))))
+(declare-datatype list ((nil) (cons (head sk) (tail list))))
+(declare-fun ordered (list2) Bool)
+(declare-fun insert2 (Int list2) list2)
+(declare-fun isort (list2) list2)
+(assert (ordered nil2))
+(assert (= (isort nil2) nil2))
+(assert (forall ((y Int)) (ordered (cons2 y nil2))))
+(assert
+  (forall ((y Int) (y2 Int) (xs list2))
+    (= (ordered (cons2 y (cons2 y2 xs)))
+      (and (<= y y2) (ordered (cons2 y2 xs))))))
+(assert (forall ((x Int)) (= (insert2 x nil2) (cons2 x nil2))))
+(assert
+  (forall ((x Int) (z Int) (xs list2))
+    (=> (not (<= x z))
+      (= (insert2 x (cons2 z xs)) (cons2 z (insert2 x xs))))))
+(assert
+  (forall ((x Int) (z Int) (xs list2))
+    (=> (<= x z) (= (insert2 x (cons2 z xs)) (cons2 x (cons2 z xs))))))
+(assert
+  (forall ((y Int) (xs list2))
+    (= (isort (cons2 y xs)) (insert2 y (isort xs)))))

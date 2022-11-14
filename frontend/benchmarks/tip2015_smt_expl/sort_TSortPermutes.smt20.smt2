@@ -1,0 +1,70 @@
+(declare-sort sk 0)
+(declare-sort fun1 0)
+(declare-sort fun12 0)
+(declare-sort fun13 0)
+(declare-sort fun14 0)
+(declare-sort fun15 0)
+(declare-sort fun16 0)
+(declare-sort sk2 0)
+(declare-datatype list2 ((nil2) (cons2 (head2 Int) (tail2 list2))))
+(declare-datatype list ((nil) (cons (head sk) (tail list))))
+(declare-datatype
+  Tree
+  ((TNode (proj1-TNode Tree) (proj2-TNode Int) (proj3-TNode Tree))
+   (TNil)))
+(declare-fun flatten (Tree list2) list2)
+(declare-fun add (Int Tree) Tree)
+(declare-fun toTree (list2) Tree)
+(declare-fun tsort (list2) list2)
+(declare-fun elem (sk list) Bool)
+(declare-fun deleteBy (fun12 sk list) list)
+(declare-fun isPermutation (list list) Bool)
+(declare-fun lam (sk) fun14)
+(declare-const lam2 fun12)
+(declare-fun apply1 (fun1 sk) sk)
+(declare-fun apply12 (fun12 sk) fun14)
+(declare-fun apply13 (fun13 sk) sk2)
+(declare-fun apply14 (fun14 sk) Bool)
+(declare-fun apply15 (fun15 sk2) sk)
+(declare-fun apply16 (fun16 sk2) sk2)
+(assert (isPermutation nil nil))
+(assert (= (toTree nil2) TNil))
+(assert (forall ((y list2)) (= (flatten TNil y) y)))
+(assert
+  (forall ((y list2) (p Tree) (z Int) (q Tree))
+    (= (flatten (TNode p z q) y) (flatten p (cons2 z (flatten q y))))))
+(assert (forall ((x sk)) (not (elem x nil))))
+(assert
+  (forall ((x sk) (z sk) (xs list))
+    (= (elem x (cons z xs)) (or (= z x) (elem x xs)))))
+(assert (forall ((x fun12) (y sk)) (= (deleteBy x y nil) nil)))
+(assert
+  (forall ((x fun12) (y sk) (y2 sk) (ys list))
+    (=> (apply14 (apply12 x y) y2)
+      (= (deleteBy x y (cons y2 ys)) ys))))
+(assert
+  (forall ((x fun12) (y sk) (y2 sk) (ys list))
+    (=> (not (apply14 (apply12 x y) y2))
+      (= (deleteBy x y (cons y2 ys)) (cons y2 (deleteBy x y ys))))))
+(assert
+  (forall ((y list) (x3 sk) (xs list))
+    (= (isPermutation (cons x3 xs) y)
+      (and (elem x3 y) (isPermutation xs (deleteBy lam2 x3 y))))))
+(assert
+  (forall ((z sk) (x2 list)) (not (isPermutation nil (cons z x2)))))
+(assert (forall ((x Int)) (= (add x TNil) (TNode TNil x TNil))))
+(assert
+  (forall ((x Int) (p Tree) (z Int) (q Tree))
+    (=> (not (<= x z))
+      (= (add x (TNode p z q)) (TNode p z (add x q))))))
+(assert
+  (forall ((x Int) (p Tree) (z Int) (q Tree))
+    (=> (<= x z) (= (add x (TNode p z q)) (TNode (add x p) z q)))))
+(assert
+  (forall ((y Int) (xs list2))
+    (= (toTree (cons2 y xs)) (add y (toTree xs)))))
+(assert
+  (forall ((x list2)) (= (tsort x) (flatten (toTree x) nil2))))
+(assert (forall ((x4 sk)) (= (apply12 lam2 x4) (lam x4))))
+(assert
+  (forall ((x4 sk) (x5 sk)) (= (apply14 (lam x4) x5) (= x4 x5))))

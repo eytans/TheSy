@@ -1,0 +1,80 @@
+(declare-sort sk 0)
+(declare-sort fun1 0)
+(declare-sort fun12 0)
+(declare-sort fun13 0)
+(declare-sort fun14 0)
+(declare-datatype
+  pair3 ((pair22 (proj1-pair2 sk) (proj2-pair2 sk))))
+(declare-datatype list ((nil3) (cons3 (head3 sk) (tail3 list))))
+(declare-datatype
+  list3 ((nil2) (cons2 (head2 list) (tail2 list3))))
+(declare-datatype pair ((pair2 (proj1-pair sk) (proj2-pair list))))
+(declare-datatype list2 ((nil) (cons (head pair) (tail list2))))
+(declare-fun select2 (sk list2) list2)
+(declare-fun select22 (list) list2)
+(declare-fun formula (list2) list3)
+(declare-fun elem (sk list) Bool)
+(declare-fun deleteBy (fun12 sk list) list)
+(declare-fun isPermutation (list list) Bool)
+(declare-fun all (fun14 list3) Bool)
+(declare-fun all2 (fun13 list) Bool)
+(declare-fun lam (sk) fun13)
+(declare-const lam2 fun12)
+(declare-fun lam3 (list) fun14)
+(declare-fun apply1 (fun1 sk) sk)
+(declare-fun apply12 (fun12 sk) fun13)
+(declare-fun apply13 (fun13 sk) Bool)
+(declare-fun apply14 (fun14 list) Bool)
+(assert (isPermutation nil3 nil3))
+(assert (= (select22 nil3) nil))
+(assert (= (formula nil) nil2))
+(assert (forall ((x sk)) (= (select2 x nil) nil)))
+(assert
+  (forall ((x sk) (x2 list2) (y2 sk) (ys list))
+    (= (select2 x (cons (pair2 y2 ys) x2))
+      (cons (pair2 y2 (cons3 x ys)) (select2 x x2)))))
+(assert
+  (forall ((y sk) (xs list))
+    (= (select22 (cons3 y xs))
+      (cons (pair2 y xs) (select2 y (select22 xs))))))
+(assert
+  (forall ((z list2) (y2 sk) (ys list))
+    (= (formula (cons (pair2 y2 ys) z))
+      (cons2 (cons3 y2 ys) (formula z)))))
+(assert (forall ((x sk)) (not (elem x nil3))))
+(assert
+  (forall ((x sk) (z sk) (xs list))
+    (= (elem x (cons3 z xs)) (or (= z x) (elem x xs)))))
+(assert (forall ((x fun12) (y sk)) (= (deleteBy x y nil3) nil3)))
+(assert
+  (forall ((x fun12) (y sk) (y2 sk) (ys list))
+    (=> (apply13 (apply12 x y) y2)
+      (= (deleteBy x y (cons3 y2 ys)) ys))))
+(assert
+  (forall ((x fun12) (y sk) (y2 sk) (ys list))
+    (=> (not (apply13 (apply12 x y) y2))
+      (= (deleteBy x y (cons3 y2 ys)) (cons3 y2 (deleteBy x y ys))))))
+(assert
+  (forall ((y list) (x3 sk) (xs list))
+    (= (isPermutation (cons3 x3 xs) y)
+      (and (elem x3 y) (isPermutation xs (deleteBy lam2 x3 y))))))
+(assert
+  (forall ((z sk) (x2 list))
+    (not (isPermutation nil3 (cons3 z x2)))))
+(assert (forall ((p fun13)) (all2 p nil3)))
+(assert
+  (forall ((p fun13) (y sk) (xs list))
+    (= (all2 p (cons3 y xs)) (and (apply13 p y) (all2 p xs)))))
+(assert (forall ((p fun14)) (all p nil2)))
+(assert
+  (forall ((p fun14) (y list) (xs list3))
+    (= (all p (cons2 y xs)) (and (apply14 p y) (all p xs)))))
+(assert (forall ((x4 sk)) (= (apply12 lam2 x4) (lam x4))))
+(assert
+  (forall ((x4 sk) (x5 sk)) (= (apply13 (lam x4) x5) (= x4 x5))))
+(assert
+  (forall ((xs list) (x list))
+    (= (apply14 (lam3 xs) x) (isPermutation x xs))))
+(assert
+  (not (forall ((xs list)) (all (lam3 xs) (formula (select22 xs))))))
+(check-sat)

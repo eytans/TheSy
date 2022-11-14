@@ -1,0 +1,46 @@
+(declare-sort sk 0)
+(declare-sort fun1 0)
+(declare-sort fun12 0)
+(declare-sort fun13 0)
+(declare-datatype list ((nil) (cons (head sk) (tail list))))
+(declare-fun filter (fun13 list) list)
+(declare-fun nubBy (fun12 list) list)
+(declare-fun lam (fun12 sk) fun13)
+(declare-fun lam2 (sk) fun13)
+(declare-const lam3 fun12)
+(declare-fun lam4 (sk) fun13)
+(declare-const lam5 fun12)
+(declare-fun lam6 (sk) fun13)
+(declare-const lam7 fun12)
+(declare-fun apply1 (fun1 sk) sk)
+(declare-fun apply12 (fun12 sk) fun13)
+(declare-fun apply13 (fun13 sk) Bool)
+(assert (forall ((p fun13)) (= (filter p nil) nil)))
+(assert
+  (forall ((p fun13) (y sk) (xs list))
+    (=> (apply13 p y)
+      (= (filter p (cons y xs)) (cons y (filter p xs))))))
+(assert
+  (forall ((p fun13) (y sk) (xs list))
+    (=> (not (apply13 p y)) (= (filter p (cons y xs)) (filter p xs)))))
+(assert (forall ((x fun12)) (= (nubBy x nil) nil)))
+(assert
+  (forall ((x fun12) (z sk) (xs list))
+    (= (nubBy x (cons z xs))
+      (cons z (nubBy x (filter (lam x z) xs))))))
+(assert
+  (forall ((x fun12) (z sk) (y2 sk))
+    (= (apply13 (lam x z) y2) (not (apply13 (apply12 x z) y2)))))
+(assert (forall ((x sk)) (= (apply12 lam3 x) (lam2 x))))
+(assert (forall ((x sk) (y sk)) (= (apply13 (lam2 x) y) (= x y))))
+(assert (forall ((z sk)) (= (apply12 lam5 z) (lam4 z))))
+(assert
+  (forall ((z sk) (x2 sk)) (= (apply13 (lam4 z) x2) (= z x2))))
+(assert (forall ((x3 sk)) (= (apply12 lam7 x3) (lam6 x3))))
+(assert
+  (forall ((x3 sk) (x4 sk)) (= (apply13 (lam6 x3) x4) (= x3 x4))))
+(assert
+  (not
+    (forall ((xs list))
+      (= (nubBy lam3 (nubBy lam5 xs)) (nubBy lam7 xs)))))
+(check-sat)

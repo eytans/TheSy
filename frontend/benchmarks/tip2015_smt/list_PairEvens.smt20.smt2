@@ -1,0 +1,47 @@
+(declare-sort sk 0)
+(declare-sort fun1 0)
+(declare-sort fun12 0)
+(declare-datatype pair ((pair2 (proj1-pair sk) (proj2-pair sk))))
+(declare-datatype list2 ((nil2) (cons2 (head2 sk) (tail2 list2))))
+(declare-datatype list ((nil) (cons (head pair) (tail list))))
+(declare-fun pairs (list2) list)
+(declare-fun map2 (fun12 list) list2)
+(declare-fun map3 (fun1 list2) list2)
+(declare-fun length (list2) Int)
+(declare-fun evens (list2) list2)
+(declare-fun odds (list2) list2)
+(declare-const lam fun12)
+(declare-fun apply1 (fun1 sk) sk)
+(declare-fun apply12 (fun12 pair) sk)
+(assert (= (pairs nil2) nil))
+(assert (= (length nil2) 0))
+(assert (= (evens nil2) nil2))
+(assert (= (odds nil2) nil2))
+(assert (forall ((y sk)) (= (pairs (cons2 y nil2)) nil)))
+(assert
+  (forall ((y sk) (y2 sk) (xs list2))
+    (= (pairs (cons2 y (cons2 y2 xs)))
+      (cons (pair2 y y2) (pairs xs)))))
+(assert (forall ((f fun1)) (= (map3 f nil2) nil2)))
+(assert
+  (forall ((f fun1) (y sk) (xs list2))
+    (= (map3 f (cons2 y xs)) (cons2 (apply1 f y) (map3 f xs)))))
+(assert (forall ((f fun12)) (= (map2 f nil) nil2)))
+(assert
+  (forall ((f fun12) (y pair) (xs list))
+    (= (map2 f (cons y xs)) (cons2 (apply12 f y) (map2 f xs)))))
+(assert
+  (forall ((y sk) (l list2))
+    (= (length (cons2 y l)) (+ 1 (length l)))))
+(assert
+  (forall ((y sk) (xs list2))
+    (= (evens (cons2 y xs)) (cons2 y (odds xs)))))
+(assert
+  (forall ((y sk) (xs list2)) (= (odds (cons2 y xs)) (evens xs))))
+(assert (forall ((x pair)) (= (apply12 lam x) (proj1-pair x))))
+(assert
+  (not
+    (forall ((xs list2))
+      (=> (= (mod (length xs) 2) 0)
+        (= (map2 lam (pairs xs)) (evens xs))))))
+(check-sat)

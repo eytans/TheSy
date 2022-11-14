@@ -1,0 +1,37 @@
+(declare-datatype Token ((A) (B) (C) (D) (ESC) (P) (Q) (R)))
+(declare-datatype list ((nil) (cons (head Token) (tail list))))
+(declare-fun isSpecial (Token) Bool)
+(declare-fun code (Token) Token)
+(declare-fun escape (list) list)
+(assert (isSpecial ESC))
+(assert (isSpecial P))
+(assert (isSpecial Q))
+(assert (isSpecial R))
+(assert (= (code ESC) ESC))
+(assert (= (code P) A))
+(assert (= (code Q) B))
+(assert (= (code R) C))
+(assert (= (escape nil) nil))
+(assert
+  (forall ((x Token))
+    (=> (distinct x ESC)
+      (=> (distinct x P)
+        (=> (distinct x Q) (=> (distinct x R) (not (isSpecial x))))))))
+(assert
+  (forall ((x Token))
+    (=> (distinct x ESC)
+      (=> (distinct x P)
+        (=> (distinct x Q) (=> (distinct x R) (= (code x) x)))))))
+(assert
+  (forall ((y Token) (xs list))
+    (=> (not (isSpecial y))
+      (= (escape (cons y xs)) (cons y (escape xs))))))
+(assert
+  (forall ((y Token) (xs list))
+    (=> (isSpecial y)
+      (= (escape (cons y xs)) (cons ESC (cons (code y) (escape xs)))))))
+(assert
+  (not
+    (forall ((xs list) (ys list))
+      (=> (= (escape xs) (escape ys)) (= xs ys)))))
+(check-sat)
