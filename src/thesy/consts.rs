@@ -35,6 +35,8 @@ pub(crate) fn bool_rws() -> Vec<ThRewrite> {
 
         rewrite!("not-true"; "(not true)" => "false"),
         rewrite!("not-false"; "(not false)" => "true"),
+        rewrite!("not-x-false"; { FilteringSearcher::searcher_is_false(Pattern::from_str("(not ?x)")) } => "true"),
+        rewrite!("not-x-true"; { FilteringSearcher::searcher_is_true(Pattern::from_str("(not ?x)")) } => "false"),
     ]
 }
 
@@ -69,9 +71,13 @@ pub(crate) fn is_rws() -> Vec<ThRewrite> {
 pub(crate) fn equality_rws() -> Vec<ThRewrite> {
     let eq_searcher = FilteringSearcher::searcher_is_true(Pattern::from_str("(= ?x ?y)").unwrap());
     let union_applier = UnionApplier::new(vec![Var::from_str("?x").unwrap(), Var::from_str("?y").unwrap()]);
+    let false_eq = FilteringSearcher::searcher_is_false(Pattern::from_str("(= ?x true)").unwrap());
+    let false_eq2 = FilteringSearcher::searcher_is_false(Pattern::from_str("(= ?x false)").unwrap());
     vec![
         rewrite!("equality"; "(= ?x ?x)" => "true"),
         rewrite!("equality-true"; eq_searcher => union_applier),
+        rewrite!("equality-false-is-false"; false_eq => "?x")
+        rewrite!("equality-true-is-false"; false_eq2 => "(not ?x)")
         // TODO: I would like to split by equality but not a possibility with current conditions.
         // rewrite!("equality-split"; "(= ?x ?y)" => "(potential_split (= ?x ?y) true false)" if {NonPatternCondition::new(Pattern::from_str("").unwrap(), Var::from_str("?"))})
     ]
