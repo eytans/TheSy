@@ -53,7 +53,7 @@ mod parser {
             .and_then(|_| parse(&contents.split("\n").map(|s| s.to_string()).collect_vec()[..]))
     }
 
-    fn collected_precon_conds_to_rw(name: String, precond: Option<Pattern<SymbolLang>>, searcher: impl Searcher<SymbolLang, ()> + Debug + 'static, applier: impl Applier<SymbolLang, ()> + 'static, dif_app: bool, conditions: Vec<MatchFilter<SymbolLang, ()>>) -> Result<Rewrite<SymbolLang, ()>, String> {
+    fn collected_precon_conds_to_rw(name: String, precond: Option<Pattern<SymbolLang>>, searcher: impl Searcher<SymbolLang, ()> + Debug + 'static, applier: impl Applier<SymbolLang, ()> + 'static, dif_app: bool, conditions: Vec<MatchFilter<SymbolLang, ()>>) -> Result<ThRewrite, String> {
         if precond.is_some() {
             // Order important as root of match is root of first pattern.
             let dif_searcher = MultiDiffSearcher::new(vec![
@@ -67,7 +67,7 @@ mod parser {
         }
     }
 
-    fn collected_conds_to_rw(name: String, searcher: Rc<dyn Searcher<SymbolLang, ()>>, applier: impl Applier<SymbolLang, ()> + 'static, dif_app: bool, conditions: Vec<MatchFilter<SymbolLang, ()>>) -> Result<Rewrite<SymbolLang, ()>, String> {
+    fn collected_conds_to_rw(name: String, searcher: Rc<dyn Searcher<SymbolLang, ()>>, applier: impl Applier<SymbolLang, ()> + 'static, dif_app: bool, conditions: Vec<MatchFilter<SymbolLang, ()>>) -> Result<ThRewrite, String> {
         if !conditions.is_empty() {
             collected_to_rw(name, FilteringSearcher::new(searcher, aggregate_conditions(conditions)).into_rc_dyn(), applier, dif_app)
         } else {
@@ -75,7 +75,7 @@ mod parser {
         }
     }
 
-    fn collected_to_rw(name: String, searcher: Rc<dyn Searcher<SymbolLang, ()>>, applier: impl Applier<SymbolLang, ()> + 'static, dif_app: bool) -> Result<Rewrite<SymbolLang, ()>, String> {
+    fn collected_to_rw(name: String, searcher: Rc<dyn Searcher<SymbolLang, ()>>, applier: impl Applier<SymbolLang, ()> + 'static, dif_app: bool) -> Result<ThRewrite, String> {
         let psearcher = PointerSearcher::new(searcher);
         if dif_app {
             let diff_applier = DiffApplier::new(applier);
@@ -328,7 +328,7 @@ mod parser {
                             } else {
                                 v
                             }).collect_vec();
-                    // let mut res: Vec<Rewrite<SymbolLang, ()>> = vec![];
+                    // let mut res: Vec<ThRewrite> = vec![];
                     let mut res: Vec<(Rc<dyn Searcher<SymbolLang, ()>>, Var, Vec<Pattern<SymbolLang>>)> = vec![];
                     for combs in combinations(patterns_and_vars.iter().cloned().map(|x| x.into_iter())) {
                         let mut nodes = vec![];
@@ -431,11 +431,11 @@ mod parser {
        Ok((name, precondition, searcher, applier, conditions))
     }
 
-    fn sexp_list_to_recexpr(sexps: Vec<Sexp>) -> Vec<RecExpr<SymbolLang>> {
+    fn sexp_list_to_recexpr(sexps: Vec<Sexp>) -> Vec<ThExpr> {
         sexps.into_iter().map(|e| sexp_to_recexpr(&e)).collect_vec()
     }
 
-    fn sexp_to_recexpr(sexp: &Sexp) -> RecExpr<SymbolLang> {
+    fn sexp_to_recexpr(sexp: &Sexp) -> ThExpr {
         RecExpr::from_str(&*sexp.to_string()).unwrap()
     }
 }

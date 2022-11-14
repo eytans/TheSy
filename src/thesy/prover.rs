@@ -150,10 +150,14 @@ impl Prover {
             let contr_id = egraph.add_expr(&c.as_exp());
             egraph.union(contr_id, ind_id);
             let mut runner: Runner<SymbolLang, ()> = Runner::new(()).with_egraph(egraph).with_iter_limit(Self::RUN_DEPTH).run(&rules[..]);
-            runner.egraph.dot().to_dot(format!("before_split_prove_base_split_d_{}_[{:?}]{}={}_{}.dot", !runner.egraph.equivs(&ex1, &ex2).is_empty(), precond, ex1, ex2, c.name)).unwrap();
             case_splitter.iter_mut().for_each(|c| c.case_split(&mut runner.egraph, split_d, &rules, Self::CASE_ITERN));
-            runner.egraph.dot().to_dot(format!("prove_base_split_d_{}_[{:?}]{}={}_{}.dot", !runner.egraph.equivs(&ex1, &ex2).is_empty(), precond, ex1, ex2, c.name)).unwrap();
-            !runner.egraph.equivs(&ex1, &ex2).is_empty()
+            let equal = !runner.egraph.equivs(&ex1, &ex2).is_empty();
+            if !equal {
+                info!("Basic constructor {} failed basic proving for {} == {}", c.name, ex1.pretty(500), ex2.pretty(500))
+            } else {
+                debug!("Basic constructor {} successfully proved for {} == {}", c.name, ex1.pretty(500), ex2.pretty(500))
+            }
+            equal
         })
     }
 

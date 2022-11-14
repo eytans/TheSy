@@ -267,13 +267,8 @@ impl CaseSplit {
         }
         warn!("Created colors: {:?}", colors);
         // When the API is limited the code is mentally inhibited
-        egraph.dot().to_dot(format!("before_colored_case_split_{}.dot", egraph.colors().count())).unwrap();
         *egraph = Self::equiv_reduction(rules, std::mem::take(egraph), run_depth);
         self.colored_case_split(egraph, split_depth - 1, known_splits_by_color, rules, run_depth);
-        colors.iter().for_each(|cs| cs.iter()
-            .for_each(|c|
-                egraph.colored_dot(*c)
-                    .to_dot(format!("after_case_split_color_{}.dot", c)).unwrap()));
         for cs in colors {
             let split_conclusions = cs.iter()
                 .map(|c| {
@@ -314,10 +309,8 @@ impl CaseSplit {
         let mut i = 0;
         for s in splitters {
             let split_conclusions = Self::split_graph(&*egraph, s).into_iter().map(|g| {
-                g.dot().to_dot(format!("before_case_split_{}.dot", i)).unwrap();
                 let mut g = Self::equiv_reduction(rules, g, run_depth);
                 self.inner_case_split(&mut g, split_depth - 1, &new_known, rules, run_depth);
-                g.dot().to_dot(format!("after_case_split_{}.dot", i)).unwrap();
                 i += 1;
                 let res = Self::collect_merged(&g, &classes);
                 warn!("Collected merged {i}: {:?}", res);

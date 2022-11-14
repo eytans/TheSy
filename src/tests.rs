@@ -63,18 +63,10 @@ pub fn test_terms(mut definitions: Definitions) -> ProofMode {
     assert_eq!(1, definitions.goals.len());
     assert_eq!(1, definitions.conjectures.len());
     let (vars, holes, precond, ex1, ex2) = definitions.conjectures.first().unwrap();
-    let (mut ast_precond, mut ast_exp1, mut ast_exp2) = definitions.goals.pop().unwrap();
+    let (mut ast_precond, mut ast_exp1, mut ast_exp2) = definitions.goals.clone().pop().unwrap();
 
     // Assert terms are not equal
     assert!(!TheSy::check_equality(&rws, precond, ex1, ex2));
-
-    let mut egraph = Prover::create_graph(precond.as_ref(), &ex1, &ex2);
-
-    // Attempt prove by case split
-    case_splitter.case_split(&mut egraph, 3, &rws, 12);
-    if egraph.add_expr(ex1) == egraph.add_expr(ex2) {
-        return ProofMode::CaseSplit;
-    }
 
     // let ph_precond = ast_precond.map(|e| e.map(exp_translator));
     let ph_exp1 = translate_expression(&mut ast_exp1);
@@ -85,15 +77,24 @@ pub fn test_terms(mut definitions: Definitions) -> ProofMode {
     thesy.equiv_reduc(&mut rws);
     thesy.increase_depth();
 
+    let classes = thesy.egraph.classes().map(|x| x.id).collect::<IndexSet<Id>>();
     let ph_id1 = thesy.egraph.add_expr(&ph_exp1);
     let ph_id2 = thesy.egraph.add_expr(&ph_exp2);
     info!("ph_exp1: {}, ph_exp2: {}", ph_exp1, ph_exp2);
 
-    let classes = thesy.egraph.classes().map(|x| x.id).collect::<IndexSet<Id>>();
     if !classes.contains(&thesy.egraph.find(ph_id1)) ||
         !classes.contains(&thesy.egraph.find(ph_id2)) {
         return ProofMode::TermNotCreated;
     }
+
+    let mut egraph = Prover::create_graph(precond.as_ref(), &ex1, &ex2);
+
+    // Attempt prove by case split
+    case_splitter.case_split(&mut egraph, 3, &rws, 12);
+    if egraph.add_expr(ex1) == egraph.add_expr(ex2) {
+        return ProofMode::CaseSplit;
+    }
+
 
     // Reduce finds equality on examples
     thesy.equiv_reduc(&mut rws);
