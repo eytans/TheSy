@@ -106,3 +106,4 @@ head_to_head.csv
 head_to_head.json
 
 experiments/**/*.thy
+venv/
