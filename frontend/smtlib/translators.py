@@ -270,7 +270,8 @@ class FunDef(object):
         if self.body is None:
             fixed_body = ""
         else:
-            fixed_body = f" => {self.body}"
+            with_args = functools.reduce(lambda x, y: str(x).replace(f"{y[0]}", f"?{y[0]}"), self.args, self.body)
+            fixed_body = f" => {with_args}"
         return f"fun {self.name} {' '.join([f'({a} : {t})' for a, t in self.args])} -> {self.ret_type}{fixed_body}"
 
 
