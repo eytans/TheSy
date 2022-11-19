@@ -1,0 +1,19 @@
+datatype Nat () := (succ : (x_0 : Nat) -> (res : Nat)) (zero : (res : Nat))
+datatype Lst () := (cons : (x_0 : Nat) -> (x_1 : Lst) -> (res : Lst)) (nil : (res : Lst))
+fun append (x_0 : Lst) (x_1 : Lst) -> Lst
+fun rev (x_0 : Lst) -> Lst
+fun qreva (x_0 : Lst) (x_1 : Lst) -> Lst
+fun qrev (x_0 : Lst) -> Lst
+rw rule0 (append nil ?x) => ?x
+rw rule1 (append (cons ?x0 ?y) ?z) => (cons ?x0 (append ?y ?z))
+rw rule2 (cons ?x0 (append ?y ?z)) => (append (cons ?x0 ?y) ?z)
+rw rule3 (rev nil) => nil
+rw rule4 nil => (rev nil)
+rw rule5 (rev (cons ?x1 ?y)) => (append (rev ?y) (cons ?x1 nil))
+rw rule6 (append (rev ?y) (cons ?x1 nil)) => (rev (cons ?x1 ?y))
+rw rule7 (qreva nil ?x) => ?x
+rw rule8 (qreva (cons ?z2 ?x) ?y) => (qreva ?x (cons ?z2 ?y))
+rw rule9 (qreva ?x (cons ?z2 ?y)) => (qreva (cons ?z2 ?x) ?y)
+rw rule10 (qrev ?x) => (qreva ?x nil)
+rw rule11 (qreva ?x nil) => (qrev ?x)
+prove (append (qreva ?x ?y) ?z)  = (qreva ?x (append ?y ?z))

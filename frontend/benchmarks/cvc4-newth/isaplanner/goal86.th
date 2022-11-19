@@ -1,0 +1,32 @@
+datatype Nat () := (succ : (x_0 : Nat) -> (res : Nat)) (zero : (res : Nat))
+datatype Lst () := (cons : (x_0 : Nat) -> (x_1 : Lst) -> (res : Lst)) (nil : (res : Lst))
+datatype Pair () := (mkpair : (x_0 : Nat) -> (x_1 : Nat) -> (res : Pair))
+datatype ZLst () := (zcons : (x_0 : Pair) -> (x_1 : ZLst) -> (res : ZLst)) (znil : (res : ZLst))
+fun append (x_0 : Lst) (x_1 : Lst) -> Lst
+fun len (x_0 : Lst) -> Nat
+fun drop (x_0 : Nat) (x_1 : Lst) -> Lst
+fun take (x_0 : Nat) (x_1 : Lst) -> Lst
+fun zip (x_0 : Lst) (x_1 : Lst) -> ZLst
+fun zappend (x_0 : ZLst) (x_1 : ZLst) -> ZLst
+fun leq (__x0 : Nat) (__y1 : Nat) -> Bool => (or (= ?__x0 ?__y1) (less ?__x0 ?__y1))
+rw rule0 (append nil ?x) => ?x
+rw rule1 (append (cons ?x2 ?y) ?z) => (cons ?x2 (append ?y ?z))
+rw rule2 (cons ?x2 (append ?y ?z)) => (append (cons ?x2 ?y) ?z)
+rw rule3 (len nil) => zero
+rw rule4 zero => (len nil)
+rw rule5 (len (cons ?x3 ?y)) => (succ (len ?y))
+rw rule6 (drop ?x4 nil) => nil
+rw rule7 (drop zero ?x) => ?x
+rw rule8 (drop (succ ?x5) (cons ?y6 ?z)) => (drop ?x5 ?z)
+rw rule9 (take ?x7 nil) => nil
+rw rule10 (take zero ?x) => nil
+rw rule11 (take (succ ?x8) (cons ?y9 ?z)) => (cons ?y9 (take ?x8 ?z))
+rw rule12 (cons ?y9 (take ?x8 ?z)) => (take (succ ?x8) (cons ?y9 ?z))
+rw rule13 (zip nil ?x) => znil
+rw rule14 (zip ?x nil) => znil
+rw rule15 (zip (cons ?x10 ?y) (cons ?z11 ?w)) => (zcons (mkpair ?x10 ?z11) (zip ?y ?w))
+rw rule16 (zcons (mkpair ?x10 ?z11) (zip ?y ?w)) => (zip (cons ?x10 ?y) (cons ?z11 ?w))
+rw rule17 (zappend znil ?x12) => ?x12
+rw rule18 (zappend (zcons ?x13 ?y14) ?z15) => (zcons ?x13 (zappend ?y14 ?z15))
+rw rule19 (zcons ?x13 (zappend ?y14 ?z15)) => (zappend (zcons ?x13 ?y14) ?z15)
+prove (zip ?xs (append ?ys ?zs))  = (zappend (zip (take (len ?ys) ?xs) ?ys) (zip (drop (len ?ys) ?xs) ?zs))

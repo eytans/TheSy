@@ -1,0 +1,21 @@
+datatype Nat () := (succ : (x_0 : Nat) -> (res : Nat)) (zero : (res : Nat))
+datatype Tree () := (node : (x_0 : Nat) -> (x_1 : Tree) -> (x_2 : Tree) -> (res : Tree)) (leaf : (res : Tree))
+fun less (x_0 : Nat) (x_1 : Nat) -> Bool
+fun nmax (x_0 : Nat) (x_1 : Nat) -> Nat
+fun mirror (x_0 : Tree) -> Tree
+fun height (x_0 : Tree) -> Nat
+fun leq (__x0 : Nat) (__y1 : Nat) -> Bool => (or (= ?__x0 ?__y1) (less ?__x0 ?__y1))
+rw rule0 (less ?x zero) => false
+rw rule1 (less zero (succ ?x)) => true
+rw rule2 (less (succ ?x) (succ ?y)) => (less ?x ?y)
+rw rule3 (less ?x ?y) => (less (succ ?x) (succ ?y))
+rw rule4 (nmax ?n ?m) => (ite (less ?n ?m) ?m ?n)
+rw rule5 (ite (less ?n ?m) ?m ?n) => (nmax ?n ?m)
+rw rule6 (mirror leaf) => leaf
+rw rule7 leaf => (mirror leaf)
+rw rule8 (mirror (node ?x ?y2 ?z)) => (node ?x (mirror ?z) (mirror ?y2))
+rw rule9 (node ?x (mirror ?z) (mirror ?y2)) => (mirror (node ?x ?y2 ?z))
+rw rule10 (height leaf) => zero
+rw rule11 zero => (height leaf)
+rw rule12 (height (node ?x ?y3 ?z)) => (succ (nmax (height ?y3) (height ?z)))
+prove (height (mirror ?a))  = (height ?a)

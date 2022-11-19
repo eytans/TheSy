@@ -1,0 +1,31 @@
+datatype Nat () := (succ : (x_0 : Nat) -> (res : Nat)) (zero : (res : Nat))
+datatype Lst () := (cons : (x_0 : Nat) -> (x_1 : Lst) -> (res : Lst)) (nil : (res : Lst))
+fun minus (x_0 : Nat) (x_1 : Nat) -> Nat
+fun append (x_0 : Lst) (x_1 : Lst) -> Lst
+fun len (x_0 : Lst) -> Nat
+fun drop (x_0 : Nat) (x_1 : Lst) -> Lst
+fun take (x_0 : Nat) (x_1 : Lst) -> Lst
+fun rev (x_0 : Lst) -> Lst
+fun leq (__x0 : Nat) (__y1 : Nat) -> Bool => (or (= ?__x0 ?__y1) (less ?__x0 ?__y1))
+rw rule0 (minus zero ?n) => zero
+rw rule1 (minus ?n zero) => ?n
+rw rule2 (minus (succ ?n) (succ ?m)) => (minus ?n ?m)
+rw rule3 (minus ?n ?m) => (minus (succ ?n) (succ ?m))
+rw rule4 (append nil ?x) => ?x
+rw rule5 (append (cons ?x2 ?y) ?z) => (cons ?x2 (append ?y ?z))
+rw rule6 (cons ?x2 (append ?y ?z)) => (append (cons ?x2 ?y) ?z)
+rw rule7 (len nil) => zero
+rw rule8 zero => (len nil)
+rw rule9 (len (cons ?x3 ?y)) => (succ (len ?y))
+rw rule10 (drop ?x4 nil) => nil
+rw rule11 (drop zero ?x) => ?x
+rw rule12 (drop (succ ?x5) (cons ?y6 ?z)) => (drop ?x5 ?z)
+rw rule13 (take ?x7 nil) => nil
+rw rule14 (take zero ?x) => nil
+rw rule15 (take (succ ?x8) (cons ?y9 ?z)) => (cons ?y9 (take ?x8 ?z))
+rw rule16 (cons ?y9 (take ?x8 ?z)) => (take (succ ?x8) (cons ?y9 ?z))
+rw rule17 (rev nil) => nil
+rw rule18 nil => (rev nil)
+rw rule19 (rev (cons ?x10 ?y)) => (append (rev ?y) (cons ?x10 nil))
+rw rule20 (append (rev ?y) (cons ?x10 nil)) => (rev (cons ?x10 ?y))
+prove (rev (take ?i ?xs))  = (drop (minus (len ?xs) ?i) (rev ?xs))
