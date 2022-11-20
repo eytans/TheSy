@@ -445,7 +445,11 @@ impl TheSy {
         !runner.egraph.equivs(ex1, ex2).is_empty()
     }
 
-    fn check_goals(&mut self, case_splitter: &mut Option<&mut CaseSplit>, rules: &mut Vec<ThRewrite>)
+    pub fn remaining_goals(&self) -> Option<Vec<Vec<(Option<ThExpr>, ThExpr, ThExpr)>>> {
+        return self.goals.clone()
+    }
+
+    pub fn check_goals(&mut self, case_splitter: &mut Option<&mut CaseSplit>, rules: &mut Vec<ThRewrite>)
                    -> Option<Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, ThRewrite)>> {
         if self.goals.is_none() {
             return None;

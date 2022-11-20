@@ -5,7 +5,7 @@ use std::io::Write;
 use std::path::PathBuf;
 use std::process::exit;
 use std::time::SystemTime;
-use log::warn;
+use log::{log, warn};
 
 use itertools::{Either, Itertools};
 #[cfg(feature = "stats")]
@@ -19,7 +19,7 @@ use TheSy::thesy::{example_creator};
 use TheSy::thesy::case_split::{CaseSplit, Split};
 use TheSy::thesy::thesy::TheSy as Synth;
 use TheSy::thesy::semantics::Definitions;
-use TheSy::{thesy, TheSyConfig};
+use TheSy::{SubCmd, thesy, TheSyConfig};
 use egg::tools::tools::choose;
 use std::rc::Rc;
 
@@ -34,11 +34,10 @@ struct CliOpt {
     ph_count: usize,
     /// Previous results to read
     dependencies: Vec<String>,
-    /// Run as prover or ignore goals, true if flag is present
-    #[structopt(name = "proof mode", short = "p", long = "prove")]
-    proof_mode: bool,
-    #[structopt(name = "check equivalence", short = "c", long = "check-equiv")]
-    check_equiv: bool,
+    /// Run exploration, as a prover, check equivalence only, or skip case split in equivalence
+    /// check
+    #[structopt(name = "run mode", short = "m", long = "mode", default_value = "Run")]
+    run_mode: SubCmd,
 }
 
 impl From<&CliOpt> for TheSyConfig {
@@ -48,7 +47,7 @@ impl From<&CliOpt> for TheSyConfig {
             opts.ph_count,
             vec![],
             opts.path.with_extension("res.th"),
-            opts.proof_mode,
+            opts.run_mode,
         )
     }
 }
@@ -56,7 +55,7 @@ impl From<&CliOpt> for TheSyConfig {
 fn main() {
     use simplelog::*;
 
-    let args = CliOpt::from_args();
+    let args: CliOpt = CliOpt::from_args();
 
     let log_path = args.path.with_extension("log");
     let mut thesy_config: simplelog::Config = ConfigBuilder::new().add_filter_ignore_str("egg").build();
@@ -78,12 +77,27 @@ fn main() {
     let thesy = Synth::from(&config);
     let mut rws = thesy.system_rws.clone();
     rws.extend_from_slice(&config.definitions.rws);
-    if args.check_equiv {
-        for (vars, holes, precond, ex1, ex2) in &config.definitions.conjectures {
-            if Synth::check_equality(&rws, precond, ex1, ex2) {
-                println!("proved: Forall {}. {}{} = {}", holes.iter().join(", "), precond.as_ref().map(|x| format!("{} => ", x.pretty(500))).unwrap_or("".to_string()), ex1.pretty(500), ex2.pretty(500))
+    if args.run_mode.is_check_equiv() || args.run_mode.is_no_case_split() {
+        // Shortened mode, only trying short proof of goals without exploration
+        if args.run_mode.is_no_case_split() {
+            for (vars, holes, precond, ex1, ex2) in &config.definitions.conjectures {
+                if !Synth::check_equality(&rws, precond, ex1, ex2) {
+                    println!("Failed to prove conjecture {} => {} = {}",
+                             precond.clone().map(|p| p.pretty(500)).unwrap_or("true".to_string()),
+                             ex1.pretty(500), ex2.pretty(500));
+                    exit(1);
+                }
+            }
+        } else {
+            // We are in case split mode
+            let (mut thesy, mut case_split, mut rules) = config.create_thesy();
+            let res = thesy.check_goals(&mut Some(&mut case_split), &mut rules);
+            if !thesy.remaining_goals().unwrap().is_empty() {
+                println!("Failed to prove conjectures");
+                exit(1);
             }
         }
+        warn!("Finished proving all goals in {:?}", start.elapsed().unwrap());
         exit(0)
     }
     let res = config.run(Some(2));
