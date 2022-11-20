@@ -8,6 +8,7 @@ import pathlib
 from collections import namedtuple
 
 from datetime import datetime
+from pathlib import Path
 from experiments import executable_release, project_root, cargo_path
 
 cgroups_disabled = os.name == 'nt' or os.name == "darwin" or os.name == "posix"
@@ -107,8 +108,18 @@ if __name__ == '__main__':
     parser.add_argument('-n', '--processnum', default=15)
     parser.add_argument('-m', '--memorylimit', default=32)
     parser.add_argument('--norerun', action='store_true', default=False)
-
+    parser.add_argument('-o', '--outputdir', default=None)
     args = parser.parse_args()
     rerun = not args.norerun
 
-    run_all(args.inputdir, args.mode, args.features, args.skip, int(args.timeout), int(args.processnum), args.memorylimit, args.singlethread, rerun)
+    outputdir = Path(args.outputdir) if args.outputdir is not None else Path.cwd() / ("results_" + datetime.now().strftime("%Y-%m-%d_%H-%M-%S"))
+    os.makedirs(outputdir, exist_ok=True)
+    # Copy all input dirs to outputdir and collect to inputdirs
+    inputdirs = []
+    for inputdir in args.inputdir:
+        new_inputdir = Path(outputdir / inputdir.name)
+        assert inputdir.is_dir()
+        shutil.copytree(inputdir, new_inputdir)
+        inputdirs.append(new_inputdir)
+
+    run_all(inputdirs, args.mode, args.features, args.skip, int(args.timeout), int(args.processnum), args.memorylimit, args.singlethread, rerun)
