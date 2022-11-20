@@ -45,6 +45,51 @@ pub(crate) use crate::thesy::consts::system_case_splits;
 use std::alloc;
 use cap::Cap;
 use crate::lang::ThRewrite;
+use crate::SubCmd::Prove;
+
+#[derive(StructOpt, Clone, Copy, strum_macros::EnumString)]
+pub enum SubCmd {
+    /// Run thesy
+    Run,
+    /// Run thesy in proof mode
+    Prove,
+    /// Check equivalence
+    CheckEquiv,
+    /// Check equivalence without Case split
+    CENoCaseSplit,
+}
+
+impl SubCmd {
+    pub fn is_run(&self) -> bool {
+        match self {
+            SubCmd::Run => true,
+            _ => false,
+        }
+    }
+
+    pub fn is_prove(&self) -> bool {
+        match self {
+            SubCmd::Prove => true,
+            _ => false,
+        }
+    }
+
+    pub fn is_check_equiv(&self) -> bool {
+        match self {
+            SubCmd::CheckEquiv => true,
+            _ => false,
+        }
+    }
+
+    pub fn is_no_case_split(&self) -> bool {
+        match self {
+            SubCmd::CENoCaseSplit => true,
+            _ => false,
+        }
+    }
+}
+
+
 
 #[global_allocator]
 static ALLOCATOR: Cap<alloc::System> = Cap::new(alloc::System, usize::MAX);
@@ -57,11 +102,11 @@ pub struct TheSyConfig {
     dep_results: Vec<Vec<ThRewrite>>,
     output: PathBuf,
     prerun: bool,
-    proof_mode: bool,
+    run_mode: SubCmd,
 }
 
 impl TheSyConfig {
-    pub fn new(definitions: Definitions, ph_count: usize, dependencies: Vec<TheSyConfig>, output: PathBuf, proof_mode: bool) -> TheSyConfig {
+    pub fn new(definitions: Definitions, ph_count: usize, dependencies: Vec<TheSyConfig>, output: PathBuf, run_mode: SubCmd) -> TheSyConfig {
         let func_len = definitions.functions.len();
         TheSyConfig {
             definitions,
@@ -70,7 +115,7 @@ impl TheSyConfig {
             dep_results: vec![],
             output,
             prerun: false,
-            proof_mode,
+            run_mode,
         }
         // prerun: func_len > 2}
     }
@@ -85,14 +130,26 @@ impl TheSyConfig {
 
     pub fn from_path(path: String) -> TheSyConfig {
         let definitions = Definitions::from_file(&PathBuf::from(path.clone()));
-        TheSyConfig::new(definitions, 2, vec![], PathBuf::from(path).with_extension("res"), true)
+        TheSyConfig::new(definitions,
+                         2,
+                         vec![],
+                         PathBuf::from(path).with_extension("res"),
+                         Prove)
+    }
+
+    pub fn create_thesy(&mut self) -> (TheSy, CaseSplit, Vec<ThRewrite>) {
+        self.collect_dependencies();
+        let mut rules = self.definitions.rws.clone();
+        rules.extend(self.dep_results.iter().flatten().cloned());
+        let thesy: TheSy = TheSy::from(&*self);
+        let case_split =
+            TheSy::create_case_splitter(self.definitions.case_splitters.clone());
+        (thesy, case_split, rules)
     }
 
     /// Run thesy using current configuration returning (thesy instance, previous + new rewrites)
     pub fn run(&mut self, max_depth: Option<usize>) -> (TheSy, Vec<ThRewrite>) {
-        self.collect_dependencies();
-        let mut rules = self.definitions.rws.clone();
-        rules.extend(self.dep_results.iter().flatten().cloned());
+        let (mut thesy, case_split, mut rules) = self.create_thesy();
         // Prerun helps prevent state overflow
         if self.prerun && self.definitions.functions.len() > 2 {
             for f in &self.definitions.functions {
@@ -114,9 +171,6 @@ impl TheSyConfig {
                 thesy.run(&mut rules, Some(case_split), max_depth.unwrap_or(2));
             }
         }
-        let mut thesy: TheSy = TheSy::from(&*self);
-        // TODO: take a ref
-        let case_split = TheSy::create_case_splitter(std::mem::take(&mut self.definitions.case_splitters));
         let results = thesy.run(&mut rules, Some(case_split), max_depth.unwrap_or(2));
         let new_rules_text = results.iter()
             .map(|(precond, searcher, applier, rw)|
@@ -170,7 +224,7 @@ impl From<&TheSyConfig> for TheSy {
             Some(conf.definitions.conjectures.clone())
         };
 
-        if conf.proof_mode && conjectures.iter().any(|x| !x.is_empty()) {
+        if conf.run_mode.is_run() && conjectures.iter().any(|x| !x.is_empty()) {
             warn!("Running exploration without proof mode, but goals were given");
         }
 
@@ -178,6 +232,6 @@ impl From<&TheSyConfig> for TheSy {
                            examples,
                            dict,
                            conf.ph_count,
-                           if conf.proof_mode { conjectures } else { None })
+                           if conf.run_mode.is_run() { None } else { conjectures })
     }
 }

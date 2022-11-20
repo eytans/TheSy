@@ -25,6 +25,8 @@ lazy_static = "1.4.0"
 global_counter = "0.2.1"
 bimap = "0.5.3"
 indexmap = "1.9.0"
+strum = "0.24.1"
+strum_macros = "0.24.3"
 
 serde = {version = "1.0.116", features = ["derive"], optional = true}
 serde_json = {version = "1.0.58", optional = true}
@@ -35,8 +37,9 @@ cap = "0.1.0"
 proptest = "1.0.0"
 
 [features]
-default = ["split_colored"]
-#default = ["split_clone", "keep_splits"]
+default = ["split_colored", "stats"]
+#default = ["split_clone", "stats"]
+#default = ["split_clone", "keep_splits", "stats"]
 stats = ["serde", "serde_json", "egg/serde-1"]
 split_colored = ["egg/colored"]
 split_clone = []

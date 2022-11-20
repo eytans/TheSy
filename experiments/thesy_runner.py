@@ -1,3 +1,4 @@
+import enum
 import os
 import argparse
 import shutil
@@ -9,9 +10,9 @@ from collections import namedtuple
 from datetime import datetime
 from experiments import executable_release, project_root, cargo_path
 
-is_windows = True
-# if not is_windows:
-#     from cgroups import Cgroup
+cgroups_disabled = os.name == 'nt' or os.name == "darwin" or os.name == "posix"
+if not cgroups_disabled:
+    from cgroups import Cgroup
 
 RunParams = namedtuple('RunParams', ['fn', 'timeout', 'proof_mode'])
 
@@ -22,13 +23,13 @@ CMD = [str(executable_release)]
 
 
 # First we create the cgroup 'charlie' and we set it's cpu and memory limits
-if not is_windows:
+if not cgroups_disabled:
     cg = Cgroup('thesy_cgroup')
 
 
 # Then we a create a function to add a process in the cgroup
 def in_my_cgroup():
-    if not is_windows:
+    if not cgroups_disabled:
         pid = os.getpid()
         cg = Cgroup('thesy_cgroup')
         cg.add(pid)
@@ -74,7 +75,7 @@ def run_all(dirs, prove=False, features="", skip=None, timeout=60, processnum=15
     if not rerun:
         files = [p for p in files if not pathlib.Path(p.fn).with_suffix('.stats.json').exists()]
     # isa_files = ["./temp/" + f for f in isa_files]
-    if not is_windows:
+    if not cgroups_disabled:
         cg.set_memory_limit(memorylimit, 'gigabytes')
     pn = processnum
     if multiprocess:
@@ -85,10 +86,18 @@ def run_all(dirs, prove=False, features="", skip=None, timeout=60, processnum=15
             run_thesy(f)
 
 
+class ThesyMode(enum.Enum):
+    Run = 1
+    Prove = 2
+    CheckEquiv = 3
+    CENoCaseSplit = 4
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("inputdir", nargs='+')
-    parser.add_argument('-p', '--prove', action='store_true', default=False)
+    # Add argument for thesy mode
+    parser.add_argument("--mode", type=ThesyMode, choices=list(ThesyMode), default=ThesyMode.Run)
     parser.add_argument('-s', '--singlethread', action='store_false', default=True)
     parser.add_argument('-f', '--features', default="")
     parser.add_argument('--skip', nargs='*', default=None)
