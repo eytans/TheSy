@@ -111,4 +111,4 @@ if __name__ == '__main__':
     args = parser.parse_args()
     rerun = not args.norerun
 
-    run_all(args.inputdir, args.mode, args.features, args.skip, args.timeout, args.processnum, args.memorylimit, args.singlethread, rerun)
+    run_all(args.inputdir, args.mode, args.features, args.skip, int(args.timeout), int(args.processnum), args.memorylimit, args.singlethread, rerun)
