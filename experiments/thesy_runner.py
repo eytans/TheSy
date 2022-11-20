@@ -41,7 +41,8 @@ def run_thesy(params: RunParams):
     try:
         cmd = [s for s in CMD]
         if params.proof_mode:
-            cmd.append('--prove')
+            cmd.append('--mode')
+            cmd.append(str(params.proof_mode))
         cmd.append(params.fn)
         print(cmd)
         res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=params.timeout)
@@ -58,7 +59,15 @@ def run_thesy(params: RunParams):
     # with open(fn + ".json", 'w') as f:
 
 
-def run_all(dirs, prove=False, features="", skip=None, timeout=60, processnum=15, memorylimit=32, multiprocess=True, rerun=True):
+class ThesyMode(enum.Enum):
+    Run = 1
+    Prove = 2
+    CheckEquiv = 3
+    CENoCaseSplit = 4
+
+
+
+def run_all(dirs, mode=ThesyMode.Run, features="", skip=None, timeout=60, processnum=15, memorylimit=32, multiprocess=True, rerun=True):
     if skip is None:
         skip = []
     to = timeout * 60
@@ -71,7 +80,7 @@ def run_all(dirs, prove=False, features="", skip=None, timeout=60, processnum=15
         exit()
     print("Build done")
     inputdirs = dirs
-    files = [RunParams(os.path.join(folder, fn), timeout=to, proof_mode=prove) for folder in inputdirs for fn in os.listdir(folder) if fn.endswith(".th") and (not fn.endswith("res.th")) and fn not in skip]
+    files = [RunParams(os.path.join(folder, fn), timeout=to, proof_mode=mode) for folder in inputdirs for fn in os.listdir(folder) if fn.endswith(".th") and (not fn.endswith("res.th")) and fn not in skip]
     if not rerun:
         files = [p for p in files if not pathlib.Path(p.fn).with_suffix('.stats.json').exists()]
     # isa_files = ["./temp/" + f for f in isa_files]
@@ -84,13 +93,6 @@ def run_all(dirs, prove=False, features="", skip=None, timeout=60, processnum=15
     else:
         for f in files:
             run_thesy(f)
-
-
-class ThesyMode(enum.Enum):
-    Run = 1
-    Prove = 2
-    CheckEquiv = 3
-    CENoCaseSplit = 4
 
 
 if __name__ == '__main__':
@@ -109,4 +111,4 @@ if __name__ == '__main__':
     args = parser.parse_args()
     rerun = not args.norerun
 
-    run_all(args.inputdir, args.prove, args.features, args.skip, args.timeout, args.processnum, args.memorylimit, args.singlethread, rerun)
+    run_all(args.inputdir, args.mode, args.features, args.skip, args.timeout, args.processnum, args.memorylimit, args.singlethread, rerun)
