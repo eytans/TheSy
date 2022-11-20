@@ -9,9 +9,9 @@ from collections import namedtuple
 from datetime import datetime
 from experiments import executable_release, project_root, cargo_path
 
-is_windows = os.name == 'nt'
-if not is_windows:
-    from cgroups import Cgroup
+is_windows = True
+# if not is_windows:
+#     from cgroups import Cgroup
 
 RunParams = namedtuple('RunParams', ['fn', 'timeout', 'proof_mode'])
 
@@ -100,4 +100,4 @@ if __name__ == '__main__':
     args = parser.parse_args()
     rerun = not args.norerun
 
-    run_all(args.inputdir, args.prove, args.features, args.skip, args.timeout, args.processnum, args.memorylimit, args.singlethread, rerun)
+    run_all(args.inputdir, args.prove, args.features, args.skip, int(args.timeout), int(args.processnum), args.memorylimit, args.singlethread, rerun)
