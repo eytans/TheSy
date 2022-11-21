@@ -12,7 +12,7 @@ use std::sync::Mutex;
 use indexmap::IndexSet;
 use thesy_parser::ast::{Expression, Terminal};
 use egg::reconstruct::reconstruct;
-use crate::{tests, TheSyConfig};
+use crate::{PRETTY_W, tests, TheSyConfig};
 use crate::lang::ThExpr;
 
 lazy_static!(
@@ -106,9 +106,9 @@ pub fn test_terms(mut definitions: Definitions) -> ProofMode {
             != thesy.get_example_ids(d, ph_id2)
     }) {
         println!("ph1: {}", reconstruct(&thesy.egraph, ph_id1, 5)
-            .map_or("".to_string(), |x| x.pretty(500)));
+            .map_or("".to_string(), |x| x.pretty(PRETTY_W)));
         println!("ph2: {}", reconstruct(&thesy.egraph, ph_id2, 5)
-            .map_or("".to_string(), |x| x.pretty(500)));
+            .map_or("".to_string(), |x| x.pretty(PRETTY_W)));
         return ProofMode::ExamplesFailed;
     }
 

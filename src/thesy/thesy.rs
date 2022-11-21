@@ -23,6 +23,7 @@ use crate::thesy::example_creator::Examples;
 use crate::thesy::prover::Prover;
 use crate::thesy::statistics::Stats;
 use egg::tools::tools::choose;
+use crate::PRETTY_W;
 
 /// Theory Synthesizer - Explores a given theory finding and proving new lemmas.
 pub struct TheSy {
@@ -90,7 +91,8 @@ impl TheSy {
                 let patterns = params.iter()
                     .flat_map(|(v, typ)| {
                         vec![
-                            Pattern::from_str(&*format!("(typed {} {})", v.to_string(), typ.pretty(500))).unwrap(),
+                            Pattern::from_str(&*format!("(typed {} {})", v.to_string(),
+                                                        typ.pretty(PRETTY_W))).unwrap(),
                         ]
                     }).collect::<Vec<Pattern<SymbolLang>>>();
                 res.insert(fun.name.clone(), (MultiDiffSearcher::new(patterns), params));
@@ -469,12 +471,49 @@ impl TheSy {
                     if res.is_some() {
                         warn!("Proved goal {} - {:?} -> {} = {}", i, precond, ex1, ex2);
                         if cfg!(feature = "stats") {
-                            self.stats.goals_proved.push((ex1.pretty(500), ex2.pretty(500), SystemTime::now().duration_since(start.unwrap()).unwrap()));
+                            self.stats.goals_proved.push((ex1.pretty(PRETTY_W), ex2.pretty(PRETTY_W), SystemTime::now().duration_since(start.unwrap()).unwrap()));
                         }
                         break 'outer;
                     } else {
                         if cfg!(feature = "stats") {
-                            self.stats.failed_proofs_goals.push((ex1.pretty(500), ex2.pretty(500), SystemTime::now().duration_since(start.unwrap()).unwrap()));
+                            self.stats.failed_proofs_goals.push((ex1.pretty(PRETTY_W), ex2.pretty(PRETTY_W), SystemTime::now().duration_since(start.unwrap()).unwrap()));
+                        }
+                    }
+                }
+            }
+        }
+        if res.is_some() {
+            lemmas.remove(index);
+        }
+        res
+    }
+
+    pub fn case_split_goals(&mut self, case_splitter: &mut Option<&mut CaseSplit>, rules: &mut Vec<ThRewrite>)
+                       -> Option<Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, ThRewrite)>> {
+        if self.goals.is_none() {
+            return None;
+        }
+        let mut lemmas = self.goals.as_mut().unwrap();
+        let mut res = None;
+        let mut index = 0;
+        'outer: for (i, conjs) in lemmas.iter().enumerate() {
+            debug!("Checking goal {}", i);
+            for (precond, ex1, ex2) in conjs {
+                for p in self.datatypes.values() {
+                    let start = if cfg!(feature = "stats") {
+                        Some(SystemTime::now())
+                    } else { None };
+                    res = p.prove_all_split_d(case_splitter, rules, Option::from(precond), ex1, ex2, 3);
+                    index = i;
+                    if res.is_some() {
+                        warn!("Proved goal {} - {:?} -> {} = {}", i, precond, ex1, ex2);
+                        if cfg!(feature = "stats") {
+                            self.stats.goals_proved.push((ex1.pretty(PRETTY_W), ex2.pretty(PRETTY_W), SystemTime::now().duration_since(start.unwrap()).unwrap()));
+                        }
+                        break 'outer;
+                    } else {
+                        if cfg!(feature = "stats") {
+                            self.stats.failed_proofs_goals.push((ex1.pretty(PRETTY_W), ex2.pretty(PRETTY_W), SystemTime::now().duration_since(start.unwrap()).unwrap()));
                         }
                     }
                 }
@@ -548,10 +587,10 @@ impl TheSy {
                     } else {
                         ex1 = new_rules.as_ref().unwrap()[0].1.pretty_string().parse().unwrap();
                         ex2 = new_rules.as_ref().unwrap()[0].2.pretty_string().parse().unwrap();
-                        info!("generalized to {} -- {}", ex1.pretty(500), ex2.pretty(500));
+                        info!("generalized to {} -- {}", ex1.pretty(PRETTY_W), ex2.pretty(PRETTY_W));
                     }
                     if Self::check_equality(&rules[..], &None, &ex1, &ex2) {
-                        info!("bad conjecture {} = {}", &ex1.pretty(500), &ex2.pretty(500));
+                        info!("bad conjecture {} = {}", &ex1.pretty(PRETTY_W), &ex2.pretty(PRETTY_W));
                         self.stats.update_filtered_conjecture(&ex1, &ex2);
                         continue 'outer;
                     }
@@ -648,7 +687,7 @@ impl TheSy {
                 } else {
                     ex1 = new_rules.as_ref().unwrap()[0].1.pretty_string().parse().unwrap();
                     ex2 = new_rules.as_ref().unwrap()[0].2.pretty_string().parse().unwrap();
-                    warn!("generalized case_split proof as: {} -- {}", ex1.pretty(500), ex2.pretty(500));
+                    warn!("generalized case_split proof as: {} -- {}", ex1.pretty(PRETTY_W), ex2.pretty(PRETTY_W));
                 }
             }
             changed = true;
@@ -697,10 +736,11 @@ impl TheSy {
 
 #[cfg(test)]
 mod test {
-    use std::iter;
+    use std::{alloc, iter};
     use std::iter::FromIterator;
     use std::str::FromStr;
     use std::time::SystemTime;
+    use cap::Cap;
 
     use egg::{EGraph, Pattern, RecExpr, Rewrite, Runner, Searcher, SearchMatches, Symbol, SymbolLang, Var};
     use indexmap::{IndexMap, IndexSet};
@@ -716,8 +756,11 @@ mod test {
     use crate::thesy::consts::ite_rws;
     use crate::thesy::semantics::Definitions;
     use crate::thesy::thesy::TheSy;
-    use crate::{TheSyConfig, tests, ALLOCATOR};
+    use crate::{TheSyConfig, tests, PRETTY_W};
     use egg::tools::tools::Grouped;
+
+    #[global_allocator]
+    pub(crate) static ALLOCATOR: Cap<alloc::System> = Cap::new(alloc::System, usize::MAX);
 
     fn create_nat_type() -> DataType {
         DataType::new("nat".to_string(), vec![
@@ -1067,7 +1110,7 @@ mod test {
         assert_ne!(thesy.egraph.find(consxy), thesy.egraph.find(ex2));
         assert_eq!(thesy.egraph.find(nil), thesy.egraph.find(ex0));
         println!("Currently (before) allocated: {}MB", ALLOCATOR.allocated() as f64 /1e6);
-        case_split.case_split(&mut thesy.egraph, 2, &rules, 4);
+        case_split.case_split(&mut thesy.egraph, 2, &rules, 6);
         println!("Currently (after) allocated: {}MB", ALLOCATOR.allocated() as f64 /1e6);
         info!("Done case split");
         thesy.egraph.rebuild();
@@ -1114,7 +1157,7 @@ mod test {
             assert_eq!(1, edges.len(),
                        "Type {} (reconstructed as {}) has {} edges: {:#?}",
                        id,
-                       reconstruct(&egraph, *id, 3).unwrap().pretty(500),
+                       reconstruct(&egraph, *id, 3).unwrap().pretty(PRETTY_W),
                        edges.len(),
                        edges);
         });

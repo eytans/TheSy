@@ -41,11 +41,12 @@ use egg::tools::tools::choose;
 use std::rc::Rc;
 pub(crate) use crate::thesy::consts::system_case_splits;
 
-
 use std::alloc;
 use cap::Cap;
 use crate::lang::ThRewrite;
 use crate::SubCmd::Prove;
+
+pub const PRETTY_W: usize = 500;
 
 #[derive(StructOpt, Clone, Copy, strum_macros::EnumString)]
 pub enum SubCmd {
@@ -88,11 +89,6 @@ impl SubCmd {
         }
     }
 }
-
-
-
-#[global_allocator]
-static ALLOCATOR: Cap<alloc::System> = Cap::new(alloc::System, usize::MAX);
 
 #[derive(Clone)]
 pub struct TheSyConfig {

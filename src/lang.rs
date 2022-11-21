@@ -3,6 +3,7 @@ use itertools::Itertools;
 
 use egg::expression_ops::{IntoTree, Tree};
 use std::fmt::{Display, Formatter};
+use crate::PRETTY_W;
 
 pub type ThNode = SymbolLang;
 pub type ThAnl = ();
@@ -21,7 +22,8 @@ pub struct DataType {
 
 impl Display for DataType {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        writeln!(f, "Datatype {}: types - {}", self.name, self.type_params.iter().map(|e| e.pretty(500)).join(" "))?;
+        writeln!(f, "Datatype {}: types - {}",
+                 self.name, self.type_params.iter().map(|e| e.pretty(PRETTY_W)).join(" "))?;
         write!(f, "  {}", self.constructors.iter().map(|f| format!("{}", f)).join("| "))
     }
 }
@@ -38,9 +40,9 @@ impl Display for Function {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         writeln!(f, "Function {}: {}{}{}",
             self.name,
-            self.params.iter().map(|x| x.pretty(500)).join(" -> "),
+            self.params.iter().map(|x| x.pretty(PRETTY_W)).join(" -> "),
             self.params.first().map(|x| " -> ").unwrap_or(" "),
-            self.ret_type.pretty(500)
+            self.ret_type.pretty(PRETTY_W)
         )
     }
 }

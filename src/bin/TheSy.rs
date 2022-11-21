@@ -1,4 +1,4 @@
-
+use std::alloc;
 use std::borrow::Borrow;
 use std::fs::File;
 use std::io::Write;
@@ -19,16 +19,20 @@ use TheSy::thesy::{example_creator};
 use TheSy::thesy::case_split::{CaseSplit, Split};
 use TheSy::thesy::thesy::TheSy as Synth;
 use TheSy::thesy::semantics::Definitions;
-use TheSy::{SubCmd, thesy, TheSyConfig};
+use TheSy::{PRETTY_W, SubCmd, thesy, TheSyConfig};
 use egg::tools::tools::choose;
 use std::rc::Rc;
+use cap::Cap;
+
+#[global_allocator]
+pub(crate) static ALLOCATOR: Cap<alloc::System> = Cap::new(alloc::System, usize::MAX);
 
 /// Arguments to use to run thesy
 #[derive(StructOpt)]
 struct CliOpt {
     /// The path to the file to read
     #[structopt(parse(from_os_str))]
-    path: std::path::PathBuf,
+    path: PathBuf,
     /// Placeholder count
     #[structopt(name = "placeholder count", default_value = "2")]
     ph_count: usize,
@@ -38,6 +42,9 @@ struct CliOpt {
     /// check
     #[structopt(name = "run mode", short = "m", long = "mode", default_value = "Run")]
     run_mode: SubCmd,
+    /// Memory limit in MB
+    #[structopt(name = "memory limit", short = "l", long = "limit", default_value = "None")]
+    mem_limit: Option<usize>,
 }
 
 impl From<&CliOpt> for TheSyConfig {
@@ -72,6 +79,10 @@ fn main() {
         warn!("Collecting statistics");
     }
 
+    if let Some(limit) = args.mem_limit {
+        ALLOCATOR.set_limit(limit * 1024 * 1024).expect("Failed to set memory limit");
+    }
+
     let start = SystemTime::now();
     let mut config = TheSyConfig::from(&args);
     let thesy = Synth::from(&config);
@@ -83,8 +94,8 @@ fn main() {
             for (vars, holes, precond, ex1, ex2) in &config.definitions.conjectures {
                 if !Synth::check_equality(&rws, precond, ex1, ex2) {
                     println!("Failed to prove conjecture {} => {} = {}",
-                             precond.clone().map(|p| p.pretty(500)).unwrap_or("true".to_string()),
-                             ex1.pretty(500), ex2.pretty(500));
+                             precond.clone().map(|p| p.pretty(PRETTY_W)).unwrap_or("true".to_string()),
+                             ex1.pretty(PRETTY_W), ex2.pretty(PRETTY_W));
                     exit(1);
                 }
             }

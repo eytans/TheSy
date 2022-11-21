@@ -14,6 +14,7 @@ use egg::searchers::{EitherSearcher, MultiDiffSearcher};
 use egg::pretty_string::PrettyString;
 use crate::lang::{DataType, Function, ThEGraph, ThExpr, ThRewrite};
 use egg::searchers::{FilteringSearcher, MatcherContainsCondition, ToDyn, ToRc};
+use crate::PRETTY_W;
 use crate::thesy::TheSy;
 use crate::thesy::case_split::CaseSplit;
 
@@ -134,31 +135,65 @@ impl Prover {
     }
 
     pub fn prove_base(&self, case_splitter: &mut Option<&mut CaseSplit>, rules: &[ThRewrite], ex1: &ThExpr, ex2: &ThExpr) -> bool {
-        self.prove_base_split_d(case_splitter, rules, None, ex1, ex2, Self::CASE_SPLIT_DEPTH)
+        let constructors = self.get_base_constructors();
+        self.prove_constructors_split_d(case_splitter, rules, None, ex1, ex2,
+                                        Self::CASE_SPLIT_DEPTH, constructors)
     }
 
-    pub fn prove_base_split_d(&self, case_splitter: &mut Option<&mut CaseSplit>, rules: &[ThRewrite], precond: Option<&ThExpr>, ex1: &ThExpr, ex2: &ThExpr, split_d: usize) -> bool {
+    fn get_base_constructors(&self) -> Vec<&Function> {
+        let constructors = self.datatype.constructors.iter()
+            .filter(|c| c.params.is_empty())
+            .collect();
+        constructors
+    }
+
+    pub fn prove_constructors_split_d(&self, case_splitter: &mut Option<&mut CaseSplit>,
+                                      rules: &[ThRewrite],
+                                      precond: Option<&ThExpr>,
+                                      ex1: &ThExpr,
+                                      ex2: &ThExpr,
+                                      split_d: usize,
+                                      constructors: Vec<&Function>) -> bool {
         if self.not_containing_ind_var(ex1) && self.not_containing_ind_var(ex2) {
             warn!("prove_base: no ind var in ex1 and ex2");
             return false;
         }
         // create graph containing both expressions
         let (orig_egraph, ind_id) = self.create_proof_graph(precond, &ex1, &ex2);
-        self.datatype.constructors.iter().filter(|c| c.params.is_empty()).all(|c| {
-            info!("prove_base: checking constructor {}", c.name);
-            let mut egraph = orig_egraph.clone();
-            let contr_id = egraph.add_expr(&c.as_exp());
-            egraph.union(contr_id, ind_id);
-            let mut runner: Runner<SymbolLang, ()> = Runner::new(()).with_egraph(egraph).with_iter_limit(Self::RUN_DEPTH).run(&rules[..]);
-            case_splitter.iter_mut().for_each(|c| c.case_split(&mut runner.egraph, split_d, &rules, Self::CASE_ITERN));
-            let equal = !runner.egraph.equivs(&ex1, &ex2).is_empty();
+        constructors.into_iter().all(|c| {
+            let equal = Self::case_split_for_constructor(case_splitter, rules,
+                                                         ex1, ex2,
+                                                         split_d, &orig_egraph, ind_id, c);
             if !equal {
-                info!("Basic constructor {} failed basic proving for {} == {}", c.name, ex1.pretty(500), ex2.pretty(500))
+                info!("Basic constructor {} failed basic proving for {} == {}",
+                    c.name, ex1.pretty(PRETTY_W), ex2.pretty(PRETTY_W))
             } else {
-                debug!("Basic constructor {} successfully proved for {} == {}", c.name, ex1.pretty(500), ex2.pretty(500))
+                debug!("Basic constructor {} successfully proved for {} == {}",
+                    c.name, ex1.pretty(PRETTY_W), ex2.pretty(PRETTY_W))
             }
             equal
         })
+    }
+
+    fn case_split_for_constructor(case_splitter: &mut Option<&mut CaseSplit>,
+                                  rules: &[ThRewrite],
+                                  ex1: &ThExpr,
+                                  ex2: &ThExpr,
+                                  split_d: usize,
+                                  orig_egraph: &ThEGraph,
+                                  ind_id: Id,
+                                  c: &Function) -> bool {
+        info!("prove_base: checking constructor {}", c.name);
+        let mut egraph = orig_egraph.clone();
+        let contr_id = egraph.add_expr(&c.as_exp());
+        egraph.union(contr_id, ind_id);
+        let mut runner: Runner<SymbolLang, ()> = Runner::new(())
+            .with_egraph(egraph)
+            .with_iter_limit(Self::RUN_DEPTH)
+            .run(&rules[..]);
+        case_splitter.iter_mut().for_each(|c|
+            c.case_split(&mut runner.egraph, split_d, &rules, Self::CASE_ITERN));
+        !runner.egraph.equivs(&ex1, &ex2).is_empty()
     }
 
     pub fn generalize_prove(&self, case_splitter: &mut Option<&mut CaseSplit>, rules: &[ThRewrite], orig_ex1: &ThExpr, orig_ex2: &ThExpr)
@@ -176,7 +211,7 @@ impl Prover {
             std::mem::swap(&mut ex1_ph1_indices, &mut ex2_ph1_indices);
             std::mem::swap(&mut ex1, &mut ex2);
         }
-        info!("generalizing {} = {}", ex1.pretty(500), ex2.pretty(500));
+        info!("generalizing {} = {}", ex1.pretty(PRETTY_W), ex2.pretty(PRETTY_W));
         // We want less options when checking all permutations
         let max_phs = max(ex2_ph1_indices.len(), ex1_ph1_indices.len());
         let mut res = None;
@@ -245,7 +280,7 @@ impl Prover {
         if res {
             Some(Self::rw_from_exp(precond, ex1, ex2, &self.ind_var))
         } else {
-            info!("Failed to prove: {} = {}", ex1.pretty(500), ex2.pretty(500));
+            info!("Failed to prove: {} = {}", ex1.pretty(PRETTY_W), ex2.pretty(PRETTY_W));
             None
         }
     }
@@ -257,7 +292,8 @@ impl Prover {
 
     pub fn prove_all_split_d(&self, case_splitter: &mut Option<&mut CaseSplit>, rules: &[ThRewrite], precond: Option<&ThExpr>, ex1: &ThExpr, ex2: &ThExpr, split_d: usize)
                              -> Option<Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, ThRewrite)>> {
-        if self.prove_base_split_d(case_splitter, rules, precond, ex1, ex2, split_d) {
+        if self.prove_constructors_split_d(case_splitter, rules, precond, ex1, ex2, split_d,
+                                           self.get_base_constructors()) {
             warn!("Basic succeeded");
             self.prove_ind_split_d(case_splitter, rules, precond, ex1, ex2, split_d)
         } else {
@@ -287,8 +323,8 @@ impl Prover {
         let ind_replacer = "?somevar".to_string();
         let clean_term1 = Self::pattern_from_exp(ex1, induction_ph, &ind_replacer);
         let clean_term2 = Self::pattern_from_exp(ex2, induction_ph, &ind_replacer);
-        let pret = clean_term1.pretty(500);
-        let pret2 = clean_term2.pretty(500);
+        let pret = clean_term1.pretty(PRETTY_W);
+        let pret2 = clean_term2.pretty(PRETTY_W);
         let mut searchers = vec![EitherSearcher::left(Pattern::from_str(&*format!("({} {} {})", Self::wfo_op(), ind_replacer, induction_ph.name)).unwrap())];
         precond.map(|p| searchers.push(EitherSearcher::right(
             FilteringSearcher::searcher_is_true(Pattern::from(p.as_ref())))));

@@ -3,6 +3,7 @@ use std::time::{Duration, SystemTime};
 use egg::{Iteration, RecExpr, SymbolLang};
 use indexmap::IndexMap;
 use crate::lang::ThExpr;
+use crate::PRETTY_W;
 
 global_counter!(MEASURE_COUNTER, usize, usize::default());
 
@@ -66,20 +67,22 @@ impl Stats {
     pub fn update_proved(&mut self, ex1: &ThExpr, ex2: &ThExpr, key: usize) {
         if cfg!(feature = "stats") {
             let data = &self.measures[&key];
-            self.conjectures_proved.push((ex1.pretty(500), ex2.pretty(500), SystemTime::now().duration_since(data.start).unwrap()));
+            self.conjectures_proved.push((ex1.pretty(PRETTY_W), ex2.pretty(PRETTY_W),
+                                          SystemTime::now().duration_since(data.start).unwrap()));
         }
     }
 
     pub fn update_filtered_conjecture(&mut self, ex1: &ThExpr, ex2: &ThExpr) {
         if cfg!(feature = "stats") {
-            self.filtered_lemmas.push((ex1.pretty(500), ex2.pretty(500)));
+            self.filtered_lemmas.push((ex1.pretty(PRETTY_W), ex2.pretty(PRETTY_W)));
         }
     }
 
     pub fn update_failed_proof(&mut self, ex1: ThExpr, ex2: ThExpr, key: usize) {
         if cfg!(feature = "stats") {
             let data = &self.measures[&key];
-            self.failed_proofs.push((ex1.pretty(500), ex2.pretty(500), SystemTime::now().duration_since(data.start).unwrap()));
+            self.failed_proofs.push((ex1.pretty(PRETTY_W), ex2.pretty(PRETTY_W),
+                                     SystemTime::now().duration_since(data.start).unwrap()));
         }
     }
 

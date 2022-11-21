@@ -5,6 +5,7 @@ use egg::expression_ops::{IntoTree};
 use crate::lang::{DataType, Function, ThExpr};
 use std::collections::hash_map::RandomState;
 use indexmap::IndexMap;
+use crate::PRETTY_W;
 
 #[derive(Clone, Debug)]
 pub struct Examples {
@@ -54,7 +55,7 @@ impl Examples {
             }));
         }
         for ex in res.iter() {
-            warn!(" ex is: {}", ex.pretty(500));
+            warn!(" ex is: {}", ex.pretty(PRETTY_W));
         }
 
         Examples{datatype: datatype.clone(), examples: res, example_vars: constructor_phs}
