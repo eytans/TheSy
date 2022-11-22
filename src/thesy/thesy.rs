@@ -542,6 +542,7 @@ impl TheSy {
         if self.prove_goals(&mut splitter_to_use, rules, &mut found_rules, new_rules_index) {
             return found_rules;
         }
+
         #[cfg(feature = "keep_splits")]
         splitter_to_use.as_mut().iter_mut().for_each(|x| x.all_splits.clear());
 
@@ -549,6 +550,7 @@ impl TheSy {
             info!("Starting depth {}", depth + 1);
             self.increase_depth();
             let stop_reason = self.equiv_reduc(rules);
+
             #[cfg(feature = "keep_splits")]
             splitter_to_use.as_mut().iter_mut().for_each(|cs| {
                 println!("Number of Splits: {}", cs.all_splits.len());
@@ -575,8 +577,10 @@ impl TheSy {
 
             'outer: while !conjectures.is_empty() {
                 let (_, mut ex1, mut ex2, d) = conjectures.pop().unwrap();
+
                 #[cfg(feature = "keep_splits")]
                 let clone_len = splitter_to_use.as_ref().map(|x| x.all_splits.len());
+
                 let measure_key = self.stats.init_measure(|| 0);
                 let mut new_rules = self.datatypes[&d].prove_ind(&mut splitter_to_use, &rules, &ex1, &ex2);
                 if new_rules.is_some() {

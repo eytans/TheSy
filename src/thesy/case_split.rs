@@ -262,7 +262,7 @@ impl CaseSplit {
 
         egraph.rebuild();
         for s in splitters {
-            let trns = reconstruct_all(egraph, s.color, 2);
+            let trns = reconstruct_all(egraph, s.color, 4);
             warn!("  {} - root: {}, cases: {}", s, trns.get(&s.root).map(|x| x.to_string()).unwrap_or("No reconstruct".to_string()), s.splits.iter().map(|c| trns.get(c).map(|x| x.to_string()).unwrap_or("No reconstruct".to_string())).intersperse(" ".to_string()).collect::<String>());
         }
         warn!("Created colors: {:?}", colors);

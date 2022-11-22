@@ -29,7 +29,7 @@ strum = "0.24.1"
 strum_macros = "0.24.3"
 
 serde = {version = "1.0.116", features = ["derive"], optional = true}
-serde_json = {version = "1.0.58", optional = true}
+serde_cbor = {version = "0.11.2", optional = true}
 
 cap = "0.1.0"
 
@@ -40,7 +40,7 @@ proptest = "1.0.0"
 default = ["split_colored", "stats"]
 #default = ["split_clone", "stats"]
 #default = ["split_clone", "keep_splits", "stats"]
-stats = ["serde", "serde_json", "egg/serde-1"]
+stats = ["serde", "serde_cbor"]
 split_colored = ["egg/colored"]
 split_clone = []
 no_split = ["no_expl_split"]

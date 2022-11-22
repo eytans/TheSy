@@ -26,8 +26,6 @@ use std::process::exit;
 use std::time::SystemTime;
 
 use itertools::{Either, Itertools};
-#[cfg(feature = "stats")]
-use serde_json;
 use structopt::StructOpt;
 
 use egg::*;
