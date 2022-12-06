@@ -29,7 +29,7 @@ strum = "0.24.1"
 strum_macros = "0.24.3"
 
 serde = {version = "1.0.116", features = ["derive"], optional = true}
-serde_cbor = {version = "0.11.2", optional = true}
+serde_cbor = {version = "0.11.2"}
 
 cap = "0.1.0"
 
@@ -40,7 +40,7 @@ proptest = "1.0.0"
 default = ["split_colored", "stats"]
 #default = ["split_clone", "stats"]
 #default = ["split_clone", "keep_splits", "stats"]
-stats = ["serde", "serde_cbor"]
+stats = ["serde"]
 split_colored = ["egg/colored"]
 split_clone = []
 no_split = ["no_expl_split"]
@@ -50,5 +50,5 @@ keep_splits= []
 #[build]
 #rustflags = ["-C", "link-args=-Wl,-stack_size,0x100000000"]    # custom flags to pass to all compiler invocations
 
-[profile.test]
-opt-level = 2
+#[profile.test]
+#opt-level = 2

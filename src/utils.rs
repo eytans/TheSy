@@ -4,8 +4,12 @@ use egg::{Analysis, ColorId, EGraph, ENodeOrVar, Id, ImmutableCondition, IntoTre
 use itertools::Itertools;
 use thesy_parser::ast::Expression;
 use egg::expression_ops::RecExpSlice;
+use egg::pretty_string::PrettyString;
 use indexmap::IndexSet;
 
+/**
+* [orig] is the expression of the `Subst` in [check_imm].
+*/
 #[derive(Clone, Debug)]
 pub struct SubPattern<L: Language> {
     orig: Expression,
@@ -75,6 +79,7 @@ impl<L: Language, N: Analysis<L>> ImmutableCondition<L, N> for SubPattern<L> {
 
     fn colored_check_imm(&self, egraph: &EGraph<L, N>, eclass: Id, subst: &Subst) -> Option<Vec<ColorId>> {
         // Same as check_imm but collects colors to use when comparing vars for each pattern.
+        // If no patterns in self then it is true always (i.e. returns black).
         let mut res = vec![];
         'patterns: for (var, pattern) in &self.patterns {
             // Get eclass from the substitution

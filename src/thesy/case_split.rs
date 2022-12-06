@@ -326,9 +326,10 @@ impl CaseSplit {
 
 #[cfg(test)]
 mod tests {
-    use egg::{Pattern, RecExpr, SymbolLang};
+    use egg::{ColorId, EGraph, Id, Pattern, RecExpr, SymbolLang};
     use crate::{TheSy, TheSyConfig, Language, tests};
     use itertools::Itertools;
+    use crate::lang::ThEGraph;
     use crate::tests::ProofMode;
 
     #[test]
@@ -358,5 +359,21 @@ mod tests {
         let ops = vec![SymbolLang::leaf("true"), SymbolLang::leaf("false")];
         let op_ids = ops.iter().map(|op| op.op_id()).collect_vec();
         assert!(thesy.egraph.detect_vacuity(&op_ids).len() == 0);
+    }
+
+    // Load egraph from resources and find all splitters on it. Assert we split with root id 70
+    #[test]
+    #[cfg(feature = "split_colored")]
+    fn find_splitters() {
+        let mut egraph: ThEGraph = serde_cbor::from_reader(std::fs::File::open("resources/egraph-bad-splitter-match.bincode").unwrap()).unwrap();
+        let dot = egraph.colored_dot(ColorId::from(0)).to_dot("test.dot").unwrap();
+        let config  = TheSyConfig::from_path("theories/goal1.smt2.th".parse().unwrap());
+        let mut case_splitter = TheSy::create_case_splitter(config.definitions.case_splitters.clone());
+        println!("{:?}", egg::get_strings());
+        let mut the_one = case_splitter.splitter_rules.remove(2);
+        println!("Splitter rule: {:?} -> ??? Some applier", the_one.0.to_string());
+        let matches = the_one.0.search(&mut egraph);
+        let splitters = the_one.1(&mut egraph, matches);
+        assert!(splitters.iter().any(|s| s.root == Id::from(70)));
     }
 }
