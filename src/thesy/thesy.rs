@@ -741,12 +741,13 @@ impl TheSy {
 #[cfg(test)]
 mod test {
     use std::{alloc, iter};
+    use std::fs::File;
     use std::iter::FromIterator;
     use std::str::FromStr;
     use std::time::SystemTime;
     use cap::Cap;
 
-    use egg::{EGraph, Pattern, RecExpr, Rewrite, Runner, Searcher, SearchMatches, Symbol, SymbolLang, Var};
+    use egg::{ColorId, EGraph, Pattern, RecExpr, Rewrite, Runner, Searcher, SearchMatches, Symbol, SymbolLang, Var};
     use indexmap::{IndexMap, IndexSet};
     use itertools::Itertools;
 
@@ -1101,6 +1102,7 @@ mod test {
         let consxy = thesy.egraph.add_expr(&"(cons y (cons x nil))".parse().unwrap());
         let ex0 = thesy.egraph.add_expr(&"(append (take i nil) (drop i nil))".parse().unwrap());
         let ex1 = thesy.egraph.add_expr(&"(append (take i (cons x nil)) (drop i (cons x nil)))".parse().unwrap());
+        let dropix = thesy.egraph.add_expr(&"(drop i (cons x nil))".parse().unwrap());
         let ex2 = thesy.egraph.add_expr(&"(append (take i (cons y (cons x nil))) (drop i (cons y (cons x nil))))".parse().unwrap());
         info!("Starting first rebuild");
         thesy.egraph.rebuild();
@@ -1115,6 +1117,7 @@ mod test {
         assert_eq!(thesy.egraph.find(nil), thesy.egraph.find(ex0));
         println!("Currently (before) allocated: {}MB", ALLOCATOR.allocated() as f64 /1e6);
         case_split.case_split(&mut thesy.egraph, 2, &rules, 6);
+
         println!("Currently (after) allocated: {}MB", ALLOCATOR.allocated() as f64 /1e6);
         info!("Done case split");
         thesy.egraph.rebuild();

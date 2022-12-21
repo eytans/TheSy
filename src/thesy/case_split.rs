@@ -1,7 +1,6 @@
 use egg::{Rewrite, SymbolLang, EGraph, Id, Runner, StopReason, Var, Pattern, Searcher, SearchMatches, Applier, Language, Analysis, ColorId};
 use itertools::Itertools;
 use std::time::Duration;
-use std::str::FromStr;
 use std::collections::hash_map::RandomState;
 use std::rc::Rc;
 use std::fmt;
@@ -12,6 +11,7 @@ use egg::reconstruct::{reconstruct, reconstruct_all, reconstruct_colored};
 use egg::appliers::DiffApplier;
 use egg::searchers::{FilteringSearcher, ToRc};
 use egg::searchers::Matcher;
+use std::str::FromStr;
 use crate::lang::{ThEGraph, ThRewrite};
 
 
@@ -47,6 +47,7 @@ impl Split {
     }
 
     pub fn create_colors<L: Language, N: Analysis<L>>(&self, egraph: &mut EGraph<L, N>) -> Vec<ColorId> {
+        egraph.rebuild();
         self.splits.iter().map(|id| {
             let c = if let Some(base_color) = self.color {
                 egraph.create_sub_color(base_color)
@@ -326,11 +327,13 @@ impl CaseSplit {
 
 #[cfg(test)]
 mod tests {
-    use egg::{ColorId, EGraph, Id, Pattern, RecExpr, SymbolLang};
+    use std::rc::Rc;
+    use egg::{ColorId, EGraph, Id, Pattern, RecExpr, Searcher, SymbolLang};
+    use egg::searchers::ToDyn;
     use crate::{TheSy, TheSyConfig, Language, tests};
     use itertools::Itertools;
     use crate::lang::ThEGraph;
-    use crate::tests::ProofMode;
+    use crate::tests::{init_logging, ProofMode};
 
     #[test]
     #[cfg(feature = "split_colored")]
@@ -375,5 +378,48 @@ mod tests {
         let matches = the_one.0.search(&mut egraph);
         let splitters = the_one.1(&mut egraph, matches);
         assert!(splitters.iter().any(|s| s.root == Id::from(70)));
+    }
+
+
+    #[test]
+    #[cfg(feature = "split_colored")]
+    fn test_sub_colors_dont_merge_base_assumption() {
+        init_logging();
+
+        // Create an EGraph with a and b
+        let mut egraph = ThEGraph::default();
+        let a = egraph.add_expr(&"a".parse().unwrap());
+        let b = egraph.add_expr(&"b".parse().unwrap());
+        let c = egraph.add_expr(&"c".parse().unwrap());
+        // Create a splitter that splits on a and b.
+        // Root applier is "a"
+        // cases appliers are "a" and "b"
+        // Searcher is "a"
+        let root: Pattern<SymbolLang> = ("a").parse().unwrap();
+        let cases: Vec<Pattern<SymbolLang>> = vec![("a").parse().unwrap(), ("b").parse().unwrap()];
+        let searcher: Rc<dyn Searcher<SymbolLang, ()>> = {
+            let p: Pattern<SymbolLang> = ("a").parse().unwrap();
+            p.into_rc_dyn()
+        };
+
+        let root2: Pattern<SymbolLang> = ("(f a)").parse().unwrap();
+        let cases2: Vec<Pattern<SymbolLang>> = vec![("c").parse().unwrap(), ("d").parse().unwrap()];
+        let searcher2: Rc<dyn Searcher<SymbolLang, ()>> = {
+            let p: Pattern<SymbolLang> = ("(f a)").parse().unwrap();
+            p.into_rc_dyn()
+        };
+        let mut case_splitter = TheSy::create_case_splitter(vec![
+            (searcher, root, cases),
+            (searcher2, root2, cases2)
+        ]);
+        egraph.rebuild();
+        let rules = vec![rewrite!("rule"; "b" => "(f b)")];
+        case_splitter.case_split(&mut egraph, 2, &rules, 1);
+        // hashset of a,b,c ids (after find)
+        let mut ids = std::collections::HashSet::new();
+        ids.insert(egraph.find(a));
+        ids.insert(egraph.find(b));
+        ids.insert(egraph.find(c));
+        assert_eq!(ids.len(), 3);
     }
 }

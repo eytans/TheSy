@@ -43,7 +43,7 @@ struct CliOpt {
     #[structopt(name = "run mode", short = "m", long = "mode", default_value = "Run")]
     run_mode: SubCmd,
     /// Memory limit in MB
-    #[structopt(name = "memory limit", short = "l", long = "limit", default_value = "None")]
+    #[structopt(name = "memory limit", short = "l", long = "limit")]
     mem_limit: Option<usize>,
 }
 
