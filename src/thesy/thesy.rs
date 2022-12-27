@@ -1276,4 +1276,34 @@ mod test {
             //assert_ne!(ProofMode::TermNotCreated, proof);
         }
     }
+
+    #[test]
+    #[cfg(feature = "split_colored")]
+    fn drop_sucsuci_yx() {
+        let mut egraph: ThEGraph = serde_cbor::from_reader(File::open("resources/take_no_drop_color_14.cbor").unwrap()).unwrap();
+        let config  = TheSyConfig::from_path("theories/goal1.smt2.th".parse().unwrap());
+        let mut case_splitter = TheSy::create_case_splitter(config.definitions.case_splitters.clone());
+        println!("{:?}", egg::get_strings());
+        let thesy = TheSy::from(&config);
+        let mut rws = thesy.system_rws.clone();
+        rws.extend_from_slice(&config.definitions.rws);
+
+        let the_one = &rws[40];
+        let matches = the_one.search(&egraph);
+        // Filter from matches all substs with color 0 or 14
+        let matches = matches.into_iter().filter_map(|mut m| {
+            let color14 = ColorId::from(14);
+            let color0 = ColorId::from(0);
+            m.substs.retain(|s| s.color().is_none() || s.color().unwrap() == color14
+                || s.color().unwrap() == color0);
+            (!m.substs.is_empty()).then(|| m)
+        }).collect::<Vec<_>>();
+        let the_match = vec![matches[1].clone()];
+        let applied = the_one.apply(&mut egraph, &the_match);
+        println!("applied {:?}", applied);
+        for m in &matches {
+            println!("match class {:?}", m.eclass);
+            println!("{:?}", m.substs);
+        }
+    }
 }

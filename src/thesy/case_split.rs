@@ -176,9 +176,13 @@ impl CaseSplit {
             // TODO: What about split conclusion from only colored matches?
             let colored = group.into_iter().filter(|id| egraph[**id].color().is_some()).copied().collect_vec();
             let color = colored.first().map(|id| egraph[*id].color().unwrap());
+            let black_size = group.len();
             let black = group.into_iter().filter(|id| egraph[**id].color().is_none()).copied().collect_vec();
             let b_res = black.into_iter().reduce(|a, b| egraph.union(a, b).0);
             let c_res = colored.into_iter().reduce(|a, b| egraph.colored_union(color.clone().unwrap(), a, b).0);
+            if black_size > 0 {
+                debug!("Merging conclusions: {:?} -> {:?}", group, b_res);
+            }
             b_res.map(|id| c_res.map(|id2| egraph.colored_union(color.unwrap(), id, id2)));
         }
         egraph.rebuild();
@@ -240,6 +244,7 @@ impl CaseSplit {
             }
         }
 
+        egraph.rebuild();
         let classes = egraph.classes().map(|c| c.id).collect_vec();
         let colors = splitters.iter().map(|s| s.create_colors(egraph)).collect_vec();
         for cs in &colors {
