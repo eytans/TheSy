@@ -34,13 +34,13 @@ struct CliOpt {
     #[structopt(parse(from_os_str))]
     path: PathBuf,
     /// Placeholder count
-    #[structopt(name = "placeholder count", default_value = "2")]
+    #[structopt(name = "placeholder count", short="c", long="phcount", default_value = "2")]
     ph_count: usize,
     /// Previous results to read
     dependencies: Vec<String>,
     /// Run exploration, as a prover, check equivalence only, or skip case split in equivalence
     /// check
-    #[structopt(name = "run mode", short = "m", long = "mode", default_value = "Run")]
+    #[structopt(name = "run mode", short = "m", long = "mode", default_value = "Prove")]
     run_mode: SubCmd,
     /// Memory limit in MB
     #[structopt(name = "memory limit", short = "l", long = "limit")]

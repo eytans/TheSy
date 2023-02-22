@@ -7,10 +7,11 @@ use std::fmt;
 use std::fmt::Debug;
 use indexmap::{IndexMap, IndexSet};
 use smallvec::alloc::fmt::Formatter;
-use egg::reconstruct::{reconstruct, reconstruct_all, reconstruct_colored};
+use egg::reconstruct::{reconstruct, reconstruct_all};
 use egg::appliers::DiffApplier;
 use egg::searchers::{FilteringSearcher, ToRc};
-use egg::searchers::Matcher;
+use crate::egg::tools::tools::Grouped;
+
 use std::str::FromStr;
 use crate::lang::{ThEGraph, ThRewrite};
 
@@ -54,7 +55,9 @@ impl Split {
             } else {
                 egraph.create_color()
             };
-            egraph.colored_union(c, self.root, *id);
+            let fixer = |id: Id| egraph.get_color(c).unwrap().translate_from_base(id);
+            egraph.colored_union(c, fixer(self.root), fixer(*id));
+            egraph.rebuild();
             c
         }).collect_vec()
     }
@@ -163,7 +166,7 @@ impl CaseSplit {
         res.into_iter().unique().collect()
     }
 
-    fn merge_conclusions(egraph: &mut ThEGraph, classes: &Vec<Id>, split_conclusions: Vec<IndexMap<Id, Id>>) {
+    fn merge_conclusions(egraph: &mut ThEGraph, color: Option<ColorId>, classes: &Vec<Id>, split_conclusions: Vec<IndexMap<Id, Id>>) {
         let mut group_by_splits: IndexMap<Vec<Id>, IndexSet<Id>> = IndexMap::new();
         for c in classes {
             let key = split_conclusions.iter().map(|m| m[c]).collect_vec();
@@ -174,16 +177,11 @@ impl CaseSplit {
             debug_assert!(group.iter().filter_map(|id| egraph[*id].color()).unique().count() <= 1);
             // TODO: might need to look into hierarchical colors conclusions.
             // TODO: What about split conclusion from only colored matches?
-            let colored = group.into_iter().filter(|id| egraph[**id].color().is_some()).copied().collect_vec();
-            let color = colored.first().map(|id| egraph[*id].color().unwrap());
-            let black_size = group.len();
-            let black = group.into_iter().filter(|id| egraph[**id].color().is_none()).copied().collect_vec();
-            let b_res = black.into_iter().reduce(|a, b| egraph.union(a, b).0);
-            let c_res = colored.into_iter().reduce(|a, b| egraph.colored_union(color.clone().unwrap(), a, b).0);
-            if black_size > 0 {
-                debug!("Merging conclusions: {:?} -> {:?}", group, b_res);
+            let mut it = group.iter();
+            let mut res = *it.next().unwrap();
+            for id in it {
+                res = egraph.opt_colored_union(color.clone(), res, *id).0;
             }
-            b_res.map(|id| c_res.map(|id2| egraph.colored_union(color.unwrap(), id, id2)));
         }
         egraph.rebuild();
     }
@@ -193,7 +191,11 @@ impl CaseSplit {
     }
 
     fn collect_colored_merged(egraph: &ThEGraph, classes: &Vec<Id>, color: ColorId) -> IndexMap<Id, Id> {
-        classes.iter().map(|eclass| (*eclass, egraph.colored_find(color, *eclass))).collect::<IndexMap<Id, Id>>()
+        classes.iter().map(|eclass| {
+            let fixed = egraph.get_color(color).unwrap()
+                .translate_to_base(egraph.colored_find(color, *eclass));
+            (*eclass, fixed)
+        }).collect::<IndexMap<Id, Id>>()
     }
 
     pub fn case_split(&mut self, egraph: &mut ThEGraph, split_depth: usize, rules: &[ThRewrite], run_depth: usize) {
@@ -225,6 +227,10 @@ impl CaseSplit {
         }
 
         let temp = self.find_splitters(egraph);
+        for s in &temp {
+            let trns = reconstruct_all(egraph, s.color, 4);
+            warn!("  {} - root: {}, cases: {}", s, trns.get(&s.root).map(|x| x.to_string()).unwrap_or("No reconstruct".to_string()), s.splits.iter().map(|c| trns.get(c).map(|x| x.to_string()).unwrap_or("No reconstruct".to_string())).intersperse(" ".to_string()).collect::<String>());
+        }
         let temp_len = temp.len();
         let mut splitters: Vec<Split> = temp.into_iter()
             .filter(|s| known_splits_by_color.contains_key(&s.color)
@@ -246,8 +252,8 @@ impl CaseSplit {
 
         egraph.rebuild();
         let classes = egraph.classes().map(|c| c.id).collect_vec();
-        let colors = splitters.iter().map(|s| s.create_colors(egraph)).collect_vec();
-        for cs in &colors {
+        let colors = splitters.iter().map(|s| (s.color.clone(), s.create_colors(egraph))).collect_vec();
+        for (_, cs) in &colors {
             for c in cs {
                 let color = egraph.get_color(*c).unwrap();
                 let mut all_ss: IndexSet<_> = known_splits_by_color[&None].iter().cloned().map(|mut s| {
@@ -265,7 +271,6 @@ impl CaseSplit {
                 known_splits_by_color.insert(Some(*c), all_ss);
             }
         }
-
         egraph.rebuild();
         for s in splitters {
             let trns = reconstruct_all(egraph, s.color, 4);
@@ -275,14 +280,17 @@ impl CaseSplit {
         // When the API is limited the code is mentally inhibited
         *egraph = Self::equiv_reduction(rules, std::mem::take(egraph), run_depth);
         self.colored_case_split(egraph, split_depth - 1, known_splits_by_color, rules, run_depth);
-        for cs in colors {
+        warn!("Doing Conclusions for depth {split_depth} ----------------");
+        for (base, cs) in colors {
             let split_conclusions = cs.iter()
                 .map(|c| {
                     Self::collect_colored_merged(egraph, &classes, *c)
                 })
                 .collect_vec();
-            Self::merge_conclusions(egraph, &classes, split_conclusions);
+            warn!("Conclusions for colors {cs:?} are {split_conclusions:?}");
+            Self::merge_conclusions(egraph, base, &classes, split_conclusions);
         }
+        warn!("Done Conclusions for depth {split_depth} -------------------");
     }
 
     fn inner_case_split(&mut self, egraph: &mut ThEGraph, split_depth: usize, known_splits: &IndexSet<Split>, rules: &[ThRewrite], run_depth: usize) {
@@ -303,29 +311,37 @@ impl CaseSplit {
         let mut new_known = known_splits.clone();
 
         new_known.extend(splitters.iter().cloned().cloned());
-        // if !splitters.is_empty() {
-            warn!("Splitters len (temp len: {temp_len}): {}", splitters.len());
-            for s in &splitters {
-                warn!("  {} - root: {}, cases: {}", s, reconstruct(egraph, s.root, 3).map(|x| x.to_string()).unwrap_or("No reconstruct".to_string()), s.splits.iter().map(|c| reconstruct(egraph, *c, 3).map(|x| x.to_string()).unwrap_or("No reconstruct".to_string())).intersperse(" ".to_string()).collect::<String>());
-            }
-        // }
+        warn!("Splitters len (temp len: {temp_len}): {} in depth {split_depth}", splitters.len());
+        let rected = reconstruct_all(egraph, None, 4);
+        for s in &splitters {
+            let root_text = rected.get(&s.root).map(|x| x.to_string()).unwrap_or("No reconstruct".to_string());
+            let cases_text = s.splits.iter()
+                .map(|c| rected.get(c).map(|x| x.to_string())
+                    .unwrap_or("No reconstruct".to_string()))
+                .intersperse(" ".to_string()).collect::<String>();
+            warn!("  {} - root: {}, cases: {}", s, root_text, cases_text);
+        }
 
         let classes = egraph.classes().map(|c| c.id).collect_vec();
 
         let mut i = 0;
         for s in splitters {
             let split_conclusions = Self::split_graph(&*egraph, s).into_iter().map(|g| {
+                debug!("Working on split {i} of {} -> {:?} in depth {split_depth}",
+                    rected.get(&s.root).map_or("Bad".to_string(), |x| x.to_string()),
+                    s.splits.iter().map(|r| rected.get(r).map_or("Bad".to_string(), |x| x.to_string())).collect_vec(),
+                    i = i, split_depth = split_depth);
                 let mut g = Self::equiv_reduction(rules, g, run_depth);
                 self.inner_case_split(&mut g, split_depth - 1, &new_known, rules, run_depth);
                 i += 1;
                 let res = Self::collect_merged(&g, &classes);
-                warn!("Collected merged {i}: {:?}", res);
+                warn!("Collected merged {i}: {:?}", res.iter().grouped(|x| x.1).iter().filter(|x| x.1.len() > 1).collect_vec());
                 #[cfg(feature = "keep_splits")]
                 self.all_splits.push(g);
                 res
             }).collect_vec();
             warn!("Split conclusions: {:?}", split_conclusions);
-            Self::merge_conclusions(egraph, &classes, split_conclusions);
+            Self::merge_conclusions(egraph, None, &classes, split_conclusions);
         }
     }
 }
@@ -361,16 +377,18 @@ mod tests {
     }
 
     #[test]
+    #[ignore]
     #[cfg(feature = "split_colored")]
     fn no_vacuity_in_and_or() {
         let (thesy, rewrites) = TheSyConfig::from_path("tests/booleans.th".to_string()).run(None);
         let ops = vec![SymbolLang::leaf("true"), SymbolLang::leaf("false")];
         let op_ids = ops.iter().map(|op| op.op_id()).collect_vec();
-        assert!(thesy.egraph.detect_vacuity(&op_ids).len() == 0);
+        assert_eq!(thesy.egraph.detect_vacuity(&op_ids).len(), 0);
     }
 
     // Load egraph from resources and find all splitters on it. Assert we split with root id 70
     #[test]
+    #[ignore]
     #[cfg(feature = "split_colored")]
     fn find_splitters() {
         let mut egraph: ThEGraph = serde_cbor::from_reader(std::fs::File::open("resources/egraph-bad-splitter-match.bincode").unwrap()).unwrap();

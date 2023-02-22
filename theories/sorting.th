@@ -1,0 +1,15 @@
+datatype Lst () := (nil : (ret : Lst)) (cons : (x : Nat) -> (xs : Lst) -> (ret : Lst))
+
+fun ins (x: Nat) (xs: Lst) -> Lst
+rw ins_base (ins ?x nil) => (cons ?x nil)
+rw ins_ind (ins ?x (cons ?y ?ys)) => (ite (le ?x ?y) (cons ?x (cons ?y ?ys)) (cons ?y (ins ?x ?ys)))
+
+fun merge (xs: Lst) (ys: Lst) -> Lst
+rw merge_base1 (merge ?xs nil) => ?xs
+rw merge_base2 (merge nil ?xs) => ?xs
+rw merge_ind (merge (cons ?x ?xs) (cons ?y ?ys)) => (ite (le ?x ?y) (cons ?x (merge ?xs (cons ?y ?ys))) (cons ?y (merge (cons ?x ?xs) ?ys)))
+
+rw sort_nil (sort nil) => nil
+rw sort_dstr (sort (cons ?y ?ys)) => (cons (f ?y ?ys) (sort (g ?y ?ys)))
+
+prove (ins (?x: Nat) (merge (sort (?l1: {ph( 0 ), Lst})) (sort (?l2: {ph( 1 ), Lst})))) = (merge (ins (?x: Nat) (sort (?l1: {ph( 0 ), Lst}))) (sort (?l2: {ph( 1 ), Lst})))
