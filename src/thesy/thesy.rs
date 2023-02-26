@@ -743,6 +743,7 @@ mod test {
     use std::{alloc, iter};
     use std::fs::File;
     use std::iter::FromIterator;
+    use std::process::id;
     use std::str::FromStr;
     use std::time::SystemTime;
     use cap::Cap;
@@ -763,6 +764,7 @@ mod test {
     use crate::thesy::thesy::TheSy;
     use crate::{TheSyConfig, tests, PRETTY_W};
     use egg::tools::tools::Grouped;
+    use rand::seq::SliceRandom;
 
     #[global_allocator]
     pub(crate) static ALLOCATOR: Cap<alloc::System> = Cap::new(alloc::System, usize::MAX);
@@ -1097,6 +1099,32 @@ mod test {
         let mut thesy = TheSy::from(&conf);
         let mut case_split = TheSy::create_case_splitter(conf.definitions.case_splitters);
         let mut rules = std::mem::take(&mut conf.definitions.rws);
+        for i in vec![12, 7, 1] {
+            rules.remove(i);
+        }
+        for i in vec![14, 7, 1] {
+            rules.remove(i);
+        }
+        for i in vec![10, 7, 6] {
+            rules.remove(i);
+        }
+        for i in vec![8, 6, 2] {
+            rules.remove(i);
+        }
+        for i in vec![2] {
+            rules.remove(i);
+        }
+        // Choose 3 indices to remove and remove them from rules
+        // let mut rng = rand::thread_rng();
+        // println!("Rules: {:?}", rules);
+        // let mut idxs = (0..rules.len()).collect_vec();
+        // idxs.shuffle(&mut rng);
+        // idxs.truncate(2);
+        // idxs.sort();
+        // println!("Removing rules: {:?}", idxs);
+        // for idx in idxs.iter().rev() {
+        //     rules.remove(*idx);
+        // }
         let nil = thesy.egraph.add_expr(&"nil".parse().unwrap());
         let consx = thesy.egraph.add_expr(&"(cons x nil)".parse().unwrap());
         let consxy = thesy.egraph.add_expr(&"(cons y (cons x nil))".parse().unwrap());
