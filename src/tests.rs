@@ -28,7 +28,7 @@ pub fn init_logging() {
         let logger = CombinedLogger::init(
             vec![
                 TermLogger::new(LevelFilter::Debug, thesy_config, TerminalMode::Mixed, ColorChoice::Auto),
-                TermLogger::new(LevelFilter::Warn, egg_config, TerminalMode::Mixed, ColorChoice::Auto),
+                TermLogger::new(LevelFilter::Debug, egg_config, TerminalMode::Mixed, ColorChoice::Auto),
                 WriteLogger::new(LevelFilter::Info, Config::default(), File::create("my_rust_bin.log").unwrap()),
             ]
         );

@@ -28,7 +28,7 @@ pub struct Prover {
 }
 
 impl Prover {
-    const CASE_SPLIT_DEPTH: usize = 1;
+    const CASE_SPLIT_DEPTH: usize = 3;
     const CASE_ITERN: usize = 4;
     const RUN_DEPTH: usize = 12;
 

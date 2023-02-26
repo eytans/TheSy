@@ -38,8 +38,8 @@ cap = "0.1.0"
 proptest = "1.0.0"
 
 [features]
-default = ["split_colored", "stats"]
-#default = ["split_clone", "stats"]
+#default = ["split_colored", "stats"]
+default = ["split_clone", "stats"]
 #default = ["split_clone", "keep_splits", "stats"]
 stats = ["serde", "serde_json"]
 split_colored = ["egg/colored"]
