@@ -8,6 +8,8 @@ use egg::expression_ops::RecExpSlice;
 use egg::pretty_string::PrettyString;
 use indexmap::IndexSet;
 use crate::lang::{ThEGraph, ThNode};
+use crate::thesy::TheSy;
+use crate::TheSyConfig;
 
 /**
 * [orig] is the expression of the `Subst` in [check_imm].
@@ -193,4 +195,17 @@ fn test_filter_typings() {
     assert!(filterTypings(&egraph, id1));
     assert!(!filterTypings(&egraph, id2));
     assert!(!filterTypings(&egraph, id3));
+}
+
+#[test]
+fn test_filter_typings_on_thesy() {
+    let mut config = TheSyConfig::from_path("theories/list.th".parse().unwrap());
+    let mut thesy = TheSy::from(&config);
+    thesy.increase_depth();
+    thesy.egraph.rebuild();
+    let dot_str = thesy.egraph.dot().to_string();
+    thesy.egraph.dot().to_dot("test.dot").unwrap();
+    let filtered_dot_str = thesy.egraph.filtered_dot(filterTypings).to_string();
+    assert!(dot_str.contains("\"Lst\""));
+    assert!(!filtered_dot_str.contains("\"Lst\""));
 }
