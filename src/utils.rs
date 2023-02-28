@@ -1,11 +1,13 @@
+use std::collections::HashSet;
 use std::iter::FromIterator;
 use std::str::FromStr;
-use egg::{Analysis, ColorId, EGraph, ENodeOrVar, Id, ImmutableCondition, IntoTree, Language, Pattern, Searcher, Subst, ToCondRc, Tree, Var};
+use egg::{Analysis, ColorId, EGraph, ENodeOrVar, Id, ImmutableCondition, IntoTree, Language, Pattern, RecExpr, Searcher, Subst, SymbolLang, ToCondRc, Tree, Var};
 use itertools::Itertools;
 use thesy_parser::ast::Expression;
 use egg::expression_ops::RecExpSlice;
 use egg::pretty_string::PrettyString;
 use indexmap::IndexSet;
+use crate::lang::{ThEGraph, ThNode};
 
 /**
 * [orig] is the expression of the `Subst` in [check_imm].
@@ -162,4 +164,33 @@ impl<L: Language, N: Analysis<L>> ImmutableCondition<L, N> for SubPattern<L> {
     fn describe(&self) -> String {
         format!("{} -> {}", self.patterns.iter().map(|(v, p)| format!("{}@{}", p, v)).join(" && "), self.orig.to_string())
     }
+}
+
+fn filterTypings(egraph: &ThEGraph, id: Id) -> bool {
+    // Return true if eclass has typed node, or is the in index 1 of a typed node.
+    let node = SymbolLang::from_op_str("typed", vec![]).unwrap();
+    let res = !egraph.classes_by_op_id().get(&node.op_id()).map_or(false, |x| x.contains(&id));
+    // Now check if it is the second argument of a typed node.
+    let x = "?x".parse().unwrap();
+    let searcher: Pattern<SymbolLang> = "(typed ?y ?x)".parse().unwrap();
+    let matched: HashSet<Id> = searcher.search(egraph).iter()
+        .flat_map(|s| {
+            s.substs.iter().map(|s| *s.get(x).unwrap())
+        }).collect();
+    return res && !matched.contains(&id);
+}
+
+#[test]
+fn test_filter_typings() {
+    let mut egraph = ThEGraph::default();
+    let x: RecExpr<ThNode> = "x".parse().unwrap();
+    let y: RecExpr<ThNode> = "y".parse().unwrap();
+    let typed: RecExpr<ThNode> = "(typed x y)".parse().unwrap();
+    let id1 = egraph.add_expr(&x);
+    let id2 = egraph.add_expr(&y);
+    let id3 = egraph.add_expr(&typed);
+    egraph.rebuild();
+    assert!(filterTypings(&egraph, id1));
+    assert!(!filterTypings(&egraph, id2));
+    assert!(!filterTypings(&egraph, id3));
 }
