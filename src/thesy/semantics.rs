@@ -20,6 +20,7 @@ use multimap::MultiMap;
 use egg::expression_ops::{IntoTree, RecExpSlice, Tree};
 use egg::conditions::{AndCondition, OrCondition};
 use std::iter::FromIterator;
+use std::sync::atomic::{AtomicUsize, Ordering};
 use indexmap::{IndexMap, IndexSet};
 use egg::searchers::{PatternMatcher, ToRc, VarMatcher};
 use crate::utils::SubPattern;
@@ -345,12 +346,21 @@ impl From<Vec<Statement>> for Definitions {
                 let const_cond = AndCondition::new(
                     dt.constructors.iter().map(|c| {
                         let v = Var::from_str(&param_hole.to_string()).unwrap();
-                        let p = pattern_for_func_app(c, i);
+                        // HACK: We use a very large number here to make sure that the pattern
+                        // matcher will not use ?splithole
+                        let p = Definitions::exp_to_pattern(
+                            &Op(Id(c.name.clone(), None),
+                                (0..c.params.len()).into_iter()
+                                    .map(|i| Leaf(create_unique_hole()))
+                                    .collect_vec()));
                         FilteringSearcher::create_non_pattern_filterer(
                             VarMatcher::new(v).into_rc(),
                             PatternMatcher::new(p).into_rc())
                     }).collect_vec()
                 ).into_rc();
+                trace!("Working on condition for splitting function: {}", f.name);
+                trace!("condition: {}", cond.describe());
+                trace!("const cond: {}", const_cond.describe());
 
                 let final_condition = AndCondition::new(vec![const_cond, cond]).into_rc();
                 let splitters = Self::create_splitters(dt, &param_hole).iter()
@@ -365,6 +375,13 @@ impl From<Vec<Statement>> for Definitions {
         }
         res
     }
+}
+
+static mut HOLE_COUNTER: AtomicUsize = AtomicUsize::new(0);
+
+fn create_unique_hole() -> Terminal {
+    let i = unsafe { HOLE_COUNTER.fetch_add(1, Ordering::SeqCst) };
+    Hole(format!("?unique_autovar_{}", i), None)
 }
 
 impl std::fmt::Display for Definitions {
@@ -530,6 +547,11 @@ impl Definitions {
 mod test {
     use crate::thesy::semantics::Definitions;
     use std::path::PathBuf;
+    use egg::{EGraph, SymbolLang};
+    use crate::tests::init_logging;
+    use crate::thesy::case_split;
+    use crate::thesy::case_split::CaseSplit;
+    use crate::utils::filterTypings;
 
     #[test]
     fn parse_libs() {
@@ -539,5 +561,40 @@ mod test {
         assert!(!defs.datatypes.is_empty());
         assert!(!defs.rws.is_empty());
         assert!(defs.case_splitters.is_empty());
+    }
+
+    #[test]
+    fn filter_constructors_from_case_split() {
+        // load theories/goal1
+        init_logging();
+
+        let mut defs = Definitions::from_file(&PathBuf::from("theories/goal1.smt2.th"));
+        // Create thesy and case splitter
+        defs.case_splitters.remove(0);
+        defs.case_splitters.remove(0);
+        defs.case_splitters.remove(1);
+        let mut splitter = CaseSplit::from_applier_patterns(defs.case_splitters);
+
+        // let mut egraph: EGraph<SymbolLang, ()> = EGraph::new(());
+        // let take_zero_exp = "(take zero (cons x (cons y nil)))".parse().unwrap();
+        // let take_succ_i = egraph.add_expr(&take_zero_exp);
+        // egraph.rebuild();
+        // let found = splitter.find_splitters(&mut egraph);
+        // assert_eq!(found.len(), 0);
+
+        // let take_succ_nil_exp = "(take (succ i) nil)".parse().unwrap();
+        // let take_succ_i = egraph.add_expr(&take_succ_nil_exp);
+        // egraph.rebuild();
+        // let found = splitter.find_splitters(&mut egraph);
+        // assert_eq!(found.len(), 0);
+
+        let mut egraph: EGraph<SymbolLang, ()> = EGraph::new(());
+        let take_succ_i_exp = "(take (succ i) (cons x (cons y nil)))".parse().unwrap();
+        let take_succ_i = egraph.add_expr(&take_succ_i_exp);
+        egraph.rebuild();
+        egraph.filtered_dot(|eg, id| filterTypings(eg, id))
+            .to_dot("take_succ_i.dot".to_string()).unwrap();
+        let found = splitter.find_splitters(&mut egraph);
+        assert_eq!(found.len(), 0);
     }
 }

@@ -71,19 +71,23 @@ impl<L: Language, N: Analysis<L>> ToCondRc<L, N> for SubPattern<L> {}
 
 impl<L: Language, N: Analysis<L>> ImmutableCondition<L, N> for SubPattern<L> {
     fn check_imm(&self, egraph: &EGraph<L, N>, eclass: Id, subst: &Subst) -> bool {
+        trace!("SubPattern::{}({}, {}) - Start", ImmutableCondition::<L, N>::describe(self), eclass, subst);
         let colores = self.colored_check_imm(egraph, eclass, subst);
-        return if colores.is_none() {
+        let res = if colores.is_none() {
             false
         } else if colores.as_ref().unwrap().is_empty() {
             true
         } else {
             subst.color().is_some() && colores.unwrap().contains(&subst.color().unwrap())
         };
+        trace!("SubPattern::{}({}, {}) - End: {}", ImmutableCondition::<L, N>::describe(self), eclass, subst, res);
+        res
     }
 
     fn colored_check_imm(&self, egraph: &EGraph<L, N>, eclass: Id, subst: &Subst) -> Option<Vec<ColorId>> {
         // Same as check_imm but collects colors to use when comparing vars for each pattern.
         // If no patterns in self then it is true always (i.e. returns black).
+        trace!("SubPattern::colored::{}({}, {}) - Start", ImmutableCondition::<L, N>::describe(self), eclass, subst);
         let mut res = vec![];
         'patterns: for (var, pattern) in &self.patterns {
             // Get eclass from the substitution
@@ -96,6 +100,7 @@ impl<L: Language, N: Analysis<L>> ImmutableCondition<L, N> for SubPattern<L> {
                 pattern.search_eclass(egraph, *eclass)
             };
             if subs.is_none() {
+                trace!("SubPattern::colored::{}({}, {}) - End: None", ImmutableCondition::<L, N>::describe(self), eclass, subst);
                 return None;
             }
 
@@ -122,6 +127,7 @@ impl<L: Language, N: Analysis<L>> ImmutableCondition<L, N> for SubPattern<L> {
                 }
                 // In the future if we support #hierarcal_colors we should not return here.
                 if s.color().is_some() {
+                    trace!("SubPattern::colored::{}({}, {}) - End: None", ImmutableCondition::<L, N>::describe(self), eclass, subst);
                     return None;
                 }
 
@@ -137,6 +143,7 @@ impl<L: Language, N: Analysis<L>> ImmutableCondition<L, N> for SubPattern<L> {
                     colored_equalities_for_var(not_equal_vars.pop().unwrap()).into_iter()
                 });
                 if working_colors.is_empty() {
+                    trace!("SubPattern::colored::{}({}, {}) - End: None", ImmutableCondition::<L, N>::describe(self), eclass, subst);
                     return None;
                 }
                 for v in not_equal_vars {
@@ -145,6 +152,7 @@ impl<L: Language, N: Analysis<L>> ImmutableCondition<L, N> for SubPattern<L> {
                     });
                     working_colors = working_colors.intersection(&colors).copied().collect();
                     if working_colors.is_empty() {
+                        trace!("SubPattern::colored::{}({}, {}) - End: None", ImmutableCondition::<L, N>::describe(self), eclass, subst);
                         return None;
                     }
                 }
@@ -156,10 +164,12 @@ impl<L: Language, N: Analysis<L>> ImmutableCondition<L, N> for SubPattern<L> {
             } else {
                 res.retain(|c| pattern_colors.contains(c));
                 if res.is_empty() {
+                    trace!("SubPattern::colored::{}({}, {}) - End: None", ImmutableCondition::<L, N>::describe(self), eclass, subst);
                     return None;
                 }
             }
         }
+        trace!("SubPattern::colored::{}({}, {}) - End: {:?}", ImmutableCondition::<L, N>::describe(self), eclass, subst, res);
         Some(res)
     }
 
@@ -168,7 +178,7 @@ impl<L: Language, N: Analysis<L>> ImmutableCondition<L, N> for SubPattern<L> {
     }
 }
 
-fn filterTypings(egraph: &ThEGraph, id: Id) -> bool {
+pub fn filterTypings(egraph: &ThEGraph, id: Id) -> bool {
     // Return true if eclass has typed node, or is the in index 1 of a typed node.
     let node = SymbolLang::from_op_str("typed", vec![]).unwrap();
     let res = !egraph.classes_by_op_id().get(&node.op_id()).map_or(false, |x| x.contains(&id));
