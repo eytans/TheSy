@@ -156,13 +156,14 @@ impl CaseSplit {
     }
 
     pub fn find_splitters(&mut self, egraph: &mut ThEGraph) -> Vec<Split> {
+        debug!("Finding splitters");
         let mut res = vec![];
         for (s, c) in &mut self.splitter_rules {
             res.extend(c(egraph, s.search(egraph)));
             egraph.rebuild();
         }
         res.iter_mut().for_each(|mut x| x.update(egraph));
-        info!("Found {} splitters", res.len());
+        debug!("Found {} splitters", res.len());
         res.into_iter().unique().collect()
     }
 
@@ -177,6 +178,9 @@ impl CaseSplit {
             debug_assert!(group.iter().filter_map(|id| egraph[*id].color()).unique().count() <= 1);
             // TODO: might need to look into hierarchical colors conclusions.
             // TODO: What about split conclusion from only colored matches?
+            if group.len() > 1 {
+                debug!("\tMerging group: {:?} for color {:?}", group, color.clone());
+            }
             let mut it = group.iter();
             let mut res = *it.next().unwrap();
             for id in it {
@@ -200,6 +204,7 @@ impl CaseSplit {
 
     pub fn case_split(&mut self, egraph: &mut ThEGraph, split_depth: usize, rules: &[ThRewrite], run_depth: usize) {
         if !cfg!(feature = "no_split") {
+            info!("Case splitting with depth {}", split_depth);
             if cfg!(feature = "split_clone") {
                 self.inner_case_split(egraph, split_depth, &Default::default(), rules, run_depth)
             } else {
@@ -215,7 +220,7 @@ impl CaseSplit {
         if split_depth == 0 {
             return;
         }
-
+        debug!("Colored Case splitting with depth {}", split_depth);
         let color_keys = known_splits_by_color.keys().cloned().collect_vec();
         for color in color_keys {
             let mut splits = known_splits_by_color.remove(&color).unwrap();
@@ -229,7 +234,7 @@ impl CaseSplit {
         let temp = self.find_splitters(egraph);
         for s in &temp {
             let trns = reconstruct_all(egraph, s.color, 4);
-            warn!("  {} - root: {}, cases: {}", s, trns.get(&s.root).map(|x| x.to_string()).unwrap_or("No reconstruct".to_string()), s.splits.iter().map(|c| trns.get(c).map(|x| x.to_string()).unwrap_or("No reconstruct".to_string())).intersperse(" ".to_string()).collect::<String>());
+            debug!("  {} - root: {}, cases: {}", s, trns.get(&s.root).map(|x| x.to_string()).unwrap_or("No reconstruct".to_string()), s.splits.iter().map(|c| trns.get(c).map(|x| x.to_string()).unwrap_or("No reconstruct".to_string())).intersperse(" ".to_string()).collect::<String>());
         }
         let temp_len = temp.len();
         let mut splitters: Vec<Split> = temp.into_iter()
@@ -287,7 +292,6 @@ impl CaseSplit {
                     Self::collect_colored_merged(egraph, &classes, *c)
                 })
                 .collect_vec();
-            warn!("Conclusions for colors {cs:?} are {split_conclusions:?}");
             Self::merge_conclusions(egraph, base, &classes, split_conclusions);
         }
         warn!("Done Conclusions for depth {split_depth} -------------------");
@@ -380,29 +384,14 @@ mod tests {
     #[ignore]
     #[cfg(feature = "split_colored")]
     fn no_vacuity_in_and_or() {
+        // This test is ignored because case splitting will create vacuity with (= T F) at the moment.
+        init_logging();
+
         let (thesy, rewrites) = TheSyConfig::from_path("tests/booleans.th".to_string()).run(None);
         let ops = vec![SymbolLang::leaf("true"), SymbolLang::leaf("false")];
         let op_ids = ops.iter().map(|op| op.op_id()).collect_vec();
         assert_eq!(thesy.egraph.detect_vacuity(&op_ids).len(), 0);
     }
-
-    // Load egraph from resources and find all splitters on it. Assert we split with root id 70
-    #[test]
-    #[ignore]
-    #[cfg(feature = "split_colored")]
-    fn find_splitters() {
-        let mut egraph: ThEGraph = serde_cbor::from_reader(std::fs::File::open("resources/egraph-bad-splitter-match.bincode").unwrap()).unwrap();
-        let dot = egraph.colored_dot(ColorId::from(0)).to_dot("test.dot").unwrap();
-        let config  = TheSyConfig::from_path("theories/goal1.smt2.th".parse().unwrap());
-        let mut case_splitter = TheSy::create_case_splitter(config.definitions.case_splitters.clone());
-        println!("{:?}", egg::get_strings());
-        let mut the_one = case_splitter.splitter_rules.remove(2);
-        println!("Splitter rule: {:?} -> ??? Some applier", the_one.0.to_string());
-        let matches = the_one.0.search(&mut egraph);
-        let splitters = the_one.1(&mut egraph, matches);
-        assert!(splitters.iter().any(|s| s.root == Id::from(70)));
-    }
-
 
     #[test]
     #[cfg(feature = "split_colored")]

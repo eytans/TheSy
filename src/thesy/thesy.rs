@@ -763,6 +763,7 @@ mod test {
     use crate::thesy::thesy::TheSy;
     use crate::{TheSyConfig, tests, PRETTY_W};
     use egg::tools::tools::Grouped;
+    use rand::prelude::SliceRandom;
 
     #[global_allocator]
     pub(crate) static ALLOCATOR: Cap<alloc::System> = Cap::new(alloc::System, usize::MAX);
@@ -1116,73 +1117,46 @@ mod test {
         assert_ne!(thesy.egraph.find(consxy), thesy.egraph.find(ex2));
         assert_eq!(thesy.egraph.find(nil), thesy.egraph.find(ex0));
         println!("Currently (before) allocated: {}MB", ALLOCATOR.allocated() as f64 /1e6);
+        info!("Starting case split");
         case_split.case_split(&mut thesy.egraph, 2, &rules, 6);
-
         println!("Currently (after) allocated: {}MB", ALLOCATOR.allocated() as f64 /1e6);
         info!("Done case split");
         thesy.egraph.rebuild();
         println!("drop i [x] is {}", thesy.egraph.find(dropix));
         info!("Done third and final rebuild");
         assert_eq!(thesy.egraph.find(consx), thesy.egraph.find(ex1));
-        // Print ids of interesting expressions and their id in color 14.
-        // println!("nil: {}", nil);
-        // println!("nil in color 14: {}", thesy.egraph.colored_find(ColorId::from(14), nil));
-        // println!("nil in color 15: {}", thesy.egraph.colored_find(ColorId::from(15), nil));
-        // println!("consx: {}", consx);
-        // println!("consx in color 14: {}", thesy.egraph.colored_find(ColorId::from(14), consx));
-        // println!("consx in color 15: {}", thesy.egraph.colored_find(ColorId::from(15), consx));
-        // println!("consxy: {}", consxy);
-        // println!("consxy in color 14: {}", thesy.egraph.colored_find(ColorId::from(14), consxy));
-        // println!("consxy in color 15: {}", thesy.egraph.colored_find(ColorId::from(15), consxy));
-        // println!("ex0: {}", ex0);
-        // println!("ex0 in color 0: {}", thesy.egraph.colored_find(ColorId::from(0), ex0));
-        // println!("ex0 in color 1: {}", thesy.egraph.colored_find(ColorId::from(1), ex0));
-        // println!("ex0 in color 14: {}", thesy.egraph.colored_find(ColorId::from(14), ex0));
-        // println!("ex0 in color 15: {}", thesy.egraph.colored_find(ColorId::from(15), ex0));
-        // println!("ex1: {}", ex1);
-        // println!("ex1 in color 0: {}", thesy.egraph.colored_find(ColorId::from(0), ex1));
-        // println!("ex1 in color 1: {}", thesy.egraph.colored_find(ColorId::from(1), ex1));
-        // println!("ex1 in color 14: {}", thesy.egraph.colored_find(ColorId::from(14), ex1));
-        // println!("ex1 in color 15: {}", thesy.egraph.colored_find(ColorId::from(15), ex1));
-        // println!("ex2: {}", ex2);
-        // println!("ex2 in color 0: {}", thesy.egraph.colored_find(ColorId::from(0), ex2));
-        // println!("ex2 in color 1: {}", thesy.egraph.colored_find(ColorId::from(1), ex2));
-        // println!("ex2 in color 14: {}", thesy.egraph.colored_find(ColorId::from(14), ex2));
-        // println!("ex2 in color 15: {}", thesy.egraph.colored_find(ColorId::from(15), ex2));
+
         let dropiyx = thesy.egraph.add_expr(&"(drop i (cons y (cons x nil)))".parse().unwrap());
-        thesy.egraph.rebuild();
-        println!("drop i [y, x]: {}", dropiyx);
-        // println!("drop i [y, x] in color 14: {}", thesy.egraph.colored_find(ColorId::from(14), dropiyx));
-        // println!("drop i [y, x] in color 15: {}", thesy.egraph.colored_find(ColorId::from(15), dropiyx));
         let takeiyx = thesy.egraph.add_expr(&"(take i (cons y (cons x nil)))".parse().unwrap());
-        thesy.egraph.rebuild();
-        println!("take i [y, x]: {}", takeiyx);
-        // println!("take i [y, x] in color 14: {}", thesy.egraph.colored_find(ColorId::from(14), takeiyx));
-        // println!("take i [y, x] in color 15: {}", thesy.egraph.colored_find(ColorId::from(15), takeiyx));
         let dropix = thesy.egraph.add_expr(&"(drop i (cons x nil))".parse().unwrap());
         thesy.egraph.rebuild();
-        println!("drop i [x]: {}", dropix);
-        // println!("drop i [x] in color 14: {}", thesy.egraph.colored_find(ColorId::from(14), dropix));
-        // println!("drop i [x] in color 15: {}", thesy.egraph.colored_find(ColorId::from(15), dropix));
-        // println!("drop i [x] in color 0: {}", thesy.egraph.colored_find(ColorId::from(0), dropix));
-        // println!("drop i [x] in color 1: {}", thesy.egraph.colored_find(ColorId::from(1), dropix));
 
-        // thesy.egraph.colored_dot(ColorId::from(14)).to_dot("color14_take_drop.dot").unwrap();
+        println!("Black results:");
+        println!("\tnil: {}", nil);
+        println!("\tconsx: {}", consx);
+        println!("\tconsxy: {}", consxy);
+        println!("\tex0: {}", ex0);
+        println!("\tex1: {}", ex1);
+        println!("\tex2: {}", ex2);
+        println!("drop i [y, x]: {}", dropiyx);
+        println!("take i [y, x]: {}", takeiyx);
+        println!("drop i [x]: {}", dropix);
+
+        for c in thesy.egraph.colors() {
+            println!("Color {} results:", c.get_id());
+            println!("\tnil: {}", thesy.egraph.colored_find(c.get_id(), nil));
+            println!("\tconsx: {}", thesy.egraph.colored_find(c.get_id(), consx));
+            println!("\tconsxy: {}", thesy.egraph.colored_find(c.get_id(), consxy));
+            println!("\tex0: {}", thesy.egraph.colored_find(c.get_id(), ex0));
+            println!("\tex1: {}", thesy.egraph.colored_find(c.get_id(), ex1));
+            println!("\tex2: {}", thesy.egraph.colored_find(c.get_id(), ex2));
+            println!("\tdrop i [y, x]: {}", thesy.egraph.colored_find(c.get_id(), dropiyx));
+            println!("\ttake i [y, x]: {}", thesy.egraph.colored_find(c.get_id(), takeiyx));
+            println!("\tdrop i [x]: {}", thesy.egraph.colored_find(c.get_id(), dropix));
+        }
+
         thesy.egraph.dot().to_dot("black_take_drop.dot").unwrap();
-        println!("{:?}", rules[5].search(&thesy.egraph));
-        let mut matches = rules[5].search(&thesy.egraph).into_iter()
-            .filter(|m| m.eclass == Id::from(58)).collect_vec();
-        matches.iter_mut().for_each(|m| m.substs
-            .retain_mut(|s| s.color() == Some(ColorId::from(14))));
-        let res = rules[5].apply(&mut thesy.egraph, &matches);
-        println!("{:?}", res);
-        thesy.egraph.rebuild();
-        // let color14 = thesy.egraph.get_color(ColorId::from(14)).unwrap();
-        // println!("{}", color14);
-        // let built = reconstruct_all(&thesy.egraph, Some(ColorId::from(14)), 4);
-        // println!("{}", built.iter().map(|x| format!("{} {}",x.0.to_string(), x.1.to_string())).sorted().join("\n"));
-        // Print all enodes from color 14
-        // println!("{:?}", color14.get_all_enodes(Id::from(58),  &thesy.egraph));
+
         assert_eq!(thesy.egraph.find(consxy), thesy.egraph.find(ex2));
         // {?x52: 70, ?y53: 48, ?z: 47 color: 14}
     }
@@ -1233,6 +1207,8 @@ mod test {
 
     #[test]
     fn test_all_are_single_typed() {
+        init_logging();
+
         let mut config = TheSyConfig::from_path("theories/list.th".parse().unwrap());
         let mut thesy = TheSy::from(&config);
         thesy.increase_depth();
