@@ -40,6 +40,8 @@ pub struct Split {
 impl Split {
     pub fn new(root: Id, splits: Vec<Id>, color: Option<ColorId>) -> Self { Split { root, splits, color } }
 
+    pub fn color(&self) -> Option<ColorId> { self.color }
+
     pub(crate) fn update(&mut self, egraph: &ThEGraph) {
         self.root = egraph.opt_colored_find(self.color, self.root);
         for i in 0..self.splits.len() {
@@ -352,13 +354,16 @@ impl CaseSplit {
 
 #[cfg(test)]
 mod tests {
+    use std::path::PathBuf;
     use std::rc::Rc;
-    use egg::{ColorId, EGraph, Id, Pattern, RecExpr, Searcher, SymbolLang};
+    use egg::{ColorId, EGraph, Id, Pattern, RecExpr, Runner, Searcher, SymbolLang};
     use egg::searchers::ToDyn;
     use crate::{TheSy, TheSyConfig, Language, tests};
     use itertools::Itertools;
     use crate::lang::ThEGraph;
     use crate::tests::{init_logging, ProofMode};
+    use crate::thesy::case_split::CaseSplit;
+    use crate::thesy::semantics::Definitions;
 
     #[test]
     #[cfg(feature = "split_colored")]
@@ -433,5 +438,48 @@ mod tests {
         ids.insert(egraph.find(b));
         ids.insert(egraph.find(c));
         assert_eq!(ids.len(), 3);
+    }
+
+    /// Test rewriting on sub_color. Optimally this test would have been in the egg repo, but we
+    /// are using TheSy definitions here. We could move it once we know what rewrites are used.
+    #[test]
+    #[cfg(feature = "split_colored")]
+    fn test_rewriting_sub_color() {
+        init_logging();
+
+        // load theories/goal1
+        let mut defs = Definitions::from_file(&PathBuf::from("theories/goal1.smt2.th"));
+        // Create thesy and case splitter
+        let mut splitter = CaseSplit::from_applier_patterns(defs.case_splitters);
+
+        let mut egraph: EGraph<SymbolLang, ()> = EGraph::new(());
+        let take_succ_i_exp = "(take i (cons x (cons y nil)))".parse().unwrap();
+        let take_succ_i = egraph.add_expr(&take_succ_i_exp);
+        let c_base = egraph.create_color();
+        // Colored add expression (succ (param_Nat_0 i))
+        let i_exp = egraph.add_expr(&"i".parse().unwrap());
+        let nil_exp = egraph.add_expr(&"nil".parse().unwrap());
+        let c_succ_i = egraph.colored_add_expr(c_base, &"(succ (param_Nat_0 i))".parse().unwrap());
+        egraph.colored_union(c_base, i_exp, c_succ_i);
+        egraph.rebuild();
+        let mut egraph = Runner::default().with_egraph(egraph).run(&defs.rws).egraph;
+        let found = splitter.find_splitters(&mut egraph);
+        assert_eq!(found.iter().filter(|x| x.color().is_some()).count(), 1, "Found splitters: {:?}", found);
+        let c_sub = egraph.create_sub_color(c_base);
+        let param_nat_0_exp = egraph.add_expr(&"(param_Nat_0 i)".parse().unwrap());
+        let c_succ_succ_i = egraph.colored_add_expr(c_sub, &"(succ (param_Nat_0 (param_Nat_0 i)))".parse().unwrap());
+        egraph.colored_union(c_sub, param_nat_0_exp, c_succ_succ_i);
+        egraph.rebuild();
+        // Remove some of the rws
+        println!("RWS: {:?}", defs.rws.len());
+        // for i in vec![0, 1, 2, 3, 4, 5, 6, 7, /* 8, 9, */ 10, 11, 12, 13, 14, 15, 16, 17]
+        //     .into_iter().rev() {
+        //     println!("Removing: {}", defs.rws[i].name());
+        //     defs.rws.remove(i);
+        // }
+        let mut egraph = Runner::default().with_egraph(egraph).run(&defs.rws).egraph;
+        egraph.rebuild();
+        egraph.colored_dot(c_sub).to_dot("take_drop.dot");
+        assert_eq!(egraph.colored_find(c_sub, take_succ_i), egraph.colored_find(c_sub, nil_exp));
     }
 }

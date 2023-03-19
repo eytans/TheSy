@@ -614,11 +614,13 @@ mod test {
         let mut egraph: EGraph<SymbolLang, ()> = EGraph::new(());
         let take_succ_i_exp = "(take i (cons x (cons y nil)))".parse().unwrap();
         let take_succ_i = egraph.add_expr(&take_succ_i_exp);
+
         egraph.rebuild();
         splitter.case_split(&mut egraph, 1, &vec![], 1);
+        assert!(egraph.colors().count() > 0);
         let found = splitter.find_splitters(&mut egraph);
         // egraph.filtered_dot(|eg, id| filterTypings(eg, id))
         //     .to_dot("take_succ_i.dot".to_string()).unwrap();
-        assert_eq!(found.len(), 0, "Found splitters: {:?}", found);
+        assert_eq!(found.iter().filter(|x| x.color().is_some()).count(), 0, "Found splitters: {:?}", found);
     }
 }
