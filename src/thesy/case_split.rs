@@ -480,6 +480,8 @@ mod tests {
         let mut egraph = Runner::default().with_egraph(egraph).run(&defs.rws).egraph;
         egraph.rebuild();
         egraph.colored_dot(c_sub).to_dot("take_drop.dot");
-        assert_eq!(egraph.colored_find(c_sub, take_succ_i), egraph.colored_find(c_sub, nil_exp));
+        // cons x cons y
+        let cons_x_cons_y = egraph.add_expr(&"(cons x (cons y nil))".parse().unwrap());
+        assert_eq!(egraph.colored_find(c_sub, take_succ_i), egraph.colored_find(c_sub, cons_x_cons_y));
     }
 }
