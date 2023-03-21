@@ -12,6 +12,7 @@ use std::sync::Mutex;
 use indexmap::IndexSet;
 use thesy_parser::ast::{Expression, Terminal};
 use egg::reconstruct::reconstruct;
+use invariants::AssertLevel;
 use crate::{PRETTY_W, tests, TheSyConfig};
 use crate::lang::ThExpr;
 
@@ -20,6 +21,8 @@ lazy_static!(
 );
 pub fn init_logging() {
     use simplelog::*;
+
+    // invariants::set_max_level(AssertLevel::Off);
 
     let mut lock = log_initialized.lock().unwrap();
     if lock.not() {

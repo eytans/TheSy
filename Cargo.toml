@@ -28,6 +28,7 @@ indexmap = "1.9.0"
 strum = "0.24.1"
 strum_macros = "0.24.3"
 rand = "0.8.5"
+invariants = "0.1.3"
 
 serde = {version = "1.0.116", features = ["derive"], optional = true}
 serde_cbor = {version = "0.11.2"}
@@ -44,6 +45,7 @@ default = ["split_colored", "stats"]
 #default = ["split_clone", "keep_splits", "stats"]
 stats = ["serde", "serde_json"]
 split_colored = ["egg/colored"]
+#split_colored = ["egg/colored", "egg/colored_no_cremove"]
 split_clone = []
 no_split = ["no_expl_split"]
 no_expl_split = []
@@ -54,3 +56,4 @@ keep_splits= []
 
 #[profile.test]
 #opt-level = 2
+#debug-assertions = false
