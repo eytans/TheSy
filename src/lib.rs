@@ -46,7 +46,7 @@ use crate::SubCmd::Prove;
 
 pub const PRETTY_W: usize = 500;
 
-#[derive(StructOpt, Clone, Copy, strum_macros::EnumString)]
+#[derive(StructOpt, Clone, Copy, strum_macros::EnumString, Debug)]
 pub enum SubCmd {
     /// Run thesy
     Run,
@@ -117,7 +117,7 @@ impl ProverConfig {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct TheSyConfig {
     pub definitions: Definitions,
     ph_count: usize,

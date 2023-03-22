@@ -28,7 +28,7 @@ use cap::Cap;
 pub(crate) static ALLOCATOR: Cap<alloc::System> = Cap::new(alloc::System, usize::MAX);
 
 /// Arguments to use to run thesy
-#[derive(StructOpt)]
+#[derive(StructOpt, Debug)]
 struct CliOpt {
     /// The path to the file to read
     #[structopt(parse(from_os_str))]
@@ -36,8 +36,6 @@ struct CliOpt {
     /// Placeholder count
     #[structopt(name = "placeholder count", short="c", long="phcount", default_value = "2")]
     ph_count: usize,
-    /// Previous results to read
-    dependencies: Vec<String>,
     /// Run exploration, as a prover, check equivalence only, or skip case split in equivalence
     /// check
     #[structopt(name = "run mode", short = "m", long = "mode", default_value = "Prove")]
@@ -63,6 +61,9 @@ struct CliOpt {
     /// Prover split iter num
     #[structopt(name = "prover split run amount", long = "prover_split_i")]
     prover_split_itern: Option<usize>,
+    /// Previous results to read
+    #[structopt(name = "previous results", long = "prev_res")]
+    dependencies: Vec<String>,
 }
 
 impl From<&CliOpt> for TheSyConfig {
@@ -111,8 +112,12 @@ fn main() {
         ALLOCATOR.set_limit(limit * 1024 * 1024).expect("Failed to set memory limit");
     }
 
+    // invariants::set_max_level(invariants::AssertLevel::Off);
+
     let start = SystemTime::now();
+    warn!("CLI Options: {:#?}", args);
     let mut config = TheSyConfig::from(&args);
+    warn!("Config: {:#?}", config);
     let thesy = Synth::from(&config);
     let mut rws = thesy.system_rws.clone();
     rws.extend_from_slice(&config.definitions.rws);

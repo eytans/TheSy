@@ -73,6 +73,19 @@ pub struct Definitions {
     pub goals: Vec<(Option<Expression>, Expression, Expression)>,
 }
 
+impl Debug for Definitions {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Definitions {{\n")?;
+        write!(f, "  datatypes: {:?}\n", self.datatypes)?;
+        write!(f, "  functions: {:?}\n", self.functions)?;
+        write!(f, "  rws: {:?}\n", self.rws)?;
+        write!(f, "  conjectures: {:?}\n", self.conjectures)?;
+        write!(f, "  case_splitters: Skipping\n")?;
+        write!(f, "  goals: {:?}\n", self.goals)?;
+        write!(f, "}}")
+    }
+}
+
 impl Definitions {
     pub fn merge(&mut self, mut other: Self) {
         self.functions.extend_from_slice(&std::mem::take(&mut other.functions).into_iter()
