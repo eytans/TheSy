@@ -163,9 +163,16 @@ impl Prover {
         // create graph containing both expressions
         let (orig_egraph, ind_id) = self.create_proof_graph(precond, &ex1, &ex2);
         constructors.into_iter().all(|c| {
-            let equal = Self::case_split_for_constructor(case_splitter, rules,
-                                                         ex1, ex2,
-                                                         split_d, &orig_egraph, ind_id, c);
+            let equal = Self::case_split_for_constructor(
+                case_splitter,
+                rules,
+                ex1,
+                ex2,
+                self.run_depth,
+                self.split_conf,
+                &orig_egraph,
+                ind_id,
+                c);
             if !equal {
                 info!("Basic constructor {} failed basic proving for {} == {}",
                     c.name, ex1.pretty(PRETTY_W), ex2.pretty(PRETTY_W))
