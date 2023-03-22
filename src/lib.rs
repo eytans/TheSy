@@ -31,7 +31,7 @@ use structopt::StructOpt;
 use egg::*;
 
 use egg::pretty_string::PrettyString;
-use crate::thesy::{example_creator};
+use crate::thesy::{example_creator, prover};
 use crate::thesy::case_split::{CaseSplit, Split};
 use crate::thesy::thesy::TheSy;
 use thesy::semantics::Definitions;
@@ -88,6 +88,35 @@ impl SubCmd {
     }
 }
 
+#[derive(Clone, Copy, Debug)]
+pub struct CaseSplitConfig {
+    pub split_depth: usize,
+    pub run_depth: usize,
+}
+
+impl CaseSplitConfig {
+    pub fn new(split_depth: usize, run_depth: usize) -> CaseSplitConfig {
+        CaseSplitConfig {
+            split_depth: split_depth,
+            run_depth: run_depth,
+        }
+    }
+}
+
+pub struct ProverConfig {
+    pub run_depth: usize,
+    pub split_conf: CaseSplitConfig,
+}
+
+impl ProverConfig {
+    pub fn new(run_depth: usize, split_conf: CaseSplitConfig) -> ProverConfig {
+        ProverConfig {
+            run_depth,
+            split_conf,
+        }
+    }
+}
+
 #[derive(Clone)]
 pub struct TheSyConfig {
     pub definitions: Definitions,
@@ -97,10 +126,23 @@ pub struct TheSyConfig {
     output: PathBuf,
     prerun: bool,
     run_mode: SubCmd,
+    run_depth: usize,
+    split_conf: CaseSplitConfig,
+    prove_run_depth: usize,
+    prove_split_conf: CaseSplitConfig,
 }
 
 impl TheSyConfig {
-    pub fn new(definitions: Definitions, ph_count: usize, dependencies: Vec<TheSyConfig>, output: PathBuf, run_mode: SubCmd) -> TheSyConfig {
+    pub fn new(definitions: Definitions,
+               ph_count: usize,
+               dependencies: Vec<TheSyConfig>,
+               output: PathBuf,
+               run_mode: SubCmd,
+               run_depth: usize,
+               split_conf: CaseSplitConfig,
+               prove_run_depth: usize,
+               prove_split_conf: CaseSplitConfig,
+    ) -> TheSyConfig {
         let func_len = definitions.functions.len();
         TheSyConfig {
             definitions,
@@ -110,6 +152,10 @@ impl TheSyConfig {
             output,
             prerun: false,
             run_mode,
+            run_depth,
+            split_conf,
+            prove_run_depth,
+            prove_split_conf,
         }
         // prerun: func_len > 2}
     }
@@ -128,7 +174,12 @@ impl TheSyConfig {
                          2,
                          vec![],
                          PathBuf::from(path).with_extension("res"),
-                         Prove)
+                         Prove,
+                         10,
+                         CaseSplitConfig::new(thesy::thesy::EXP_SPLIT_D, thesy::thesy::EXP_SPLIT_ITERN),
+                         prover::RUN_DEPTH,
+                         CaseSplitConfig::new(prover::CASE_SPLIT_DEPTH, prover::CASE_ITERN),
+        )
     }
 
     pub fn create_thesy(&mut self) -> (TheSy, CaseSplit, Vec<ThRewrite>) {
@@ -195,11 +246,14 @@ impl From<&Definitions> for TheSy {
             Some(defs.conjectures.clone())
         };
 
-        TheSy::new_with_ph(defs.datatypes.clone(),
-                           examples,
-                           dict,
-                           2,
-                           conjectures)
+        TheSy::new_with_ph(
+            defs.datatypes.clone(),
+            examples,
+            dict,
+            2,
+            conjectures,
+            thesy::thesy::ITERN,
+        )
     }
 }
 
@@ -222,10 +276,13 @@ impl From<&TheSyConfig> for TheSy {
             warn!("Running exploration without proof mode, but goals were given");
         }
 
-        TheSy::new_with_ph(conf.definitions.datatypes.clone(),
-                           examples,
-                           dict,
-                           conf.ph_count,
-                           if conf.run_mode.is_run() { None } else { conjectures })
+        TheSy::new_with_ph(
+            conf.definitions.datatypes.clone(),
+            examples,
+            dict,
+            conf.ph_count,
+            if conf.run_mode.is_run() { None } else { conjectures },
+            conf.run_depth,
+        )
     }
 }

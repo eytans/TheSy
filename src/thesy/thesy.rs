@@ -17,13 +17,17 @@ use egg::{IntoTree, Tree};
 use egg::pretty_string::PrettyString;
 use egg::searchers::MultiDiffSearcher;
 use crate::lang::*;
-use crate::thesy::{case_split, consts};
+use crate::thesy::{case_split, consts, thesy};
 use crate::thesy::case_split::{CaseSplit, Split, SplitApplier};
 use crate::thesy::example_creator::Examples;
 use crate::thesy::prover::Prover;
 use crate::thesy::statistics::Stats;
 use egg::tools::tools::choose;
 use crate::PRETTY_W;
+
+pub const ITERN: usize = 12;
+pub const EXP_SPLIT_D: usize = 2;
+pub const EXP_SPLIT_ITERN: usize = 4;
 
 /// Theory Synthesizer - Explores a given theory finding and proving new lemmas.
 pub struct TheSy {
@@ -102,10 +106,24 @@ impl TheSy {
     }
 
     pub fn new(datatype: DataType, examples: Examples, dict: Vec<Function>) -> TheSy {
-        Self::new_with_ph(vec![datatype.clone()], IndexMap::from_iter(iter::once((datatype, examples))), dict, 2, None)
+        Self::new_with_ph(
+            vec![datatype.clone()],
+            IndexMap::from_iter(iter::once((datatype, examples))),
+            dict,
+            2,
+            None,
+            ITERN,
+        )
     }
 
-    pub fn new_with_ph(datatypes: Vec<DataType>, examples: IndexMap<DataType, Examples>, dict: Vec<Function>, ph_count: usize, lemmas: Option<Vec<(IndexMap<ThExpr, ThExpr>, IndexSet<ThExpr>, Option<ThExpr>, ThExpr, ThExpr)>>) -> TheSy {
+    pub fn new_with_ph(
+        datatypes: Vec<DataType>,
+        examples: IndexMap<DataType, Examples>,
+        dict: Vec<Function>,
+        ph_count: usize,
+        lemmas: Option<Vec<(IndexMap<ThExpr, ThExpr>, IndexSet<ThExpr>, Option<ThExpr>, ThExpr, ThExpr)>>,
+        run_depth: usize,
+    ) -> TheSy {
         debug_assert!(examples.iter().all(|(d, e)| &e.datatype == d));
         let datatype_to_prover: IndexMap<DataType, Prover> = datatypes.iter()
             .map(|d| (d.clone(), Prover::new(d.clone()))).collect();
@@ -164,7 +182,7 @@ impl TheSy {
             example_ids,
             system_rws,
             node_limit: 400000,
-            iter_limit: 12,
+            iter_limit: run_depth,
             goals: conjectures,
             stats,
             // assumptions: Default::default(),
@@ -448,47 +466,10 @@ impl TheSy {
     }
 
     pub fn remaining_goals(&self) -> Option<Vec<Vec<(Option<ThExpr>, ThExpr, ThExpr)>>> {
-        return self.goals.clone()
+        return self.goals.clone();
     }
 
     pub fn check_goals(&mut self, case_splitter: &mut Option<&mut CaseSplit>, rules: &mut Vec<ThRewrite>)
-                   -> Option<Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, ThRewrite)>> {
-        if self.goals.is_none() {
-            return None;
-        }
-        let mut lemmas = self.goals.as_mut().unwrap();
-        let mut res = None;
-        let mut index = 0;
-        'outer: for (i, conjs) in lemmas.iter().enumerate() {
-            debug!("Checking goal {}", i);
-            for (precond, ex1, ex2) in conjs {
-                for p in self.datatypes.values() {
-                    let start = if cfg!(feature = "stats") {
-                        Some(SystemTime::now())
-                    } else { None };
-                    res = p.prove_all_split_d(case_splitter, rules, Option::from(precond), ex1, ex2, 3);
-                    index = i;
-                    if res.is_some() {
-                        warn!("Proved goal {} - {:?} -> {} = {}", i, precond, ex1, ex2);
-                        if cfg!(feature = "stats") {
-                            self.stats.goals_proved.push((ex1.pretty(PRETTY_W), ex2.pretty(PRETTY_W), SystemTime::now().duration_since(start.unwrap()).unwrap()));
-                        }
-                        break 'outer;
-                    } else {
-                        if cfg!(feature = "stats") {
-                            self.stats.failed_proofs_goals.push((ex1.pretty(PRETTY_W), ex2.pretty(PRETTY_W), SystemTime::now().duration_since(start.unwrap()).unwrap()));
-                        }
-                    }
-                }
-            }
-        }
-        if res.is_some() {
-            lemmas.remove(index);
-        }
-        res
-    }
-
-    pub fn case_split_goals(&mut self, case_splitter: &mut Option<&mut CaseSplit>, rules: &mut Vec<ThRewrite>)
                        -> Option<Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, ThRewrite)>> {
         if self.goals.is_none() {
             return None;
@@ -503,7 +484,7 @@ impl TheSy {
                     let start = if cfg!(feature = "stats") {
                         Some(SystemTime::now())
                     } else { None };
-                    res = p.prove_all_split_d(case_splitter, rules, Option::from(precond), ex1, ex2, 3);
+                    res = p.prove_all_split_d(case_splitter, rules, Option::from(precond), ex1, ex2);
                     index = i;
                     if res.is_some() {
                         warn!("Proved goal {} - {:?} -> {} = {}", i, precond, ex1, ex2);
@@ -756,7 +737,7 @@ mod test {
     use egg::searchers::ToDyn;
     use crate::lang::{DataType, Function, ThEGraph, ThRewrite};
     use crate::tests::{init_logging, ProofMode};
-    use crate::thesy::{consts, Examples};
+    use crate::thesy::{consts, Examples, thesy};
     use crate::thesy::case_split::{CaseSplit, Split, SplitApplier};
     use crate::thesy::consts::ite_rws;
     use crate::thesy::semantics::Definitions;
@@ -876,6 +857,7 @@ mod test {
                      Function::new("pl".to_string(), vec!["nat".parse().unwrap(), "nat".parse().unwrap()], "nat".parse().unwrap())],
                 2,
                 None,
+                thesy::ITERN,
             )
         };
         let z = syg.egraph.lookup(SymbolLang::new("Z", vec![]));
@@ -932,6 +914,7 @@ mod test {
             vec![Function::new("x".to_string(), vec!["nat".parse().unwrap(), "nat".parse().unwrap()], "nat".parse().unwrap())],
             3,
             None,
+            thesy::ITERN,
         );
 
         let results0 = anchor_patt.search(&syg.egraph);
@@ -1116,10 +1099,10 @@ mod test {
         assert_ne!(thesy.egraph.find(consx), thesy.egraph.find(ex1));
         assert_ne!(thesy.egraph.find(consxy), thesy.egraph.find(ex2));
         assert_eq!(thesy.egraph.find(nil), thesy.egraph.find(ex0));
-        println!("Currently (before) allocated: {}MB", ALLOCATOR.allocated() as f64 /1e6);
+        println!("Currently (before) allocated: {}MB", ALLOCATOR.allocated() as f64 / 1e6);
         info!("Starting case split");
         case_split.case_split(&mut thesy.egraph, 2, &rules, 6);
-        println!("Currently (after) allocated: {}MB", ALLOCATOR.allocated() as f64 /1e6);
+        println!("Currently (after) allocated: {}MB", ALLOCATOR.allocated() as f64 / 1e6);
         info!("Done case split");
         thesy.egraph.rebuild();
         println!("drop i [x] is {}", thesy.egraph.find(dropix));

@@ -17,14 +17,15 @@ use crate::{PRETTY_W, tests, TheSyConfig};
 use crate::lang::ThExpr;
 
 lazy_static!(
-    static ref log_initialized: Mutex<bool> = Mutex::new(false);
+    static ref LOG_INITIALIZED: Mutex<bool> = Mutex::new(false);
 );
+
 pub fn init_logging() {
     use simplelog::*;
 
     // invariants::set_max_level(AssertLevel::Off);
 
-    let mut lock = log_initialized.lock().unwrap();
+    let mut lock = LOG_INITIALIZED.lock().unwrap();
     if lock.not() {
         let mut thesy_config: simplelog::Config = ConfigBuilder::new().add_filter_ignore_str("egg").build();
         let mut egg_config: simplelog::Config = ConfigBuilder::new().add_filter_allow_str("egg").build();
@@ -159,12 +160,13 @@ pub fn test_prover(definitions: &Definitions) -> Vec<ProofMode> {
             // Attempt proof
             let prover = &thesy.datatypes[d];
             warn!("Proving goal with {}", d);
-            let temp = prover.prove_all_split_d(&mut Some(&mut case_splitter),
-                                               &rws,
-                                               Option::from(precond),
-                                               &ph_exp1,
-                                               &ph_exp2,
-                                               1);
+            let temp = prover.prove_all_split_d(
+                &mut Some(&mut case_splitter),
+                &rws,
+                Option::from(precond),
+                &ph_exp1,
+                &ph_exp2,
+            );
             if temp.is_some() {
                 proof_res = Some(ProofMode::Prover);
                 break;

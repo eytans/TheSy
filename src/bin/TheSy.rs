@@ -15,11 +15,11 @@ use structopt::StructOpt;
 use egg::*;
 
 use egg::pretty_string::PrettyString;
-use TheSy::thesy::{example_creator};
+use TheSy::thesy::{example_creator, prover};
 use TheSy::thesy::case_split::{CaseSplit, Split};
 use TheSy::thesy::thesy::TheSy as Synth;
 use TheSy::thesy::semantics::Definitions;
-use TheSy::{PRETTY_W, SubCmd, thesy, TheSyConfig};
+use TheSy::{CaseSplitConfig, PRETTY_W, SubCmd, thesy, TheSyConfig};
 use egg::tools::tools::choose;
 use std::rc::Rc;
 use cap::Cap;
@@ -45,6 +45,24 @@ struct CliOpt {
     /// Memory limit in MB
     #[structopt(name = "memory limit", short = "l", long = "limit")]
     mem_limit: Option<usize>,
+    /// Case splitter split depth
+    #[structopt(name = "case split depth", short = "s", long = "case_split_d")]
+    case_split_depth: Option<usize>,
+    /// Case splitter split iter num
+    #[structopt(name = "case split run amount", short = "i", long = "case_split_i")]
+    case_split_itern: Option<usize>,
+    /// Number of egg iterations for each depth
+    #[structopt(name = "run depth", short = "r", long = "run_depth")]
+    run_depth: Option<usize>,
+    /// Prover run depth
+    #[structopt(name = "prover run depth", short = "p", long = "prover_run_depth")]
+    prover_run_depth: Option<usize>,
+    /// Prover split depth
+    #[structopt(name = "prover split depth", long = "prover_split_d")]
+    prover_split_depth: Option<usize>,
+    /// Prover split iter num
+    #[structopt(name = "prover split run amount", long = "prover_split_i")]
+    prover_split_itern: Option<usize>,
 }
 
 impl From<&CliOpt> for TheSyConfig {
@@ -55,6 +73,16 @@ impl From<&CliOpt> for TheSyConfig {
             vec![],
             opts.path.with_extension("res.th"),
             opts.run_mode,
+            opts.run_depth.unwrap_or(thesy::thesy::ITERN),
+            CaseSplitConfig::new(
+                opts.case_split_depth.unwrap_or(thesy::thesy::EXP_SPLIT_D),
+                opts.case_split_itern.unwrap_or(thesy::thesy::EXP_SPLIT_ITERN),
+            ),
+            opts.prover_run_depth.unwrap_or(prover::RUN_DEPTH),
+            CaseSplitConfig::new(
+                opts.prover_split_depth.unwrap_or(prover::CASE_SPLIT_DEPTH),
+                opts.prover_split_itern.unwrap_or(prover::CASE_ITERN),
+            ),
         )
     }
 }
