@@ -145,20 +145,21 @@ fn main() {
         warn!("Finished proving all goals in {:?}", start.elapsed().unwrap());
         exit(0)
     }
-    let res = config.run(Some(2));
+    let mut res = config.run(Some(2));
     #[cfg(all(feature = "split_colored", feature = "stats"))]
     sample_colored_stats(&res.0.egraph, StatsReport::End);
     println!("done in {}", SystemTime::now().duration_since(start).unwrap().as_millis());
     if cfg!(feature = "stats") {
-        export_json(&res.0, &args.path);
+        export_json(&mut res.0, &args.path);
     }
     exit(0);
 }
 
 #[cfg(feature = "stats")]
-fn export_json(thesy: &thesy::TheSy, path: &PathBuf) {
+fn export_json(thesy: &mut thesy::TheSy, path: &PathBuf) {
     let stat_path = path.with_extension("stats.json");
     let colored_stat_path = path.with_extension("colored_stats.json");
+    thesy.stats.update_mem(&ALLOCATOR);
     serde_json::to_writer(File::create(stat_path).unwrap(), &thesy.stats);
     unsafe {
         serde_json::to_writer(File::create(colored_stat_path).unwrap(), &STATS);

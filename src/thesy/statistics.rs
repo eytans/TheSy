@@ -42,6 +42,10 @@ pub struct Stats {
     pub(crate) measures: IndexMap<usize, MeasureData>,
     /// Run start time
     start_total: SystemTime,
+    /// Total amount of memory allocated
+    pub total_allocated: usize,
+    /// Max amount of memory allocated
+    pub max_allocated: usize,
 }
 
 impl Stats {
@@ -120,6 +124,13 @@ impl Stats {
             self.case_split.push((data.as_ref().unwrap().amount, SystemTime::now().duration_since(data.unwrap().start).unwrap()));
         }
     }
+
+    pub fn update_mem<T>(&mut self, cap: &cap::Cap<T>) {
+        if cfg!(feature = "stats") {
+            self.total_allocated = cap.total_allocated();
+            self.max_allocated = cap.max_allocated();
+        }
+    }
 }
 
 
@@ -147,6 +158,8 @@ impl Default for Stats {
             total_time: Default::default(),
             measures: Default::default(),
             start_total: SystemTime::now(),
+            total_allocated: Default::default(),
+            max_allocated: Default::default(),
         }
     }
 }

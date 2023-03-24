@@ -34,7 +34,7 @@ serde = {version = "1.0.116", features = ["derive"], optional = true}
 serde_cbor = {version = "0.11.2"}
 serde_json = {version = "1.0.88", optional = true}
 
-cap = "0.1.0"
+cap = { git = "https://github.com/eytans/cap.git", branch = "master" }
 
 [dev-dependencies]
 proptest = "1.0.0"
@@ -44,7 +44,7 @@ default = ["split_colored", "stats"]
 #default = ["split_no_cremove", "stats"]
 #default = ["split_clone", "stats"]
 #default = ["split_clone", "keep_splits", "stats"]
-stats = ["serde", "serde_json"]
+stats = ["serde", "serde_json", "cap/stats"]
 split_colored = ["egg/colored"]
 split_no_cremove = ["split_colored", "egg/colored_no_cremove"]
 split_no_cmemo = ["split_colored", "egg/colored_no_cremove", "egg/colored_no_cmemo"]
