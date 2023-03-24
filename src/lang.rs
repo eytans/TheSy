@@ -1,5 +1,6 @@
 use egg::{EGraph, Id, Language, RecExpr, Rewrite, Symbol, SymbolLang};
 use itertools::Itertools;
+use serde::{Deserialize, Serialize};
 
 use egg::expression_ops::{IntoTree, Tree};
 use std::fmt::{Display, Formatter};
@@ -28,7 +29,7 @@ impl Display for DataType {
     }
 }
 
-#[derive(Clone, Hash, PartialEq, Eq, Debug)]
+#[derive(Clone, Hash, PartialEq, Eq, Debug, Serialize, Deserialize)]
 pub struct Function {
     pub name: String,
     pub params: Vec<ThExpr>,

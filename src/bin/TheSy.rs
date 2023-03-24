@@ -23,6 +23,7 @@ use TheSy::{CaseSplitConfig, PRETTY_W, SubCmd, thesy, TheSyConfig};
 use egg::tools::tools::choose;
 use std::rc::Rc;
 use cap::Cap;
+use TheSy::thesy::statistics::{sample_colored_stats, STATS, StatsReport};
 
 #[global_allocator]
 pub(crate) static ALLOCATOR: Cap<alloc::System> = Cap::new(alloc::System, usize::MAX);
@@ -145,6 +146,8 @@ fn main() {
         exit(0)
     }
     let res = config.run(Some(2));
+    #[cfg(all(feature = "split_colored", feature = "stats"))]
+    sample_colored_stats(&res.0.egraph, StatsReport::End);
     println!("done in {}", SystemTime::now().duration_since(start).unwrap().as_millis());
     if cfg!(feature = "stats") {
         export_json(&res.0, &args.path);
@@ -155,7 +158,11 @@ fn main() {
 #[cfg(feature = "stats")]
 fn export_json(thesy: &thesy::TheSy, path: &PathBuf) {
     let stat_path = path.with_extension("stats.json");
+    let colored_stat_path = path.with_extension("colored_stats.json");
     serde_json::to_writer(File::create(stat_path).unwrap(), &thesy.stats);
+    unsafe {
+        serde_json::to_writer(File::create(colored_stat_path).unwrap(), &STATS);
+    }
 }
 
 #[cfg(not(feature = "stats"))]

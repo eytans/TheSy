@@ -21,7 +21,7 @@ use crate::thesy::{case_split, consts, thesy};
 use crate::thesy::case_split::{CaseSplit, Split, SplitApplier};
 use crate::thesy::example_creator::Examples;
 use crate::thesy::prover::Prover;
-use crate::thesy::statistics::Stats;
+use crate::thesy::statistics::{sample_colored_stats, Stats, StatsReport};
 use egg::tools::tools::choose;
 use crate::PRETTY_W;
 
@@ -71,6 +71,8 @@ pub struct TheSy {
     equiv_reduc_hooks: Vec<Box<dyn FnMut(&mut Runner<SymbolLang, ()>, &mut Vec<ThRewrite>) -> Result<(), String>>>,
     /// Vars created for examples, used to reduce case split depth
     examples: IndexMap<DataType, Examples>,
+    /// Total amount of iters
+    total_iters: usize,
 }
 
 /// *** TheSy Statics ***
@@ -190,6 +192,7 @@ impl TheSy {
             after_inference_hooks: Default::default(),
             equiv_reduc_hooks: Default::default(),
             examples,
+            total_iters: 0
         }
     }
 
@@ -419,8 +422,11 @@ impl TheSy {
             x => {
                 info!("Stop reason: {:#?}", x);
                 self.node_limit
-            }
+            },
         };
+        self.total_iters += runner.iterations.len();
+        #[cfg(all(feature = "split_colored", feature = "stats"))]
+        sample_colored_stats(&self.egraph, StatsReport::ThesyDepth(self.total_iters));
         reason
     }
 

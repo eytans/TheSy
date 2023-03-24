@@ -14,6 +14,7 @@ use crate::egg::tools::tools::Grouped;
 
 use std::str::FromStr;
 use crate::lang::{ThEGraph, ThRewrite};
+use crate::thesy::statistics::{sample_colored_stats, StatsReport};
 
 
 /// To be used as the op of edges representing potential split
@@ -208,12 +209,12 @@ impl CaseSplit {
         if !cfg!(feature = "no_split") {
             info!("Case splitting with depth {}", split_depth);
             if cfg!(feature = "split_clone") {
-                self.inner_case_split(egraph, split_depth, &Default::default(), rules, run_depth)
+                self.inner_case_split(egraph, split_depth, &Default::default(), rules, run_depth);
             } else {
                 let mut map = IndexMap::default();
                 // Hack to not fail first checks
                 map.insert(None, Default::default());
-                self.colored_case_split(egraph, split_depth, map, rules, run_depth)
+                self.colored_case_split(egraph, split_depth, map, rules, run_depth);
             }
         }
     }
@@ -286,6 +287,8 @@ impl CaseSplit {
         warn!("Created colors: {:?}", colors);
         // When the API is limited the code is mentally inhibited
         *egraph = Self::equiv_reduction(rules, std::mem::take(egraph), run_depth);
+        #[cfg(all(feature = "split_colored", feature = "stats"))]
+        sample_colored_stats(egraph, StatsReport::CaseSplitDepth(split_depth));
         self.colored_case_split(egraph, split_depth - 1, known_splits_by_color, rules, run_depth);
         warn!("Doing Conclusions for depth {split_depth} ----------------");
         for (base, cs) in colors {

@@ -1,8 +1,9 @@
 use std::time::{Duration, SystemTime};
 
-use egg::{Iteration, RecExpr, SymbolLang};
-use indexmap::IndexMap;
-use crate::lang::ThExpr;
+use egg::{ColorId, Iteration, RecExpr, SymbolLang};
+use indexmap::{IndexMap, IndexSet};
+use serde::{Deserialize, Serialize};
+use crate::lang::{Function, ThEGraph, ThExpr};
 use crate::PRETTY_W;
 
 global_counter!(MEASURE_COUNTER, usize, usize::default());
@@ -147,5 +148,69 @@ impl Default for Stats {
             measures: Default::default(),
             start_total: SystemTime::now(),
         }
+    }
+}
+
+#[cfg(feature = "stats")]
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct ColorStats {
+    #[cfg(feature = "split_no_cremove")]
+    pub should_delete: IndexMap<ColorId, usize>,
+    #[cfg(feature = "split_colored")]
+    pub colors_sizes: IndexMap<ColorId, usize>,
+    pub black_size: usize,
+}
+
+impl ColorStats {
+    pub fn from_egraph(egraph: &ThEGraph) -> Self {
+        let mut black_enodes = IndexSet::new();
+        let mut colored_enodes = egraph.colors().map(|c| (c.get_id(), IndexSet::new())).collect::<IndexMap<_, _>>();
+        if cfg!(feature = "split_no_cremove") || cfg!(feature = "split_no_cmemo") {
+            for class in egraph.classes() {
+                if let Some(color) = class.color() {
+                    let mut set = colored_enodes.get_mut(&color).unwrap();
+                    class.nodes.iter().map(|n| egraph.colored_canonize(color, n)).for_each(|n| {
+                        set.insert(n);
+                    });
+                } else {
+                    black_enodes.extend(class.nodes.iter().cloned());
+                }
+            }
+            for c in egraph.colors() {
+                let fixed_black = black_enodes.iter().map(|n| egraph.colored_canonize(c.get_id(), n)).collect::<IndexSet<_>>();
+                colored_enodes.get_mut(&c.get_id()).unwrap().retain(|n| fixed_black.contains(n));
+            }
+        }
+        ColorStats {
+            #[cfg(any(feature = "split_no_cremove", feature = "split_no_cmemo"))]
+            should_delete: colored_enodes.iter().map(|(k, v)| (*k, v.len())).collect(),
+            #[cfg(feature = "split_colored")]
+            colors_sizes: egraph.color_sizes().collect(),
+            black_size: egraph.total_size(),
+        }
+    }
+}
+
+impl From<&ThEGraph> for ColorStats {
+    fn from(graph: &ThEGraph) -> Self {
+        ColorStats::from_egraph(graph)
+    }
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub enum StatsReport {
+  ThesyDepth(usize),
+  CaseSplitDepth(usize),
+  ProverBaseEnd(Function, ThExpr, ThExpr),
+  ProverIndEnd(Function, ThExpr, ThExpr),
+  UNKNOWN,
+  End,
+}
+
+pub static mut STATS: Vec<(StatsReport, ColorStats)> = vec![];
+
+pub fn sample_colored_stats(egraph: &ThEGraph, report: StatsReport) {
+    unsafe {
+        STATS.push((report, ColorStats::from(egraph)));
     }
 }
