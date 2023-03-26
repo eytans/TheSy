@@ -167,7 +167,7 @@ impl Default for Stats {
 #[cfg(feature = "stats")]
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ColorStats {
-    #[cfg(feature = "split_no_cremove")]
+    #[cfg(any(feature = "split_no_cremove", feature = "split_no_cmemo"))]
     pub should_delete: IndexMap<ColorId, usize>,
     #[cfg(feature = "split_colored")]
     pub colors_sizes: IndexMap<ColorId, usize>,

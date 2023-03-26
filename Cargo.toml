@@ -42,6 +42,7 @@ proptest = "1.0.0"
 [features]
 default = ["split_colored", "stats"]
 #default = ["split_no_cremove", "stats"]
+#default = ["split_no_cmemo", "stats"]
 #default = ["split_clone", "stats"]
 #default = ["split_clone", "keep_splits", "stats"]
 stats = ["serde", "serde_json", "cap/stats"]

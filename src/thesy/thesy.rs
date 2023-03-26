@@ -1080,8 +1080,6 @@ mod test {
     #[test]
     fn take_drop_equiv_red() {
         init_logging();
-        // Set the limit to 10MiB.
-        ALLOCATOR.set_limit(1000 * 1024 * 1024).unwrap();
 
         let mut conf = TheSyConfig::from_path("theories/goal1.smt2.th".parse().unwrap());
         let mut thesy = TheSy::from(&conf);

@@ -27,8 +27,12 @@ pub fn init_logging() {
 
     let mut lock = LOG_INITIALIZED.lock().unwrap();
     if lock.not() {
-        let mut thesy_config: simplelog::Config = ConfigBuilder::new().add_filter_ignore_str("egg").build();
-        let mut egg_config: simplelog::Config = ConfigBuilder::new().add_filter_allow_str("egg").build();
+        let mut thesy_config: simplelog::Config = ConfigBuilder::new()
+            .add_filter_ignore_str("egg")
+            .build();
+        let mut egg_config: simplelog::Config = ConfigBuilder::new()
+            .add_filter_allow_str("egg")
+            .build();
         let logger = CombinedLogger::init(
             vec![
                 TermLogger::new(LevelFilter::Debug, thesy_config, TerminalMode::Mixed, ColorChoice::Auto),
