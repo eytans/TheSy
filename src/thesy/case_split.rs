@@ -381,11 +381,12 @@ mod tests {
         let mut egraph = thesy.egraph;
         let ops = vec![SymbolLang::leaf("true"), SymbolLang::leaf("false")];
         let op_ids = ops.iter().map(|op| op.op_id()).collect_vec();
-        assert!(egraph.detect_vacuity(&op_ids).len() == 0);
+        egraph.vacuity_ops = vec![op_ids];
+        assert!(egraph.detect_color_vacuity().len() == 0);
         case_splitter.case_split(&mut egraph, 1, &config.definitions.rws, 4);
-        assert!(egraph.detect_vacuity(&op_ids).len() == 0);
+        assert!(egraph.detect_color_vacuity().len() == 0);
         case_splitter.case_split(&mut egraph, 2, &config.definitions.rws, 0);
-        assert!(egraph.detect_vacuity(&op_ids).len() == 0);
+        assert!(egraph.detect_color_vacuity().len() == 0);
     }
 
     #[test]
@@ -395,10 +396,11 @@ mod tests {
         // This test is ignored because case splitting will create vacuity with (= T F) at the moment.
         init_logging();
 
-        let (thesy, rewrites) = TheSyConfig::from_path("tests/booleans.th".to_string()).run(None);
+        let (mut thesy, rewrites) = TheSyConfig::from_path("tests/booleans.th".to_string()).run(None);
         let ops = vec![SymbolLang::leaf("true"), SymbolLang::leaf("false")];
         let op_ids = ops.iter().map(|op| op.op_id()).collect_vec();
-        assert_eq!(thesy.egraph.detect_vacuity(&op_ids).len(), 0);
+        thesy.egraph.vacuity_ops = vec![op_ids];
+        assert_eq!(thesy.egraph.detect_color_vacuity().len(), 0);
     }
 
     #[test]

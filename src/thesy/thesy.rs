@@ -176,6 +176,13 @@ impl TheSy {
 
         warn!("Proof mode: {}", conjectures.is_some());
 
+        let op_ids = datatypes.iter().map(|d| {
+            d.constructors.iter().map(|c| {
+                SymbolLang::leaf(c.name.clone()).op_id()
+            }).collect_vec()
+        }).collect_vec();
+        egraph.vacuity_ops = op_ids;
+
         TheSy {
             datatypes: datatype_to_prover,
             dict,
@@ -192,7 +199,7 @@ impl TheSy {
             after_inference_hooks: Default::default(),
             equiv_reduc_hooks: Default::default(),
             examples,
-            total_iters: 0
+            total_iters: 0,
         }
     }
 
