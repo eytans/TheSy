@@ -1,10 +1,10 @@
 use std::collections::HashSet;
 use std::iter::FromIterator;
 use std::str::FromStr;
-use egg::{Analysis, ColorId, EGraph, ENodeOrVar, Id, ImmutableCondition, IntoTree, Language, Pattern, RecExpr, Searcher, Subst, SymbolLang, ToCondRc, Tree, Var};
+use egg::{Analysis, ColorId, EGraph, ENodeOrVar, Id, ImmutableCondition, Language, Pattern, RecExpr, Searcher, Subst, SymbolLang, ToCondRc, Var};
 use itertools::Itertools;
 use thesy_parser::ast::Expression;
-use egg::expression_ops::RecExpSlice;
+use egg::expression_ops::{IntoTree, RecExpSlice, Tree};
 use egg::pretty_string::PrettyString;
 use indexmap::IndexSet;
 use crate::lang::{ThEGraph, ThNode};

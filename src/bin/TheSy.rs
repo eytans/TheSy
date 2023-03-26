@@ -16,7 +16,7 @@ use egg::*;
 
 use egg::pretty_string::PrettyString;
 use TheSy::thesy::{example_creator, prover};
-use TheSy::thesy::case_split::{CaseSplit, Split};
+use TheSy::thesy::case_split::{CaseSplit, CaseSplitStats, Split};
 use TheSy::thesy::thesy::TheSy as Synth;
 use TheSy::thesy::semantics::Definitions;
 use TheSy::{CaseSplitConfig, PRETTY_W, SubCmd, thesy, TheSyConfig};
@@ -89,6 +89,19 @@ impl From<&CliOpt> for TheSyConfig {
     }
 }
 
+struct TheSyRunRes {
+    thesy: Synth,
+    rws: Vec<Rewrite<SymbolLang, ()>>,
+    success: bool,
+    case_split_stats: CaseSplitStats,
+}
+
+impl TheSyRunRes {
+    fn new(thesy: Synth, rws: Vec<Rewrite<SymbolLang, ()>>, success: bool, case_split_stats: CaseSplitStats) -> Self {
+        Self { thesy, rws, success, case_split_stats }
+    }
+}
+
 fn main() {
     use simplelog::*;
 
@@ -119,38 +132,43 @@ fn main() {
     warn!("CLI Options: {:#?}", args);
     let mut config = TheSyConfig::from(&args);
     warn!("Config: {:#?}", config);
-    let thesy = Synth::from(&config);
-    let mut rws = thesy.system_rws.clone();
-    rws.extend_from_slice(&config.definitions.rws);
-    if args.run_mode.is_check_equiv() || args.run_mode.is_no_case_split() {
+    let (mut thesy, mut case_split, mut rules) = config.create_thesy();
+    let mut res = if args.run_mode.is_check_equiv() || args.run_mode.is_no_case_split() {
         // Shortened mode, only trying short proof of goals without exploration
         if args.run_mode.is_no_case_split() {
+            let mut success = true;
             for (vars, holes, precond, ex1, ex2) in &config.definitions.conjectures {
-                if !Synth::check_equality(&rws, precond, ex1, ex2) {
+                if !Synth::check_equality(&rules, precond, ex1, ex2) {
                     println!("Failed to prove conjecture {} => {} = {}",
                              precond.clone().map(|p| p.pretty(PRETTY_W)).unwrap_or("true".to_string()),
                              ex1.pretty(PRETTY_W), ex2.pretty(PRETTY_W));
-                    exit(1);
+                    success = false;
                 }
             }
+            TheSyRunRes::new(thesy, rules, success, CaseSplitStats::new())
         } else {
             // We are in case split mode
-            let (mut thesy, mut case_split, mut rules) = config.create_thesy();
             let res = thesy.check_goals(&mut Some(&mut case_split), &mut rules);
-            if !thesy.remaining_goals().unwrap().is_empty() {
+            let success = if !thesy.remaining_goals().unwrap().is_empty() {
                 println!("Failed to prove conjectures");
-                exit(1);
-            }
+                false
+            } else {
+                true
+            };
+            warn!("Finished proving all goals in {:?}", start.elapsed().unwrap());
+            TheSyRunRes::new(thesy, rules, success, case_split.stats)
         }
-        warn!("Finished proving all goals in {:?}", start.elapsed().unwrap());
-        exit(0)
-    }
-    let mut res = config.run(Some(2));
+    } else {
+        let (mut new_thesy, mut new_rules): (TheSy::thesy::TheSy, Vec<Rewrite<SymbolLang, ()>>) = config.run(Some(2));
+        println!("done in {}", SystemTime::now().duration_since(start).unwrap().as_millis());
+        TheSyRunRes::new(new_thesy, new_rules, true, case_split.stats)
+    };
+
     #[cfg(all(feature = "split_colored", feature = "stats"))]
-    sample_colored_stats(&res.0.egraph, StatsReport::End);
-    println!("done in {}", SystemTime::now().duration_since(start).unwrap().as_millis());
+    sample_colored_stats(&res.thesy.egraph, StatsReport::End);
+    res.thesy.stats.case_split_stats = res.case_split_stats;
     if cfg!(feature = "stats") {
-        export_json(&mut res.0, &args.path);
+        export_json(&mut res.thesy, &args.path);
     }
     exit(0);
 }

@@ -1,10 +1,11 @@
 use std::time::{Duration, SystemTime};
 
-use egg::{ColorId, Iteration, RecExpr, SymbolLang};
+use egg::{ColorId, Iteration};
 use indexmap::{IndexMap, IndexSet};
 use serde::{Deserialize, Serialize};
 use crate::lang::{Function, ThEGraph, ThExpr};
 use crate::PRETTY_W;
+use crate::thesy::case_split::CaseSplitStats;
 
 global_counter!(MEASURE_COUNTER, usize, usize::default());
 
@@ -46,6 +47,8 @@ pub struct Stats {
     pub total_allocated: usize,
     /// Max amount of memory allocated
     pub max_allocated: usize,
+    /// Case split stats
+    pub case_split_stats: CaseSplitStats,
 }
 
 impl Stats {
@@ -160,6 +163,7 @@ impl Default for Stats {
             start_total: SystemTime::now(),
             total_allocated: Default::default(),
             max_allocated: Default::default(),
+            case_split_stats: Default::default(),
         }
     }
 }
@@ -172,6 +176,8 @@ pub struct ColorStats {
     #[cfg(feature = "split_colored")]
     pub colors_sizes: IndexMap<ColorId, usize>,
     pub black_size: usize,
+    #[cfg(feature = "split_colored")]
+    pub vacuos_colors: Vec<ColorId>,
 }
 
 impl ColorStats {
@@ -200,6 +206,8 @@ impl ColorStats {
             #[cfg(feature = "split_colored")]
             colors_sizes: egraph.color_sizes().collect(),
             black_size: egraph.total_size(),
+            #[cfg(feature = "split_colored")]
+            vacuos_colors: egraph.detect_color_vacuity(),
         }
     }
 }

@@ -4,7 +4,7 @@ use std::time::Duration;
 use std::collections::hash_map::RandomState;
 use std::rc::Rc;
 use std::fmt;
-use std::fmt::Debug;
+use std::fmt::{Debug, format};
 use indexmap::{IndexMap, IndexSet};
 use smallvec::alloc::fmt::Formatter;
 use egg::reconstruct::{reconstruct, reconstruct_all};
@@ -13,6 +13,8 @@ use egg::searchers::{FilteringSearcher, ToRc};
 use crate::egg::tools::tools::Grouped;
 
 use std::str::FromStr;
+use egg::tree::Tree;
+use serde::{Deserialize, Serialize};
 use crate::lang::{ThEGraph, ThRewrite};
 use crate::thesy::statistics::{sample_colored_stats, StatsReport};
 
@@ -64,6 +66,18 @@ impl Split {
             c
         }).collect_vec()
     }
+
+    pub fn by_translation(&self, trns: &IndexMap<Id, Tree>) -> String {
+        let root = trns.get(&self.root).map(|x| x.to_string())
+            .unwrap_or("No reconstruct".to_string());
+        let splits = self.splits.iter()
+            .map(|c| trns.get(c).map(|x| x.to_string())
+                .unwrap_or("No reconstruct".to_string()))
+            .intersperse(" ".to_string())
+            .collect::<String>();
+        let color = format!("{:?}", self.color);
+        return format!("(root: {}, splits [{}], color: {})", root, splits, color);
+    }
 }
 
 impl fmt::Display for Split {
@@ -74,10 +88,30 @@ impl fmt::Display for Split {
 
 pub type SplitApplier = Box<dyn FnMut(&mut ThEGraph, Vec<SearchMatches>) -> Vec<Split>>;
 
+/// A struct to collect statistics to
+#[cfg(feature = "stats")]
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+pub struct CaseSplitStats {
+    pub(crate) vacuous_cases: Vec<usize>,
+    pub(crate) known_splits_text: IndexSet<String>,
+}
+
+#[cfg(feature = "stats")]
+impl CaseSplitStats {
+    pub fn new() -> Self {
+        CaseSplitStats {
+            vacuous_cases: vec![],
+            known_splits_text: Default::default(),
+        }
+    }
+}
+
 pub struct CaseSplit {
     splitter_rules: Vec<(Rc<dyn Searcher<SymbolLang, ()>>, SplitApplier)>,
     #[cfg(feature = "keep_splits")]
     pub(crate) all_splits: Vec<ThEGraph>,
+    #[cfg(feature = "stats")]
+    pub stats: CaseSplitStats,
 }
 
 impl Debug for CaseSplit {
@@ -92,7 +126,9 @@ impl CaseSplit {
         CaseSplit {
             splitter_rules,
             #[cfg(feature = "keep_splits")]
-            all_splits: vec![]
+            all_splits: vec![],
+            #[cfg(feature = "stats")]
+            stats: Default::default(),
         }
     }
 
@@ -209,12 +245,20 @@ impl CaseSplit {
         if !cfg!(feature = "no_split") {
             info!("Case splitting with depth {}", split_depth);
             if cfg!(feature = "split_clone") {
-                self.inner_case_split(egraph, split_depth, &Default::default(), rules, run_depth);
+                let mut vacuity_cases = 0;
+                self.inner_case_split(egraph, split_depth, &Default::default(), rules, run_depth, &mut vacuity_cases);
+                info!("Found {} vacuity cases", vacuity_cases);
+                self.stats.vacuous_cases.push(vacuity_cases);
             } else {
                 let mut map = IndexMap::default();
+                let initial_vacuos = egraph.detect_color_vacuity();
                 // Hack to not fail first checks
                 map.insert(None, Default::default());
                 self.colored_case_split(egraph, split_depth, map, rules, run_depth);
+                self.stats.vacuous_cases
+                    .push(egraph.detect_color_vacuity().iter()
+                        .filter(|x| !initial_vacuos.contains(x))
+                        .count());
             }
         }
     }
@@ -282,7 +326,10 @@ impl CaseSplit {
         egraph.rebuild();
         for s in splitters {
             let trns = reconstruct_all(egraph, s.color, 4);
-            warn!("  {} - root: {}, cases: {}", s, trns.get(&s.root).map(|x| x.to_string()).unwrap_or("No reconstruct".to_string()), s.splits.iter().map(|c| trns.get(c).map(|x| x.to_string()).unwrap_or("No reconstruct".to_string())).intersperse(" ".to_string()).collect::<String>());
+            let text = s.by_translation(&trns);
+            warn!("  {s} - {}", text);
+            #[cfg(feature = "stats")]
+            self.stats.known_splits_text.insert(text);
         }
         warn!("Created colors: {:?}", colors);
         // When the API is limited the code is mentally inhibited
@@ -302,7 +349,15 @@ impl CaseSplit {
         warn!("Done Conclusions for depth {split_depth} -------------------");
     }
 
-    fn inner_case_split(&mut self, egraph: &mut ThEGraph, split_depth: usize, known_splits: &IndexSet<Split>, rules: &[ThRewrite], run_depth: usize) {
+    fn inner_case_split(
+        &mut self,
+        egraph: &mut ThEGraph,
+        split_depth: usize,
+        known_splits: &IndexSet<Split>,
+        rules: &[ThRewrite],
+        run_depth: usize,
+        vacuity_cases: &mut usize,
+    ) {
         if split_depth == 0 {
             return;
         }
@@ -323,12 +378,10 @@ impl CaseSplit {
         warn!("Splitters len (temp len: {temp_len}): {} in depth {split_depth}", splitters.len());
         let rected = reconstruct_all(egraph, None, 4);
         for s in &splitters {
-            let root_text = rected.get(&s.root).map(|x| x.to_string()).unwrap_or("No reconstruct".to_string());
-            let cases_text = s.splits.iter()
-                .map(|c| rected.get(c).map(|x| x.to_string())
-                    .unwrap_or("No reconstruct".to_string()))
-                .intersperse(" ".to_string()).collect::<String>();
-            warn!("  {} - root: {}, cases: {}", s, root_text, cases_text);
+            let split_text = s.by_translation(&rected);
+            warn!("  {} - {}", s, split_text);
+            #[cfg(feature = "stats")]
+            self.stats.known_splits_text.insert(split_text);
         }
 
         let classes = egraph.classes().map(|c| c.id).collect_vec();
@@ -341,10 +394,13 @@ impl CaseSplit {
                     s.splits.iter().map(|r| rected.get(r).map_or("Bad".to_string(), |x| x.to_string())).collect_vec(),
                     i = i, split_depth = split_depth);
                 let mut g = Self::equiv_reduction(rules, g, run_depth);
-                self.inner_case_split(&mut g, split_depth - 1, &new_known, rules, run_depth);
+                self.inner_case_split(&mut g, split_depth - 1, &new_known, rules, run_depth, vacuity_cases);
                 i += 1;
                 let res = Self::collect_merged(&g, &classes);
                 warn!("Collected merged {i}: {:?}", res.iter().grouped(|x| x.1).iter().filter(|x| x.1.len() > 1).collect_vec());
+                if g.detect_graph_vacuity() {
+                    *vacuity_cases += 1;
+                }
                 #[cfg(feature = "keep_splits")]
                 self.all_splits.push(g);
                 res
@@ -432,7 +488,7 @@ mod tests {
         };
         let mut case_splitter = TheSy::create_case_splitter(vec![
             (searcher, root, cases),
-            (searcher2, root2, cases2)
+            (searcher2, root2, cases2),
         ]);
         egraph.rebuild();
         let rules = vec![rewrite!("rule"; "b" => "(f b)")];

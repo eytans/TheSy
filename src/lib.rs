@@ -187,6 +187,7 @@ impl TheSyConfig {
         let mut rules = self.definitions.rws.clone();
         rules.extend(self.dep_results.iter().flatten().cloned());
         let thesy: TheSy = TheSy::from(&*self);
+        rules.extend(thesy.system_rws.clone());
         let case_split =
             TheSy::create_case_splitter(self.definitions.case_splitters.clone());
         (thesy, case_split, rules)

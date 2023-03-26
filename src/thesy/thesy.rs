@@ -13,7 +13,7 @@ use log::{info, warn};
 use multimap::MultiMap;
 
 use egg::costs::{MinRep, RepOrder};
-use egg::{IntoTree, Tree};
+use egg::expression_ops::{IntoTree, Tree};
 use egg::pretty_string::PrettyString;
 use egg::searchers::MultiDiffSearcher;
 use crate::lang::*;
@@ -524,16 +524,16 @@ impl TheSy {
         info!("Running TheSy on datatypes: {} dict: {}", self.datatypes.keys().map(|x| &x.name).join(" "), self.dict.iter().map(|x| &x.name).join(" "));
         self.stats.init_run();
 
-        let system_rws_start = rules.len();
         let mut found_rules = vec![];
-        for r in self.system_rws.iter() {
-            rules.push(r.clone());
-        }
-        let new_rules_index = rules.len();
         let mut splitter_to_use = case_spliter.as_mut();
+        for r in &self.system_rws {
+            if rules.iter().find(|x| x.name() == r.name()).is_none() {
+                rules.push(r.clone());
+            }
+        }
 
         warn!("Running prove goals");
-        if self.prove_goals(&mut splitter_to_use, rules, &mut found_rules, new_rules_index) {
+        if self.prove_goals(&mut splitter_to_use, rules, &mut found_rules) {
             return found_rules;
         }
 
@@ -560,7 +560,7 @@ impl TheSy {
             // True if goals were proven
             if !cfg!(feature="no_expl_split") {
                 if splitter_to_use.is_some() {
-                    if self.prove_case_split_rules(splitter_to_use.unwrap(), rules, &mut found_rules, new_rules_index) {
+                    if self.prove_case_split_rules(splitter_to_use.unwrap(), rules, &mut found_rules) {
                         return found_rules;
                     }
                     splitter_to_use = case_spliter.as_mut();
@@ -598,11 +598,11 @@ impl TheSy {
                     for r in new_rules.unwrap() {
                         warn!("proved: {}", r.3.name());
                         // inserting like this so new rule will apply before running into node limit.
-                        rules.insert(new_rules_index, r.3);
+                        rules.insert(0, r.3);
                     }
 
                     warn!("Running prove goals");
-                    if self.prove_goals(&mut splitter_to_use, rules, &mut found_rules, new_rules_index) {
+                    if self.prove_goals(&mut splitter_to_use, rules, &mut found_rules) {
                         return found_rules;
                     }
 
@@ -632,14 +632,16 @@ impl TheSy {
                 }
             }
         }
-        for _ in 0..self.system_rws.len() {
-            rules.remove(system_rws_start);
+        for r in &self.system_rws {
+            let i = rules.iter().enumerate().find(|x| x.1.name() == r.name());
+            assert!(i.is_some());
+            rules.remove(i.unwrap().0);
         }
         self.stats.update_total();
         found_rules
     }
 
-    fn prove_case_split_rules(&mut self, case_splitter: &mut CaseSplit, rules: &mut Vec<ThRewrite>, found_rules: &mut Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, ThRewrite)>, new_rules_index: usize) -> bool {
+    fn prove_case_split_rules(&mut self, case_splitter: &mut CaseSplit, rules: &mut Vec<ThRewrite>, found_rules: &mut Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, ThRewrite)>) -> bool {
         let measure_splits = if cfg!(feature = "stats") {
             let n = case_split::split_patterns.iter().map(|p|
                 p.search(&self.egraph)
@@ -694,10 +696,10 @@ impl TheSy {
             for r in new_rules.unwrap() {
                 warn!("proved: {}", r.3.name());
                 // inserting like this so new rule will apply before running into node limit.
-                rules.insert(new_rules_index, r.3);
+                rules.insert(0, r.3);
             }
             warn!("Running prove goals");
-            if self.prove_goals(&mut splitter_to_use, rules, found_rules, new_rules_index) {
+            if self.prove_goals(&mut splitter_to_use, rules, found_rules) {
                 return true;
             }
         }
@@ -710,7 +712,7 @@ impl TheSy {
     }
 
     /// Attempt to prove all lemmas with retry. Return true if finished all goals.
-    fn prove_goals(&mut self, case_splitter: &mut Option<&mut CaseSplit>, rules: &mut Vec<ThRewrite>, found_rules: &mut Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, ThRewrite)>, new_rules_index: usize) -> bool {
+    fn prove_goals(&mut self, case_splitter: &mut Option<&mut CaseSplit>, rules: &mut Vec<ThRewrite>, found_rules: &mut Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, ThRewrite)>) -> bool {
         loop {
             let lemma = self.check_goals(case_splitter, rules);
             if lemma.is_none() {
@@ -720,7 +722,7 @@ impl TheSy {
             for r in lemma.unwrap() {
                 info!("proved: {}", r.3.name());
                 // inserting like this so new rule will apply before running into node limit.
-                rules.insert(new_rules_index, r.3);
+                rules.insert(0, r.3);
             }
         }
         if self.goals.is_some() && self.goals.as_ref().unwrap().is_empty() {
