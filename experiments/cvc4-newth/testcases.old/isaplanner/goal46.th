@@ -1,9 +1,0 @@
-datatype Nat () := (succ : (x_0 : Nat) -> (res : Nat)) (zero : (res : Nat))
-datatype Lst () := (cons : (x_0 : Nat) -> (x_1 : Lst) -> (res : Lst)) (nil : (res : Lst))
-fun zip (x_0 : Lst) (x_1 : Lst) -> ZLst
-fun leq (__x0 : Nat) (__y1 : Nat) -> Bool => (or (= ?__x0 ?__y1) (less ?__x0 ?__y1))
-rw rule0 (zip nil ?x) => znil
-rw rule1 (zip ?x nil) => znil
-rw rule2 (zip (cons ?x2 ?y) (cons ?z ?w)) => (zcons (mkpair ?x2 ?z) (zip ?y ?w))
-rw rule3 (zcons (mkpair ?x2 ?z) (zip ?y ?w)) => (zip (cons ?x2 ?y) (cons ?z ?w))
-prove (zip nil ?ys)  = znil

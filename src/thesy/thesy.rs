@@ -143,6 +143,12 @@ impl TheSy {
         // TODO: replace placeholders only for holes and not for all terminals (also in creating ph0)
         let conjectures = lemmas.map(|v| v.into_iter()
             .map(|(vars, holes, precond, ex1, ex2)| {
+                trace!("Creating conjectures from lemma: {}{} => {}",precond.as_ref()
+                    .map(|c| format!("{} |> ", c.pretty(PRETTY_W)))
+                    .unwrap_or("".to_string()),ex1.pretty(PRETTY_W),ex2.pretty(PRETTY_W));
+                trace!("Holes: {}", holes.iter().map(|h| h.pretty(PRETTY_W)).join(", "));
+                trace!("Vars: {}", vars.iter().map(|(k, v)|
+                    format!("{}: {}", k.pretty(PRETTY_W), v.pretty(PRETTY_W))).join(", "));
                 let mut types_to_vars: IndexMap<ThExpr, IndexMap<Symbol, Function>> = IndexMap::new();
                 for v in vars {
                     if !holes.contains(&v.0) {

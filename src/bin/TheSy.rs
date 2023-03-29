@@ -65,6 +65,9 @@ struct CliOpt {
     /// Previous results to read
     #[structopt(name = "previous results", long = "prev_res")]
     dependencies: Vec<String>,
+    /// Whether to turn off invariants checking
+    #[structopt(name = "disable invariants", long = "no_invariants")]
+    no_invariants: bool,
 }
 
 impl From<&CliOpt> for TheSyConfig {
@@ -126,7 +129,11 @@ fn main() {
         ALLOCATOR.set_limit(limit * 1024 * 1024).expect("Failed to set memory limit");
     }
 
-    // invariants::set_max_level(invariants::AssertLevel::Off);
+    if args.no_invariants {
+        warn!("Invariants checking is disabled");
+        invariants::set_max_level(invariants::AssertLevel::Off);
+    }
+
 
     let start = SystemTime::now();
     warn!("CLI Options: {:#?}", args);

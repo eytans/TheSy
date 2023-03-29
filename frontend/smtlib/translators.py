@@ -295,6 +295,7 @@ class Goal(object):
         self.precondition = precondition
         self.lhs = lhs
         self.rhs = rhs
+        self.uvars = uvar
         for v in uvar:
             # Need to change v occurences in precondition, lhs, rhs to "?v"
             assert v.is_symbol()
@@ -312,7 +313,10 @@ class Goal(object):
         fixed_rhs = ""
         if self.rhs:
             fixed_rhs = f" = {self.rhs.to_smtlib(daggify=False)}"
-        return f"prove{fixed_precondition} {self.lhs.to_smtlib(daggify=False)} {fixed_rhs}"
+        res = f"prove{fixed_precondition} {self.lhs.to_smtlib(daggify=False)} {fixed_rhs}"
+        for v in self.uvars:
+            res = res.replace(f"?{v.symbol_name()}", f"(?{v.symbol_name()} : {v.symbol_type()})")
+        return res
 
 
 class NewThesyFromSmt(ThesyFromSmt):

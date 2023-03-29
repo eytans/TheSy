@@ -11,39 +11,29 @@ from datetime import datetime
 from pathlib import Path
 from experiments import executable_release, project_root, cargo_path
 
-cgroups_disabled = os.name == 'nt' or os.name == "darwin" or os.name == "posix"
-if not cgroups_disabled:
-    from cgroups import Cgroup
-
-RunParams = namedtuple('RunParams', ['fn', 'timeout', 'proof_mode'])
+RunParams = namedtuple('RunParams', ['fn', 'timeout', 'proof_mode', 'memorylimit', 'prover_split_d', 'prover_split_i', 'base_path', 'out_path'])
 
 project_dir = project_root
 
-BUILD_CMD = [str(cargo_path), "build", "--release", "--features", "stats", "--package", "TheSy", "--bin", "TheSy"]
+
+def create_build_cmd(additional_features):
+    return [str(cargo_path), "build", "--release", "--features", f"stats {' '.join(additional_features)}",
+            "--package", "TheSy", "--bin", "TheSy"]
+
+
 CMD = [str(executable_release)]
 
 
-# First we create the cgroup 'charlie' and we set it's cpu and memory limits
-if not cgroups_disabled:
-    cg = Cgroup('thesy_cgroup')
-
-
-# Then we a create a function to add a process in the cgroup
-def in_my_cgroup():
-    if not cgroups_disabled:
-        pid = os.getpid()
-        cg = Cgroup('thesy_cgroup')
-        cg.add(pid)
-
-
 def run_thesy(params: RunParams):
-    in_my_cgroup()
     print(f"running {params.fn}")
     try:
         cmd = [s for s in CMD]
         if params.proof_mode:
-            cmd.append('--mode')
-            cmd.append(str(params.proof_mode))
+            cmd.append(f'--mode={str(params.proof_mode).replace("ThesyMode.", "")}')
+        cmd.append(f'--limit={int(params.memorylimit) * 1024}')
+        cmd.append('--no_invariants')
+        cmd.append(f"--prover_split_d={params.prover_split_d}")
+        cmd.append(f"--prover_split_i={params.prover_split_i}")
         cmd.append(params.fn)
         print(cmd)
         res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=params.timeout)
@@ -52,9 +42,14 @@ def run_thesy(params: RunParams):
     except subprocess.TimeoutExpired:
         out = ""
         error = "Timeout Exception"
-    with open(params.fn + ".out", 'w') as f:
+    fixed_fn: Path = params.fn
+    if params.base_path:
+        extra = 1 if params.fn.endswith("/") else 0
+        fixed_fn = Path(str(params.out_path) + params.fn[len(str(params.base_path)) + extra:])
+    fixed_fn.parent.mkdir(parents=True, exist_ok=True)
+    with fixed_fn.with_suffix(".out").open('w') as f:
         f.write(out)
-    with open(params.fn + ".err", 'w') as f:
+    with fixed_fn.with_suffix(".err").open('w') as f:
         f.write(error)
     print("Done with " + os.path.basename(params.fn))
     # with open(fn + ".json", 'w') as f:
@@ -67,13 +62,13 @@ class ThesyMode(enum.Enum):
     CENoCaseSplit = 4
 
 
-
-def run_all(dirs, mode=ThesyMode.Run, features="", skip=None, timeout=60, processnum=15, memorylimit=32, multiprocess=True, rerun=True):
+def run_all(dirs, mode=ThesyMode.Run, features="", skip=None, timeout=60, processnum=15, memorylimit=32,
+            multiprocess=True, rerun=True, prover_split_d="1", prover_split_i="4", out_path=None, base_path=None):
+    assert out_path is None or base_path is not None
     if skip is None:
         skip = []
     to = timeout * 60
-    build_cmd = [c for c in BUILD_CMD]
-    build_cmd[4] = (build_cmd[4] + " " + features).strip()
+    build_cmd = [c for c in create_build_cmd(features.split(" ")) if c != ""]
     p = subprocess.run(build_cmd, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
     if p.returncode != 0:
         print(p.stderr.decode())
@@ -81,12 +76,13 @@ def run_all(dirs, mode=ThesyMode.Run, features="", skip=None, timeout=60, proces
         exit()
     print("Build done")
     inputdirs = dirs
-    files = [RunParams(os.path.join(folder, fn), timeout=to, proof_mode=mode) for folder in inputdirs for fn in os.listdir(folder) if fn.endswith(".th") and (not fn.endswith("res.th")) and fn not in skip]
+    files = [RunParams(os.path.join(folder, fn), timeout=to, proof_mode=mode, memorylimit=memorylimit,
+                       prover_split_d=prover_split_d, prover_split_i=prover_split_i, base_path=base_path,
+                       out_path=out_path) for folder in inputdirs for fn in
+             os.listdir(folder) if fn.endswith(".th") and (not fn.endswith("res.th")) and fn not in skip]
     if not rerun:
         files = [p for p in files if not pathlib.Path(p.fn).with_suffix('.stats.json').exists()]
     # isa_files = ["./temp/" + f for f in isa_files]
-    if not cgroups_disabled:
-        cg.set_memory_limit(memorylimit, 'gigabytes')
     pn = processnum
     if multiprocess:
         pool = multiprocessing.Pool(pn)
@@ -109,10 +105,13 @@ if __name__ == '__main__':
     parser.add_argument('-m', '--memorylimit', default=32)
     parser.add_argument('--norerun', action='store_true', default=False)
     parser.add_argument('-o', '--outputdir', default=None)
+    parser.add_argument('--prover_split_d', default="1")
+    parser.add_argument('--prover_split_i', default="4")
     args = parser.parse_args()
     rerun = not args.norerun
 
-    outputdir = Path(args.outputdir) if args.outputdir is not None else Path.cwd() / ("results_" + datetime.now().strftime("%Y-%m-%d_%H-%M-%S"))
+    outputdir = Path(args.outputdir) if args.outputdir is not None else Path.cwd() / (
+            "results_" + datetime.now().strftime("%Y-%m-%d_%H-%M-%S"))
     os.makedirs(outputdir, exist_ok=True)
     # Copy all input dirs to outputdir and collect to inputdirs
     inputdirs = []
@@ -122,4 +121,5 @@ if __name__ == '__main__':
         shutil.copytree(inputdir, new_inputdir)
         inputdirs.append(new_inputdir)
 
-    run_all(inputdirs, args.mode, args.features, args.skip, int(args.timeout), int(args.processnum), args.memorylimit, args.singlethread, rerun)
+    run_all(inputdirs, args.mode, args.features, args.skip, int(args.timeout), int(args.processnum), args.memorylimit,
+            args.singlethread, rerun)
