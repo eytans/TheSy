@@ -1,0 +1,20 @@
+datatype Nat () := (succ : (x_0 : Nat) -> (res : Nat)) (zero : (res : Nat))
+datatype Lst () := (cons : (x_0 : Nat) -> (x_1 : Lst) -> (res : Lst)) (nil : (res : Lst))
+fun less (x_0 : Nat) (x_1 : Nat) -> Bool
+fun len (x_0 : Lst) -> Nat
+fun drop (x_0 : Nat) (x_1 : Lst) -> Lst
+fun last (x_0 : Lst) -> Nat
+fun leq (__x0 : Nat) (__y1 : Nat) -> Bool => (or (= ?__x0 ?__y1) (less ?__x0 ?__y1))
+rw rule0 (less ?x zero) => false
+rw rule1 (less zero (succ ?x)) => true
+rw rule2 (less (succ ?x) (succ ?y)) => (less ?x ?y)
+rw rule3 (less ?x ?y) => (less (succ ?x) (succ ?y))
+rw rule4 (len nil) => zero
+rw rule5 zero => (len nil)
+rw rule6 (len (cons ?x ?y2)) => (succ (len ?y2))
+rw rule7 (drop ?x nil) => nil
+rw rule8 (drop zero ?x3) => ?x3
+rw rule9 (drop (succ ?x) (cons ?y ?z)) => (drop ?x ?z)
+rw rule10 (last (cons ?x ?y4)) => (ite (= ?y4 nil) ?x (last ?y4))
+rw rule11 (ite (= ?y4 nil) ?x (last ?y4)) => (last (cons ?x ?y4))
+prove if (less (?n : Nat) (len (?xs : Lst))) then (last (drop (?n : Nat) (?xs : Lst)))  = (last (?xs : Lst))

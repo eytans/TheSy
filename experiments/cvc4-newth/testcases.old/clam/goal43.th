@@ -1,0 +1,15 @@
+datatype Nat () := (succ : (x_0 : Nat) -> (res : Nat)) (zero : (res : Nat))
+datatype Lst () := (cons : (x_0 : Nat) -> (x_1 : Lst) -> (res : Lst)) (nil : (res : Lst))
+fun mem (x_0 : Nat) (x_1 : Lst) -> Bool
+fun lst-mem (x_0 : Nat) (x_1 : Lst) -> Bool
+fun lst-union (x_0 : Lst) (x_1 : Lst) -> Lst
+fun leq (__x0 : Nat) (__y1 : Nat) -> Bool => (or (= ?__x0 ?__y1) (less ?__x0 ?__y1))
+rw rule0 (mem ?x nil) => false
+rw rule1 (mem ?x (cons ?y ?z)) => (or (= ?x ?y) (mem ?x ?z))
+rw rule2 (or (= ?x ?y) (mem ?x ?z)) => (mem ?x (cons ?y ?z))
+rw rule3 (lst-mem ?n ?x2) => (mem ?n ?x2)
+rw rule4 (mem ?n ?x2) => (lst-mem ?n ?x2)
+rw rule5 (lst-union nil ?x3) => ?x3
+rw rule6 (lst-union (cons ?n ?x4) ?y5) => (ite (lst-mem ?n ?y5) (lst-union ?x4 ?y5) (cons ?n (lst-union ?x4 ?y5)))
+rw rule7 (ite (lst-mem ?n ?y5) (lst-union ?x4 ?y5) (cons ?n (lst-union ?x4 ?y5))) => (lst-union (cons ?n ?x4) ?y5)
+prove if (lst-mem ?x ?y6) then (lst-mem ?x (lst-union ?z ?y6)) 

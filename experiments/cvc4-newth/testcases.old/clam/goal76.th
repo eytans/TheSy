@@ -1,0 +1,27 @@
+datatype Nat () := (succ : (x_0 : Nat) -> (res : Nat)) (zero : (res : Nat))
+datatype Lst () := (cons : (x_0 : Nat) -> (x_1 : Lst) -> (res : Lst)) (nil : (res : Lst))
+datatype Tree () := (node : (x_0 : Nat) -> (x_1 : Tree) -> (x_2 : Tree) -> (res : Tree)) (leaf : (res : Tree))
+fun append (x_0 : Lst) (x_1 : Lst) -> Lst
+fun rev (x_0 : Lst) -> Lst
+fun qreva (x_0 : Lst) (x_1 : Lst) -> Lst
+fun revflat (x_0 : Tree) -> Lst
+fun qrevaflat (x_0 : Tree) (x_1 : Lst) -> Lst
+fun leq (__x0 : Nat) (__y1 : Nat) -> Bool => (or (= ?__x0 ?__y1) (less ?__x0 ?__y1))
+rw rule0 (qrevaflat leaf ?x) => ?x
+rw rule1 (qrevaflat (node ?d ?l ?r) ?x) => (qrevaflat ?l (cons ?d (qrevaflat ?r ?x)))
+rw rule2 (qrevaflat ?l (cons ?d (qrevaflat ?r ?x))) => (qrevaflat (node ?d ?l ?r) ?x)
+rw rule3 (append nil ?x) => ?x
+rw rule4 (append (cons ?x2 ?y) ?z) => (cons ?x2 (append ?y ?z))
+rw rule5 (cons ?x2 (append ?y ?z)) => (append (cons ?x2 ?y) ?z)
+rw rule6 (rev nil) => nil
+rw rule7 nil => (rev nil)
+rw rule8 (rev (cons ?x3 ?y)) => (append (rev ?y) (cons ?x3 nil))
+rw rule9 (append (rev ?y) (cons ?x3 nil)) => (rev (cons ?x3 ?y))
+rw rule10 (qreva nil ?x) => ?x
+rw rule11 (qreva (cons ?z4 ?x) ?y) => (qreva ?x (cons ?z4 ?y))
+rw rule12 (qreva ?x (cons ?z4 ?y)) => (qreva (cons ?z4 ?x) ?y)
+rw rule13 (revflat leaf) => nil
+rw rule14 nil => (revflat leaf)
+rw rule15 (revflat (node ?d ?l ?r)) => (append (revflat ?l) (cons ?d (revflat ?r)))
+rw rule16 (append (revflat ?l) (cons ?d (revflat ?r))) => (revflat (node ?d ?l ?r))
+prove (append (revflat ?x5) ?y)  = (qrevaflat ?x5 ?y)
