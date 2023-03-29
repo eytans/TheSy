@@ -24,15 +24,17 @@ def run(prove_timeout=None, rerun=None, features=None):
         features = []
     if prove_timeout is None:
         prove_timeout = 10
-    copy_tree_th_only(tests_dir, results_dir(features))
+    res_dir = results_dir(features)
+    copy_tree_th_only(tests_dir, res_dir)
 
-    tests_subdirs = [d for d in tests_dir.iterdir() if d.is_dir()]
+    tests_subdirs = [d for d in res_dir.iterdir() if d.is_dir()]
     tests_subdirs = tests_subdirs + [d for x in tests_subdirs for d in x.iterdir() if d.is_dir()]
     print(f"Running with features: {features} on testcases: {tests_subdirs}")
     run_all(tests_subdirs, mode=thesy_runner.ThesyMode.CheckEquiv, timeout=prove_timeout, rerun=rerun, prover_split_d="4",
-            memorylimit=8, multiprocess=False, processnum=1, features=" ".join(features), base_path=tests_dir, out_path=results_dir(features))
+            memorylimit=8, multiprocess=False, processnum=1, features=" ".join(features))
+            # memorylimit=8, multiprocess=False, processnum=1, features=" ".join(features), base_path=tests_dir, out_path=res_dir)
     tests_stats = pandas.concat([create_stats(d) for d in tests_subdirs], keys=[d.name for d in tests_subdirs])
-    fixed_res_path = results_dir(features) / res_path.name
+    fixed_res_path = res_dir / res_path.name
     tests_stats.to_csv(fixed_res_path)
 
 
@@ -42,8 +44,7 @@ if __name__ == '__main__':
     parser.add_argument('-n', '--norerun', action='store_true', default=False)
     args = parser.parse_args()
 
-    todo_features = [["split_colored"], ["split_no_cremove"], ["split_no_cmemo"], ["split_clone"],
-                     ["split_clone", "keep_splits"]]
+    todo_features = [["split_colored"], ["split_no_cremove"], ["split_no_cmemo"], ["split_clone"]]
     todo_features = [fs + ["stats"] for fs in todo_features]
 
     for features in todo_features:

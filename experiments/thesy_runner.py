@@ -11,7 +11,9 @@ from datetime import datetime
 from pathlib import Path
 from experiments import executable_release, project_root, cargo_path
 
-RunParams = namedtuple('RunParams', ['fn', 'timeout', 'proof_mode', 'memorylimit', 'prover_split_d', 'prover_split_i', 'base_path', 'out_path'])
+RunParams = namedtuple('RunParams', ['fn', 'timeout', 'proof_mode', 'memorylimit', 'prover_split_d', 'prover_split_i',
+                                     # 'base_path', 'out_path'
+                                     ])
 
 project_dir = project_root
 
@@ -42,10 +44,10 @@ def run_thesy(params: RunParams):
     except subprocess.TimeoutExpired:
         out = ""
         error = "Timeout Exception"
-    fixed_fn: Path = params.fn
-    if params.base_path:
-        extra = 1 if params.fn.endswith("/") else 0
-        fixed_fn = Path(str(params.out_path) + params.fn[len(str(params.base_path)) + extra:])
+    fixed_fn: Path = Path(params.fn)
+    # if params.base_path:
+    #     extra = 1 if params.fn.endswith("/") else 0
+    #     fixed_fn = Path(str(params.out_path) + params.fn[len(str(params.base_path)) + extra:])
     fixed_fn.parent.mkdir(parents=True, exist_ok=True)
     with fixed_fn.with_suffix(".out").open('w') as f:
         f.write(out)
@@ -77,8 +79,9 @@ def run_all(dirs, mode=ThesyMode.Run, features="", skip=None, timeout=60, proces
     print("Build done")
     inputdirs = dirs
     files = [RunParams(os.path.join(folder, fn), timeout=to, proof_mode=mode, memorylimit=memorylimit,
-                       prover_split_d=prover_split_d, prover_split_i=prover_split_i, base_path=base_path,
-                       out_path=out_path) for folder in inputdirs for fn in
+                       prover_split_d=prover_split_d, prover_split_i=prover_split_i,
+                       # base_path=base_path, out_path=out_path
+                       ) for folder in inputdirs for fn in
              os.listdir(folder) if fn.endswith(".th") and (not fn.endswith("res.th")) and fn not in skip]
     if not rerun:
         files = [p for p in files if not pathlib.Path(p.fn).with_suffix('.stats.json').exists()]
