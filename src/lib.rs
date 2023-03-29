@@ -103,6 +103,7 @@ impl CaseSplitConfig {
     }
 }
 
+#[derive(Clone, Copy, Debug)]
 pub struct ProverConfig {
     pub run_depth: usize,
     pub split_conf: CaseSplitConfig,
@@ -232,6 +233,8 @@ impl TheSyConfig {
     }
 }
 
+
+// TODO: remove this and only use from TheSyConfig
 impl From<&Definitions> for TheSy {
     fn from(defs: &Definitions) -> Self {
         let mut dict = defs.functions.clone();
@@ -254,6 +257,8 @@ impl From<&Definitions> for TheSy {
             2,
             conjectures,
             thesy::thesy::ITERN,
+            None,
+            None,
         )
     }
 }
@@ -277,6 +282,7 @@ impl From<&TheSyConfig> for TheSy {
             warn!("Running exploration without proof mode, but goals were given");
         }
 
+        let prover_conf = ProverConfig::new(conf.prove_run_depth, conf.prove_split_conf);
         TheSy::new_with_ph(
             conf.definitions.datatypes.clone(),
             examples,
@@ -284,6 +290,8 @@ impl From<&TheSyConfig> for TheSy {
             conf.ph_count,
             if conf.run_mode.is_run() { None } else { conjectures },
             conf.run_depth,
+            Some(prover_conf),
+            Some(conf.split_conf),
         )
     }
 }

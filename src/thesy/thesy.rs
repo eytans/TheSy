@@ -23,7 +23,7 @@ use crate::thesy::example_creator::Examples;
 use crate::thesy::prover::Prover;
 use crate::thesy::statistics::{sample_colored_stats, Stats, StatsReport};
 use egg::tools::tools::choose;
-use crate::PRETTY_W;
+use crate::{CaseSplitConfig, PRETTY_W, ProverConfig};
 
 pub const ITERN: usize = 12;
 pub const EXP_SPLIT_D: usize = 2;
@@ -73,6 +73,8 @@ pub struct TheSy {
     examples: IndexMap<DataType, Examples>,
     /// Total amount of iters
     total_iters: usize,
+    /// Case split configuration
+    case_split_config: CaseSplitConfig,
 }
 
 /// *** TheSy Statics ***
@@ -115,6 +117,8 @@ impl TheSy {
             2,
             None,
             ITERN,
+            None,
+            None,
         )
     }
 
@@ -125,10 +129,16 @@ impl TheSy {
         ph_count: usize,
         lemmas: Option<Vec<(IndexMap<ThExpr, ThExpr>, IndexSet<ThExpr>, Option<ThExpr>, ThExpr, ThExpr)>>,
         run_depth: usize,
+        prover_config: Option<ProverConfig>,
+        case_split_config: Option<CaseSplitConfig>,
     ) -> TheSy {
         debug_assert!(examples.iter().all(|(d, e)| &e.datatype == d));
         let datatype_to_prover: IndexMap<DataType, Prover> = datatypes.iter()
-            .map(|d| (d.clone(), Prover::new(d.clone()))).collect();
+            .map(|d| (d.clone(),
+                      prover_config.as_ref().map_or(
+                          Prover::new(d.clone()),
+                          |x|  Prover::new_config(d.clone(), x.clone()))
+            )).collect();
         let (mut egraph, mut example_ids) = TheSy::create_graph_example_ids(&datatypes, &examples, &dict, ph_count);
 
         let apply_rws = TheSy::create_apply_rws(&dict, &datatypes, ph_count);
@@ -206,6 +216,7 @@ impl TheSy {
             equiv_reduc_hooks: Default::default(),
             examples,
             total_iters: 0,
+            case_split_config: case_split_config.unwrap_or(CaseSplitConfig::new(2, 4)),
         }
     }
 
@@ -664,7 +675,12 @@ impl TheSy {
         // TODO: case split + check all conjectures should be a function.
         // TODO: After finishing checking all conjectures in final depth (if a lemma was found) try case split again then finish.
         // TODO: can be a single loop with max depth
-        case_splitter.case_split(&mut self.egraph, 2, rules, 4);
+        case_splitter.case_split(
+            &mut self.egraph,
+            self.case_split_config.split_depth,
+            rules,
+            self.case_split_config.run_depth,
+        );
         // case_split_all(rules, &mut self.egraph, 2, 4);
         self.stats.update_splits(measure_splits);
 
@@ -879,6 +895,8 @@ mod test {
                 2,
                 None,
                 thesy::ITERN,
+                None,
+                None,
             )
         };
         let z = syg.egraph.lookup(SymbolLang::new("Z", vec![]));
@@ -936,6 +954,8 @@ mod test {
             3,
             None,
             thesy::ITERN,
+            None,
+            None
         );
 
         let results0 = anchor_patt.search(&syg.egraph);
