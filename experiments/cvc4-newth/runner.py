@@ -15,23 +15,36 @@ res_path = current_exp / 'stats.csv'
 # take time now into format suiting to dirs
 now = datetime.datetime.now()
 now_str = now.strftime("%Y-%m-%d_%H-%M-%S")
-def results_dir(features):
-    return current_exp / now_str / f"case_split_proof_{'_'.join(features)}"
 
 
-def run(prove_timeout=None, rerun=None, features=None):
+def results_dir(features, split_depth):
+    """Return path to results dir for given features"""
+    return current_exp / now_str / f"case_split_proof_split_{split_depth}_{'_'.join(features)}"
+
+
+def run(prove_timeout=None, rerun=None, features=None, split_depth=None):
+    """Run the experiment with given features, timeout, and split depth"""
     if features is None:
         features = []
     if prove_timeout is None:
         prove_timeout = 10
-    res_dir = results_dir(features)
+    if split_depth is None:
+        split_depth = 4
+    res_dir = results_dir(features, split_depth)
     copy_tree_th_only(tests_dir, res_dir)
 
     tests_subdirs = [d for d in res_dir.iterdir() if d.is_dir()]
     tests_subdirs = tests_subdirs + [d for x in tests_subdirs for d in x.iterdir() if d.is_dir()]
     print(f"Running with features: {features} on testcases: {tests_subdirs}")
-    run_all(tests_subdirs, mode=thesy_runner.ThesyMode.CheckEquiv, timeout=prove_timeout, rerun=rerun, prover_split_d="4",
-            memorylimit=8, multiprocess=False, processnum=1, features=" ".join(features))
+    run_all(tests_subdirs,
+            mode=thesy_runner.ThesyMode.CheckEquiv,
+            timeout=prove_timeout,
+            rerun=rerun,
+            prover_split_d=str(split_depth),
+            memorylimit=8,
+            multiprocess=False,
+            processnum=1,
+            features=" ".join(features))
             # memorylimit=8, multiprocess=False, processnum=1, features=" ".join(features), base_path=tests_dir, out_path=res_dir)
     tests_stats = pandas.concat([create_stats(d) for d in tests_subdirs], keys=[d.name for d in tests_subdirs])
     fixed_res_path = res_dir / res_path.name
@@ -47,5 +60,8 @@ if __name__ == '__main__':
     todo_features = [["split_colored"], ["split_no_cremove"], ["split_no_cmemo"], ["split_clone"]]
     todo_features = [fs + ["stats"] for fs in todo_features]
 
-    for features in todo_features:
-        run(rerun=not args.norerun, features=features)
+    split_depths = [1, 2, 3, 4, 5, 6]
+
+    for split_depth in split_depths:
+        for features in todo_features:
+            run(rerun=not args.norerun, features=features, split_depth=split_depth)
