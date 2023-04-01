@@ -1267,7 +1267,7 @@ mod test {
 
         let defs = TheSyConfig::from_path("tests/booleans.th".to_string()).definitions;
         let proofs = tests::test_prover(&defs);
-        assert!(!proofs.contains(&ProofMode::Failed));
+        assert!(!proofs.1.contains(&ProofMode::Failed));
     }
 
     #[test]
@@ -1334,5 +1334,14 @@ mod test {
             assert_ne!(ProofMode::Failed, proof);
             //assert_ne!(ProofMode::TermNotCreated, proof);
         }
+    }
+
+    #[test]
+    fn test_rotate7() {
+        init_logging();
+
+        let mut defs = Definitions::from_file(&"tests/rotate-goal7.th".parse().unwrap());
+        let (thesy, res) = tests::test_prover(&defs);
+        assert!(!res.contains(&ProofMode::Prover));
     }
 }

@@ -271,6 +271,7 @@ impl Prover {
         if self.not_containing_ind_var(ex1) && self.not_containing_ind_var(ex2) {
             return None;
         }
+        info!("prove_ind: {} = {}", ex1.pretty(PRETTY_W), ex2.pretty(PRETTY_W));
         // rewrites to encode proof
         let mut rule_set = Self::create_hypothesis(&self.ind_var, precond, &ex1, &ex2);
         let wfo_rws = &self.wfo_rules;
@@ -348,6 +349,7 @@ impl Prover {
         // Precondition on each direction of the hypothesis
         if pret.starts_with("(") {
             let searcher = MultiDiffSearcher::new(vec![EitherSearcher::left(clean_term1.clone()), EitherSearcher::right(precondition.clone())]);
+            info!("Creating IH1 with {} => {}", searcher.pretty_string(), clean_term2.pretty(PRETTY_W));
             let rw = Rewrite::new("IH1", searcher, clean_term2.clone());
             if rw.is_ok() {
                 res.push(rw.unwrap())
@@ -358,6 +360,7 @@ impl Prover {
         }
         if pret2.starts_with("(") {
             let searcher = MultiDiffSearcher::new(vec![EitherSearcher::left(clean_term2.clone()), EitherSearcher::right(precondition.clone())]);
+            info!("Creating IH2 with {} => {}", searcher.pretty_string(), clean_term1.pretty(PRETTY_W));
             let rw = Rewrite::new("IH2", searcher, clean_term1.clone());
             if rw.is_ok() {
                 res.push(rw.unwrap())

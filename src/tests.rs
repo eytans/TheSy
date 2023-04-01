@@ -121,7 +121,7 @@ pub fn test_terms(mut definitions: Definitions) -> ProofMode {
     }
 
 
-    test_prover(&definitions)[0]
+    test_prover(&definitions).1[0]
 }
 
 fn translate_expression(ast_exp1: &mut Expression) -> ThExpr {
@@ -131,9 +131,7 @@ fn translate_expression(ast_exp1: &mut Expression) -> ThExpr {
 fn terminal_ph_translator(t: &Terminal) -> Terminal {
     if let Some(a) = t.anno() {
         Terminal::Id(
-            TheSy::get_ph(&RecExpr::from_str(
-                &*a.get_type().unwrap().to_sexp_string()
-            ).unwrap(),
+            TheSy::get_ph(&RecExpr::from_str(&*a.get_type().unwrap().to_sexp_string()).unwrap(),
                           a.get_ph().unwrap(),
             ).name, Some(a.clone()))
     } else {
@@ -142,7 +140,7 @@ fn terminal_ph_translator(t: &Terminal) -> Terminal {
 }
 
 
-pub fn test_prover(definitions: &Definitions) -> Vec<ProofMode> {
+pub fn test_prover(definitions: &Definitions) -> (TheSy, Vec<ProofMode>) {
     let mut thesy: TheSy = TheSy::from(definitions);
     let mut case_splitter = TheSy::create_case_splitter(definitions.case_splitters.clone());
     warn!("Case splitters: {:?}", &case_splitter);
@@ -181,5 +179,5 @@ pub fn test_prover(definitions: &Definitions) -> Vec<ProofMode> {
         }
         res.push(proof_res.unwrap());
     }
-    res
+    (thesy, res)
 }
