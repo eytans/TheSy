@@ -33,8 +33,12 @@ def run(prove_timeout=None, rerun=None, features=None, split_depth=None):
     res_dir = results_dir(features, split_depth)
     copy_tree_th_only(tests_dir, res_dir)
 
+    # find sub-subfoldrs in res_dir and move them up
+    subsubdirs = [sd for d in res_dir.iterdir() if d.is_dir() for sd in d.iterdir() if sd.is_dir()]
+    for sd in subsubdirs:
+        sd.rename(sd.parent.parent / f"{sd.parent.name}_{sd.name}")
+
     tests_subdirs = [d for d in res_dir.iterdir() if d.is_dir()]
-    tests_subdirs = tests_subdirs + [d for x in tests_subdirs for d in x.iterdir() if d.is_dir()]
     print(f"Running with features: {features} on testcases: {tests_subdirs}")
     run_all(tests_subdirs,
             mode=thesy_runner.ThesyMode.CheckEquiv,
@@ -57,10 +61,10 @@ if __name__ == '__main__':
     parser.add_argument('-n', '--norerun', action='store_true', default=False)
     args = parser.parse_args()
 
-    todo_features = [["split_colored"], ["split_no_cremove"], ["split_no_cmemo"], ["split_clone"]]
+    todo_features = [["split_colored"], ["split_no_cremove"], ["split_no_cmemo"], ["split_clone"], ["split_clone", "keep_splits"]]
     todo_features = [fs + ["stats"] for fs in todo_features]
 
-    split_depths = [1, 2, 3, 4, 5, 6]
+    split_depths = [1, 2, 3, 4]
 
     for split_depth in split_depths:
         for features in todo_features:
