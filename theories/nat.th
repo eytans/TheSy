@@ -12,5 +12,5 @@ rw minus_base (minus ?y Z) => ?y
 rw minus_base2 (minus Z ?y) => Z
 rw minus_rw (minus (S ?y) (S ?x)) => (minus ?y ?x)
 
-split ?x in (minus (S ?y) ?x) to Z (S (f ?x)) when (?x != (S ?p)) and (?x != Z)
-split ?x in (minus ?x (S ?y)) to Z (S (f ?x)) when (?x != (S ?p)) and (?x != Z)
+split ?x in (minus (S ?y) ?x) to Z (S (f ?x)) when (?x != (S ?p)) andalso (?x != Z)
+split ?x in (minus ?x (S ?y)) to Z (S (f ?x)) when (?x != (S ?p)) andalso (?x != Z)
