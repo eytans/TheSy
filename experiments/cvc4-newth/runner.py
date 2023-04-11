@@ -22,7 +22,7 @@ def results_dir(features, split_depth):
     return current_exp / now_str / f"case_split_proof_split_{split_depth}_{'_'.join(features)}"
 
 
-def run(prove_timeout=None, rerun=None, features=None, split_depth=None):
+def run(prove_timeout=None, rerun=None, features=None, split_depth=None, processnum=None):
     """Run the experiment with given features, timeout, and split depth"""
     if features is None:
         features = []
@@ -30,6 +30,8 @@ def run(prove_timeout=None, rerun=None, features=None, split_depth=None):
         prove_timeout = 10
     if split_depth is None:
         split_depth = 4
+    if processnum is None:
+        processnum = 1
     res_dir = results_dir(features, split_depth)
     copy_tree_th_only(tests_dir, res_dir)
 
@@ -40,14 +42,15 @@ def run(prove_timeout=None, rerun=None, features=None, split_depth=None):
 
     tests_subdirs = [d for d in res_dir.iterdir() if d.is_dir()]
     print(f"Running with features: {features} on testcases: {tests_subdirs}")
+    multi = processnum == 1
     run_all(tests_subdirs,
             mode=thesy_runner.ThesyMode.CheckEquiv,
             timeout=prove_timeout,
             rerun=rerun,
             prover_split_d=str(split_depth),
             memorylimit=8,
-            multiprocess=False,
-            processnum=1,
+            multiprocess=multi,
+            processnum=processnum,
             features=" ".join(features))
             # memorylimit=8, multiprocess=False, processnum=1, features=" ".join(features), base_path=tests_dir, out_path=res_dir)
     tests_stats = pandas.concat([create_stats(d) for d in tests_subdirs], keys=[d.name for d in tests_subdirs])
@@ -59,6 +62,7 @@ if __name__ == '__main__':
     parser = ArgumentParser()
     parser.add_argument('-t', '--timeout', default=None, type=int)
     parser.add_argument('-n', '--norerun', action='store_true', default=False)
+    parser.add_argument('-p', '--processnum', default=None, type=int)
     args = parser.parse_args()
 
     todo_features = [["split_colored"], ["split_no_cremove"], ["split_no_cmemo"], ["split_clone"], ["split_clone", "keep_splits"]]
@@ -68,4 +72,4 @@ if __name__ == '__main__':
 
     for split_depth in split_depths:
         for features in todo_features:
-            run(rerun=not args.norerun, features=features, split_depth=split_depth)
+            run(rerun=not args.norerun, features=features, split_depth=split_depth, processnum=args.processnum)
