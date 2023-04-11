@@ -176,7 +176,7 @@ impl CaseSplit {
         let mut runner = Runner::default().with_time_limit(Duration::from_secs(60 * 10)).with_node_limit(egraph.total_number_of_nodes() + 200000).with_egraph(egraph).with_iter_limit(run_depth);
         runner = runner.run(rules);
         match runner.stop_reason.as_ref().unwrap() {
-            Saturated => {}
+            StopReason::Saturated => {}
             StopReason::IterationLimit(_) => {}
             StopReason::NodeLimit(_) => { warn!("Stopped case split due to node limit") }
             StopReason::TimeLimit(_) => { warn!("Stopped case split due to time limit") }

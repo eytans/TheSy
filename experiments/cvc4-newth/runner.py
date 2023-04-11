@@ -19,7 +19,7 @@ now_str = now.strftime("%Y-%m-%d_%H-%M-%S")
 
 def results_dir(features, split_depth):
     """Return path to results dir for given features"""
-    return current_exp / now_str / f"case_split_proof_split_{split_depth}_{'_'.join(features)}"
+    return current_exp / "results" / now_str / f"case_split_proof_split_{split_depth}_{'_'.join(features)}"
 
 
 def run(prove_timeout=None, rerun=None, features=None, split_depth=None, processnum=None):
