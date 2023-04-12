@@ -1,1 +1,51 @@
-{"conjectures_proved":[],"failed_proofs":[],"goals_proved":[["(len (qreva ts_ph_Lst_0 ts_ph_Lst_2))","(plus (len ts_ph_Lst_0) (len ts_ph_Lst_2))",{"secs":0,"nanos":7277559}]],"failed_proofs_goals":[["(len (qreva ts_ph_Lst_0 ts_ph_Lst_2))","(plus (len ts_ph_Lst_0) (len ts_ph_Lst_2))",{"secs":0,"nanos":20880}]],"equiv_red_iterations":[],"case_split":[],"term_creation":[],"get_conjectures":[],"filtered_lemmas":[],"total_time":{"secs":0,"nanos":0},"measures":{},"start_total":{"secs_since_epoch":1681249876,"nanos_since_epoch":350461504},"total_allocated":9251639,"max_allocated":553441,"case_split_stats":{"vacuous_cases":[0,0],"known_splits_text":["(root: ts_ph_Lst_2, splits [(cons (param_Lst_0 ts_ph_Lst_2) (param_Lst_1 ts_ph_Lst_2)) ts_ph_Lst_0], color: None)","(root: param_1, splits [(cons (param_Lst_0 param_1) (param_Lst_1 param_1)) nil], color: None)","(root: ts_ph_Lst_2, splits [(cons (param_Lst_0 ts_ph_Lst_2) (param_Lst_1 ts_ph_Lst_2)) nil], color: None)"]}}
+{
+    "conjectures_proved": [],
+    "failed_proofs": [],
+    "goals_proved": [
+        [
+            "(len (qreva ts_ph_Lst_0 ts_ph_Lst_2))",
+            "(plus (len ts_ph_Lst_0) (len ts_ph_Lst_2))",
+            {
+                "secs": 0,
+                "nanos": 7203969
+            }
+        ]
+    ],
+    "failed_proofs_goals": [
+        [
+            "(len (qreva ts_ph_Lst_0 ts_ph_Lst_2))",
+            "(plus (len ts_ph_Lst_0) (len ts_ph_Lst_2))",
+            {
+                "secs": 0,
+                "nanos": 21210
+            }
+        ]
+    ],
+    "equiv_red_iterations": [],
+    "case_split": [],
+    "term_creation": [],
+    "get_conjectures": [],
+    "filtered_lemmas": [],
+    "total_time": {
+        "secs": 0,
+        "nanos": 7364915
+    },
+    "measures": {},
+    "start_total": {
+        "secs_since_epoch": 1681287199,
+        "nanos_since_epoch": 860908254
+    },
+    "total_allocated": 9251240,
+    "max_allocated": 553153,
+    "case_split_stats": {
+        "vacuous_cases": [
+            0,
+            0
+        ],
+        "known_splits_text": [
+            "(root: ts_ph_Lst_2, splits [(cons (param_Lst_0 ts_ph_Lst_2) (param_Lst_1 ts_ph_Lst_2)) ts_ph_Lst_0], color: None)",
+            "(root: param_1, splits [(cons (param_Lst_0 param_1) (param_Lst_1 param_1)) nil], color: None)",
+            "(root: ts_ph_Lst_2, splits [(cons (param_Lst_0 ts_ph_Lst_2) (param_Lst_1 ts_ph_Lst_2)) nil], color: None)"
+        ]
+    }
+}

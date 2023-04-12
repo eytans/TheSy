@@ -20,7 +20,7 @@ def create_stats(path):
                     continue
                 count = 0
                 had_vacuity = False
-                if 'case_split_stats' in d and 'known_splits_text' in d['case_split']:
+                if 'case_split_stats' in d and 'known_splits_text' in d['case_split_stats']:
                     count = len(d['case_split_stats']['known_splits_text'])
                     if 'vacuos_cases' in d['case_split_stats']:
                         had_vacuity = any(lambda x: x > 0, d['case_split_stats']['vacuos_cases'])
