@@ -7,7 +7,7 @@ from collections import Counter
 
 
 def create_stats(path):
-    keys_assertions = ['equiv_red_iterations', 'total_time', 'goals_proved', 'conjectures_proved', 'filtered_lemmas', 'case_split', 'file_name']
+    keys_assertions = ['equiv_red_iterations', 'total_time', 'goals_proved', 'conjectures_proved', 'filtered_lemmas', 'case_split', 'file_name', 'total_allocated', 'max_allocated']
 
     jsons = []
     for fn in os.listdir(path):
@@ -18,7 +18,15 @@ def create_stats(path):
                 if any(map(lambda k: not k in d, keys_assertions)):
                     print(f"missing key. keys: {list(d.keys())}")
                     continue
-
+                count = 0
+                had_vacuity = False
+                if 'case_split_stats' in d and 'known_splits_text' in d['case_split']:
+                    count = len(d['case_split_stats']['known_splits_text'])
+                    if 'vacuos_cases' in d['case_split_stats']:
+                        had_vacuity = any(lambda x: x > 0, d['case_split_stats']['vacuos_cases'])
+                d['case_split_root_count'] = count
+                d['case_split_had_vacuity'] = had_vacuity
+                del d['case_split_stats']
                 jsons.append(d)
 
     df = pandas.DataFrame(jsons)
@@ -28,7 +36,9 @@ def create_stats(path):
     res['success'] = None
     res['lemma_count'] = None
     res['proofs_later_filtered'] = None
-    # res['case_splits'] = None
+    res['case_splits'] = None
+    res['total_allocated'] = None
+    res['max_allocated'] = None
     res['file_name'] = None
     if jsons:
         # Fix for empty dirs
@@ -37,7 +47,8 @@ def create_stats(path):
         res['success'] = df['goals_proved'].apply(lambda gp: len(gp) > 0)
         res['lemma_count'] = df['conjectures_proved'].apply(len)
         res['proofs_later_filtered'] = df['filtered_lemmas'].apply(len)
-        # res['case_splits'] = df['case_split'].
+        res['case_split_root_count'] = df['case_split']
+        res['case_split_had_vacuity'] = df['case_split']
         res['file_name'] = df['file_name']
     return res
 
