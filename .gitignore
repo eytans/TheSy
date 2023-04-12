@@ -113,3 +113,4 @@ experiments/cvc4-newth/testcases/**/*.json
 experiments/cvc4-newth/testcases/**/*.long
 experiments/cvc4-newth/testcases/**/*.res
 experiments/cvc4-newth/results/**/*
+!experiments/test/stats/*
