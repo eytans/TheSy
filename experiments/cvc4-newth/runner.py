@@ -42,7 +42,7 @@ def run(prove_timeout=None, rerun=None, features=None, split_depth=None, process
 
     tests_subdirs = [d for d in res_dir.iterdir() if d.is_dir()]
     print(f"Running with features: {features} on testcases: {tests_subdirs}")
-    multi = processnum == 1
+    multi = processnum != 1
     run_all(tests_subdirs,
             mode=thesy_runner.ThesyMode.CheckEquiv,
             timeout=prove_timeout,
