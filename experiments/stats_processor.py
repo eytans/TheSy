@@ -7,7 +7,7 @@ from collections import Counter
 
 
 def create_stats(path):
-    keys_assertions = ['equiv_red_iterations', 'total_time', 'goals_proved', 'conjectures_proved', 'filtered_lemmas', 'case_split', 'file_name', 'total_allocated', 'max_allocated']
+    keys_assertions = ['equiv_red_iterations', 'total_time', 'goals_proved', 'conjectures_proved', 'filtered_lemmas', 'total_allocated', 'max_allocated', 'file_name']
 
     jsons = []
     for fn in os.listdir(path):
@@ -36,7 +36,8 @@ def create_stats(path):
     res['success'] = None
     res['lemma_count'] = None
     res['proofs_later_filtered'] = None
-    res['case_splits'] = None
+    res['case_split_root_count'] = None
+    res['case_split_had_vacuity'] = None
     res['total_allocated'] = None
     res['max_allocated'] = None
     res['file_name'] = None
@@ -47,8 +48,10 @@ def create_stats(path):
         res['success'] = df['goals_proved'].apply(lambda gp: len(gp) > 0)
         res['lemma_count'] = df['conjectures_proved'].apply(len)
         res['proofs_later_filtered'] = df['filtered_lemmas'].apply(len)
-        res['case_split_root_count'] = df['case_split']
-        res['case_split_had_vacuity'] = df['case_split']
+        res['case_split_root_count'] = df['case_split_root_count']
+        res['case_split_had_vacuity'] = df['case_split_had_vacuity']
+        res['total_allocated'] = df['total_allocated']
+        res['max_allocated'] = df['max_allocated']
         res['file_name'] = df['file_name']
     return res
 

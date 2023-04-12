@@ -179,6 +179,7 @@ fn main() {
     sample_colored_stats(&res.thesy.egraph, StatsReport::End);
     res.thesy.stats.case_split_stats = res.case_split_stats;
     if cfg!(feature = "stats") {
+        res.thesy.stats.update_total();
         export_json(&mut res.thesy, &args.path);
     }
     exit(0);
