@@ -170,7 +170,7 @@ impl Default for Stats {
 
 #[cfg(feature = "stats")]
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct ColorStats {
+pub struct GraphStats {
     #[cfg(any(feature = "split_no_cremove", feature = "split_no_cmemo"))]
     pub should_delete: IndexMap<ColorId, usize>,
     #[cfg(feature = "split_colored")]
@@ -178,9 +178,18 @@ pub struct ColorStats {
     pub black_size: usize,
     #[cfg(feature = "split_colored")]
     pub vacuos_colors: Vec<ColorId>,
+    #[cfg(feature = "keep_splits")]
+    pub split_sizes: Vec<usize>,
 }
 
-impl ColorStats {
+#[cfg(all(feature = "stats", feature = "keep_splits"))]
+fn get_split_sizes(egraph: &ThEGraph) -> Vec<usize> {
+    let mut res: Vec<usize> = egraph.all_splits.iter().flat_map(|g| get_split_sizes(g)).collect();
+    res
+}
+
+impl GraphStats {
+    
     pub fn from_egraph(egraph: &ThEGraph) -> Self {
         let mut black_enodes = IndexSet::new();
         let mut colored_enodes = egraph.colors().map(|c| (c.get_id(), IndexSet::new())).collect::<IndexMap<_, _>>();
@@ -200,7 +209,7 @@ impl ColorStats {
                 colored_enodes.get_mut(&c.get_id()).unwrap().retain(|n| fixed_black.contains(n));
             }
         }
-        ColorStats {
+        GraphStats {
             #[cfg(any(feature = "split_no_cremove", feature = "split_no_cmemo"))]
             should_delete: colored_enodes.iter().map(|(k, v)| (*k, v.len())).collect(),
             #[cfg(feature = "split_colored")]
@@ -208,13 +217,15 @@ impl ColorStats {
             black_size: egraph.total_size(),
             #[cfg(feature = "split_colored")]
             vacuos_colors: egraph.detect_color_vacuity(),
+            #[cfg(feature = "keep_splits")]
+            split_sizes: get_split_sizes(egraph),
         }
     }
 }
 
-impl From<&ThEGraph> for ColorStats {
+impl From<&ThEGraph> for GraphStats {
     fn from(graph: &ThEGraph) -> Self {
-        ColorStats::from_egraph(graph)
+        GraphStats::from_egraph(graph)
     }
 }
 
@@ -228,10 +239,10 @@ pub enum StatsReport {
   End,
 }
 
-pub static mut STATS: Vec<(StatsReport, ColorStats)> = vec![];
+pub static mut STATS: Vec<(StatsReport, GraphStats)> = vec![];
 
-pub fn sample_colored_stats(egraph: &ThEGraph, report: StatsReport) {
+pub fn sample_graph_stats(egraph: &ThEGraph, report: StatsReport) {
     unsafe {
-        STATS.push((report, ColorStats::from(egraph)));
+        STATS.push((report, GraphStats::from(egraph)));
     }
 }

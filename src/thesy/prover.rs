@@ -17,7 +17,7 @@ use egg::searchers::{FilteringSearcher, MatcherContainsCondition, ToDyn, ToRc};
 use crate::{CaseSplitConfig, PRETTY_W, ProverConfig};
 use crate::thesy::TheSy;
 use crate::thesy::case_split::CaseSplit;
-use crate::thesy::statistics::{sample_colored_stats, StatsReport};
+use crate::thesy::statistics::{sample_graph_stats, StatsReport};
 
 #[derive(Clone, Debug)]
 pub struct Prover {
@@ -204,8 +204,8 @@ impl Prover {
             .run(&rules[..]);
         case_splitter.iter_mut().for_each(|c|
             c.case_split(&mut runner.egraph, split_conf.split_depth, &rules, split_conf.run_depth));
-        #[cfg(all(feature = "split_colored", feature = "stats"))]
-        sample_colored_stats(&orig_egraph, StatsReport::ProverBaseEnd(c.clone(), ex1.clone(), ex2.clone()));
+        #[cfg(feature = "stats")]
+        sample_graph_stats(&orig_egraph, StatsReport::ProverBaseEnd(c.clone(), ex1.clone(), ex2.clone()));
         !runner.egraph.equivs(&ex1, &ex2).is_empty()
     }
 
@@ -289,8 +289,8 @@ impl Prover {
             egraph.union(contr_id, ind_id);
             let mut runner: Runner<SymbolLang, ()> = Runner::new(()).with_egraph(egraph).with_iter_limit(self.run_depth).run(&rule_set[..]);
             case_splitter.iter_mut().for_each(|c| c.case_split(&mut runner.egraph, self.split_conf.split_depth, &rule_set, self.split_conf.run_depth));
-            #[cfg(all(feature = "split_colored", feature = "stats"))]
-            sample_colored_stats(&orig_egraph, StatsReport::ProverIndEnd(c.clone(), ex1.clone(), ex2.clone()));
+            #[cfg(feature = "stats")]
+            sample_graph_stats(&orig_egraph, StatsReport::ProverIndEnd(c.clone(), ex1.clone(), ex2.clone()));
             res = res && !runner.egraph.equivs(&ex1, &ex2).is_empty()
         }
         if res {

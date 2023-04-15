@@ -16,7 +16,7 @@ use std::str::FromStr;
 use egg::tree::Tree;
 use serde::{Deserialize, Serialize};
 use crate::lang::{ThEGraph, ThRewrite};
-use crate::thesy::statistics::{sample_colored_stats, StatsReport};
+use crate::thesy::statistics::{sample_graph_stats, StatsReport};
 
 
 /// To be used as the op of edges representing potential split
@@ -108,8 +108,6 @@ impl CaseSplitStats {
 
 pub struct CaseSplit {
     splitter_rules: Vec<(Rc<dyn Searcher<SymbolLang, ()>>, SplitApplier)>,
-    #[cfg(feature = "keep_splits")]
-    pub(crate) all_splits: Vec<ThEGraph>,
     #[cfg(feature = "stats")]
     pub stats: CaseSplitStats,
 }
@@ -125,8 +123,6 @@ impl CaseSplit {
                                     SplitApplier)>) -> Self {
         CaseSplit {
             splitter_rules,
-            #[cfg(feature = "keep_splits")]
-            all_splits: vec![],
             #[cfg(feature = "stats")]
             stats: Default::default(),
         }
@@ -248,6 +244,7 @@ impl CaseSplit {
                 let mut vacuity_cases = 0;
                 self.inner_case_split(egraph, split_depth, &Default::default(), rules, run_depth, &mut vacuity_cases);
                 info!("Found {} vacuity cases", vacuity_cases);
+                sample_graph_stats(egraph, StatsReport::CaseSplitDepth(split_depth));
                 self.stats.vacuous_cases.push(vacuity_cases);
             } else {
                 let mut map = IndexMap::default();
@@ -334,8 +331,8 @@ impl CaseSplit {
         warn!("Created colors: {:?}", colors);
         // When the API is limited the code is mentally inhibited
         *egraph = Self::equiv_reduction(rules, std::mem::take(egraph), run_depth);
-        #[cfg(all(feature = "split_colored", feature = "stats"))]
-        sample_colored_stats(egraph, StatsReport::CaseSplitDepth(split_depth));
+        #[cfg(feature = "stats")]
+        sample_graph_stats(egraph, StatsReport::CaseSplitDepth(split_depth));
         self.colored_case_split(egraph, split_depth - 1, known_splits_by_color, rules, run_depth);
         warn!("Doing Conclusions for depth {split_depth} ----------------");
         for (base, cs) in colors {
@@ -402,7 +399,7 @@ impl CaseSplit {
                     *vacuity_cases += 1;
                 }
                 #[cfg(feature = "keep_splits")]
-                self.all_splits.push(g);
+                egraph.all_splits.push(g);
                 res
             }).collect_vec();
             warn!("Split conclusions: {:?}", split_conclusions);

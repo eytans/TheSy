@@ -1,5 +1,4 @@
 use std::alloc;
-use std::borrow::Borrow;
 use std::fs::File;
 use std::io::Write;
 use std::path::PathBuf;
@@ -23,7 +22,7 @@ use TheSy::{CaseSplitConfig, PRETTY_W, SubCmd, thesy, TheSyConfig};
 use egg::tools::tools::choose;
 use std::rc::Rc;
 use cap::Cap;
-use TheSy::thesy::statistics::{sample_colored_stats, STATS, StatsReport};
+use TheSy::thesy::statistics::{sample_graph_stats, STATS, StatsReport};
 
 #[global_allocator]
 pub(crate) static ALLOCATOR: Cap<alloc::System> = Cap::new(alloc::System, usize::MAX);
@@ -148,7 +147,7 @@ fn main() {
         // Shortened mode, only trying short proof of goals without exploration
         if args.run_mode.is_no_case_split() {
             let mut success = true;
-            for (vars, holes, precond, ex1, ex2) in &config.definitions.conjectures {
+            for (_vars, _holes, precond, ex1, ex2) in &config.definitions.conjectures {
                 if !Synth::check_equality(&rules, precond, ex1, ex2) {
                     println!("Failed to prove conjecture {} => {} = {}",
                              precond.clone().map(|p| p.pretty(PRETTY_W)).unwrap_or("true".to_string()),
@@ -159,7 +158,7 @@ fn main() {
             TheSyRunRes::new(thesy, rules, success, CaseSplitStats::new())
         } else {
             // We are in case split mode
-            let res = thesy.check_goals(&mut Some(&mut case_split), &mut rules);
+            let _res = thesy.check_goals(&mut Some(&mut case_split), &mut rules);
             let success = if !thesy.remaining_goals().unwrap().is_empty() {
                 println!("Failed to prove conjectures");
                 false
@@ -175,8 +174,8 @@ fn main() {
         TheSyRunRes::new(new_thesy, new_rules, true, case_split.stats)
     };
 
-    #[cfg(all(feature = "split_colored", feature = "stats"))]
-    sample_colored_stats(&res.thesy.egraph, StatsReport::End);
+    #[cfg(all(feature = "stats"))]
+    sample_graph_stats(&res.thesy.egraph, StatsReport::End);
     res.thesy.stats.case_split_stats = res.case_split_stats;
     if cfg!(feature = "stats") {
         res.thesy.stats.update_total();

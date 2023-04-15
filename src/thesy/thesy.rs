@@ -21,7 +21,7 @@ use crate::thesy::{case_split, consts, thesy};
 use crate::thesy::case_split::{CaseSplit, Split, SplitApplier};
 use crate::thesy::example_creator::Examples;
 use crate::thesy::prover::Prover;
-use crate::thesy::statistics::{sample_colored_stats, Stats, StatsReport};
+use crate::thesy::statistics::{sample_graph_stats, Stats, StatsReport};
 use egg::tools::tools::choose;
 use crate::{CaseSplitConfig, PRETTY_W, ProverConfig};
 
@@ -449,8 +449,8 @@ impl TheSy {
             },
         };
         self.total_iters += runner.iterations.len();
-        #[cfg(all(feature = "split_colored", feature = "stats"))]
-        sample_colored_stats(&self.egraph, StatsReport::ThesyDepth(self.total_iters));
+        #[cfg(feature = "stats")]
+        sample_graph_stats(&self.egraph, StatsReport::ThesyDepth(self.total_iters));
         reason
     }
 
@@ -554,25 +554,10 @@ impl TheSy {
             return found_rules;
         }
 
-        #[cfg(feature = "keep_splits")]
-        splitter_to_use.as_mut().iter_mut().for_each(|x| x.all_splits.clear());
-
         for depth in 0..max_depth {
             info!("Starting depth {}", depth + 1);
             self.increase_depth();
             let stop_reason = self.equiv_reduc(rules);
-
-            #[cfg(feature = "keep_splits")]
-            splitter_to_use.as_mut().iter_mut().for_each(|cs| {
-                println!("Number of Splits: {}", cs.all_splits.len());
-                let time = SystemTime::now();
-                for s in cs.all_splits.iter_mut() {
-                    std::mem::swap(&mut self.egraph, s);
-                    self.equiv_reduc(rules);
-                    std::mem::swap(&mut self.egraph, s);
-                }
-                println!("Split equiv_reduc time: {:?}", SystemTime::now().duration_since(time).unwrap());
-            });
 
             // True if goals were proven
             if !cfg!(feature="no_expl_split") {
@@ -588,10 +573,6 @@ impl TheSy {
 
             'outer: while !conjectures.is_empty() {
                 let (_, mut ex1, mut ex2, d) = conjectures.pop().unwrap();
-
-                #[cfg(feature = "keep_splits")]
-                let clone_len = splitter_to_use.as_ref().map(|x| x.all_splits.len());
-
                 let measure_key = self.stats.init_measure(|| 0);
                 let mut new_rules = self.datatypes[&d].prove_ind(&mut splitter_to_use, &rules, &ex1, &ex2);
                 if new_rules.is_some() {
@@ -625,28 +606,11 @@ impl TheSy {
 
                     let reduc_depth = 3;
                     let stop_reason = self.equiv_reduc_depth(rules, reduc_depth);
-                    #[cfg(feature = "keep_splits")]
-                    if let Some(stu) = splitter_to_use.as_mut() {
-                        println!("Number of Splits: {}", stu.all_splits.len());
-                        let time = SystemTime::now();
-                        for s in stu.all_splits.iter_mut().take(clone_len.unwrap()) {
-                            std::mem::swap(&mut self.egraph, s);
-                            self.equiv_reduc_depth(rules, reduc_depth);
-                            std::mem::swap(&mut self.egraph, s);
-                        }
-                        println!("Split equiv_reduc time: {:?}", SystemTime::now().duration_since(time).unwrap());
-                    }
                     conjectures = self.get_conjectures();
                 } else {
                     self.stats.update_failed_proof(ex1, ex2, measure_key);
                 }
                 self.stats.measures.remove(&measure_key);
-                #[cfg(feature = "keep_splits")]
-                if let Some(stu) = splitter_to_use.as_mut() {
-                    while stu.all_splits.len() > clone_len.unwrap() {
-                        stu.all_splits.pop();
-                    }
-                }
             }
         }
         for r in &self.system_rws {
