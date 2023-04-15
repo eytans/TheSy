@@ -1,26 +1,23 @@
+#![allow(non_snake_case)]
+
 use std::alloc;
 use std::fs::File;
-use std::io::Write;
 use std::path::PathBuf;
 use std::process::exit;
 use std::time::SystemTime;
-use log::{log, warn};
+use log::warn;
 
-use itertools::{Either, Itertools};
 #[cfg(feature = "stats")]
 use serde_json;
 use structopt::StructOpt;
 
 use egg::*;
 
-use egg::pretty_string::PrettyString;
-use TheSy::thesy::{example_creator, prover};
-use TheSy::thesy::case_split::{CaseSplit, CaseSplitStats, Split};
+use TheSy::thesy::prover;
+use TheSy::thesy::case_split::CaseSplitStats;
 use TheSy::thesy::thesy::TheSy as Synth;
 use TheSy::thesy::semantics::Definitions;
 use TheSy::{CaseSplitConfig, PRETTY_W, SubCmd, thesy, TheSyConfig};
-use egg::tools::tools::choose;
-use std::rc::Rc;
 use cap::Cap;
 use TheSy::thesy::statistics::{sample_graph_stats, STATS, StatsReport};
 
@@ -62,6 +59,7 @@ struct CliOpt {
     #[structopt(name = "prover split run amount", long = "prover_split_i")]
     prover_split_itern: Option<usize>,
     /// Previous results to read
+    #[allow(dead_code)]
     #[structopt(name = "previous results", long = "prev_res")]
     dependencies: Vec<String>,
     /// Whether to turn off invariants checking
@@ -93,7 +91,9 @@ impl From<&CliOpt> for TheSyConfig {
 
 struct TheSyRunRes {
     thesy: Synth,
+    #[allow(dead_code)]
     rws: Vec<Rewrite<SymbolLang, ()>>,
+    #[allow(dead_code)]
     success: bool,
     case_split_stats: CaseSplitStats,
 }
@@ -110,10 +110,10 @@ fn main() {
     let args: CliOpt = CliOpt::from_args();
 
     let log_path = args.path.with_extension("log");
-    let mut thesy_config: simplelog::Config = ConfigBuilder::new()
+    let thesy_config: simplelog::Config = ConfigBuilder::new()
         .add_filter_ignore_str("egg")
         .build();
-    let mut egg_config: simplelog::Config = ConfigBuilder::new()
+    let egg_config: simplelog::Config = ConfigBuilder::new()
         .add_filter_allow_str("egg")
         .build();
     CombinedLogger::init(
@@ -169,7 +169,7 @@ fn main() {
             TheSyRunRes::new(thesy, rules, success, case_split.stats)
         }
     } else {
-        let (mut new_thesy, mut new_rules): (TheSy::thesy::TheSy, Vec<Rewrite<SymbolLang, ()>>) = config.run(Some(2));
+        let (new_thesy, new_rules): (TheSy::thesy::TheSy, Vec<Rewrite<SymbolLang, ()>>) = config.run(Some(2));
         println!("done in {}", SystemTime::now().duration_since(start).unwrap().as_millis());
         TheSyRunRes::new(new_thesy, new_rules, true, case_split.stats)
     };
@@ -189,9 +189,9 @@ fn export_json(thesy: &mut thesy::TheSy, path: &PathBuf) {
     let stat_path = path.with_extension("stats.json");
     let colored_stat_path = path.with_extension("colored_stats.json");
     thesy.stats.update_mem(&ALLOCATOR);
-    serde_json::to_writer(File::create(stat_path).unwrap(), &thesy.stats);
+    serde_json::to_writer(File::create(stat_path).unwrap(), &thesy.stats).unwrap();
     unsafe {
-        serde_json::to_writer(File::create(colored_stat_path).unwrap(), &STATS);
+        serde_json::to_writer(File::create(colored_stat_path).unwrap(), &STATS).unwrap();
     }
 }
 

@@ -1,19 +1,17 @@
-use crate::thesy::{semantics, TheSy};
-use egg::{RecExpr, SymbolLang, Id, Rewrite};
+#![allow(dead_code)]
+
+use crate::thesy::TheSy;
+use egg::{RecExpr, Id};
 use crate::thesy::semantics::Definitions;
-use crate::thesy::case_split::CaseSplit;
 use crate::thesy::prover::Prover;
 use std::fs::File;
 use std::ops::Not;
-use thesy_parser::ast;
 use std::str::FromStr;
-use std::sync::atomic::AtomicBool;
 use std::sync::Mutex;
 use indexmap::IndexSet;
 use thesy_parser::ast::{Expression, Terminal};
 use egg::reconstruct::reconstruct;
-use invariants::AssertLevel;
-use crate::{PRETTY_W, tests, TheSyConfig};
+use crate::PRETTY_W;
 use crate::lang::ThExpr;
 
 lazy_static!(
@@ -27,10 +25,10 @@ pub fn init_logging() {
 
     let mut lock = LOG_INITIALIZED.lock().unwrap();
     if lock.not() {
-        let mut thesy_config: simplelog::Config = ConfigBuilder::new()
+        let thesy_config: simplelog::Config = ConfigBuilder::new()
             .add_filter_ignore_str("egg")
             .build();
-        let mut egg_config: simplelog::Config = ConfigBuilder::new()
+        let egg_config: simplelog::Config = ConfigBuilder::new()
             .add_filter_allow_str("egg")
             .build();
         let logger = CombinedLogger::init(
@@ -62,7 +60,7 @@ pub enum ProofMode {
 }
 
 // TODO: maybe hint on recursion
-pub fn test_terms(mut definitions: Definitions) -> ProofMode {
+pub fn test_terms(definitions: Definitions) -> ProofMode {
     let mut thesy: TheSy = TheSy::from(&definitions);
     let mut case_splitter = TheSy::create_case_splitter(definitions.case_splitters.clone());
     warn!("Case splitters: {:?}", &case_splitter);
@@ -70,8 +68,8 @@ pub fn test_terms(mut definitions: Definitions) -> ProofMode {
     rws.extend_from_slice(&definitions.rws);
     assert_eq!(1, definitions.goals.len());
     assert_eq!(1, definitions.conjectures.len());
-    let (vars, holes, precond, ex1, ex2) = definitions.conjectures.first().unwrap();
-    let (mut ast_precond, mut ast_exp1, mut ast_exp2) = definitions.goals.clone().pop().unwrap();
+    let (_vars, _holes, precond, ex1, ex2) = definitions.conjectures.first().unwrap();
+    let (_ast_precond, mut ast_exp1, mut ast_exp2) = definitions.goals.clone().pop().unwrap();
 
     // Assert terms are not equal
     assert!(!TheSy::check_equality(&rws, precond, ex1, ex2));
@@ -141,7 +139,7 @@ fn terminal_ph_translator(t: &Terminal) -> Terminal {
 
 
 pub fn test_prover(definitions: &Definitions) -> (TheSy, Vec<ProofMode>) {
-    let mut thesy: TheSy = TheSy::from(definitions);
+    let thesy: TheSy = TheSy::from(definitions);
     let mut case_splitter = TheSy::create_case_splitter(definitions.case_splitters.clone());
     warn!("Case splitters: {:?}", &case_splitter);
     let mut rws = thesy.system_rws.clone();
@@ -149,8 +147,8 @@ pub fn test_prover(definitions: &Definitions) -> (TheSy, Vec<ProofMode>) {
 
     let mut res = Vec::new();
     for (c, g) in definitions.conjectures.iter().zip(definitions.goals.iter()) {
-        let (vars, holes, precond, ex1, ex2) = c;
-        let (mut ast_precond, mut ast_exp1, mut ast_exp2) = g.clone();
+        let (_vars, _holes, precond, _ex1, _ex2) = c;
+        let (_ast_precond, mut ast_exp1, mut ast_exp2) = g.clone();
         // let ph_precond = ast_precond.map(|e| e.map(exp_translator));
         let ph_exp1 = translate_expression(&mut ast_exp1);
         let ph_exp2 = translate_expression(&mut ast_exp2);

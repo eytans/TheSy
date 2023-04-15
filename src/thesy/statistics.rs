@@ -196,7 +196,7 @@ impl GraphStats {
         if cfg!(feature = "split_no_cremove") || cfg!(feature = "split_no_cmemo") {
             for class in egraph.classes() {
                 if let Some(color) = class.color() {
-                    let mut set = colored_enodes.get_mut(&color).unwrap();
+                    let set = colored_enodes.get_mut(&color).unwrap();
                     class.nodes.iter().map(|n| egraph.colored_canonize(color, n)).for_each(|n| {
                         set.insert(n);
                     });

@@ -1,32 +1,29 @@
 use std::fmt::{Debug, Formatter};
-use std::hash::Hash;
 use std::rc::Rc;
 
-use egg::{Pattern, RecExpr, Rewrite, Searcher, SymbolLang, Var, ENodeOrVar, Condition, ImmutableCondition, Language, RcImmutableCondition, ToCondRc};
+use egg::{Pattern, RecExpr, Rewrite, Searcher, SymbolLang, Var, ENodeOrVar, ImmutableCondition, Language, RcImmutableCondition, ToCondRc};
 use itertools::Itertools;
 use thesy_parser::{grammar, ast};
 
 use crate::lang::{DataType, Function, ThExpr, ThRewrite};
 use std::path::PathBuf;
-use thesy_parser::ast::{Expression, Statement, Identifier, Annotation, Terminal};
+use thesy_parser::ast::{Expression, Statement, Annotation, Terminal};
 use thesy_parser::ast::Definitions::Defs;
 use std::str::FromStr;
 use egg::searchers::{MultiDiffSearcher, EitherSearcher, FilteringSearcher, ToDyn, PointerSearcher};
-use crate::thesy::TheSy;
 use egg::appliers::DiffApplier;
 use thesy_parser::ast::Terminal::{Id, Hole};
 use thesy_parser::ast::Expression::{Op, Leaf};
 use multimap::MultiMap;
 use egg::expression_ops::{IntoTree, RecExpSlice, Tree};
 use egg::conditions::{AndCondition, OrCondition};
-use std::iter::FromIterator;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use indexmap::{IndexMap, IndexSet};
 use egg::searchers::{PatternMatcher, ToRc, VarMatcher};
 use crate::utils::SubPattern;
 
 lazy_static!(
-    static ref split_hole: Terminal = Hole(String::from("splithole"), None);
+    static ref SPLIT_HOLE: Terminal = Hole(String::from("splithole"), None);
 );
 
 pub trait ToExpression<'a> {
@@ -214,12 +211,12 @@ impl Definitions {
 
         // TODO: Careful! currently have a hacky way to make pattern expression holes match the
         //       searcher for case split. In the future make this generic.
-        let cond = AndCondition::new(patterns_grouped.into_iter().map(|(name, pats)| {
+        let cond = AndCondition::new(patterns_grouped.into_iter().map(|(_name, pats)| {
             OrCondition::new(pats.into_iter().map(|exp| {
-                assert!(exp.holes().iter().find(|h| h.ident() == split_hole.ident()).is_none());
+                assert!(exp.holes().iter().find(|h| h.ident() == SPLIT_HOLE.ident()).is_none());
                 let mut new_children = exp.children().iter().cloned().collect_vec();
-                new_children[i] = Leaf(split_hole.clone());
-                let mut new_exp = Op(exp.root().clone(), new_children);
+                new_children[i] = Leaf(SPLIT_HOLE.clone());
+                let new_exp = Op(exp.root().clone(), new_children);
                 // TODO: new_exp should change param names to fit the seacher being created
                 let subpattern = SubPattern::new(orig.clone(), Self::exp_to_pattern(&new_exp));
                 subpattern.into_rc()
@@ -273,7 +270,7 @@ impl From<Vec<Statement>> for Definitions {
                     name, params, ret, body) => {
                     res.process_fun(name, params, ret, body)
                 }
-                Statement::Datatype(name, type_params, constructors) => {
+                Statement::Datatype(name, _type_params, constructors) => {
                     res.process_datatype(name, constructors);
                 }
                 Statement::Goal(precond, exp1, exp2) => {
@@ -309,7 +306,7 @@ impl From<Vec<Statement>> for Definitions {
             Definitions::exp_to_pattern(
                 &Op(Id(f.name.clone(), None), (0..f.params.len()).into_iter().map(|i|
                     if hole_i == i {
-                        Leaf(split_hole.clone())
+                        Leaf(SPLIT_HOLE.clone())
                     } else {
                         Leaf(create_hole_for_param(i))
                     }
@@ -332,7 +329,7 @@ impl From<Vec<Statement>> for Definitions {
                 for (c, patterns) in &grouped_patterns {
                     let mut fixed_patterns = vec![];
                     for p in patterns {
-                        let mut fixed_pattern = p.clone();
+                        let fixed_pattern = p.clone();
                         let mut subs = vec![];
                         for (i, c) in pattern_for_func_app(f, i).ast.into_tree().children().into_iter().enumerate() {
                             // We know this is a hole because we created it.
@@ -344,8 +341,8 @@ impl From<Vec<Statement>> for Definitions {
                             }
                         }
                         let new_pat = fixed_pattern.map(&mut |t: &Terminal| subs.iter()
-                            .find(|&(a, b)| a == &t.to_string())
-                            .map(|(a, b)| Hole(b.replace("?", ""), t.anno().clone()))
+                            .find(|&(a, _b)| a == &t.to_string())
+                            .map(|(_a, b)| Hole(b.replace("?", ""), t.anno().clone()))
                             .unwrap_or(t.clone()));
                         fixed_patterns.push(new_pat);
                     }
@@ -355,7 +352,7 @@ impl From<Vec<Statement>> for Definitions {
                     .map(|(c, p)| (c.clone().clone(), p.iter().collect_vec()))
                     .collect();
                 let cond = Self::condition_from_grouped_patterns(&func_pattern.to_expression(), i, referenced_fixed_groups).into_rc();
-                let param_hole = split_hole.clone();
+                let param_hole = SPLIT_HOLE.clone();
                 let const_cond = AndCondition::new(
                     dt.constructors.iter().map(|c| {
                         let v = Var::from_str(&param_hole.to_string()).unwrap();
@@ -364,7 +361,7 @@ impl From<Vec<Statement>> for Definitions {
                         let p = Definitions::exp_to_pattern(
                             &Op(Id(c.name.clone(), None),
                                 (0..c.params.len()).into_iter()
-                                    .map(|i| Leaf(create_unique_hole()))
+                                    .map(|_i| Leaf(create_unique_hole()))
                                     .collect_vec()));
                         FilteringSearcher::create_non_pattern_filterer(
                             VarMatcher::new(v).into_rc(),
@@ -410,7 +407,7 @@ impl std::fmt::Display for Definitions {
         writeln!(f, "rewrites:")?;
         for rw in &self.rws {
             write!(f, "  {}", rw)?;
-            writeln!(f);
+            writeln!(f)?;
         }
         for c in &self.conjectures {
             write!(f, "  ")?;
@@ -477,7 +474,7 @@ impl Definitions {
 
     fn process_fun(&mut self, name: String, params: Vec<(String, Annotation)>, ret: Annotation, body: Option<Expression>) {
         let param_types = params.iter()
-            .map(|(i, a)|
+            .map(|(_i, a)|
                 RecExpr::from_str(&*a.get_type().unwrap().to_sexp_string()).unwrap()
             ).collect_vec();
         let ret_type = RecExpr::from_str(
@@ -486,7 +483,7 @@ impl Definitions {
         self.functions.push(Function::new(name.clone(), param_types, ret_type));
         body.iter().for_each(|e| {
             let param_names = params.iter()
-                .map(|(i, a)| "?".to_owned() + i).collect_vec();
+                .map(|(i, _a)| "?".to_owned() + i).collect_vec();
             // let source = Pattern::from_str(&*format!("({} {})", name, param_names.join(" "))).unwrap();
             let source = Expression::Op(Id(name.clone(), None), param_names.into_iter().map(|n| Expression::Leaf(Id(n, None))).collect_vec());
             // let target = Pattern::from_str(&*e.to_sexp_string()).unwrap();
@@ -547,7 +544,7 @@ impl Definitions {
                conds: Vec<thesy_parser::ast::Condition>) -> ThRewrite {
         let (cond_searcher, applier) =
             Self::create_searcher_applier(precond, source.clone(), target, conds);
-        if let Op(op, params) = &source {
+        if let Op(op, _params) = &source {
             if op.is_id() {
                 self.name_pats.push((op.ident().clone(), source));
             }
@@ -562,7 +559,6 @@ mod test {
     use std::path::PathBuf;
     use egg::{EGraph, SymbolLang};
     use crate::tests::init_logging;
-    use crate::thesy::case_split;
     use crate::thesy::case_split::CaseSplit;
     use crate::utils::filterTypings;
 
@@ -603,7 +599,7 @@ mod test {
 
         let mut egraph: EGraph<SymbolLang, ()> = EGraph::new(());
         let take_succ_i_exp = "(take (succ i) (cons x (cons y nil)))".parse().unwrap();
-        let take_succ_i = egraph.add_expr(&take_succ_i_exp);
+        let _take_succ_i = egraph.add_expr(&take_succ_i_exp);
         egraph.rebuild();
         egraph.filtered_dot(|eg, id| filterTypings(eg, id))
             .to_dot("take_succ_i.dot".to_string()).unwrap();
@@ -626,7 +622,7 @@ mod test {
 
         let mut egraph: EGraph<SymbolLang, ()> = EGraph::new(());
         let take_succ_i_exp = "(take i (cons x (cons y nil)))".parse().unwrap();
-        let take_succ_i = egraph.add_expr(&take_succ_i_exp);
+        let _take_succ_i = egraph.add_expr(&take_succ_i_exp);
 
         egraph.rebuild();
         splitter.case_split(&mut egraph, 1, &vec![], 1);

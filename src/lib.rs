@@ -1,4 +1,5 @@
-#[allow(non_snake_case)]
+#![allow(non_snake_case)]
+
 #[macro_use(rewrite)]
 extern crate egg;
 
@@ -19,29 +20,21 @@ mod utils;
 
 // mod smtlib_translator;
 
-use std::borrow::Borrow;
 use std::fs::File;
 use std::io::Write;
 use std::path::PathBuf;
-use std::process::exit;
-use std::time::SystemTime;
 
-use itertools::{Either, Itertools};
+use itertools::Itertools;
 use structopt::StructOpt;
 
-use egg::*;
-
+use egg::Language;
 use egg::pretty_string::PrettyString;
 use crate::thesy::{example_creator, prover};
-use crate::thesy::case_split::{CaseSplit, Split};
+use crate::thesy::case_split::CaseSplit;
 use crate::thesy::thesy::TheSy;
 use thesy::semantics::Definitions;
 use egg::tools::tools::choose;
-use std::rc::Rc;
-pub(crate) use crate::thesy::consts::system_case_splits;
 
-use std::alloc;
-use cap::Cap;
 use crate::lang::ThRewrite;
 use crate::SubCmd::Prove;
 
@@ -145,7 +138,6 @@ impl TheSyConfig {
                prove_run_depth: usize,
                prove_split_conf: CaseSplitConfig,
     ) -> TheSyConfig {
-        let func_len = definitions.functions.len();
         TheSyConfig {
             definitions,
             ph_count,
@@ -221,7 +213,7 @@ impl TheSyConfig {
         }
         let results = thesy.run(&mut rules, Some(case_split), max_depth.unwrap_or(2));
         let new_rules_text = results.iter()
-            .map(|(precond, searcher, applier, rw)|
+            .map(|(precond, searcher, applier, _rw)|
                 if precond.is_some() {
                     let precond = precond.as_ref().unwrap();
                     format!("(=> \"{} |> {} => {}\" (=> {} (= {} {})))", precond.pretty_string(), searcher.pretty(1000), applier.pretty(1000), precond.pretty_string(), searcher.pretty(1000), applier.pretty(1000))

@@ -1,15 +1,14 @@
-use egg::{Rewrite, SymbolLang, EGraph, Id, Runner, StopReason, Var, Pattern, Searcher, SearchMatches, Applier, Language, Analysis, ColorId};
+use egg::{SymbolLang, EGraph, Id, Runner, StopReason, Pattern, Searcher, SearchMatches, Applier, Language, Analysis, ColorId};
 use itertools::Itertools;
 use std::time::Duration;
 use std::collections::hash_map::RandomState;
 use std::rc::Rc;
 use std::fmt;
-use std::fmt::{Debug, format};
+use std::fmt::Debug;
 use indexmap::{IndexMap, IndexSet};
 use smallvec::alloc::fmt::Formatter;
-use egg::reconstruct::{reconstruct, reconstruct_all};
+use egg::reconstruct::reconstruct_all;
 use egg::appliers::DiffApplier;
-use egg::searchers::{FilteringSearcher, ToRc};
 use crate::egg::tools::tools::Grouped;
 
 use std::str::FromStr;
@@ -23,7 +22,7 @@ use crate::thesy::statistics::{sample_graph_stats, StatsReport};
 pub const SPLITTER: &'static str = "potential_split";
 lazy_static! {
     /// Pattern to find all available splitter edges. Limited arbitrarily to 5 possible splits.
-    pub(crate) static ref split_patterns: Vec<Pattern<SymbolLang>> = {
+    pub(crate) static ref SPLIT_PATTERNS: Vec<Pattern<SymbolLang>> = {
         vec![
             Pattern::from_str(&*format!("({} ?root ?c0 ?c1)", SPLITTER)).unwrap(),
             Pattern::from_str(&*format!("({} ?root ?c0 ?c1 ?c2)", SPLITTER)).unwrap(),
@@ -70,10 +69,9 @@ impl Split {
     pub fn by_translation(&self, trns: &IndexMap<Id, Tree>) -> String {
         let root = trns.get(&self.root).map(|x| x.to_string())
             .unwrap_or("No reconstruct".to_string());
-        let splits = self.splits.iter()
-            .map(|c| trns.get(c).map(|x| x.to_string())
-                .unwrap_or("No reconstruct".to_string()))
-            .intersperse(" ".to_string())
+        let splits = itertools::Itertools::intersperse(self.splits.iter()
+        .map(|c| trns.get(c).map(|x| x.to_string())
+            .unwrap_or("No reconstruct".to_string())), " ".to_string())
             .collect::<String>();
         let color = format!("{:?}", self.color);
         return format!("(root: {}, splits [{}], color: {})", root, splits, color);
@@ -82,7 +80,11 @@ impl Split {
 
 impl fmt::Display for Split {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        write!(f, "(root: {}, splits [{}], color: {})", self.root, self.splits.iter().map(|x| usize::from(*x).to_string()).intersperse(" ".parse().unwrap()).collect::<String>(), self.color.map(|c| usize::from(c).to_string()).unwrap_or("None".to_string()))
+        write!(f, "(root: {}, splits [{}], color: {})", self.root, 
+        itertools::Itertools::intersperse(
+            self.splits.iter().map(|x| usize::from(*x).to_string()), 
+            " ".parse().unwrap()).collect::<String>(), 
+            self.color.map(|c| usize::from(c).to_string()).unwrap_or("None".to_string()))
     }
 }
 
@@ -131,7 +133,7 @@ impl CaseSplit {
     pub fn from_applier_patterns(case_splitters: Vec<(Rc<dyn Searcher<SymbolLang, ()>>,
                                                       Pattern<SymbolLang>,
                                                       Vec<Pattern<SymbolLang>>)>) -> CaseSplit {
-        let mut res = CaseSplit::new(case_splitters.into_iter()
+        let res = CaseSplit::new(case_splitters.into_iter()
             .map(|(searcher, pattern, split_evaluators)| {
                 let diff_pattern = DiffApplier::new(pattern);
                 let applier: SplitApplier = Box::new(move |graph: &mut ThEGraph, sms: Vec<SearchMatches>| {
@@ -197,7 +199,7 @@ impl CaseSplit {
             res.extend(c(egraph, s.search(egraph)));
             egraph.rebuild();
         }
-        res.iter_mut().for_each(|mut x| x.update(egraph));
+        res.iter_mut().for_each(|x| x.update(egraph));
         debug!("Found {} splitters", res.len());
         res.into_iter().unique().collect()
     }
@@ -278,7 +280,11 @@ impl CaseSplit {
         let temp = self.find_splitters(egraph);
         for s in &temp {
             let trns = reconstruct_all(egraph, s.color, 4);
-            debug!("  {} - root: {}, cases: {}", s, trns.get(&s.root).map(|x| x.to_string()).unwrap_or("No reconstruct".to_string()), s.splits.iter().map(|c| trns.get(c).map(|x| x.to_string()).unwrap_or("No reconstruct".to_string())).intersperse(" ".to_string()).collect::<String>());
+            debug!("  {} - root: {}, cases: {}", 
+                s, 
+                trns.get(&s.root).map(|x| x.to_string()).unwrap_or("No reconstruct".to_string()),
+                itertools::Itertools::intersperse(s.splits.iter().map(|c| trns.get(c).map(|x| x.to_string())
+                    .unwrap_or("No reconstruct".to_string())), " ".to_string()) .collect::<String>());
         }
         let temp_len = temp.len();
         let mut splitters: Vec<Split> = temp.into_iter()
@@ -412,12 +418,12 @@ impl CaseSplit {
 mod tests {
     use std::path::PathBuf;
     use std::rc::Rc;
-    use egg::{ColorId, EGraph, Id, Pattern, RecExpr, Runner, Searcher, SymbolLang};
+    use egg::{EGraph, Pattern, Runner, Searcher, SymbolLang};
     use egg::searchers::ToDyn;
-    use crate::{TheSy, TheSyConfig, Language, tests};
+    use crate::{TheSy, TheSyConfig, Language};
     use itertools::Itertools;
     use crate::lang::ThEGraph;
-    use crate::tests::{init_logging, ProofMode};
+    use crate::tests::init_logging;
     use crate::thesy::case_split::CaseSplit;
     use crate::thesy::semantics::Definitions;
 
@@ -449,7 +455,7 @@ mod tests {
         // This test is ignored because case splitting will create vacuity with (= T F) at the moment.
         init_logging();
 
-        let (mut thesy, rewrites) = TheSyConfig::from_path("tests/booleans.th".to_string()).run(None);
+        let (mut thesy, _rewrites) = TheSyConfig::from_path("tests/booleans.th".to_string()).run(None);
         let ops = vec![SymbolLang::leaf("true"), SymbolLang::leaf("false")];
         let op_ids = ops.iter().map(|op| op.op_id()).collect_vec();
         thesy.egraph.vacuity_ops = vec![op_ids];
@@ -506,7 +512,7 @@ mod tests {
         init_logging();
 
         // load theories/goal1
-        let mut defs = Definitions::from_file(&PathBuf::from("theories/goal1.smt2.th"));
+        let defs = Definitions::from_file(&PathBuf::from("theories/goal1.smt2.th"));
         // Create thesy and case splitter
         let mut splitter = CaseSplit::from_applier_patterns(defs.case_splitters);
 
@@ -516,7 +522,7 @@ mod tests {
         let c_base = egraph.create_color();
         // Colored add expression (succ (param_Nat_0 i))
         let i_exp = egraph.add_expr(&"i".parse().unwrap());
-        let nil_exp = egraph.add_expr(&"nil".parse().unwrap());
+        let _nil_exp = egraph.add_expr(&"nil".parse().unwrap());
         let c_succ_i = egraph.colored_add_expr(c_base, &"(succ (param_Nat_0 i))".parse().unwrap());
         egraph.colored_union(c_base, i_exp, c_succ_i);
         egraph.rebuild();
@@ -537,7 +543,7 @@ mod tests {
         // }
         let mut egraph = Runner::default().with_egraph(egraph).run(&defs.rws).egraph;
         egraph.rebuild();
-        egraph.colored_dot(c_sub).to_dot("take_drop.dot");
+        egraph.colored_dot(c_sub).to_dot("take_drop.dot").unwrap();
         // cons x cons y
         let cons_x_cons_y = egraph.add_expr(&"(cons x (cons y nil))".parse().unwrap());
         assert_eq!(egraph.colored_find(c_sub, take_succ_i), egraph.colored_find(c_sub, cons_x_cons_y));

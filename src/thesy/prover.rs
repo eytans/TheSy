@@ -1,5 +1,4 @@
 use std::cmp::max;
-use std::ptr::eq;
 use std::str::FromStr;
 
 use egg::{EGraph, ENodeOrVar, Id, Language, Pattern, RecExpr, Rewrite, Runner, Symbol, SymbolLang, Var};
@@ -13,7 +12,7 @@ use egg::expression_ops::{IntoTree, RecExpSlice, Tree};
 use egg::searchers::{EitherSearcher, MultiDiffSearcher};
 use egg::pretty_string::PrettyString;
 use crate::lang::{DataType, Function, ThEGraph, ThExpr, ThRewrite};
-use egg::searchers::{FilteringSearcher, MatcherContainsCondition, ToDyn, ToRc};
+use egg::searchers::FilteringSearcher;
 use crate::{CaseSplitConfig, PRETTY_W, ProverConfig};
 use crate::thesy::TheSy;
 use crate::thesy::case_split::CaseSplit;
@@ -283,7 +282,7 @@ impl Prover {
         for c in self.datatype.constructors.iter().filter(|c| !c.params.is_empty()) {
             let mut egraph = orig_egraph.clone();
             let contr_exp = RecExpr::from_str(format!("({} {})", c.name, c.params.iter().enumerate()
-                .map(|(i, t)| "param_".to_owned() + &*i.to_string())
+                .map(|(i, _t)| "param_".to_owned() + &*i.to_string())
                 .intersperse(" ".parse().unwrap()).collect::<String>()).as_str()).unwrap();
             let contr_id = egraph.add_expr(&contr_exp);
             egraph.union(contr_id, ind_id);
@@ -402,12 +401,6 @@ impl Prover {
         } else {
             i.clone()
         }
-    }
-
-    fn clean_vars(i: String) -> String {
-        if i.starts_with("?") {
-            i[1..].to_string()
-        } else { i }
     }
 }
 

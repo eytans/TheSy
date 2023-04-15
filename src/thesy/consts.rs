@@ -1,13 +1,11 @@
-use egg::{Rewrite, SymbolLang, Pattern, Var, Language, Id, RcImmutableCondition, ToCondRc, OpId, Symbol};
-use egg::searchers::{FilteringSearcher, MultiDiffSearcher, ToDyn};
+use egg::{SymbolLang, Pattern, Var, ToCondRc};
+use egg::searchers::{FilteringSearcher, ToDyn};
 use egg::appliers::{DiffApplier, UnionApplier};
 use std::str::FromStr;
-use crate::thesy::{case_split, TheSy};
 use crate::thesy::case_split::{CaseSplit, Split, SplitApplier};
 use itertools::Itertools;
-use std::rc::Rc;
 use egg::conditions::AndCondition;
-use egg::searchers::{MatcherContainsCondition, PatternMatcher, ToRc, VarMatcher};
+use egg::searchers::{PatternMatcher, ToRc, VarMatcher};
 use crate::lang::ThRewrite;
 
 pub(crate) fn bool_rws() -> Vec<ThRewrite> {
@@ -16,7 +14,9 @@ pub(crate) fn bool_rws() -> Vec<ThRewrite> {
         FilteringSearcher::searcher_is_true(p)
     };
 
+    #[allow(unused_variables)]
     let and_implies = rewrite!("and_implies"; {and_multi_searcher.clone()} => "(= ?x true)");
+    #[allow(unused_variables)]
     let and_implies2 = rewrite!("and_implies2"; {and_multi_searcher} => "(= ?y true)");
 
     vec![

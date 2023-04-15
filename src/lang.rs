@@ -42,7 +42,7 @@ impl Display for Function {
         writeln!(f, "Function {}: {}{}{}",
             self.name,
             self.params.iter().map(|x| x.pretty(PRETTY_W)).join(" -> "),
-            self.params.first().map(|x| " -> ").unwrap_or(" "),
+            self.params.first().map(|_x| " -> ").unwrap_or(" "),
             self.ret_type.pretty(PRETTY_W)
         )
     }

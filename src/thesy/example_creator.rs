@@ -1,4 +1,3 @@
-use egg::{RecExpr, SymbolLang};
 use itertools::Itertools;
 
 use egg::expression_ops::{IntoTree};
@@ -11,6 +10,7 @@ use crate::PRETTY_W;
 pub struct Examples {
     pub datatype: DataType,
     examples: Vec<ThExpr>,
+    #[allow(dead_code)]
     example_vars: Vec<IndexMap<Function, Vec<ThExpr>>>,
 }
 

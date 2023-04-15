@@ -139,7 +139,7 @@ impl TheSy {
                           Prover::new(d.clone()),
                           |x|  Prover::new_config(d.clone(), x.clone()))
             )).collect();
-        let (mut egraph, mut example_ids) = TheSy::create_graph_example_ids(&datatypes, &examples, &dict, ph_count);
+        let (mut egraph, example_ids) = TheSy::create_graph_example_ids(&datatypes, &examples, &dict, ph_count);
 
         let apply_rws = TheSy::create_apply_rws(&dict, &datatypes, ph_count);
         let system_rws: Vec<ThRewrite> = apply_rws.into_iter()
@@ -263,10 +263,6 @@ impl TheSy {
         (egraph, example_ids)
     }
 
-    fn create_sygue_anchor() -> String {
-        format!("sygueanchor")
-    }
-
     /// Appears at the start of every placeholder var
     pub(crate) const PH_START: &'static str = "ts_ph";
 
@@ -276,7 +272,7 @@ impl TheSy {
             .filter(|fun| !fun.params.is_empty())
             .map(|fun| {
                 let params = &fun.params.iter().enumerate()
-                    .map(|(i, x)| format!("?param_{}", i))
+                    .map(|(i, _x)| format!("?param_{}", i))
                     .collect_vec();
                 let name = &fun.name;
                 let searcher: Pattern<SymbolLang> = format!("(apply {} {})", name, params.iter().intersperse(&" ".to_string()).cloned().collect::<String>()).parse().unwrap();
@@ -332,7 +328,7 @@ impl TheSy {
     fn extract_classes(&self) -> IndexMap<Id, (RepOrder, ThExpr)> {
         let mut ext = Extractor::new(&self.egraph, MinRep);
         // each datatype should have the same keys
-        let keys: IndexSet<Id> = self.example_ids.iter().flat_map(|(d, m)| m.keys()).copied().collect();
+        let keys: IndexSet<Id> = self.example_ids.iter().flat_map(|(_d, m)| m.keys()).copied().collect();
         keys.iter().map(|key| {
             let updated_key = &self.egraph.find(*key);
             (*updated_key, ext.find_best(*updated_key))
@@ -367,7 +363,7 @@ impl TheSy {
         // Now apply for all matches
         // let anchor = Self::create_sygue_anchor();
         fn create_edge(op: &String, params: &Vec<(Var, ThExpr)>, sub: &Subst) -> SymbolLang {
-            SymbolLang::new(op.clone(), params.iter().map(|(v, typ)| sub.get(v.clone()).unwrap()).copied().collect())
+            SymbolLang::new(op.clone(), params.iter().map(|(v, _typ)| sub.get(v.clone()).unwrap()).copied().collect())
         }
 
         fn translate_edge(edge: &SymbolLang, e_index: usize, translations: &IndexMap<Id, Vec<Id>>) -> SymbolLang {
@@ -379,7 +375,7 @@ impl TheSy {
 
         let op_matches = self.searchers.iter()
             .map(|(op, (searcher, params))| {
-                (op, params, searcher.search(&self.egraph).iter_mut().flat_map(|mut sm| std::mem::take(&mut sm.substs)).collect_vec())
+                (op, params, searcher.search(&self.egraph).iter_mut().flat_map(|sm| std::mem::take(&mut sm.substs)).collect_vec())
             }).collect_vec();
         for (op, params, subs) in op_matches {
             let typ = {
@@ -490,7 +486,7 @@ impl TheSy {
     }
 
     pub fn check_equality(rules: &[ThRewrite], precond: &Option<ThExpr>, ex1: &ThExpr, ex2: &ThExpr) -> bool {
-        let mut egraph = Prover::create_graph(precond.as_ref(), &ex1, &ex2);
+        let egraph = Prover::create_graph(precond.as_ref(), &ex1, &ex2);
         let runner = Runner::default().with_iter_limit(8).with_time_limit(Duration::from_secs(600)).with_node_limit(10000).with_egraph(egraph).run(rules);
         !runner.egraph.equivs(ex1, ex2).is_empty()
     }
@@ -504,7 +500,7 @@ impl TheSy {
         if self.goals.is_none() {
             return None;
         }
-        let mut lemmas = self.goals.as_mut().unwrap();
+        let lemmas = self.goals.as_mut().unwrap();
         let mut res = None;
         let mut index = 0;
         'outer: for (i, conjs) in lemmas.iter().enumerate() {
@@ -557,7 +553,7 @@ impl TheSy {
         for depth in 0..max_depth {
             info!("Starting depth {}", depth + 1);
             self.increase_depth();
-            let stop_reason = self.equiv_reduc(rules);
+            let _stop_reason = self.equiv_reduc(rules);
 
             // True if goals were proven
             if !cfg!(feature="no_expl_split") {
@@ -605,7 +601,7 @@ impl TheSy {
                     }
 
                     let reduc_depth = 3;
-                    let stop_reason = self.equiv_reduc_depth(rules, reduc_depth);
+                    let _stop_reason = self.equiv_reduc_depth(rules, reduc_depth);
                     conjectures = self.get_conjectures();
                 } else {
                     self.stats.update_failed_proof(ex1, ex2, measure_key);
@@ -624,7 +620,7 @@ impl TheSy {
 
     fn prove_case_split_rules(&mut self, case_splitter: &mut CaseSplit, rules: &mut Vec<ThRewrite>, found_rules: &mut Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, ThRewrite)>) -> bool {
         let measure_splits = if cfg!(feature = "stats") {
-            let n = case_split::split_patterns.iter().map(|p|
+            let n = case_split::SPLIT_PATTERNS.iter().map(|p|
                 p.search(&self.egraph)
                     .iter().map(|m| m.substs.len()).sum::<usize>()
             ).sum();
@@ -650,9 +646,9 @@ impl TheSy {
 
         let mut splitter_to_use = Some(case_splitter);
 
-        let mut conjectures = self.get_conjectures();
+        let conjectures = self.get_conjectures();
         let mut changed = false;
-        for (o, mut ex1, mut ex2, d) in conjs_before_cases.into_iter().rev() {
+        for (_o, mut ex1, mut ex2, d) in conjs_before_cases.into_iter().rev() {
             if conjectures.iter().any(|(_, other_ex1, other_ex2, _)|
                 other_ex1 == &ex1 && &ex2 == other_ex2) {
                 continue;
@@ -692,7 +688,7 @@ impl TheSy {
 
         if changed {
             let reduc_depth = 3;
-            let stop_reason = self.equiv_reduc_depth(rules, reduc_depth);
+            let _stop_reason = self.equiv_reduc_depth(rules, reduc_depth);
         }
         false
     }
@@ -723,29 +719,25 @@ impl TheSy {
 #[cfg(test)]
 mod test {
     use std::{alloc, iter};
-    use std::fs::File;
     use std::iter::FromIterator;
     use std::str::FromStr;
     use std::time::SystemTime;
     use cap::Cap;
 
-    use egg::{ColorId, EGraph, Id, Pattern, RecExpr, Rewrite, Runner, Searcher, SearchMatches, Symbol, SymbolLang, Var};
+    use egg::{EGraph, Pattern, RecExpr, Searcher, Symbol, SymbolLang};
     use indexmap::{IndexMap, IndexSet};
     use itertools::Itertools;
 
-    use egg::appliers::DiffApplier;
-    use egg::reconstruct::{reconstruct, reconstruct_all};
-    use egg::searchers::ToDyn;
+    use egg::reconstruct::reconstruct;
     use crate::lang::{DataType, Function, ThEGraph, ThRewrite};
     use crate::tests::{init_logging, ProofMode};
     use crate::thesy::{consts, Examples, thesy};
-    use crate::thesy::case_split::{CaseSplit, Split, SplitApplier};
+    use crate::thesy::case_split::CaseSplit;
     use crate::thesy::consts::ite_rws;
     use crate::thesy::semantics::Definitions;
     use crate::thesy::thesy::TheSy;
     use crate::{TheSyConfig, tests, PRETTY_W};
     use egg::tools::tools::Grouped;
-    use rand::prelude::SliceRandom;
 
     #[global_allocator]
     pub(crate) static ALLOCATOR: Cap<alloc::System> = Cap::new(alloc::System, usize::MAX);
@@ -774,6 +766,7 @@ mod test {
         )
     }
 
+    #[allow(dead_code)]
     fn create_list_sygue() -> TheSy {
         TheSy::new(
             create_list_type(),
@@ -788,6 +781,7 @@ mod test {
         vec![rewrite!("pl base"; "(pl Z ?x)" => "?x"), rewrite!("pl ind"; "(pl (S ?y) ?x)" => "(S (pl ?y ?x))")]
     }
 
+    #[allow(dead_code)]
     fn create_list_rewrites() -> Vec<ThRewrite> {
         vec![
             rewrite!("app base"; "(app Nil ?xs)" => "?xs"),
@@ -820,7 +814,6 @@ mod test {
     fn no_double_translation() {
         // from previous test assume each class has one edge
         let mut syg = create_nat_sygue();
-        let rules = create_pl_rewrites();
         syg.increase_depth();
         syg.increase_depth();
         let level0 = syg.egraph.classes()
@@ -986,9 +979,9 @@ mod test {
 
     #[test]
     fn prove_pl_zero() {
-        let mut syg = create_nat_sygue();
+        let syg = create_nat_sygue();
         let nat = create_nat_type();
-        let mut rewrites = create_pl_rewrites();
+        let rewrites = create_pl_rewrites();
         let ind_rec = TheSy::get_ind_var(&nat);
         assert!(syg.datatypes[&nat].prove_ind(&mut None, &rewrites[..], &format!("(pl {} Z)", ind_rec.name).parse().unwrap(), &ind_rec.name.parse().unwrap()).is_some())
     }
@@ -1019,7 +1012,7 @@ mod test {
                                           .map(|x| x.parse().unwrap()).collect_vec(),
                                       "list".parse().unwrap(),
         )];
-        let mut thesy = TheSy::new(list_type.clone(), Examples::new(&list_type, 2), dict.clone());
+        let thesy = TheSy::new(list_type.clone(), Examples::new(&list_type, 2), dict.clone());
         (list_type, dict, thesy)
     }
 
@@ -1031,16 +1024,6 @@ mod test {
 
         let mut filter_defs = filter_definitions();
         filter_defs.functions = filter_defs.functions.into_iter().filter(|f| f.name == "filter".to_string()).collect_vec();
-
-        let x_var: Var = "?x".parse().unwrap();
-        let y_var: Var = "?y".parse().unwrap();
-        let correct_pattern = Pattern::from_str(&*format!("(filter ?x (filter ?y {}))", TheSy::get_ind_var(&filter_defs.datatypes[0]).name)).unwrap();
-        let filter_p_filter_q_exists = |egraph: &ThEGraph, min_count: usize| -> bool {
-            correct_pattern.search(&egraph).iter().any(|sm| {
-                sm.substs.iter().filter(|s| s.get(x_var) != s.get(y_var))
-                    .count() > (min_count - 1)
-            })
-        };
 
         let proof = tests::test_terms(filter_defs.clone());
 
@@ -1154,17 +1137,6 @@ mod test {
     //     assert!(thesy.datatypes[conf.definitions.datatypes.last().unwrap()].prove_all(&*rules, &"(append (take ts_ph_Nat_1 ts_ph_Lst_0) (drop ts_ph_Nat_1 ts_ph_Lst_0))".parse().unwrap(), &"ts_ph_Lst_0".parse().unwrap()).is_some());
     // }
 
-    #[test]
-    fn filtering_searcher_playground() {
-        init_logging();
-
-        let mut conf = TheSyConfig::from_path("theories/goal1.smt2.th".parse().unwrap());
-        let mut thesy = TheSy::from(&conf);
-        let rules = std::mem::take(&mut conf.definitions.rws);
-        println!("{}", rules.last().unwrap().name());
-
-        // assert!(thesy.datatypes[conf.definitions.datatypes.last().unwrap()].prove_all(rules, &"(append (take ts_ph_Nat_1 ts_ph_Lst_0) (drop ts_ph_Nat_1 ts_ph_Lst_0))".parse().unwrap(), &"ts_ph_Lst_0".parse().unwrap()).is_some());
-    }
 
     #[test]
     fn test_ite_split_rule() {
@@ -1207,7 +1179,7 @@ mod test {
 
     #[test]
     fn test_not_creating_append_nat() {
-        let mut config = TheSyConfig::from_path("theories/list.th".parse().unwrap());
+        let config = TheSyConfig::from_path("theories/list.th".parse().unwrap());
         let mut thesy = TheSy::from(&config);
         thesy.increase_depth();
         thesy.increase_depth();
@@ -1239,8 +1211,8 @@ mod test {
         init_logging();
 
         let mut defs = TheSyConfig::from_path("tests/booleans.th".to_string()).definitions;
-        let mut conjectures = std::mem::take(&mut defs.conjectures);
-        let mut goals = std::mem::take(&mut defs.goals);
+        let conjectures = std::mem::take(&mut defs.conjectures);
+        let goals = std::mem::take(&mut defs.goals);
         for (c, g) in conjectures.into_iter().zip(goals.into_iter()) {
             let proof_text = format!("proving {}{} = {}",
                   g.0.as_ref().map_or("".to_string(), |e| e.to_string() + "|> "),
@@ -1262,8 +1234,8 @@ mod test {
         init_logging();
 
         let mut defs = TheSyConfig::from_path("tests/minus.th".to_string()).definitions;
-        let mut conjectures = std::mem::take(&mut defs.conjectures);
-        let mut goals = std::mem::take(&mut defs.goals);
+        let conjectures = std::mem::take(&mut defs.conjectures);
+        let goals = std::mem::take(&mut defs.goals);
         for (c, g) in conjectures.into_iter().zip(goals.into_iter()) {
             info!("proving {}{} = {}",
                   g.0.as_ref().map_or("".to_string(), |e| e.to_string() + "|> "),
@@ -1283,8 +1255,8 @@ mod test {
         init_logging();
 
         let mut defs = Definitions::from_file(&"tests/filter.th".parse().unwrap());
-        let mut conjectures = std::mem::take(&mut defs.conjectures);
-        let mut goals = std::mem::take(&mut defs.goals);
+        let conjectures = std::mem::take(&mut defs.conjectures);
+        let goals = std::mem::take(&mut defs.goals);
         for (c, g) in conjectures.into_iter().zip(goals.into_iter()) {
             info!("proving {}{} = {}",
                   g.0.as_ref().map_or("".to_string(), |e| e.to_string() + "|> "),
@@ -1304,8 +1276,8 @@ mod test {
     fn test_rotate7() {
         init_logging();
 
-        let mut defs = Definitions::from_file(&"tests/rotate-goal7.th".parse().unwrap());
-        let (thesy, res) = tests::test_prover(&defs);
+        let defs = Definitions::from_file(&"tests/rotate-goal7.th".parse().unwrap());
+        let (_thesy, res) = tests::test_prover(&defs);
         assert!(!res.contains(&ProofMode::Prover));
     }
 }
