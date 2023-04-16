@@ -5,20 +5,18 @@ use std::rc::Rc;
 use std::str::FromStr;
 use std::time::{Duration, SystemTime};
 
-use bimap::BiHashMap;
 use egg::*;
 use indexmap::{IndexMap, IndexSet};
 use itertools::Itertools;
 use log::{info, warn};
-use multimap::MultiMap;
 
 use egg::costs::{MinRep, RepOrder};
 use egg::expression_ops::{IntoTree, Tree};
 use egg::pretty_string::PrettyString;
 use egg::searchers::MultiDiffSearcher;
 use crate::lang::*;
-use crate::thesy::{case_split, consts, thesy};
-use crate::thesy::case_split::{CaseSplit, Split, SplitApplier};
+use crate::thesy::{case_split, consts};
+use crate::thesy::case_split::CaseSplit;
 use crate::thesy::example_creator::Examples;
 use crate::thesy::prover::Prover;
 use crate::thesy::statistics::{sample_graph_stats, Stats, StatsReport};
@@ -61,15 +59,19 @@ pub struct TheSy {
     // assumptions: BiHashMap<Vec<Id>, ColorId>,
     /// the hooks are used after every step of TheSy which could expand the rules set
     /// currently used to support parallel running
+    #[allow(dead_code)]
     after_inference_hooks: Vec<Box<dyn FnMut(&mut Self, &mut Vec<ThRewrite>) -> Result<(), String>>>,
     //after_inference_hooks: Vec<Box<dyn FnMut(&mut Self, &Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, ThRewrite)>) -> Result<(), String>>>,
     /// the hooks are used before every step of TheSy which could expand the rules set
     /// currently used to support parallel running
+    #[allow(dead_code)]
     before_inference_hooks: Vec<Box<dyn FnMut(&mut Self, &mut Vec<ThRewrite>) -> Result<(), String>>>,
     /// hooks passed to [runner]
     /// for more info check: [EGG] documentation
+    #[allow(dead_code)]
     equiv_reduc_hooks: Vec<Box<dyn FnMut(&mut Runner<SymbolLang, ()>, &mut Vec<ThRewrite>) -> Result<(), String>>>,
     /// Vars created for examples, used to reduce case split depth
+    #[allow(dead_code)]
     examples: IndexMap<DataType, Examples>,
     /// Total amount of iters
     total_iters: usize,
@@ -733,7 +735,6 @@ mod test {
     use crate::tests::{init_logging, ProofMode};
     use crate::thesy::{consts, Examples, thesy};
     use crate::thesy::case_split::CaseSplit;
-    use crate::thesy::consts::ite_rws;
     use crate::thesy::semantics::Definitions;
     use crate::thesy::thesy::TheSy;
     use crate::{TheSyConfig, tests, PRETTY_W};

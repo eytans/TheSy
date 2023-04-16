@@ -418,9 +418,9 @@ impl CaseSplit {
 mod tests {
     use std::path::PathBuf;
     use std::rc::Rc;
-    use egg::{EGraph, Pattern, Runner, Searcher, SymbolLang};
+    use egg::{Language, EGraph, Pattern, Runner, Searcher, SymbolLang};
     use egg::searchers::ToDyn;
-    use crate::{TheSy, TheSyConfig, Language};
+    use crate::{TheSy, TheSyConfig};
     use itertools::Itertools;
     use crate::lang::ThEGraph;
     use crate::tests::init_logging;

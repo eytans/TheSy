@@ -184,7 +184,7 @@ pub struct GraphStats {
 
 #[cfg(all(feature = "stats", feature = "keep_splits"))]
 fn get_split_sizes(egraph: &ThEGraph) -> Vec<usize> {
-    let mut res: Vec<usize> = egraph.all_splits.iter().flat_map(|g| get_split_sizes(g)).collect();
+    let res: Vec<usize> = egraph.all_splits.iter().flat_map(|g| get_split_sizes(g)).collect();
     res
 }
 

@@ -68,7 +68,11 @@ impl Prover {
                     .map(|(i, t)|
                         (format!("?param_{}", i).to_string(), *t == datatype.as_exp())
                     ).collect_vec();
-                let contr_pattern = Pattern::from_str(&*format!("(|@|?root|@|{} {})", c.name, params.iter().map(|s| s.0.clone()).intersperse(" ".to_string()).collect::<String>())).unwrap();
+                let interspersed = itertools::Itertools::intersperse(
+                    params.iter().map(|s| s.0.clone()), 
+                    " ".to_string()
+                ).collect::<String>();
+                let contr_pattern = Pattern::from_str(&*format!("(|@|?root|@|{} {})", c.name, interspersed)).unwrap();
 
                 let appliers = params.iter()
                     .filter(|x| x.1)
@@ -281,9 +285,12 @@ impl Prover {
         let mut res = true;
         for c in self.datatype.constructors.iter().filter(|c| !c.params.is_empty()) {
             let mut egraph = orig_egraph.clone();
-            let contr_exp = RecExpr::from_str(format!("({} {})", c.name, c.params.iter().enumerate()
-                .map(|(i, _t)| "param_".to_owned() + &*i.to_string())
-                .intersperse(" ".parse().unwrap()).collect::<String>()).as_str()).unwrap();
+            let interspersed = itertools::Itertools::intersperse(
+                c.params.iter().enumerate()
+                    .map(|(i, _t)| "param_".to_owned() + &*i.to_string()), 
+                    " ".parse().unwrap()
+            ).collect::<String>();
+            let contr_exp = RecExpr::from_str(format!("({} {})", c.name, interspersed).as_str()).unwrap();
             let contr_id = egraph.add_expr(&contr_exp);
             egraph.union(contr_id, ind_id);
             let mut runner: Runner<SymbolLang, ()> = Runner::new(()).with_egraph(egraph).with_iter_limit(self.run_depth).run(&rule_set[..]);

@@ -1,4 +1,5 @@
 #![allow(non_snake_case)]
+#![allow(unstable_name_collisions)]
 
 #[macro_use(rewrite)]
 extern crate egg;
@@ -27,7 +28,6 @@ use std::path::PathBuf;
 use itertools::Itertools;
 use structopt::StructOpt;
 
-use egg::Language;
 use egg::pretty_string::PrettyString;
 use crate::thesy::{example_creator, prover};
 use crate::thesy::case_split::CaseSplit;
