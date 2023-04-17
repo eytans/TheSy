@@ -70,6 +70,12 @@ def run_all(dirs, mode=ThesyMode.Run, features="", skip=None, timeout=60, proces
     if skip is None:
         skip = []
     to = timeout * 60
+    clean_cmd = [str(cargo_path), "clean"]
+    p = subprocess.run(clean_cmd, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+    if p.returncode != 0:
+        print(p.stderr.decode())
+        print(p.stdout.decode())
+        exit()
     build_cmd = [c for c in create_build_cmd(features.split(" ")) if c != ""]
     p = subprocess.run(build_cmd, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
     if p.returncode != 0:
