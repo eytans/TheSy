@@ -488,13 +488,6 @@ impl CaseSplit {
         *egraph = Self::equiv_reduction(rules, std::mem::take(egraph), run_depth);
         #[cfg(feature = "stats")]
         sample_graph_stats(egraph, StatsReport::CaseSplitDepth(split_depth));
-        self.colored_case_split(
-            egraph,
-            split_depth - 1,
-            known_splits_by_color,
-            rules,
-            run_depth,
-        );
         warn!("Doing Conclusions for depth {split_depth} ----------------");
         for (base, cs) in colors {
             let split_conclusions = cs
@@ -504,6 +497,13 @@ impl CaseSplit {
             Self::merge_conclusions(egraph, base, &classes, split_conclusions);
         }
         warn!("Done Conclusions for depth {split_depth} -------------------");
+        self.colored_case_split(
+            egraph,
+            split_depth - 1,
+            known_splits_by_color,
+            rules,
+            run_depth,
+        );
     }
 
     fn inner_case_split(
