@@ -52,7 +52,8 @@ split_no_cmemo = ["split_colored", "egg/colored_no_cremove", "egg/colored_no_cme
 split_clone = []
 no_split = ["no_expl_split"]
 no_expl_split = []
-keep_splits= ["egg/keep_splits"]
+keep_splits = ["egg/keep_splits"]
+optimized_split_behaviour = []
 
 #[build]
 #rustflags = ["-C", "link-args=-Wl,-stack_size,0x100000000"]    # custom flags to pass to all compiler invocations
