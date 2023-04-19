@@ -588,7 +588,8 @@ impl CaseSplit {
             // Merge all conclusions into the original graph
             Self::merge_conclusions(egraph, None, &classes, &curr_conc);
         }
-        // Add splits to all_splits
+        // Add splits to all_splits - This is only used for keep_splits anyway
+        #[cfg(feature = "keep_splits")]
         egraph.all_splits.extend(split_graphs.into_iter().flatten());
     }
 

@@ -739,6 +739,8 @@ mod test {
     use crate::thesy::thesy::TheSy;
     use crate::{TheSyConfig, tests, PRETTY_W};
     use egg::tools::tools::Grouped;
+    #[allow(unused_imports)]
+    use invariants::AssertLevel;
 
     #[global_allocator]
     pub(crate) static ALLOCATOR: Cap<alloc::System> = Cap::new(alloc::System, usize::MAX);
@@ -1189,7 +1191,7 @@ mod test {
     #[test]
     fn test_list_run_append_assoc() {
         init_logging();
-
+        // invariants::set_max_level(AssertLevel::Off);
         let mut config = TheSyConfig::from_path("theories/list.th".parse().unwrap());
         let mut thesy = TheSy::from(&config);
         thesy.run(&mut config.definitions.rws, None, 2);
@@ -1210,7 +1212,7 @@ mod test {
     #[test]
     fn test_split_and_or() {
         init_logging();
-
+        // invariants::set_max_level(AssertLevel::Off);
         let mut defs = TheSyConfig::from_path("tests/booleans.th".to_string()).definitions;
         let conjectures = std::mem::take(&mut defs.conjectures);
         let goals = std::mem::take(&mut defs.goals);
@@ -1233,7 +1235,7 @@ mod test {
     #[test]
     fn test_split_minus_plus() {
         init_logging();
-
+        // invariants::set_max_level(AssertLevel::Off);
         let mut defs = TheSyConfig::from_path("tests/minus.th".to_string()).definitions;
         let conjectures = std::mem::take(&mut defs.conjectures);
         let goals = std::mem::take(&mut defs.goals);
