@@ -108,11 +108,11 @@ head_to_head.json
 experiments/**/*.thy
 venv/
 
-experiments/cvc4-newth/testcases/**/*.csv
-experiments/cvc4-newth/testcases/**/*.json
-experiments/cvc4-newth/testcases/**/*.long
-experiments/cvc4-newth/testcases/**/*.res
-experiments/cvc4-newth/results/**/*
+experiments/cvc4-newth*/testcases/**/*.csv
+experiments/cvc4-newth*/testcases/**/*.json
+experiments/cvc4-newth*/testcases/**/*.long
+experiments/cvc4-newth*/testcases/**/*.res
+experiments/cvc4-newth*/results/**/*
 !experiments/test/stats/*
 .vscode/settings.json
 take_drop.dot

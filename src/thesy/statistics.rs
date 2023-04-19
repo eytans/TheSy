@@ -191,7 +191,6 @@ fn get_split_sizes(egraph: &ThEGraph) -> Vec<usize> {
         res.insert(0, g.total_size());
         res
     }).collect();
-    info!("Split sizes: {:?}", res);
     res
 }
 
