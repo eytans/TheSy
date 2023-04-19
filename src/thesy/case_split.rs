@@ -597,6 +597,7 @@ impl CaseSplit {
     }
 }
 
+#[allow(unused_imports)]
 #[cfg(test)]
 mod tests {
     use crate::lang::ThEGraph;
@@ -648,7 +649,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg(feature = "split_colored")]
     fn test_sub_colors_dont_merge_base_assumption() {
         init_logging();
 

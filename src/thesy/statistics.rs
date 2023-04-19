@@ -1,5 +1,6 @@
 use std::time::{Duration, SystemTime};
 
+#[allow(unused_imports)]
 use egg::{ColorId, Iteration};
 use indexmap::{IndexMap, IndexSet};
 use serde::{Deserialize, Serialize};
@@ -184,7 +185,13 @@ pub struct GraphStats {
 
 #[cfg(all(feature = "stats", feature = "keep_splits"))]
 fn get_split_sizes(egraph: &ThEGraph) -> Vec<usize> {
-    let res: Vec<usize> = egraph.all_splits.iter().flat_map(|g| get_split_sizes(g)).collect();
+    let res: Vec<usize> = egraph.all_splits.iter()
+    .flat_map(|g| {
+        let mut res = get_split_sizes(g);
+        res.insert(0, g.total_size());
+        res
+    }).collect();
+    info!("Split sizes: {:?}", res);
     res
 }
 
@@ -244,5 +251,84 @@ pub static mut STATS: Vec<(StatsReport, GraphStats)> = vec![];
 pub fn sample_graph_stats(egraph: &ThEGraph, report: StatsReport) {
     unsafe {
         STATS.push((report, GraphStats::from(egraph)));
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use crate::lang::ThEGraph;
+    #[allow(unused_imports)]
+    use crate::tests::init_logging;
+    #[allow(unused_imports)]
+    use crate::thesy::statistics::STATS;
+
+    #[cfg(all(feature = "stats", feature = "keep_splits"))]
+    #[test]
+    fn test_get_split_sizes() {
+        use crate::thesy::statistics::get_split_sizes;
+
+        init_logging();
+
+        // Create a new egraphs with sizes 0-4
+        let mut egraphs = vec![];
+        let mut base = ThEGraph::new(());
+        egraphs.push(base.clone());
+        for i in 0..4 {
+            base.add_expr(&i.to_string().parse().unwrap());
+            egraphs.push(base.clone());
+        }
+        assert_eq!(egraphs[4].total_size(), 4);
+        let res = get_split_sizes(&base);
+        assert_eq!(res.len(), 0);
+        let mut egraph4 = egraphs.remove(4);
+        let egraph3 = egraphs.remove(3);
+        let egraph2 = egraphs.remove(2);
+        let egraph1 = egraphs.remove(1);
+        egraph4.all_splits.push(egraph3);
+        egraphs[0].all_splits.push(egraph4);
+        let res = get_split_sizes(&egraphs[0]);
+        assert_eq!(res.len(), 2);
+        assert_eq!(res[0], 4);
+        assert_eq!(res[1], 3);
+        egraphs[0].all_splits[0].all_splits.push(egraph2);
+        let res = get_split_sizes(&egraphs[0]);
+        assert_eq!(res.len(), 3);
+        assert_eq!(res[0], 4);
+        assert_eq!(res[1], 3);
+        assert_eq!(res[2], 2);
+        egraphs[0].all_splits.push(egraph1);
+        let res = get_split_sizes(&egraphs[0]);
+        assert_eq!(res.len(), 4);
+        assert_eq!(res[0], 4);
+        assert_eq!(res[1], 3);
+        assert_eq!(res[2], 2);
+        assert_eq!(res[3], 1);
+    }
+
+    #[test]
+    fn test_collecting_split_sizes() {
+        use crate::TheSyConfig;
+
+        init_logging();
+
+        // Do a simple thesy run
+        let _ = TheSyConfig::from_path("tests/minus.th".to_string()).run(Some(1));
+        // get statistics
+        unsafe {
+            #[cfg(all(feature = "stats", feature = "keep_splits"))]
+            {
+                let total_splits = STATS.iter()
+                    .map(|(_, s)| {
+                    println!("{:?}", s.split_sizes); 
+                    s.split_sizes.len()
+                }).max().unwrap();
+                info!("Found {} splits statistics", total_splits);
+                assert!(STATS.iter().any(|(_, stats)| stats.split_sizes.len() > 0 &&
+                    stats.split_sizes.iter().any(|v| *v > 0)));
+            }
+            #[cfg(all(feature = "stats", feature = "split_colored"))]
+            assert!(STATS.iter().any(|(_, stats)| stats.colors_sizes.len() > 0 
+                && stats.colors_sizes.values().any(|v| *v > 0)));
+        }
     }
 }
