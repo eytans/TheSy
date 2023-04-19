@@ -269,7 +269,7 @@ impl CaseSplit {
         egraph: &mut ThEGraph,
         color: Option<ColorId>,
         classes: &Vec<Id>,
-        split_conclusions: Vec<IndexMap<Id, Id>>,
+        split_conclusions: &Vec<IndexMap<Id, Id>>,
     ) {
         let mut group_by_splits: IndexMap<Vec<Id>, IndexSet<Id>> = IndexMap::new();
         for c in classes {
@@ -335,14 +335,25 @@ impl CaseSplit {
             info!("Case splitting with depth {}", split_depth);
             if cfg!(feature = "split_clone") {
                 let mut vacuity_cases = 0;
-                self.inner_case_split(
-                    egraph,
-                    split_depth,
-                    &Default::default(),
-                    rules,
-                    run_depth,
-                    &mut vacuity_cases,
-                );
+                if cfg!(feature = "keep_splits") {
+                    self.keep_splits_case_split(
+                        egraph,
+                        split_depth,
+                        &Default::default(),
+                        rules,
+                        run_depth,
+                        &mut vacuity_cases,
+                    );
+                } else {
+                    self.inner_case_split(
+                        egraph,
+                        split_depth,
+                        &Default::default(),
+                        rules,
+                        run_depth,
+                        &mut vacuity_cases,
+                    );
+                }
                 if !cfg!(feature = "optimized_split_behaviour") {
                     *egraph = Self::equiv_reduction(
                         rules,
@@ -494,7 +505,7 @@ impl CaseSplit {
                 .iter()
                 .map(|c| Self::collect_colored_merged(egraph, &classes, *c))
                 .collect_vec();
-            Self::merge_conclusions(egraph, base, &classes, split_conclusions);
+            Self::merge_conclusions(egraph, base, &classes, &split_conclusions);
         }
         warn!("Done Conclusions for depth {split_depth} -------------------");
         self.colored_case_split(
@@ -504,6 +515,81 @@ impl CaseSplit {
             rules,
             run_depth,
         );
+    }
+
+    fn keep_splits_case_split(
+        &mut self,
+        egraph: &mut ThEGraph,
+        split_depth: usize,
+        known_splits: &IndexSet<Split>,
+        rules: &[ThRewrite],
+        run_depth: usize,
+        vacuity_cases: &mut usize,
+    ) {
+        if split_depth == 0 {
+            return;
+        }
+        let (splitters, new_known, rected) =
+            self.initialize_case_split(known_splits, egraph, split_depth);
+        let classes = egraph.classes().map(|c| c.id).collect_vec();
+
+        let mut i = 0;
+        let mut split_graphs = splitters
+            .iter()
+            .map(|s| Self::split_graph(egraph, s))
+            .collect_vec();
+        debug!(
+            "Working on following splits in depth {split_depth}:\n{splits}",
+            splits=splitters.iter().map(|s| rected
+                .get(&s.root)
+                .map_or("Bad".to_string(), |x| x.to_string()).to_string() +
+                &s.splits
+                .iter()
+                .map(|r| rected.get(r).map_or("Bad".to_string(), |x| x.to_string()))
+                .join(" ")
+            ).join(", "),
+            split_depth = split_depth
+        );
+        let conclusions = split_graphs
+            .iter_mut()
+            .map(|graphs| {
+                let sub_concs = graphs
+                    .iter_mut()
+                    .map(|g| {
+                        *g = Self::equiv_reduction(rules, std::mem::take(g), run_depth);
+                        let res = Self::collect_merged(&g, &classes);
+                        res
+                    }).collect_vec();
+                    sub_concs
+            }).collect_vec();
+        for split_conclusions in conclusions {
+            for gs in split_graphs.iter_mut() {
+                for g in gs.iter_mut() {
+                    Self::merge_conclusions(g, None, &classes, &split_conclusions);
+                }
+            }
+        }
+        for gs in split_graphs.iter_mut() {
+            let mut curr_conc = vec![];
+            for g in gs.iter_mut() {
+                self.keep_splits_case_split(
+                    g,
+                    split_depth - 1,
+                    &new_known,
+                    rules,
+                    run_depth,
+                    vacuity_cases,
+                );
+                curr_conc.push(Self::collect_merged(g, &classes));
+                if g.detect_graph_vacuity() {
+                    *vacuity_cases += 1;
+                }
+            }
+            // Merge all conclusions into the original graph
+            Self::merge_conclusions(egraph, None, &classes, &curr_conc);
+        }
+        // Add splits to all_splits
+        egraph.all_splits.extend(split_graphs.into_iter().flatten());
     }
 
     fn inner_case_split(
@@ -518,38 +604,13 @@ impl CaseSplit {
         if split_depth == 0 {
             return;
         }
-        let known_splits: IndexSet<Split, RandomState> = known_splits
-            .iter()
-            .map(|e| {
-                let mut res = e.clone();
-                res.update(egraph);
-                res
-            })
-            .collect();
-
-        let temp = self.find_splitters(egraph);
-        let temp_len = temp.len();
-        let splitters: Vec<&Split> = temp.iter().filter(|s| !known_splits.contains(*s)).collect();
-        let mut new_known = known_splits.clone();
-
-        new_known.extend(splitters.iter().cloned().cloned());
-        warn!(
-            "Splitters len (temp len: {temp_len}): {} in depth {split_depth}",
-            splitters.len()
-        );
-        let rected = reconstruct_all(egraph, None, 4);
-        for s in &splitters {
-            let split_text = s.by_translation(&rected);
-            warn!("  {} - {}", s, split_text);
-            #[cfg(feature = "stats")]
-            self.stats.known_splits_text.insert(split_text);
-        }
-
+        let (splitters, new_known, rected) =
+            self.initialize_case_split(known_splits, egraph, split_depth);
         let classes = egraph.classes().map(|c| c.id).collect_vec();
 
         let mut i = 0;
         for s in splitters {
-            let split_conclusions = Self::split_graph(&*egraph, s)
+            let split_conclusions = Self::split_graph(&*egraph, &s)
                 .into_iter()
                 .map(|g| {
                     debug!(
@@ -592,8 +653,46 @@ impl CaseSplit {
                 })
                 .collect_vec();
             warn!("Split conclusions: {:?}", split_conclusions);
-            Self::merge_conclusions(egraph, None, &classes, split_conclusions);
+            Self::merge_conclusions(egraph, None, &classes, &split_conclusions);
         }
+    }
+
+    fn initialize_case_split(
+        &mut self,
+        known_splits: &IndexSet<Split>,
+        egraph: &mut EGraph<SymbolLang, ()>,
+        split_depth: usize,
+    ) -> (Vec<Split>, IndexSet<Split>, IndexMap<Id, Tree>) {
+        let known_splits: IndexSet<Split, RandomState> = known_splits
+            .iter()
+            .map(|e| {
+                let mut res = e.clone();
+                res.update(egraph);
+                res
+            })
+            .collect();
+
+        let temp = self.find_splitters(egraph);
+        let temp_len = temp.len();
+        let splitters: Vec<Split> = temp
+            .into_iter()
+            .filter(|s| !known_splits.contains(s))
+            .collect();
+        let mut new_known = known_splits.clone();
+
+        new_known.extend(splitters.iter().cloned());
+        warn!(
+            "Splitters len (temp len: {temp_len}): {} in depth {split_depth}",
+            splitters.len()
+        );
+        let rected = reconstruct_all(egraph, None, 4);
+        for s in &splitters {
+            let split_text = s.by_translation(&rected);
+            warn!("  {} - {}", s, split_text);
+            #[cfg(feature = "stats")]
+            self.stats.known_splits_text.insert(split_text);
+        }
+        (splitters, new_known, rected)
     }
 }
 
