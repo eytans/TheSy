@@ -500,12 +500,12 @@ impl CaseSplit {
         #[cfg(feature = "stats")]
         sample_graph_stats(egraph, StatsReport::CaseSplitDepth(split_depth));
         warn!("Doing Conclusions for depth {split_depth} ----------------");
-        for (base, cs) in colors {
+        for (base, cs) in colors.iter() {
             let split_conclusions = cs
                 .iter()
                 .map(|c| Self::collect_colored_merged(egraph, &classes, *c))
                 .collect_vec();
-            Self::merge_conclusions(egraph, base, &classes, &split_conclusions);
+            Self::merge_conclusions(egraph, base.clone(), &classes, &split_conclusions);
         }
         warn!("Done Conclusions for depth {split_depth} -------------------");
         self.colored_case_split(
@@ -515,6 +515,13 @@ impl CaseSplit {
             rules,
             run_depth,
         );
+        for (base, cs) in colors {
+            let split_conclusions = cs
+                .iter()
+                .map(|c| Self::collect_colored_merged(egraph, &classes, *c))
+                .collect_vec();
+            Self::merge_conclusions(egraph, base, &classes, &split_conclusions);
+        }
     }
 
     fn keep_splits_case_split(
