@@ -52,6 +52,12 @@ pub struct Stats {
     pub case_split_stats: CaseSplitStats,
     /// Iteration of check_equiv reductions
     pub equality_check_iterations: Vec<Vec<Iteration<()>>>,
+    /// Total search time - milliseconds
+    pub total_search_time: Option<Duration>,
+    /// Total apply time - milliseconds
+    pub total_apply_time: Option<Duration>,
+    /// Total rebuild time - milliseconds
+    pub total_rebuild_time: Option<Duration>,
 }
 
 impl Stats {
@@ -168,6 +174,9 @@ impl Default for Stats {
             max_allocated: Default::default(),
             case_split_stats: Default::default(),
             equality_check_iterations: Default::default(),
+            total_search_time: Default::default(),
+            total_apply_time: Default::default(),
+            total_rebuild_time: Default::default(),
         }
     }
 }
@@ -272,7 +281,7 @@ mod test {
 
         // Create a new egraphs with sizes 0-4
         let mut egraphs = vec![];
-        let mut base = ThEGraph::new(());
+        let mut base = crate::lang::ThEGraph::new(());
         egraphs.push(base.clone());
         for i in 0..4 {
             base.add_expr(&i.to_string().parse().unwrap());

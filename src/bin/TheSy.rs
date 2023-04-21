@@ -19,6 +19,7 @@ use TheSy::thesy::thesy::TheSy as Synth;
 use TheSy::thesy::semantics::Definitions;
 use TheSy::{CaseSplitConfig, PRETTY_W, SubCmd, thesy, TheSyConfig};
 use cap::Cap;
+use itertools::Itertools;
 use TheSy::thesy::statistics::{sample_graph_stats, STATS, StatsReport};
 
 #[global_allocator]
@@ -148,7 +149,7 @@ fn main() {
         if args.run_mode.is_no_case_split() {
             let mut success = true;
             for (_vars, _holes, precond, ex1, ex2) in &config.definitions.conjectures {
-                if !Synth::check_equality(&rules, precond, ex1, ex2) {
+                if !thesy.check_equality(&rules, precond, ex1, ex2) {
                     println!("Failed to prove conjecture {} => {} = {}",
                              precond.clone().map(|p| p.pretty(PRETTY_W)).unwrap_or("true".to_string()),
                              ex1.pretty(PRETTY_W), ex2.pretty(PRETTY_W));
@@ -189,6 +190,17 @@ fn export_json(thesy: &mut thesy::TheSy, path: &PathBuf) {
     let stat_path = path.with_extension("stats.json");
     let colored_stat_path = path.with_extension("colored_stats.json");
     thesy.stats.update_mem(&ALLOCATOR);
+    let mut total_search = 0;
+    let mut total_apply = 0;
+    let mut total_rebuild = 0;
+    let mut all_iters = thesy.get_prover_iters().into_iter().flatten().into_iter().flatten().collect_vec();
+    all_iters.extend(thesy.stats.equiv_red_iterations.iter().flatten().cloned());
+    all_iters.extend(thesy.stats.case_split_stats.iterations.iter().flatten().cloned());
+    for iter in all_iters {
+        total_search += iter.search_time;
+        total_apply += iter.apply_time;
+        total_rebuild += iter.rebuild_time;
+    }
     serde_json::to_writer(File::create(stat_path).unwrap(), &thesy.stats).unwrap();
     unsafe {
         serde_json::to_writer(File::create(colored_stat_path).unwrap(), &STATS).unwrap();

@@ -124,7 +124,7 @@ pub type SplitApplier = Box<dyn FnMut(&mut ThEGraph, Vec<SearchMatches>) -> Vec<
 pub struct CaseSplitStats {
     pub(crate) vacuous_cases: Vec<usize>,
     pub(crate) known_splits_text: IndexSet<String>,
-    pub(crate) iterations: Vec<Vec<Iteration<()>>>,
+    pub iterations: Vec<Vec<Iteration<()>>>,
 }
 
 #[cfg(feature = "stats")]

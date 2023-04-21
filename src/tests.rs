@@ -139,7 +139,7 @@ fn terminal_ph_translator(t: &Terminal) -> Terminal {
 
 
 pub fn test_prover(definitions: &Definitions) -> (TheSy, Vec<ProofMode>) {
-    let thesy: TheSy = TheSy::from(definitions);
+    let mut thesy: TheSy = TheSy::from(definitions);
     let mut case_splitter = TheSy::create_case_splitter(definitions.case_splitters.clone());
     warn!("Case splitters: {:?}", &case_splitter);
     let mut rws = thesy.system_rws.clone();
@@ -158,7 +158,7 @@ pub fn test_prover(definitions: &Definitions) -> (TheSy, Vec<ProofMode>) {
             // Check exploration results
 
             // Attempt proof
-            let prover = &thesy.datatypes[d];
+            let prover = &mut thesy.datatypes[d];
             warn!("Proving goal with {}", d);
             let temp = prover.prove_all_split_d(
                 &mut Some(&mut case_splitter),

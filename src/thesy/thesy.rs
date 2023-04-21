@@ -81,6 +81,11 @@ pub struct TheSy {
 
 /// *** TheSy Statics ***
 impl TheSy {
+    #[cfg(feature = "stats")]
+    pub fn get_prover_iters(&self) -> Vec<Vec<Vec<Iteration<()>>>> {
+        self.datatypes.values().map(|x| x.iterations.clone()).collect_vec()
+    }
+
     fn replace_ops(exp: &ThExpr, replacments: &IndexMap<Symbol, Symbol>) -> ThExpr {
         RecExpr::from(exp.as_ref().iter().map(|s| replacments.get(&s.op)
             .map(|x| SymbolLang::new(x.as_str(), s.children.clone())).unwrap_or(s.clone())).collect_vec())
@@ -520,7 +525,7 @@ impl TheSy {
         'outer: for (i, conjs) in lemmas.iter().enumerate() {
             debug!("Checking goal {}", i);
             for (precond, ex1, ex2) in conjs {
-                for p in self.datatypes.values() {
+                for p in self.datatypes.values_mut() {
                     let start = if cfg!(feature = "stats") {
                         Some(SystemTime::now())
                     } else { None };
@@ -994,7 +999,7 @@ mod test {
 
     #[test]
     fn prove_pl_zero() {
-        let syg = create_nat_sygue();
+        let mut syg = create_nat_sygue();
         let nat = create_nat_type();
         let rewrites = create_pl_rewrites();
         let ind_rec = TheSy::get_ind_var(&nat);
