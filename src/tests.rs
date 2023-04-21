@@ -72,7 +72,7 @@ pub fn test_terms(definitions: Definitions) -> ProofMode {
     let (_ast_precond, mut ast_exp1, mut ast_exp2) = definitions.goals.clone().pop().unwrap();
 
     // Assert terms are not equal
-    assert!(!TheSy::check_equality(&rws, precond, ex1, ex2));
+    assert!(!thesy.check_equality(&rws, precond, ex1, ex2));
 
     // let ph_precond = ast_precond.map(|e| e.map(exp_translator));
     let ph_exp1 = translate_expression(&mut ast_exp1);

@@ -1,10 +1,7 @@
 use crate::egg::tools::tools::Grouped;
 use egg::appliers::DiffApplier;
 use egg::reconstruct::reconstruct_all;
-use egg::{
-    Analysis, Applier, ColorId, EGraph, Id, Language, Pattern, Runner, SearchMatches, Searcher,
-    StopReason, SymbolLang,
-};
+use egg::{Analysis, Applier, ColorId, EGraph, Id, Language, Pattern, Runner, SearchMatches, Searcher, StopReason, SymbolLang, Iteration};
 use indexmap::{IndexMap, IndexSet};
 use itertools::Itertools;
 use smallvec::alloc::fmt::Formatter;
@@ -127,6 +124,7 @@ pub type SplitApplier = Box<dyn FnMut(&mut ThEGraph, Vec<SearchMatches>) -> Vec<
 pub struct CaseSplitStats {
     pub(crate) vacuous_cases: Vec<usize>,
     pub(crate) known_splits_text: IndexSet<String>,
+    pub(crate) iterations: Vec<Vec<Iteration<()>>>,
 }
 
 #[cfg(feature = "stats")]
@@ -135,6 +133,7 @@ impl CaseSplitStats {
         CaseSplitStats {
             vacuous_cases: vec![],
             known_splits_text: Default::default(),
+            iterations: vec![],
         }
     }
 }
@@ -223,7 +222,7 @@ impl CaseSplit {
             .collect_vec()
     }
 
-    fn equiv_reduction(rules: &[ThRewrite], egraph: ThEGraph, run_depth: usize) -> ThEGraph {
+    fn equiv_reduction(&mut self, rules: &[ThRewrite], egraph: ThEGraph, run_depth: usize) -> ThEGraph {
         let mut runner = Runner::default()
             .with_time_limit(Duration::from_secs(60 * 10))
             .with_node_limit(egraph.total_number_of_nodes() + 200000)
@@ -250,6 +249,8 @@ impl CaseSplit {
         //     info!("");
         // }
         runner.egraph.rebuild();
+        #[cfg(feature = "stats")]
+        self.stats.iterations.push(std::mem::take(&mut runner.iterations));
         runner.egraph
     }
 
@@ -355,7 +356,7 @@ impl CaseSplit {
                     );
                 }
                 if !cfg!(feature = "optimized_split_behaviour") {
-                    *egraph = Self::equiv_reduction(
+                    *egraph = self.equiv_reduction(
                         rules,
                         std::mem::take(egraph),
                         split_depth * run_depth,
@@ -496,7 +497,7 @@ impl CaseSplit {
         }
         warn!("Created colors: {:?}", colors);
         // When the API is limited the code is mentally inhibited
-        *egraph = Self::equiv_reduction(rules, std::mem::take(egraph), run_depth);
+        *egraph = self.equiv_reduction(rules, std::mem::take(egraph), run_depth);
         #[cfg(feature = "stats")]
         sample_graph_stats(egraph, StatsReport::CaseSplitDepth(split_depth));
         warn!("Doing Conclusions for depth {split_depth} ----------------");
@@ -540,7 +541,6 @@ impl CaseSplit {
             self.initialize_case_split(known_splits, egraph, split_depth);
         let classes = egraph.classes().map(|c| c.id).collect_vec();
 
-        let mut i = 0;
         let mut split_graphs = splitters
             .iter()
             .map(|s| Self::split_graph(egraph, s))
@@ -563,7 +563,7 @@ impl CaseSplit {
                 let sub_concs = graphs
                     .iter_mut()
                     .map(|g| {
-                        *g = Self::equiv_reduction(rules, std::mem::take(g), run_depth);
+                        *g = self.equiv_reduction(rules, std::mem::take(g), run_depth);
                         let res = Self::collect_merged(&g, &classes);
                         res
                     }).collect_vec();
@@ -633,7 +633,7 @@ impl CaseSplit {
                         i = i,
                         split_depth = split_depth
                     );
-                    let mut g = Self::equiv_reduction(rules, g, run_depth);
+                    let mut g = self.equiv_reduction(rules, g, run_depth);
                     self.inner_case_split(
                         &mut g,
                         split_depth - 1,

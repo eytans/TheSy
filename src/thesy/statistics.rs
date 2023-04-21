@@ -50,6 +50,8 @@ pub struct Stats {
     pub max_allocated: usize,
     /// Case split stats
     pub case_split_stats: CaseSplitStats,
+    /// Iteration of check_equiv reductions
+    pub equality_check_iterations: Vec<Vec<Iteration<()>>>,
 }
 
 impl Stats {
@@ -165,6 +167,7 @@ impl Default for Stats {
             total_allocated: Default::default(),
             max_allocated: Default::default(),
             case_split_stats: Default::default(),
+            equality_check_iterations: Default::default(),
         }
     }
 }
@@ -255,7 +258,6 @@ pub fn sample_graph_stats(egraph: &ThEGraph, report: StatsReport) {
 
 #[cfg(test)]
 mod test {
-    use crate::lang::ThEGraph;
     #[allow(unused_imports)]
     use crate::tests::init_logging;
     #[allow(unused_imports)]

@@ -139,7 +139,7 @@ impl TheSy {
             .map(|d| (d.clone(),
                       prover_config.as_ref().map_or(
                           Prover::new(d.clone()),
-                          |x|  Prover::new_config(d.clone(), x.clone()))
+                          |x| Prover::new_config(d.clone(), x.clone()))
             )).collect();
         let (mut egraph, example_ids) = TheSy::create_graph_example_ids(&datatypes, &examples, &dict, ph_count);
 
@@ -444,7 +444,7 @@ impl TheSy {
             x => {
                 info!("Stop reason: {:#?}", x);
                 self.node_limit
-            },
+            }
         };
         self.total_iters += runner.iterations.len();
         #[cfg(feature = "stats")]
@@ -487,10 +487,22 @@ impl TheSy {
         res.into_iter().rev().collect_vec()
     }
 
-    pub fn check_equality(rules: &[ThRewrite], precond: &Option<ThExpr>, ex1: &ThExpr, ex2: &ThExpr) -> bool {
+    pub(crate) fn inner_check_equality(rules: &[ThRewrite], precond: &Option<ThExpr>, ex1: &ThExpr, ex2: &ThExpr) -> (Runner<ThNode, ThAnl>, bool) {
         let egraph = Prover::create_graph(precond.as_ref(), &ex1, &ex2);
-        let runner = Runner::default().with_iter_limit(8).with_time_limit(Duration::from_secs(600)).with_node_limit(10000).with_egraph(egraph).run(rules);
-        !runner.egraph.equivs(ex1, ex2).is_empty()
+        let runner = Runner::default()
+            .with_iter_limit(8)
+            .with_time_limit(Duration::from_secs(600))
+            .with_node_limit(10000)
+            .with_egraph(egraph)
+            .run(rules);
+        let res = !runner.egraph.equivs(ex1, ex2).is_empty();
+        (runner, res)
+    }
+
+    pub fn check_equality(&mut self, rules: &[ThRewrite], precond: &Option<ThExpr>, ex1: &ThExpr, ex2: &ThExpr) -> bool {
+        let (mut runner, res) = Self::inner_check_equality(rules, precond, ex1, ex2);
+        self.stats.equality_check_iterations.push(std::mem::take(&mut runner.iterations));
+        res
     }
 
     pub fn remaining_goals(&self) -> Option<Vec<Vec<(Option<ThExpr>, ThExpr, ThExpr)>>> {
@@ -583,7 +595,7 @@ impl TheSy {
                         ex2 = new_rules.as_ref().unwrap()[0].2.pretty_string().parse().unwrap();
                         info!("generalized to {} -- {}", ex1.pretty(PRETTY_W), ex2.pretty(PRETTY_W));
                     }
-                    if Self::check_equality(&rules[..], &None, &ex1, &ex2) {
+                    if self.check_equality(&rules[..], &None, &ex1, &ex2) {
                         info!("bad conjecture {} = {}", &ex1.pretty(PRETTY_W), &ex2.pretty(PRETTY_W));
                         self.stats.update_filtered_conjecture(&ex1, &ex2);
                         continue 'outer;
@@ -655,7 +667,7 @@ impl TheSy {
                 other_ex1 == &ex1 && &ex2 == other_ex2) {
                 continue;
             }
-            if Self::check_equality(&rules[..], &None, &ex1, &ex2) {
+            if self.check_equality(&rules[..], &None, &ex1, &ex2) {
                 self.stats.update_filtered_conjecture(&ex1, &ex2);
                 continue;
             }
@@ -915,7 +927,7 @@ mod test {
             None,
             thesy::ITERN,
             None,
-            None
+            None,
         );
 
         let results0 = anchor_patt.search(&syg.egraph);
@@ -1196,7 +1208,7 @@ mod test {
         let mut thesy = TheSy::from(&config);
         thesy.run(&mut config.definitions.rws, None, 2);
         assert_eq!(config.definitions.datatypes.len(), 1);
-        let res = TheSy::check_equality(&config.definitions.rws, &None, &"(append x (append y z))".parse().unwrap(), &"(append (append x y) z)".parse().unwrap());
+        let res = thesy.check_equality(&config.definitions.rws, &None, &"(append x (append y z))".parse().unwrap(), &"(append (append x y) z)".parse().unwrap());
         assert!(res);
     }
 
@@ -1218,9 +1230,9 @@ mod test {
         let goals = std::mem::take(&mut defs.goals);
         for (c, g) in conjectures.into_iter().zip(goals.into_iter()) {
             let proof_text = format!("proving {}{} = {}",
-                  g.0.as_ref().map_or("".to_string(), |e| e.to_string() + "|> "),
-                  &g.1,
-                  &g.2);
+                                     g.0.as_ref().map_or("".to_string(), |e| e.to_string() + "|> "),
+                                     &g.1,
+                                     &g.2);
             info!("{}", proof_text);
             defs.goals = vec![g];
             defs.conjectures = vec![c];
