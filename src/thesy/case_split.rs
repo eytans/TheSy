@@ -741,14 +741,12 @@ mod tests {
     }
 
     #[test]
-    #[ignore]
     #[cfg(feature = "split_colored")]
     fn no_vacuity_in_and_or() {
-        // This test is ignored because case splitting will create vacuity with (= T F) at the moment.
         init_logging();
 
         let (mut thesy, _rewrites) =
-            TheSyConfig::from_path("tests/booleans.th".to_string()).run(None);
+            TheSyConfig::from_path("tests/booleans.th".to_string()).run(Some(1));
         let ops = vec![SymbolLang::leaf("true"), SymbolLang::leaf("false")];
         let op_ids = ops.iter().map(|op| op.op_id()).collect_vec();
         thesy.egraph.vacuity_ops = vec![op_ids];

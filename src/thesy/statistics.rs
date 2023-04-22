@@ -363,4 +363,18 @@ mod test {
                 && stats.colors_sizes.values().any(|v| *v > 0)));
         }
     }
+
+    #[test]
+    fn test_collecting_vacuity() {
+        use crate::TheSyConfig;
+
+        init_logging();
+
+        // Do a simple thesy run
+        let (thesy, _rw) = TheSyConfig::from_path("tests/vacuity.th".to_string()).run(Some(1));
+        assert!(thesy.stats.case_split_stats.vacuous_cases.iter().any(|v| *v > 0));
+        unsafe {
+            assert!(STATS.iter().any(|x| x.1.vacuos_colors.len() > 0));
+        }
+    }
 }
