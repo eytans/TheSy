@@ -566,6 +566,7 @@ impl TheSy {
 
         warn!("Running prove goals");
         if self.prove_goals(&mut splitter_to_use, rules, &mut found_rules) {
+            self.finalize_stats(case_spliter.as_ref());
             return found_rules;
         }
 
@@ -578,6 +579,7 @@ impl TheSy {
             if !cfg!(feature="no_expl_split") {
                 if splitter_to_use.is_some() {
                     if self.prove_case_split_rules(splitter_to_use.unwrap(), rules, &mut found_rules) {
+                        self.finalize_stats(case_spliter.as_ref());
                         return found_rules;
                     }
                     splitter_to_use = case_spliter.as_mut();
@@ -616,6 +618,7 @@ impl TheSy {
 
                     warn!("Running prove goals");
                     if self.prove_goals(&mut splitter_to_use, rules, &mut found_rules) {
+                        self.finalize_stats(case_spliter.as_ref());
                         return found_rules;
                     }
 
@@ -633,7 +636,7 @@ impl TheSy {
             assert!(i.is_some());
             rules.remove(i.unwrap().0);
         }
-        self.stats.update_total();
+        self.finalize_stats(case_spliter.as_ref());
         found_rules
     }
 
@@ -732,6 +735,30 @@ impl TheSy {
             return true;
         }
         false
+    }
+}
+
+// Stats stuff
+impl TheSy {
+    pub fn finalize_stats(&mut self, case_spliter: Option<&CaseSplit>) {
+        if let Some(cs) = case_spliter {
+            self.stats.case_split_stats = cs.stats.clone()
+        }
+        let mut total_search: f64 = 0.0;
+        let mut total_apply: f64 = 0.0;
+        let mut total_rebuild: f64 = 0.0;
+        let mut all_iters = self.get_prover_iters().into_iter().flatten().into_iter().flatten().collect_vec();
+        all_iters.extend(self.stats.equiv_red_iterations.iter().flatten().cloned());
+        all_iters.extend(self.stats.case_split_stats.iterations.iter().flatten().cloned());
+        for iter in all_iters {
+            total_search += iter.search_time;
+            total_apply += iter.apply_time;
+            total_rebuild += iter.rebuild_time;
+        }
+        self.stats.total_search_time = Some(total_search);
+        self.stats.total_apply_time = Some(total_apply);
+        self.stats.total_rebuild_time = Some(total_rebuild);
+        self.stats.update_total();
     }
 }
 

@@ -172,14 +172,13 @@ fn main() {
     } else {
         let (new_thesy, new_rules): (TheSy::thesy::TheSy, Vec<Rewrite<SymbolLang, ()>>) = config.run(Some(2));
         println!("done in {}", SystemTime::now().duration_since(start).unwrap().as_millis());
-        TheSyRunRes::new(new_thesy, new_rules, true, case_split.stats)
+        TheSyRunRes::new(new_thesy, new_rules, true, new_thesy.stats.case_split_stats.clone())
     };
 
     #[cfg(all(feature = "stats"))]
     sample_graph_stats(&res.thesy.egraph, StatsReport::End);
-    res.thesy.stats.case_split_stats = res.case_split_stats;
     if cfg!(feature = "stats") {
-        res.thesy.stats.update_total();
+        res.thesy.finalize_stats(None);
         export_json(&mut res.thesy, &args.path);
     }
     exit(0);
@@ -189,18 +188,7 @@ fn main() {
 fn export_json(thesy: &mut thesy::TheSy, path: &PathBuf) {
     let stat_path = path.with_extension("stats.json");
     let colored_stat_path = path.with_extension("colored_stats.json");
-    thesy.stats.update_mem(&ALLOCATOR);
-    let mut total_search = 0;
-    let mut total_apply = 0;
-    let mut total_rebuild = 0;
-    let mut all_iters = thesy.get_prover_iters().into_iter().flatten().into_iter().flatten().collect_vec();
-    all_iters.extend(thesy.stats.equiv_red_iterations.iter().flatten().cloned());
-    all_iters.extend(thesy.stats.case_split_stats.iterations.iter().flatten().cloned());
-    for iter in all_iters {
-        total_search += iter.search_time;
-        total_apply += iter.apply_time;
-        total_rebuild += iter.rebuild_time;
-    }
+    thesy.finalize_stats(None);
     serde_json::to_writer(File::create(stat_path).unwrap(), &thesy.stats).unwrap();
     unsafe {
         serde_json::to_writer(File::create(colored_stat_path).unwrap(), &STATS).unwrap();

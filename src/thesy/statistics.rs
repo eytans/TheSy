@@ -53,11 +53,11 @@ pub struct Stats {
     /// Iteration of check_equiv reductions
     pub equality_check_iterations: Vec<Vec<Iteration<()>>>,
     /// Total search time - milliseconds
-    pub total_search_time: Option<Duration>,
+    pub total_search_time: Option<f64>,
     /// Total apply time - milliseconds
-    pub total_apply_time: Option<Duration>,
+    pub total_apply_time: Option<f64>,
     /// Total rebuild time - milliseconds
-    pub total_rebuild_time: Option<Duration>,
+    pub total_rebuild_time: Option<f64>,
 }
 
 impl Stats {
@@ -271,6 +271,7 @@ mod test {
     use crate::tests::init_logging;
     #[allow(unused_imports)]
     use crate::thesy::statistics::STATS;
+    use crate::thesy::TheSy;
 
     #[cfg(all(feature = "stats", feature = "keep_splits"))]
     #[test]
@@ -313,6 +314,27 @@ mod test {
         assert_eq!(res[1], 3);
         assert_eq!(res[2], 2);
         assert_eq!(res[3], 1);
+    }
+
+    #[cfg(feature = "stats")]
+    #[test]
+    fn test_collecting_stats() {
+        init_logging();
+
+        // Do a simple thesy run
+        let (thesy, _rws) = crate::TheSyConfig::from_path("tests/filter.th".to_string()).run(Some(2));
+        // Assert we have case split iterations
+        assert!(thesy.stats.case_split_stats.iterations.iter().any(|v|
+            v.len() > 0 && v.iter().any(|v| v.rebuild_time > 0.0)));
+        // Assert we have prover iterations
+        assert!(thesy.datatypes.values().any(|p| p.iterations.iter().any(|v|
+            v.len() > 0 && v.iter().any(|v| v.search_time > 0.0))));
+        // Assert we have thesy iterations
+        assert!(thesy.stats.equiv_red_iterations.iter().any(|v|
+            v.len() > 0 && v.iter().any(|v| v.apply_time > 0.0)));
+        // Assert we have thesy::equiv_check iterations
+        assert!(thesy.stats.equality_check_iterations.iter().any(|v|
+            v.len() > 0 && v.iter().any(|v| v.apply_time > 0.0)));
     }
 
     #[test]
