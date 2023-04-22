@@ -172,7 +172,8 @@ fn main() {
     } else {
         let (new_thesy, new_rules): (TheSy::thesy::TheSy, Vec<Rewrite<SymbolLang, ()>>) = config.run(Some(2));
         println!("done in {}", SystemTime::now().duration_since(start).unwrap().as_millis());
-        TheSyRunRes::new(new_thesy, new_rules, true, new_thesy.stats.case_split_stats.clone())
+        let case_split_stats = new_thesy.stats.case_split_stats.clone();
+        TheSyRunRes::new(new_thesy, new_rules, true, case_split_stats)
     };
 
     #[cfg(all(feature = "stats"))]

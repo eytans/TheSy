@@ -1065,8 +1065,6 @@ mod test {
 
     #[test]
     fn filter_p_filter_q_conjecture() {
-        // We are ignoring this until smart splits is working (the filter feature on edges prevents the depth of case splits needed here).
-
         init_logging();
 
         let mut filter_defs = filter_definitions();
@@ -1279,7 +1277,7 @@ mod test {
     #[test]
     fn test_split_minus_plus() {
         init_logging();
-        // invariants::set_max_level(AssertLevel::Off);
+        invariants::set_max_level(AssertLevel::Off);
         let mut defs = TheSyConfig::from_path("tests/minus.th".to_string()).definitions;
         let conjectures = std::mem::take(&mut defs.conjectures);
         let goals = std::mem::take(&mut defs.goals);
