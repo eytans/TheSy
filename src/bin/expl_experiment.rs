@@ -1,6 +1,8 @@
 use std::alloc;
+use std::any::Any;
 use std::fs::File;
 use std::path::PathBuf;
+use std::process::exit;
 use std::time::SystemTime;
 use cap::Cap;
 use egg::{RecExpr, SymbolLang};
@@ -11,6 +13,8 @@ use TheSy::thesy::semantics::Definitions;
 use TheSy::{CaseSplitConfig, thesy, TheSyConfig};
 use TheSy::SubCmd::CheckEquiv;
 use TheSy::thesy::prover;
+use TheSy::thesy::prover::RewriteProver;
+use TheSy::thesy::statistics::{sample_graph_stats, StatsReport};
 use TheSy::utils::TheSyRunRes;
 
 #[global_allocator]
@@ -122,8 +126,12 @@ fn main() {
             args.prover_split_itern.unwrap_or(prover::CASE_ITERN),
         ),
     );
-    // TODO: Fix up thesy creation to use different prover
+    // Create thesy and update prover to my needs
     let (mut thesy, mut case_split, mut rules) = config.create_thesy();
+    thesy.update_provers(|p| {
+        let casted: &RewriteProver = unsafe { &*(&p as *const dyn Any as *const RewriteProver) };
+        Box::new(casted.with_terms_to_push(additional_terms.clone()))
+    });
     // run case split mode only
     let _res = thesy.check_goals(&mut Some(&mut case_split), &mut rules);
     let success = if !thesy.remaining_goals().unwrap().is_empty() {
@@ -133,6 +141,11 @@ fn main() {
         true
     };
     warn!("Finished proving all goals in {:?}", start.elapsed().unwrap());
-    let res = TheSyRunRes::new(thesy, rules, success, case_split.stats);
-    // TODO: report statistics
+    #[cfg(all(feature = "stats"))]
+    sample_gres.thesyraph_stats(&thesy.egraph, StatsReport::End);
+    if cfg!(feature = "stats") {
+        thesy.finalize_stats(None);
+        thesy::statistics::export_json(&mut thesy, &args.path);
+    }
+    exit(0);
 }

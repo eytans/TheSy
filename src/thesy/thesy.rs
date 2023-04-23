@@ -30,7 +30,7 @@ pub const EXP_SPLIT_ITERN: usize = 4;
 /// Theory Synthesizer - Explores a given theory finding and proving new lemmas.
 pub struct TheSy {
     /// known datatypes to wfo rewrites for induction
-    pub(crate) datatypes: IndexMap<DataType, Box<dyn Prover>>,
+    pub(crate) datatypes: IndexMap<DataType, Box<dyn Prover + 'static>>,
     /// known function declerations and their types
     dict: Vec<Function>,
     /// egraph which is expanded as part of the exploration
@@ -227,6 +227,11 @@ impl TheSy {
             total_iters: 0,
             case_split_config: case_split_config.unwrap_or(CaseSplitConfig::new(2, 4)),
         }
+    }
+
+    pub fn update_provers(&mut self, mut f: impl FnMut(Box<dyn Prover + 'static>) -> Box<dyn Prover + 'static>) {
+        self.datatypes = std::mem::take(&mut self.datatypes)
+            .into_iter().map(|(k, v)| (k, f(v))).collect();
     }
 
     pub fn get_example_ids(&self, datatype: &DataType, class: Id) -> Option<Vec<Id>> {

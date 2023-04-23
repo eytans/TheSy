@@ -1,19 +1,20 @@
+use std::any::Any;
 use std::cmp::max;
 use std::str::FromStr;
 
 use egg::{ENodeOrVar, Id, Iteration, Language, Pattern, RecExpr, Rewrite, Runner, Symbol, SymbolLang, Var};
+use egg::appliers::DiffApplier;
+use egg::expression_ops::{IntoTree, RecExpSlice, Tree};
+use egg::pretty_string::PrettyString;
+use egg::searchers::{EitherSearcher, MultiDiffSearcher};
+use egg::searchers::FilteringSearcher;
 use itertools::Itertools;
 use log::{debug, info};
 use permutohedron::control::Control;
 use permutohedron::heap_recursive;
 
-use egg::appliers::DiffApplier;
-use egg::expression_ops::{IntoTree, RecExpSlice, Tree};
-use egg::searchers::{EitherSearcher, MultiDiffSearcher};
-use egg::pretty_string::PrettyString;
-use crate::lang::{DataType, Function, ThEGraph, ThExpr, ThRewrite};
-use egg::searchers::FilteringSearcher;
 use crate::{CaseSplitConfig, PRETTY_W, ProverConfig, utils};
+use crate::lang::{DataType, Function, ThEGraph, ThExpr, ThRewrite};
 use crate::thesy::case_split::CaseSplit;
 use crate::thesy::statistics::{sample_graph_stats, StatsReport};
 use crate::thesy::TheSy;
@@ -37,6 +38,8 @@ pub struct RewriteProver {
     run_depth: usize,
     split_conf: CaseSplitConfig,
     stats: ProverStats,
+    // TODO: redesign the prover to be modular and then have two implementations of it
+    terms_to_push: Vec<ThExpr>,
 }
 
 pub const CASE_SPLIT_DEPTH: usize = 1;
@@ -52,12 +55,18 @@ impl RewriteProver {
     pub fn new_config(datatype: DataType, config: ProverConfig) -> RewriteProver {
         let wfo_rules = Self::wfo_datatype(&datatype);
         let ind_var = TheSy::get_ind_var(&datatype);
-        RewriteProver { datatype, wfo_rules, ind_var, run_depth: config.run_depth, split_conf: config.split_conf, stats: Default::default() }
+        RewriteProver { datatype, wfo_rules, ind_var, run_depth: config.run_depth, split_conf: config.split_conf, stats: Default::default(), terms_to_push: Default::default() }
     }
 
     pub fn with_split_params(&self, config: CaseSplitConfig) -> RewriteProver {
         let mut res = self.clone();
         res.split_conf = config;
+        res
+    }
+
+    pub fn with_terms_to_push(&self, terms: Vec<ThExpr>) -> RewriteProver {
+        let mut res = self.clone();
+        res.terms_to_push = terms;
         res
     }
 
@@ -81,8 +90,8 @@ impl RewriteProver {
                         (format!("?param_{}", i).to_string(), *t == datatype.as_exp())
                     ).collect_vec();
                 let interspersed = itertools::Itertools::intersperse(
-                    params.iter().map(|s| s.0.clone()), 
-                    " ".to_string()
+                    params.iter().map(|s| s.0.clone()),
+                    " ".to_string(),
                 ).collect::<String>();
                 let contr_pattern = Pattern::from_str(&*format!("(|@|?root|@|{} {})", c.name, interspersed)).unwrap();
 
@@ -152,11 +161,11 @@ impl RewriteProver {
     }
 
     fn prove_constructors_split_d(&mut self, case_splitter: &mut Option<&mut CaseSplit>,
-                                      rules: &[ThRewrite],
-                                      precond: Option<&ThExpr>,
-                                      ex1: &ThExpr,
-                                      ex2: &ThExpr,
-                                      constructors: Vec<Function>) -> bool {
+                                  rules: &[ThRewrite],
+                                  precond: Option<&ThExpr>,
+                                  ex1: &ThExpr,
+                                  ex2: &ThExpr,
+                                  constructors: Vec<Function>) -> bool {
         if self.not_containing_ind_var(ex1) && self.not_containing_ind_var(ex2) {
             warn!("prove_base: no ind var in ex1 and ex2");
             return false;
@@ -214,12 +223,12 @@ impl RewriteProver {
     }
 
     /// Assume base case is correct and prove equality using induction.
-   /// Induction hypothesis is given as a rewrite rule, using precompiled rewrite rules
-   /// representing well founded order on the induction variable.
-   /// Need to replace the induction variable with an expression representing a constructor and
-   /// well founded order on the params of the constructor.
+    /// Induction hypothesis is given as a rewrite rule, using precompiled rewrite rules
+    /// representing well founded order on the induction variable.
+    /// Need to replace the induction variable with an expression representing a constructor and
+    /// well founded order on the params of the constructor.
     fn prove_ind_split_d(&mut self, case_splitter: &mut Option<&mut CaseSplit>, rules: &[ThRewrite], precond: Option<&ThExpr>, ex1: &ThExpr, ex2: &ThExpr)
-                             -> Option<Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, ThRewrite)>> {
+                         -> Option<Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, ThRewrite)>> {
         if self.not_containing_ind_var(ex1) && self.not_containing_ind_var(ex2) {
             return None;
         }
@@ -236,8 +245,8 @@ impl RewriteProver {
             let mut egraph = orig_egraph.clone();
             let interspersed = itertools::Itertools::intersperse(
                 c.params.iter().enumerate()
-                    .map(|(i, _t)| "param_".to_owned() + &*i.to_string()), 
-                    " ".parse().unwrap()
+                    .map(|(i, _t)| "param_".to_owned() + &*i.to_string()),
+                " ".parse().unwrap(),
             ).collect::<String>();
             let contr_exp = RecExpr::from_str(format!("({} {})", c.name, interspersed).as_str()).unwrap();
             let contr_id = egraph.add_expr(&contr_exp);
@@ -260,7 +269,7 @@ impl RewriteProver {
     }
 
     fn prove_all_split_d(&mut self, case_splitter: &mut Option<&mut CaseSplit>, rules: &[ThRewrite], precond: Option<&ThExpr>, ex1: &ThExpr, ex2: &ThExpr)
-                             -> Option<Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, ThRewrite)>> {
+                         -> Option<Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, ThRewrite)>> {
         let constructors = self.get_base_constructors().into_iter().cloned().collect_vec();
         let temp_res = self.prove_constructors_split_d(case_splitter, rules, precond, ex1, ex2, constructors);
         if temp_res {
@@ -421,7 +430,7 @@ impl Prover for RewriteProver {
     }
 }
 
-pub trait Prover {
+pub trait Prover: Any {
     fn generalize_prove(&mut self, case_splitter: &mut Option<&mut CaseSplit>, rules: &[ThRewrite], orig_ex1: &ThExpr, orig_ex2: &ThExpr)
                         -> Option<Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, ThRewrite)>>;
     /// Returns Some if found rules otherwise None. Receives expressions without vars.
@@ -439,8 +448,8 @@ mod tests {
 
     use crate::lang::{DataType, Function};
     use crate::thesy::prover::RewriteProver;
-    use crate::TheSyConfig;
     use crate::thesy::TheSy;
+    use crate::TheSyConfig;
 
     fn create_nat_type() -> DataType {
         DataType::new("nat".to_string(), vec![
