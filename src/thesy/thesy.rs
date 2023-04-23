@@ -20,7 +20,7 @@ use crate::lang::*;
 use crate::thesy::{case_split, consts};
 use crate::thesy::case_split::CaseSplit;
 use crate::thesy::example_creator::Examples;
-use crate::thesy::prover::Prover;
+use crate::thesy::prover::{Prover, RewriteProver};
 use crate::thesy::statistics::{sample_graph_stats, Stats, StatsReport};
 
 pub const ITERN: usize = 12;
@@ -30,7 +30,7 @@ pub const EXP_SPLIT_ITERN: usize = 4;
 /// Theory Synthesizer - Explores a given theory finding and proving new lemmas.
 pub struct TheSy {
     /// known datatypes to wfo rewrites for induction
-    pub(crate) datatypes: IndexMap<DataType, Prover>,
+    pub(crate) datatypes: IndexMap<DataType, RewriteProver>,
     /// known function declerations and their types
     dict: Vec<Function>,
     /// egraph which is expanded as part of the exploration
@@ -140,11 +140,11 @@ impl TheSy {
         case_split_config: Option<CaseSplitConfig>,
     ) -> TheSy {
         debug_assert!(examples.iter().all(|(d, e)| &e.datatype == d));
-        let datatype_to_prover: IndexMap<DataType, Prover> = datatypes.iter()
+        let datatype_to_prover: IndexMap<DataType, RewriteProver> = datatypes.iter()
             .map(|d| (d.clone(),
                       prover_config.as_ref().map_or(
-                          Prover::new(d.clone()),
-                          |x| Prover::new_config(d.clone(), x.clone()))
+                          RewriteProver::new(d.clone()),
+                          |x| RewriteProver::new_config(d.clone(), x.clone()))
             )).collect();
         let (mut egraph, example_ids) = TheSy::create_graph_example_ids(&datatypes, &examples, &dict, ph_count);
 
@@ -787,6 +787,7 @@ mod test {
     use crate::tests::{init_logging, ProofMode};
     use crate::thesy::{consts, Examples, thesy};
     use crate::thesy::case_split::CaseSplit;
+    use crate::thesy::prover::Prover;
     use crate::thesy::semantics::Definitions;
     use crate::thesy::thesy::TheSy;
 

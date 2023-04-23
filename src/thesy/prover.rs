@@ -19,7 +19,7 @@ use crate::thesy::statistics::{sample_graph_stats, StatsReport};
 use crate::thesy::TheSy;
 
 #[derive(Clone, Debug)]
-pub struct Prover {
+pub struct RewriteProver {
     datatype: DataType,
     wfo_rules: Vec<ThRewrite>,
     ind_var: Function,
@@ -33,19 +33,19 @@ pub const CASE_SPLIT_DEPTH: usize = 1;
 pub const CASE_ITERN: usize = 4;
 pub const RUN_DEPTH: usize = 12;
 
-impl Prover {
-    pub fn new(datatype: DataType) -> Prover {
+impl RewriteProver {
+    pub fn new(datatype: DataType) -> RewriteProver {
         let split_conf = CaseSplitConfig::new(CASE_SPLIT_DEPTH, CASE_ITERN);
-        Prover::new_config(datatype, ProverConfig::new(RUN_DEPTH, split_conf))
+        RewriteProver::new_config(datatype, ProverConfig::new(RUN_DEPTH, split_conf))
     }
 
-    pub fn new_config(datatype: DataType, config: ProverConfig) -> Prover {
+    pub fn new_config(datatype: DataType, config: ProverConfig) -> RewriteProver {
         let wfo_rules = Self::wfo_datatype(&datatype);
         let ind_var = TheSy::get_ind_var(&datatype);
-        Prover { datatype, wfo_rules, ind_var, run_depth: config.run_depth, split_conf: config.split_conf, #[cfg(feature = "stats")] iterations: vec![] }
+        RewriteProver { datatype, wfo_rules, ind_var, run_depth: config.run_depth, split_conf: config.split_conf, #[cfg(feature = "stats")] iterations: vec![] }
     }
 
-    pub fn with_split_params(&self, config: CaseSplitConfig) -> Prover {
+    pub fn with_split_params(&self, config: CaseSplitConfig) -> RewriteProver {
         let mut res = self.clone();
         res.split_conf = config;
         res
@@ -63,7 +63,7 @@ impl Prover {
 
     /// create well founded order rewrites for constructors of Datatype `datatype`.
     fn wfo_datatype(datatype: &DataType) -> Vec<ThRewrite> {
-        let contructor_rules = datatype.constructors.iter()
+        let constructor_rules = datatype.constructors.iter()
             .filter(|c| !c.params.is_empty())
             .flat_map(|c| {
                 let params = c.params.iter().enumerate()
@@ -87,7 +87,7 @@ impl Prover {
                     Rewrite::new(format!("{}_{}", c.name, a.0), contr_pattern.clone(), a.1).unwrap()
                 }).collect_vec()
             });
-        let mut res = contructor_rules.collect_vec();
+        let mut res = constructor_rules.collect_vec();
         res.push(Self::wfo_trans());
         res
     }
@@ -129,8 +129,8 @@ impl Prover {
         let text2 = precond_text.to_owned() + &*fixed_ex2.pretty(80) + " => " + &*fixed_ex1.pretty(80);
         let mut new_rules: Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, ThRewrite)> = vec![];
         // TODO: dont do it so half assed
-        Prover::push_rw(fixed_precond.clone(), &fixed_ex1, &fixed_ex2, text1, &mut new_rules);
-        Prover::push_rw(fixed_precond, &fixed_ex2, &fixed_ex1, text2, &mut new_rules);
+        RewriteProver::push_rw(fixed_precond.clone(), &fixed_ex1, &fixed_ex2, text1, &mut new_rules);
+        RewriteProver::push_rw(fixed_precond, &fixed_ex2, &fixed_ex1, text2, &mut new_rules);
         new_rules
     }
 
@@ -203,58 +203,6 @@ impl Prover {
         !runner.egraph.equivs(&ex1, &ex2).is_empty()
     }
 
-    pub fn generalize_prove(&mut self, case_splitter: &mut Option<&mut CaseSplit>, rules: &[ThRewrite], orig_ex1: &ThExpr, orig_ex2: &ThExpr)
-                            -> Option<Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, ThRewrite)>> {
-        // TODO: generalize non induction vars
-        let mut ex1 = orig_ex1.into_tree().to_clean_exp();
-        let mut ex2 = orig_ex2.into_tree().to_clean_exp();
-
-        let mut ex1_ph1_indices = self.collect_ph1s(&ex1);
-        let mut ex2_ph1_indices = self.collect_ph1s(&ex2);
-        if ex1_ph1_indices.len() <= 1 && ex2_ph1_indices.len() <= 1 {
-            return None;
-        }
-        if ex1_ph1_indices.len() > ex2_ph1_indices.len() {
-            std::mem::swap(&mut ex1_ph1_indices, &mut ex2_ph1_indices);
-            std::mem::swap(&mut ex1, &mut ex2);
-        }
-        info!("generalizing {} = {}", ex1.pretty(PRETTY_W), ex2.pretty(PRETTY_W));
-        // We want less options when checking all permutations
-        let max_phs = max(ex2_ph1_indices.len(), ex1_ph1_indices.len());
-        let mut res = None;
-        for ph_count in (1..=max_phs).rev() {
-            let updated_ex2 = Self::replace_at_indexes(
-                &ex2,
-                ex2_ph1_indices.iter().enumerate().map(|(ph_id, index)|
-                    (*index, TheSy::get_ph(&self.datatype.as_exp(), (ph_id % ph_count) + 1).name)).collect_vec(),
-            );
-            let control = heap_recursive(&mut ex1_ph1_indices, |permutation| {
-                let updated_ex1 = Self::replace_at_indexes(
-                    &ex1,
-                    permutation.iter().enumerate().map(|(ph_id, index)|
-                        (*index, TheSy::get_ph(&self.datatype.as_exp(), (ph_id % ph_count) + 1).name)).collect_vec(),
-                );
-                let res = self.prove_all(case_splitter, rules, None, &updated_ex1, &updated_ex2);
-                if res.is_some() {
-                    Control::Break(res.unwrap())
-                } else {
-                    Control::Continue
-                }
-            });
-            res = control.break_value();
-            if res.is_some() {
-                break;
-            }
-        }
-        res
-    }
-
-    /// Returns Some if found rules otherwise None. Receives expressions without vars.
-    pub fn prove_ind(&mut self, case_splitter: &mut Option<&mut CaseSplit>, rules: &[ThRewrite], ex1: &ThExpr, ex2: &ThExpr)
-                     -> Option<Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, ThRewrite)>> {
-        self.prove_ind_split_d(case_splitter, rules, None, ex1, ex2)
-    }
-
     /// Assume base case is correct and prove equality using induction.
    /// Induction hypothesis is given as a rewrite rule, using precompiled rewrite rules
    /// representing well founded order on the induction variable.
@@ -299,11 +247,6 @@ impl Prover {
             info!("Failed to prove: {} = {}", ex1.pretty(PRETTY_W), ex2.pretty(PRETTY_W));
             None
         }
-    }
-
-    pub fn prove_all(&mut self, case_splitter: &mut Option<&mut CaseSplit>, rules: &[ThRewrite], precond: Option<&ThExpr>, ex1: &ThExpr, ex2: &ThExpr)
-                     -> Option<Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, ThRewrite)>> {
-        self.prove_all_split_d(case_splitter, rules, precond, ex1, ex2)
     }
 
     fn prove_all_split_d(&mut self, case_splitter: &mut Option<&mut CaseSplit>, rules: &[ThRewrite], precond: Option<&ThExpr>, ex1: &ThExpr, ex2: &ThExpr)
@@ -379,7 +322,7 @@ impl Prover {
         fn add_to_exp(res: &mut RecExpr<ENodeOrVar<SymbolLang>>, inp: &RecExpSlice<SymbolLang>, induction_ph: &String, sub_ind: &String) -> Id {
             let mut ids = inp.children().iter().map(|c| add_to_exp(res, c, induction_ph, sub_ind)).collect_vec();
             let mut root = inp.root().clone();
-            root.op = Prover::ident_mapper(&root.op.to_string(), induction_ph, sub_ind).parse().unwrap();
+            root.op = RewriteProver::ident_mapper(&root.op.to_string(), induction_ph, sub_ind).parse().unwrap();
             let is_var = root.op.to_string().starts_with("?");
             if (!ids.is_empty()) && is_var {
                 // Special case of vairable function
@@ -407,12 +350,79 @@ impl Prover {
     }
 }
 
+impl Prover for RewriteProver {
+    fn generalize_prove(&mut self, case_splitter: &mut Option<&mut CaseSplit>, rules: &[ThRewrite], orig_ex1: &ThExpr, orig_ex2: &ThExpr)
+                        -> Option<Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, ThRewrite)>> {
+        // TODO: generalize non induction vars
+        let mut ex1 = orig_ex1.into_tree().to_clean_exp();
+        let mut ex2 = orig_ex2.into_tree().to_clean_exp();
+
+        let mut ex1_ph1_indices = self.collect_ph1s(&ex1);
+        let mut ex2_ph1_indices = self.collect_ph1s(&ex2);
+        if ex1_ph1_indices.len() <= 1 && ex2_ph1_indices.len() <= 1 {
+            return None;
+        }
+        if ex1_ph1_indices.len() > ex2_ph1_indices.len() {
+            std::mem::swap(&mut ex1_ph1_indices, &mut ex2_ph1_indices);
+            std::mem::swap(&mut ex1, &mut ex2);
+        }
+        info!("generalizing {} = {}", ex1.pretty(PRETTY_W), ex2.pretty(PRETTY_W));
+        // We want less options when checking all permutations
+        let max_phs = max(ex2_ph1_indices.len(), ex1_ph1_indices.len());
+        let mut res = None;
+        for ph_count in (1..=max_phs).rev() {
+            let updated_ex2 = Self::replace_at_indexes(
+                &ex2,
+                ex2_ph1_indices.iter().enumerate().map(|(ph_id, index)|
+                    (*index, TheSy::get_ph(&self.datatype.as_exp(), (ph_id % ph_count) + 1).name)).collect_vec(),
+            );
+            let control = heap_recursive(&mut ex1_ph1_indices, |permutation| {
+                let updated_ex1 = Self::replace_at_indexes(
+                    &ex1,
+                    permutation.iter().enumerate().map(|(ph_id, index)|
+                        (*index, TheSy::get_ph(&self.datatype.as_exp(), (ph_id % ph_count) + 1).name)).collect_vec(),
+                );
+                let res = self.prove_all(case_splitter, rules, None, &updated_ex1, &updated_ex2);
+                if res.is_some() {
+                    Control::Break(res.unwrap())
+                } else {
+                    Control::Continue
+                }
+            });
+            res = control.break_value();
+            if res.is_some() {
+                break;
+            }
+        }
+        res
+    }
+    /// Returns Some if found rules otherwise None. Receives expressions without vars.
+    fn prove_ind(&mut self, case_splitter: &mut Option<&mut CaseSplit>, rules: &[ThRewrite], ex1: &ThExpr, ex2: &ThExpr)
+                 -> Option<Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, ThRewrite)>> {
+        self.prove_ind_split_d(case_splitter, rules, None, ex1, ex2)
+    }
+    fn prove_all(&mut self, case_splitter: &mut Option<&mut CaseSplit>, rules: &[ThRewrite], precond: Option<&ThExpr>, ex1: &ThExpr, ex2: &ThExpr)
+                 -> Option<Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, ThRewrite)>> {
+        self.prove_all_split_d(case_splitter, rules, precond, ex1, ex2)
+    }
+}
+
+pub trait Prover {
+    fn generalize_prove(&mut self, case_splitter: &mut Option<&mut CaseSplit>, rules: &[ThRewrite], orig_ex1: &ThExpr, orig_ex2: &ThExpr)
+                        -> Option<Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, ThRewrite)>>;
+    /// Returns Some if found rules otherwise None. Receives expressions without vars.
+    fn prove_ind(&mut self, case_splitter: &mut Option<&mut CaseSplit>, rules: &[ThRewrite], ex1: &ThExpr, ex2: &ThExpr)
+                 -> Option<Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, ThRewrite)>>;
+    fn prove_all(&mut self, case_splitter: &mut Option<&mut CaseSplit>, rules: &[ThRewrite], precond: Option<&ThExpr>, ex1: &ThExpr, ex2: &ThExpr)
+                 -> Option<Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, ThRewrite)>>;
+}
+
 #[cfg(test)]
 mod tests {
     use egg::{EGraph, Pattern, Runner, Searcher, SymbolLang};
 
     use crate::lang::{DataType, Function};
-    use crate::thesy::prover::Prover;
+    use crate::thesy::prover::{Prover, RewriteProver};
     use crate::TheSyConfig;
     use crate::thesy::TheSy;
 
@@ -428,7 +438,7 @@ mod tests {
         let mut egraph = EGraph::default();
         egraph.add_expr("(ltwf x y)".parse().as_ref().unwrap());
         egraph.add_expr("(ltwf y z)".parse().as_ref().unwrap());
-        egraph = Runner::default().with_egraph(egraph).run(&vec![Prover::wfo_trans()][..]).egraph;
+        egraph = Runner::default().with_egraph(egraph).run(&vec![RewriteProver::wfo_trans()][..]).egraph;
         let pat: Pattern<SymbolLang> = "(ltwf x z)".parse().unwrap();
         assert!(pat.search(&egraph).iter().all(|s| !s.substs.is_empty()));
         assert!(!pat.search(&egraph).is_empty());
@@ -438,7 +448,7 @@ mod tests {
     fn wfo_nat_ok() {
         let mut egraph = EGraph::default();
         egraph.add_expr("(S y)".parse().as_ref().unwrap());
-        egraph = Runner::default().with_egraph(egraph).run(&Prover::wfo_datatype(&create_nat_type())[..]).egraph;
+        egraph = Runner::default().with_egraph(egraph).run(&RewriteProver::wfo_datatype(&create_nat_type())[..]).egraph;
         let pat: Pattern<SymbolLang> = "(ltwf y (S y))".parse().unwrap();
         assert!(pat.search(&egraph).iter().all(|s| !s.substs.is_empty()));
         assert!(!pat.search(&egraph).is_empty());
