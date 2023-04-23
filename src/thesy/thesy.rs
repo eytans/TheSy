@@ -6,22 +6,22 @@ use std::str::FromStr;
 use std::time::{Duration, SystemTime};
 
 use egg::*;
-use indexmap::{IndexMap, IndexSet};
-use itertools::Itertools;
-use log::{info, warn};
-
 use egg::costs::{MinRep, RepOrder};
 use egg::expression_ops::{IntoTree, Tree};
 use egg::pretty_string::PrettyString;
 use egg::searchers::MultiDiffSearcher;
+use egg::tools::tools::choose;
+use indexmap::{IndexMap, IndexSet};
+use itertools::Itertools;
+use log::{info, warn};
+
+use crate::{CaseSplitConfig, PRETTY_W, ProverConfig, utils};
 use crate::lang::*;
 use crate::thesy::{case_split, consts};
 use crate::thesy::case_split::CaseSplit;
 use crate::thesy::example_creator::Examples;
 use crate::thesy::prover::Prover;
 use crate::thesy::statistics::{sample_graph_stats, Stats, StatsReport};
-use egg::tools::tools::choose;
-use crate::{CaseSplitConfig, PRETTY_W, ProverConfig};
 
 pub const ITERN: usize = 12;
 pub const EXP_SPLIT_D: usize = 2;
@@ -493,7 +493,11 @@ impl TheSy {
     }
 
     pub(crate) fn inner_check_equality(rules: &[ThRewrite], precond: &Option<ThExpr>, ex1: &ThExpr, ex2: &ThExpr) -> (Runner<ThNode, ThAnl>, bool) {
-        let egraph = Prover::create_graph(precond.as_ref(), &ex1, &ex2);
+
+        let mut egraph = utils::create_graph(&vec![ex1, ex2]);
+        if let Some(pre) = precond {
+            utils::add_assumption(&mut egraph, pre);
+        }
         let runner = Runner::default()
             .with_iter_limit(8)
             .with_time_limit(Duration::from_secs(600))
@@ -529,7 +533,7 @@ impl TheSy {
                     let start = if cfg!(feature = "stats") {
                         Some(SystemTime::now())
                     } else { None };
-                    res = p.prove_all_split_d(case_splitter, rules, Option::from(precond), ex1, ex2);
+                    res = p.prove_all(case_splitter, rules, Option::from(precond), ex1, ex2);
                     index = i;
                     if res.is_some() {
                         warn!("Proved goal {} - {:?} -> {} = {}", i, precond, ex1, ex2);
@@ -680,7 +684,7 @@ impl TheSy {
                 continue;
             }
             // Might be a false conjecture that just doesnt get picked anymore in reconstruct.
-            let mut new_rules = self.datatypes[&d].prove_all(&mut splitter_to_use, rules, &ex1, &ex2);
+            let mut new_rules = self.datatypes[&d].prove_all(&mut splitter_to_use, rules, None, &ex1, &ex2);
             if new_rules.is_none() {
                 continue;
             } else {
@@ -768,23 +772,23 @@ mod test {
     use std::iter::FromIterator;
     use std::str::FromStr;
     use std::time::SystemTime;
-    use cap::Cap;
 
+    use cap::Cap;
     use egg::{EGraph, Pattern, RecExpr, Searcher, Symbol, SymbolLang};
+    use egg::reconstruct::reconstruct;
+    use egg::tools::tools::Grouped;
     use indexmap::{IndexMap, IndexSet};
+    #[allow(unused_imports)]
+    use invariants::AssertLevel;
     use itertools::Itertools;
 
-    use egg::reconstruct::reconstruct;
+    use crate::{PRETTY_W, tests, TheSyConfig};
     use crate::lang::{DataType, Function, ThEGraph, ThRewrite};
     use crate::tests::{init_logging, ProofMode};
     use crate::thesy::{consts, Examples, thesy};
     use crate::thesy::case_split::CaseSplit;
     use crate::thesy::semantics::Definitions;
     use crate::thesy::thesy::TheSy;
-    use crate::{TheSyConfig, tests, PRETTY_W};
-    use egg::tools::tools::Grouped;
-    #[allow(unused_imports)]
-    use invariants::AssertLevel;
 
     #[global_allocator]
     pub(crate) static ALLOCATOR: Cap<alloc::System> = Cap::new(alloc::System, usize::MAX);

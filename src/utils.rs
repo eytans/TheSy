@@ -1,13 +1,11 @@
-use crate::lang::ThEGraph;
+use crate::lang::{ThEGraph, ThExpr};
 use egg::expression_ops::{IntoTree, RecExpSlice, Tree};
-use egg::{
-    Analysis, ColorId, EGraph, ENodeOrVar, Id, ImmutableCondition, Language, Pattern,
-    Searcher, Subst, SymbolLang, ToCondRc, Var,
-};
+use egg::{Analysis, ColorId, EGraph, ENodeOrVar, Id, ImmutableCondition, Language, Pattern, RecExpr, Searcher, Subst, SymbolLang, ToCondRc, Var};
 use indexmap::IndexSet;
 use itertools::Itertools;
 use std::collections::HashSet;
 use std::iter::FromIterator;
+use std::ops::Deref;
 use std::str::FromStr;
 use thesy_parser::ast::Expression;
 
@@ -298,6 +296,24 @@ pub fn filterTypings(egraph: &ThEGraph, id: Id) -> bool {
         .collect();
     return res && !matched.contains(&id);
 }
+
+pub fn create_graph(expressions: &[impl Deref<Target = ThExpr>]) -> ThEGraph {
+    let mut orig_egraph: ThEGraph = EGraph::default();
+    for e in expressions {
+        let _ = orig_egraph.add_expr(e);
+    }
+    orig_egraph.rebuild();
+    orig_egraph
+}
+
+
+pub fn add_assumption(orig_egraph: &mut ThEGraph, pre: &ThExpr) {
+    let precond_id = orig_egraph.add_expr(pre);
+    let true_id = orig_egraph.add_expr(&RecExpr::from_str("true").unwrap());
+    orig_egraph.union(precond_id, true_id);
+    orig_egraph.add(SymbolLang::new("=", vec![precond_id, true_id]));
+}
+
 
 #[cfg(test)]
 mod test {

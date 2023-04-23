@@ -271,6 +271,7 @@ mod test {
     use crate::tests::init_logging;
     #[allow(unused_imports)]
     use crate::thesy::statistics::STATS;
+    #[allow(unused_imports)]
     use crate::thesy::TheSy;
 
     #[cfg(all(feature = "stats", feature = "keep_splits"))]

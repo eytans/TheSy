@@ -3,7 +3,6 @@
 use crate::thesy::TheSy;
 use egg::{RecExpr, Id};
 use crate::thesy::semantics::Definitions;
-use crate::thesy::prover::Prover;
 use std::fs::File;
 use std::ops::Not;
 use std::str::FromStr;
@@ -11,7 +10,7 @@ use std::sync::Mutex;
 use indexmap::IndexSet;
 use thesy_parser::ast::{Expression, Terminal};
 use egg::reconstruct::reconstruct;
-use crate::PRETTY_W;
+use crate::{PRETTY_W, utils};
 use crate::lang::ThExpr;
 
 lazy_static!(
@@ -93,7 +92,10 @@ pub fn test_terms(definitions: Definitions) -> ProofMode {
         return ProofMode::TermNotCreated;
     }
 
-    let mut egraph = Prover::create_graph(precond.as_ref(), &ex1, &ex2);
+    let mut egraph = utils::create_graph(&vec![ex1, ex2]);
+    if let Some(pre) = precond.as_ref() {
+        utils::add_assumption(&mut egraph, pre);
+    }
 
     // Attempt prove by case split
     case_splitter.case_split(&mut egraph, 3, &rws, 12);
@@ -160,7 +162,7 @@ pub fn test_prover(definitions: &Definitions) -> (TheSy, Vec<ProofMode>) {
             // Attempt proof
             let prover = &mut thesy.datatypes[d];
             warn!("Proving goal with {}", d);
-            let temp = prover.prove_all_split_d(
+            let temp = prover.prove_all(
                 &mut Some(&mut case_splitter),
                 &rws,
                 Option::from(precond),

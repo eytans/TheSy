@@ -1,7 +1,7 @@
 use std::cmp::max;
 use std::str::FromStr;
 
-use egg::{EGraph, ENodeOrVar, Id, Iteration, Language, Pattern, RecExpr, Rewrite, Runner, Symbol, SymbolLang, Var};
+use egg::{ENodeOrVar, Id, Iteration, Language, Pattern, RecExpr, Rewrite, Runner, Symbol, SymbolLang, Var};
 use itertools::Itertools;
 use log::{debug, info};
 use permutohedron::control::Control;
@@ -13,10 +13,10 @@ use egg::searchers::{EitherSearcher, MultiDiffSearcher};
 use egg::pretty_string::PrettyString;
 use crate::lang::{DataType, Function, ThEGraph, ThExpr, ThRewrite};
 use egg::searchers::FilteringSearcher;
-use crate::{CaseSplitConfig, PRETTY_W, ProverConfig};
-use crate::thesy::TheSy;
+use crate::{CaseSplitConfig, PRETTY_W, ProverConfig, thesy, utils};
 use crate::thesy::case_split::CaseSplit;
 use crate::thesy::statistics::{sample_graph_stats, StatsReport};
+use crate::thesy::TheSy;
 
 #[derive(Clone, Debug)]
 pub struct Prover {
@@ -96,22 +96,12 @@ impl Prover {
         ex.as_ref().iter().find(|s| s.op.to_string() == self.ind_var.name).is_none()
     }
 
-    pub fn create_graph(precond: Option<&ThExpr>, ex1: &&ThExpr, ex2: &&ThExpr) -> ThEGraph {
-        let mut orig_egraph: ThEGraph = EGraph::default();
-        let _ = orig_egraph.add_expr(&ex1);
-        let _ = orig_egraph.add_expr(&ex2);
-        if precond.is_some() {
-            let precond_id = orig_egraph.add_expr(precond.unwrap());
-            let true_id = orig_egraph.add_expr(&RecExpr::from_str("true").unwrap());
-            orig_egraph.union(precond_id, true_id);
-            orig_egraph.add(SymbolLang::new("=", vec![precond_id, true_id]));
+    fn create_proof_graph(&self, precond: Option<&ThExpr>, ex1: &ThExpr, ex2: &ThExpr) -> (ThEGraph, Id) {
+        let expressions = vec![ex1, ex2];
+        let mut orig_egraph = utils::create_graph(&expressions);
+        if let Some(pre) = precond {
+            utils::add_assumption(&mut orig_egraph, pre);
         }
-        orig_egraph.rebuild();
-        orig_egraph
-    }
-
-    fn create_proof_graph(&self, precond: Option<&ThExpr>, ex1: &&ThExpr, ex2: &&ThExpr) -> (ThEGraph, Id) {
-        let orig_egraph = Self::create_graph(precond, ex1, ex2);
         let ind_id = orig_egraph.lookup(SymbolLang::new(&self.ind_var.name, vec![])).unwrap();
         (orig_egraph, ind_id)
     }
@@ -130,7 +120,7 @@ impl Prover {
             .map(|s| s.0).collect_vec()
     }
 
-    pub fn rw_from_exp(precond: Option<&ThExpr>, ex1: &ThExpr, ex2: &ThExpr, ind_var: &Function) -> Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, ThRewrite)> {
+    fn rw_from_exp(precond: Option<&ThExpr>, ex1: &ThExpr, ex2: &ThExpr, ind_var: &Function) -> Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, ThRewrite)> {
         let fixed_precond = precond.map(|p| Self::pattern_from_exp(p, &ind_var, &("?".to_owned() + &ind_var.name)));
         let fixed_ex1 = Self::pattern_from_exp(ex1, ind_var, &("?".to_owned() + &ind_var.name));
         let fixed_ex2 = Self::pattern_from_exp(ex2, ind_var, &("?".to_owned() + &ind_var.name));
@@ -144,11 +134,6 @@ impl Prover {
         new_rules
     }
 
-    pub fn prove_base(&mut self, case_splitter: &mut Option<&mut CaseSplit>, rules: &[ThRewrite], ex1: &ThExpr, ex2: &ThExpr) -> bool {
-        let constructors = self.get_base_constructors().into_iter().cloned().collect_vec();
-        self.prove_constructors_split_d(case_splitter, rules, None, ex1, ex2, constructors)
-    }
-
     fn get_base_constructors(&self) -> Vec<&Function> {
         let constructors = self.datatype.constructors.iter()
             .filter(|c| c.params.is_empty())
@@ -156,7 +141,7 @@ impl Prover {
         constructors
     }
 
-    pub fn prove_constructors_split_d(&mut self, case_splitter: &mut Option<&mut CaseSplit>,
+    fn prove_constructors_split_d(&mut self, case_splitter: &mut Option<&mut CaseSplit>,
                                       rules: &[ThRewrite],
                                       precond: Option<&ThExpr>,
                                       ex1: &ThExpr,
@@ -249,7 +234,7 @@ impl Prover {
                     permutation.iter().enumerate().map(|(ph_id, index)|
                         (*index, TheSy::get_ph(&self.datatype.as_exp(), (ph_id % ph_count) + 1).name)).collect_vec(),
                 );
-                let res = self.prove_all(case_splitter, rules, &updated_ex1, &updated_ex2);
+                let res = self.prove_all(case_splitter, rules, None, &updated_ex1, &updated_ex2);
                 if res.is_some() {
                     Control::Break(res.unwrap())
                 } else {
@@ -275,7 +260,7 @@ impl Prover {
    /// representing well founded order on the induction variable.
    /// Need to replace the induction variable with an expression representing a constructor and
    /// well founded order on the params of the constructor.
-    pub fn prove_ind_split_d(&mut self, case_splitter: &mut Option<&mut CaseSplit>, rules: &[ThRewrite], precond: Option<&ThExpr>, ex1: &ThExpr, ex2: &ThExpr)
+    fn prove_ind_split_d(&mut self, case_splitter: &mut Option<&mut CaseSplit>, rules: &[ThRewrite], precond: Option<&ThExpr>, ex1: &ThExpr, ex2: &ThExpr)
                              -> Option<Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, ThRewrite)>> {
         if self.not_containing_ind_var(ex1) && self.not_containing_ind_var(ex2) {
             return None;
@@ -316,12 +301,12 @@ impl Prover {
         }
     }
 
-    pub fn prove_all(&mut self, case_splitter: &mut Option<&mut CaseSplit>, rules: &[ThRewrite], ex1: &ThExpr, ex2: &ThExpr)
+    pub fn prove_all(&mut self, case_splitter: &mut Option<&mut CaseSplit>, rules: &[ThRewrite], precond: Option<&ThExpr>, ex1: &ThExpr, ex2: &ThExpr)
                      -> Option<Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, ThRewrite)>> {
-        self.prove_all_split_d(case_splitter, rules, None, ex1, ex2)
+        self.prove_all_split_d(case_splitter, rules, precond, ex1, ex2)
     }
 
-    pub fn prove_all_split_d(&mut self, case_splitter: &mut Option<&mut CaseSplit>, rules: &[ThRewrite], precond: Option<&ThExpr>, ex1: &ThExpr, ex2: &ThExpr)
+    fn prove_all_split_d(&mut self, case_splitter: &mut Option<&mut CaseSplit>, rules: &[ThRewrite], precond: Option<&ThExpr>, ex1: &ThExpr, ex2: &ThExpr)
                              -> Option<Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, ThRewrite)>> {
         let constructors = self.get_base_constructors().into_iter().cloned().collect_vec();
         let temp_res = self.prove_constructors_split_d(case_splitter, rules, precond, ex1, ex2, constructors);
@@ -389,7 +374,7 @@ impl Prover {
         res
     }
 
-    pub fn pattern_from_exp(exp: &ThExpr, induction_ph: &Function, sub_ind: &String) -> Pattern<SymbolLang> {
+    fn pattern_from_exp(exp: &ThExpr, induction_ph: &Function, sub_ind: &String) -> Pattern<SymbolLang> {
         let mut res_exp: RecExpr<ENodeOrVar<SymbolLang>> = RecExpr::default();
         fn add_to_exp(res: &mut RecExpr<ENodeOrVar<SymbolLang>>, inp: &RecExpSlice<SymbolLang>, induction_ph: &String, sub_ind: &String) -> Id {
             let mut ids = inp.children().iter().map(|c| add_to_exp(res, c, induction_ph, sub_ind)).collect_vec();
