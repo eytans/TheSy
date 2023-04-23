@@ -12,7 +12,6 @@ use thesy_parser::ast::{Expression, Terminal};
 use egg::reconstruct::reconstruct;
 use crate::{PRETTY_W, utils};
 use crate::lang::ThExpr;
-use crate::thesy::prover::Prover;
 
 lazy_static!(
     static ref LOG_INITIALIZED: Mutex<bool> = Mutex::new(false);

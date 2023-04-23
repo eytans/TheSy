@@ -13,7 +13,7 @@ use egg::searchers::{EitherSearcher, MultiDiffSearcher};
 use egg::pretty_string::PrettyString;
 use crate::lang::{DataType, Function, ThEGraph, ThExpr, ThRewrite};
 use egg::searchers::FilteringSearcher;
-use crate::{CaseSplitConfig, PRETTY_W, ProverConfig, thesy, utils};
+use crate::{CaseSplitConfig, PRETTY_W, ProverConfig, utils};
 use crate::thesy::case_split::CaseSplit;
 use crate::thesy::statistics::{sample_graph_stats, StatsReport};
 use crate::thesy::TheSy;
@@ -438,7 +438,7 @@ mod tests {
     use egg::{EGraph, Pattern, Runner, Searcher, SymbolLang};
 
     use crate::lang::{DataType, Function};
-    use crate::thesy::prover::{Prover, RewriteProver};
+    use crate::thesy::prover::RewriteProver;
     use crate::TheSyConfig;
     use crate::thesy::TheSy;
 

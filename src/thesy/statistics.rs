@@ -1,3 +1,5 @@
+use std::fs::File;
+use std::path::PathBuf;
 use std::time::{Duration, SystemTime};
 
 #[allow(unused_imports)]
@@ -5,7 +7,7 @@ use egg::{ColorId, Iteration};
 use indexmap::{IndexMap, IndexSet};
 use serde::{Deserialize, Serialize};
 use crate::lang::{Function, ThEGraph, ThExpr};
-use crate::PRETTY_W;
+use crate::{PRETTY_W, thesy};
 use crate::thesy::case_split::CaseSplitStats;
 
 global_counter!(MEASURE_COUNTER, usize, usize::default());
@@ -265,11 +267,26 @@ pub fn sample_graph_stats(egraph: &ThEGraph, report: StatsReport) {
     }
 }
 
+
+#[cfg(feature = "stats")]
+pub fn export_json(thesy: &mut thesy::TheSy, path: &PathBuf) {
+    let stat_path = path.with_extension("stats.json");
+    let colored_stat_path = path.with_extension("colored_stats.json");
+    thesy.finalize_stats(None);
+    serde_json::to_writer(File::create(stat_path).unwrap(), &thesy.stats).unwrap();
+    unsafe {
+        serde_json::to_writer(File::create(colored_stat_path).unwrap(), &STATS).unwrap();
+    }
+}
+
+#[cfg(not(feature = "stats"))]
+fn export_json(thesy: &TheSy::thesy::thesy::TheSy, path: &PathBuf) {}
+
+
 #[cfg(test)]
 mod test {
     #[allow(unused_imports)]
     use crate::tests::init_logging;
-    use crate::thesy::prover::Prover;
     #[allow(unused_imports)]
     use crate::thesy::statistics::STATS;
     #[allow(unused_imports)]

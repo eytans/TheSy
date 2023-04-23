@@ -789,7 +789,6 @@ mod test {
     use crate::tests::{init_logging, ProofMode};
     use crate::thesy::{consts, Examples, thesy};
     use crate::thesy::case_split::CaseSplit;
-    use crate::thesy::prover::Prover;
     use crate::thesy::semantics::Definitions;
     use crate::thesy::thesy::TheSy;
 

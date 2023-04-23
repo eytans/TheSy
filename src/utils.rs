@@ -1,6 +1,6 @@
 use crate::lang::{ThEGraph, ThExpr};
 use egg::expression_ops::{IntoTree, RecExpSlice, Tree};
-use egg::{Analysis, ColorId, EGraph, ENodeOrVar, Id, ImmutableCondition, Language, Pattern, RecExpr, Searcher, Subst, SymbolLang, ToCondRc, Var};
+use egg::{Analysis, ColorId, EGraph, ENodeOrVar, Id, ImmutableCondition, Language, Pattern, RecExpr, Rewrite, Searcher, Subst, SymbolLang, ToCondRc, Var};
 use indexmap::IndexSet;
 use itertools::Itertools;
 use std::collections::HashSet;
@@ -8,6 +8,8 @@ use std::iter::FromIterator;
 use std::ops::Deref;
 use std::str::FromStr;
 use thesy_parser::ast::Expression;
+use crate::thesy::case_split::CaseSplitStats;
+use crate::thesy::TheSy;
 
 /**
 * [orig] is the expression of the `Subst` in [check_imm].
@@ -312,6 +314,21 @@ pub fn add_assumption(orig_egraph: &mut ThEGraph, pre: &ThExpr) {
     let true_id = orig_egraph.add_expr(&RecExpr::from_str("true").unwrap());
     orig_egraph.union(precond_id, true_id);
     orig_egraph.add(SymbolLang::new("=", vec![precond_id, true_id]));
+}
+
+pub struct TheSyRunRes {
+    pub thesy: TheSy,
+    #[allow(dead_code)]
+    pub rws: Vec<Rewrite<SymbolLang, ()>>,
+    #[allow(dead_code)]
+    pub success: bool,
+    pub case_split_stats: CaseSplitStats,
+}
+
+impl TheSyRunRes {
+    pub fn new(thesy: TheSy, rws: Vec<Rewrite<SymbolLang, ()>>, success: bool, case_split_stats: CaseSplitStats) -> Self {
+        Self { thesy, rws, success, case_split_stats }
+    }
 }
 
 

@@ -17,7 +17,7 @@ extern crate lazy_static;
 pub mod thesy;
 mod lang;
 mod tests;
-mod utils;
+pub mod utils;
 
 // mod smtlib_translator;
 

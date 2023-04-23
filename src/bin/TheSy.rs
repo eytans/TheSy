@@ -7,20 +7,18 @@ use std::process::exit;
 use std::time::SystemTime;
 use log::warn;
 
-#[cfg(feature = "stats")]
-use serde_json;
 use structopt::StructOpt;
 
 use egg::*;
 
 use TheSy::thesy::prover;
 use TheSy::thesy::case_split::CaseSplitStats;
-use TheSy::thesy::thesy::TheSy as Synth;
 use TheSy::thesy::semantics::Definitions;
 use TheSy::{CaseSplitConfig, PRETTY_W, SubCmd, thesy, TheSyConfig};
 use cap::Cap;
 use itertools::Itertools;
-use TheSy::thesy::statistics::{sample_graph_stats, STATS, StatsReport};
+use TheSy::thesy::statistics::{sample_graph_stats, StatsReport};
+use TheSy::utils::TheSyRunRes;
 
 #[global_allocator]
 pub(crate) static ALLOCATOR: Cap<alloc::System> = Cap::new(alloc::System, usize::MAX);
@@ -87,21 +85,6 @@ impl From<&CliOpt> for TheSyConfig {
                 opts.prover_split_itern.unwrap_or(prover::CASE_ITERN),
             ),
         )
-    }
-}
-
-struct TheSyRunRes {
-    thesy: Synth,
-    #[allow(dead_code)]
-    rws: Vec<Rewrite<SymbolLang, ()>>,
-    #[allow(dead_code)]
-    success: bool,
-    case_split_stats: CaseSplitStats,
-}
-
-impl TheSyRunRes {
-    fn new(thesy: Synth, rws: Vec<Rewrite<SymbolLang, ()>>, success: bool, case_split_stats: CaseSplitStats) -> Self {
-        Self { thesy, rws, success, case_split_stats }
     }
 }
 
@@ -180,21 +163,7 @@ fn main() {
     sample_graph_stats(&res.thesy.egraph, StatsReport::End);
     if cfg!(feature = "stats") {
         res.thesy.finalize_stats(None);
-        export_json(&mut res.thesy, &args.path);
+        thesy::statistics::export_json(&mut res.thesy, &args.path);
     }
     exit(0);
 }
-
-#[cfg(feature = "stats")]
-fn export_json(thesy: &mut thesy::TheSy, path: &PathBuf) {
-    let stat_path = path.with_extension("stats.json");
-    let colored_stat_path = path.with_extension("colored_stats.json");
-    thesy.finalize_stats(None);
-    serde_json::to_writer(File::create(stat_path).unwrap(), &thesy.stats).unwrap();
-    unsafe {
-        serde_json::to_writer(File::create(colored_stat_path).unwrap(), &STATS).unwrap();
-    }
-}
-
-#[cfg(not(feature = "stats"))]
-fn export_json(thesy: &TheSy::thesy::thesy::TheSy, path: &PathBuf) {}
