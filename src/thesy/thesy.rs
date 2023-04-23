@@ -83,7 +83,7 @@ pub struct TheSy {
 impl TheSy {
     #[cfg(feature = "stats")]
     pub fn get_prover_iters(&self) -> Vec<Vec<Vec<Iteration<()>>>> {
-        self.datatypes.values().map(|x| x.iterations.clone()).collect_vec()
+        self.datatypes.values().map(|x| x.get_stats().iterations.clone()).collect_vec()
     }
 
     fn replace_ops(exp: &ThExpr, replacments: &IndexMap<Symbol, Symbol>) -> ThExpr {

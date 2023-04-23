@@ -18,6 +18,17 @@ use crate::thesy::case_split::CaseSplit;
 use crate::thesy::statistics::{sample_graph_stats, StatsReport};
 use crate::thesy::TheSy;
 
+#[derive(Clone, Debug, Default)]
+pub struct ProverStats {
+    pub iterations: Vec<Vec<Iteration<()>>>,
+}
+
+impl ProverStats {
+    pub fn new() -> ProverStats {
+        ProverStats { iterations: vec![] }
+    }
+}
+
 #[derive(Clone, Debug)]
 pub struct RewriteProver {
     datatype: DataType,
@@ -25,8 +36,7 @@ pub struct RewriteProver {
     ind_var: Function,
     run_depth: usize,
     split_conf: CaseSplitConfig,
-    #[cfg(feature = "stats")]
-    pub(crate) iterations: Vec<Vec<Iteration<()>>>,
+    stats: ProverStats,
 }
 
 pub const CASE_SPLIT_DEPTH: usize = 1;
@@ -42,7 +52,7 @@ impl RewriteProver {
     pub fn new_config(datatype: DataType, config: ProverConfig) -> RewriteProver {
         let wfo_rules = Self::wfo_datatype(&datatype);
         let ind_var = TheSy::get_ind_var(&datatype);
-        RewriteProver { datatype, wfo_rules, ind_var, run_depth: config.run_depth, split_conf: config.split_conf, #[cfg(feature = "stats")] iterations: vec![] }
+        RewriteProver { datatype, wfo_rules, ind_var, run_depth: config.run_depth, split_conf: config.split_conf, stats: Default::default() }
     }
 
     pub fn with_split_params(&self, config: CaseSplitConfig) -> RewriteProver {
@@ -197,7 +207,7 @@ impl RewriteProver {
             c.case_split(&mut runner.egraph, split_conf.split_depth, &rules, split_conf.run_depth));
         #[cfg(feature = "stats")]
         {
-            self.iterations.push(std::mem::take(&mut runner.iterations));
+            self.stats.iterations.push(std::mem::take(&mut runner.iterations));
             sample_graph_stats(&orig_egraph, StatsReport::ProverBaseEnd(c.clone(), ex1.clone(), ex2.clone()));
         }
         !runner.egraph.equivs(&ex1, &ex2).is_empty()
@@ -236,7 +246,7 @@ impl RewriteProver {
             case_splitter.iter_mut().for_each(|c| c.case_split(&mut runner.egraph, self.split_conf.split_depth, &rule_set, self.split_conf.run_depth));
             #[cfg(feature = "stats")]
             {
-                self.iterations.push(std::mem::take(&mut runner.iterations));
+                self.stats.iterations.push(std::mem::take(&mut runner.iterations));
                 sample_graph_stats(&orig_egraph, StatsReport::ProverIndEnd(c.clone(), ex1.clone(), ex2.clone()));
             }
             res = res && !runner.egraph.equivs(&ex1, &ex2).is_empty()
@@ -405,6 +415,10 @@ impl Prover for RewriteProver {
                  -> Option<Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, ThRewrite)>> {
         self.prove_all_split_d(case_splitter, rules, precond, ex1, ex2)
     }
+
+    fn get_stats(&self) -> &ProverStats {
+        &self.stats
+    }
 }
 
 pub trait Prover {
@@ -415,6 +429,8 @@ pub trait Prover {
                  -> Option<Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, ThRewrite)>>;
     fn prove_all(&mut self, case_splitter: &mut Option<&mut CaseSplit>, rules: &[ThRewrite], precond: Option<&ThExpr>, ex1: &ThExpr, ex2: &ThExpr)
                  -> Option<Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, ThRewrite)>>;
+
+    fn get_stats(&self) -> &ProverStats;
 }
 
 #[cfg(test)]

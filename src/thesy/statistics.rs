@@ -269,6 +269,7 @@ pub fn sample_graph_stats(egraph: &ThEGraph, report: StatsReport) {
 mod test {
     #[allow(unused_imports)]
     use crate::tests::init_logging;
+    use crate::thesy::prover::Prover;
     #[allow(unused_imports)]
     use crate::thesy::statistics::STATS;
     #[allow(unused_imports)]
@@ -328,7 +329,7 @@ mod test {
         assert!(thesy.stats.case_split_stats.iterations.iter().any(|v|
             v.len() > 0 && v.iter().any(|v| v.rebuild_time > 0.0)));
         // Assert we have prover iterations
-        assert!(thesy.datatypes.values().any(|p| p.iterations.iter().any(|v|
+        assert!(thesy.datatypes.values().any(|p| p.get_stats().iterations.iter().any(|v|
             v.len() > 0 && v.iter().any(|v| v.search_time > 0.0))));
         // Assert we have thesy iterations
         assert!(thesy.stats.equiv_red_iterations.iter().any(|v|
