@@ -408,23 +408,25 @@ impl CaseSplit {
         }
 
         let temp = self.find_splitters(egraph);
-        for s in &temp {
-            let trns = reconstruct_all(egraph, s.color, 4);
-            debug!(
-                "  {} - root: {}, cases: {}",
-                s,
-                trns.get(&s.root)
-                    .map(|x| x.to_string())
-                    .unwrap_or("No reconstruct".to_string()),
-                itertools::Itertools::intersperse(
-                    s.splits.iter().map(|c| trns
-                        .get(c)
+        if cfg!(feature = "print_splits") {
+            for s in &temp {
+                let trns = reconstruct_all(egraph, s.color, 4);
+                debug!(
+                    "  {} - root: {}, cases: {}",
+                    s,
+                    trns.get(&s.root)
                         .map(|x| x.to_string())
-                        .unwrap_or("No reconstruct".to_string())),
-                    " ".to_string()
-                )
-                .collect::<String>()
-            );
+                        .unwrap_or("No reconstruct".to_string()),
+                    itertools::Itertools::intersperse(
+                        s.splits.iter().map(|c| trns
+                            .get(c)
+                            .map(|x| x.to_string())
+                            .unwrap_or("No reconstruct".to_string())),
+                        " ".to_string()
+                    )
+                    .collect::<String>()
+                );
+            }
         }
         let temp_len = temp.len();
         let mut splitters: Vec<Split> = temp
@@ -488,12 +490,14 @@ impl CaseSplit {
             }
         }
         egraph.rebuild();
-        for s in splitters {
-            let trns = reconstruct_all(egraph, s.color, 4);
-            let text = s.by_translation(&trns);
-            warn!("  {s} - {}", text);
-            #[cfg(feature = "stats")]
-            self.stats.known_splits_text.insert(text);
+        if cfg!(feature = "print_splits") {
+            for s in splitters {
+                let trns = reconstruct_all(egraph, s.color, 4);
+                let text = s.by_translation(&trns);
+                warn!("  {s} - {}", text);
+                #[cfg(feature = "stats")]
+                self.stats.known_splits_text.insert(text);
+            }
         }
         warn!("Created colors: {:?}", colors);
         // When the API is limited the code is mentally inhibited

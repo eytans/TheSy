@@ -614,7 +614,7 @@ impl TheSy {
                         info!("generalized to {} -- {}", ex1.pretty(PRETTY_W), ex2.pretty(PRETTY_W));
                     }
                     if self.check_equality(&rules[..], &None, &ex1, &ex2) {
-                        info!("bad conjecture {} = {}", &ex1.pretty(PRETTY_W), &ex2.pretty(PRETTY_W));
+                        info!("conjecture already known {} = {}", &ex1.pretty(PRETTY_W), &ex2.pretty(PRETTY_W));
                         self.stats.update_filtered_conjecture(&ex1, &ex2);
                         continue 'outer;
                     }
@@ -1077,6 +1077,7 @@ mod test {
     #[test]
     fn filter_p_filter_q_conjecture() {
         init_logging();
+        invariants::set_max_level(AssertLevel::Off);
 
         let mut filter_defs = filter_definitions();
         filter_defs.functions = filter_defs.functions.into_iter().filter(|f| f.name == "filter".to_string()).collect_vec();
