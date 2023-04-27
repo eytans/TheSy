@@ -392,6 +392,7 @@ mod test {
         // Do a simple thesy run
         let (thesy, _rw) = TheSyConfig::from_path("tests/vacuity.th".to_string()).run(Some(1));
         assert!(thesy.stats.case_split_stats.vacuous_cases.iter().any(|v| *v > 0));
+        #[cfg(feature = "split_colored")]
         unsafe {
             assert!(STATS.iter().any(|x| x.1.vacuos_colors.len() > 0));
         }
