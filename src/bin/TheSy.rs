@@ -162,6 +162,7 @@ fn main() {
     #[cfg(all(feature = "stats"))]
     sample_graph_stats(&res.thesy.egraph, StatsReport::End);
     if cfg!(feature = "stats") {
+        res.thesy.stats.update_mem(&ALLOCATOR);
         res.thesy.finalize_stats(None);
         thesy::statistics::export_json(&mut res.thesy, &args.path);
     }

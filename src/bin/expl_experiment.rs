@@ -142,10 +142,11 @@ fn main() {
     };
     warn!("Finished proving all goals in {:?}", start.elapsed().unwrap());
     #[cfg(all(feature = "stats"))]
-    sample_gres.thesyraph_stats(&thesy.egraph, StatsReport::End);
+    sample_graph_stats(&thesy.egraph, StatsReport::End);
     if cfg!(feature = "stats") {
         thesy.finalize_stats(None);
-        thesy::statistics::export_json(&mut thesy, &args.path);
+        thesy.stats.update_mem(&ALLOCATOR);
+        thesy::statistics::export_json(&mut thesy, &path);
     }
     exit(0);
 }
