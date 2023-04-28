@@ -1,0 +1,20 @@
+datatype Nat () := (succ : (x_0 : Nat) -> (res : Nat)) (zero : (res : Nat))
+fun plus (x_0 : Nat) (x_1 : Nat) -> Nat
+fun mult (x_0 : Nat) (x_1 : Nat) -> Nat
+fun fac (x_0 : Nat) -> Nat
+fun qfac (x_0 : Nat) (x_1 : Nat) -> Nat
+fun leq (__x0 : Nat) (__y1 : Nat) -> Bool => (or (= ?__x0 ?__y1) (less ?__x0 ?__y1))
+rw rule0 (plus zero ?n) => ?n
+rw rule1 (plus (succ ?n) ?m) => (succ (plus ?n ?m))
+rw rule2 (succ (plus ?n ?m)) => (plus (succ ?n) ?m)
+rw rule3 (mult zero ?n) => zero
+rw rule4 (mult (succ ?n) ?m) => (plus (mult ?n ?m) ?m)
+rw rule5 (plus (mult ?n ?m) ?m) => (mult (succ ?n) ?m)
+rw rule6 (fac zero) => (succ zero)
+rw rule7 (succ zero) => (fac zero)
+rw rule8 (fac (succ ?n)) => (mult (fac ?n) ?n)
+rw rule9 (mult (fac ?n) ?n) => (fac (succ ?n))
+rw rule10 (qfac zero ?n) => ?n
+rw rule11 (qfac (succ ?n) ?m) => (qfac ?n (mult ?m ?n))
+rw rule12 (qfac ?n (mult ?m ?n)) => (qfac (succ ?n) ?m)
+prove (fac (?x : Nat))  = (qfac (?x : Nat) (succ zero))

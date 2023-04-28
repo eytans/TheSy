@@ -19,7 +19,7 @@ project_dir = project_root
 
 
 def create_build_cmd(additional_features):
-    return [str(cargo_path), "build", "--release", "--features", f"stats {' '.join(additional_features)}",
+    return [str(cargo_path), "build", "--release", "--no-default-features", "--features", f"stats {' '.join(additional_features)}",
             "--package", "TheSy", "--bin", "TheSy"]
 
 

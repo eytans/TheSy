@@ -1,0 +1,20 @@
+datatype Nat () := (succ : (x_0 : Nat) -> (res : Nat)) (zero : (res : Nat))
+fun plus (x_0 : Nat) (x_1 : Nat) -> Nat
+fun mult (x_0 : Nat) (x_1 : Nat) -> Nat
+fun tri (x_0 : Nat) -> Nat
+fun cubes (x_0 : Nat) -> Nat
+rw rule0 (plus zero ?n) => ?n
+rw rule1 (plus (succ ?n) ?m) => (succ (plus ?n ?m))
+rw rule2 (succ (plus ?n ?m)) => (plus (succ ?n) ?m)
+rw rule3 (mult zero ?n) => zero
+rw rule4 (mult (succ ?n) ?m) => (plus (mult ?n ?m) ?m)
+rw rule5 (plus (mult ?n ?m) ?m) => (mult (succ ?n) ?m)
+rw rule6 (tri zero) => zero
+rw rule7 zero => (tri zero)
+rw rule8 (tri (succ ?n)) => (plus (tri ?n) (succ ?n))
+rw rule9 (plus (tri ?n) (succ ?n)) => (tri (succ ?n))
+rw rule10 (cubes zero) => zero
+rw rule11 zero => (cubes zero)
+rw rule12 (cubes (succ ?n)) => (plus (cubes ?n) (mult (succ ?n) (mult (succ ?n) (succ ?n))))
+rw rule13 (plus (cubes ?n) (mult (succ ?n) (mult (succ ?n) (succ ?n)))) => (cubes (succ ?n))
+prove (mult (?x : Nat) (mult (?y : Nat) (?z : Nat)))  = (mult (mult (?y : Nat) (?x : Nat)) (?z : Nat))

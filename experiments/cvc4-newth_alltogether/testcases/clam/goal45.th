@@ -1,0 +1,23 @@
+datatype Nat () := (succ : (x_0 : Nat) -> (res : Nat)) (zero : (res : Nat))
+datatype Lst () := (cons : (x_0 : Nat) -> (x_1 : Lst) -> (res : Lst)) (nil : (res : Lst))
+fun less (x_0 : Nat) (x_1 : Nat) -> Bool
+fun mem (x_0 : Nat) (x_1 : Lst) -> Bool
+fun insort (x_0 : Nat) (x_1 : Lst) -> Lst
+fun sort (x_0 : Lst) -> Lst
+fun leq (__x0 : Nat) (__y1 : Nat) -> Bool => (or (= ?__x0 ?__y1) (less ?__x0 ?__y1))
+rw rule0 (less ?x zero) => false
+rw rule1 (less zero (succ ?x)) => true
+rw rule2 (less (succ ?x) (succ ?y)) => (less ?x ?y)
+rw rule3 (less ?x ?y) => (less (succ ?x) (succ ?y))
+rw rule4 (mem ?x nil) => false
+rw rule5 (mem ?x (cons ?y ?z)) => (or (= ?x ?y) (mem ?x ?z))
+rw rule6 (or (= ?x ?y) (mem ?x ?z)) => (mem ?x (cons ?y ?z))
+rw rule7 (insort ?i nil) => (cons ?i nil)
+rw rule8 (cons ?i nil) => (insort ?i nil)
+rw rule9 (insort ?i (cons ?x ?y2)) => (ite (less ?i ?x) (cons ?i (cons ?x ?y2)) (cons ?x (insort ?i ?y2)))
+rw rule10 (ite (less ?i ?x) (cons ?i (cons ?x ?y2)) (cons ?x (insort ?i ?y2))) => (insort ?i (cons ?x ?y2))
+rw rule11 (sort nil) => nil
+rw rule12 nil => (sort nil)
+rw rule13 (sort (cons ?x ?y3)) => (insort ?x (sort ?y3))
+rw rule14 (insort ?x (sort ?y3)) => (sort (cons ?x ?y3))
+prove (mem (?x : Nat) (insort (?x : Nat) (?y4 : Lst))) 
