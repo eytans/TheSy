@@ -1,6 +1,7 @@
 #![allow(dead_code)]
 
 use crate::thesy::TheSy;
+use crate::thesy::prover::Prover;
 use egg::{RecExpr, Id};
 use crate::thesy::semantics::Definitions;
 use std::fs::File;

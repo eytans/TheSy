@@ -121,6 +121,11 @@ impl RewriteProver {
         if let Some(pre) = precond {
             utils::add_assumption(&mut orig_egraph, pre);
         }
+        for t in &self.terms_to_push {
+            orig_egraph.add_expr(t);
+            info!("Creating proof graph: pushed term: {}", t);
+        }
+        orig_egraph.rebuild();
         let ind_id = orig_egraph.lookup(SymbolLang::new(&self.ind_var.name, vec![])).unwrap();
         (orig_egraph, ind_id)
     }
@@ -447,7 +452,7 @@ mod tests {
     use egg::{EGraph, Pattern, Runner, Searcher, SymbolLang};
 
     use crate::lang::{DataType, Function};
-    use crate::thesy::prover::RewriteProver;
+    use crate::thesy::prover::{RewriteProver, Prover};
     use crate::thesy::TheSy;
     use crate::TheSyConfig;
 

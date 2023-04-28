@@ -1,0 +1,12 @@
+datatype boolean () := (T: ret: boolean) (F: ret: boolean)
+
+fun And a: boolean b: boolean -> boolean => (ite (#=# ?a T) ?b F)
+fun Or a: boolean b: boolean -> boolean => (ite (#=# ?a T) T ?b)
+fun Not a: boolean -> boolean => (ite (#=# ?a T) F T)
+rw vac_f vac => F
+rw vac_t vac => T
+
+prove (And F ?v: {ph( 0 ), boolean}) = ?v: {ph( 0 ), boolean}
+;prove (And v: {ph( 0 ), boolean} F) = F
+;prove (Or v: {ph( 0 ), boolean} T) = T
+;prove (Or v: {ph( 0 ), boolean} F) = v: {ph( 0 ), boolean}

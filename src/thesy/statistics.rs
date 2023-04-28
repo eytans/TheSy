@@ -338,6 +338,8 @@ mod test {
     #[cfg(feature = "stats")]
     #[test]
     fn test_collecting_stats() {
+        use crate::thesy::prover::Prover;
+
         init_logging();
 
         // Do a simple thesy run

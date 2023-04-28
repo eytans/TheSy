@@ -30,7 +30,7 @@ pub const EXP_SPLIT_ITERN: usize = 4;
 /// Theory Synthesizer - Explores a given theory finding and proving new lemmas.
 pub struct TheSy {
     /// known datatypes to wfo rewrites for induction
-    pub(crate) datatypes: IndexMap<DataType, Box<dyn Prover + 'static>>,
+    pub(crate) datatypes: IndexMap<DataType, RewriteProver>,
     /// known function declerations and their types
     dict: Vec<Function>,
     /// egraph which is expanded as part of the exploration
@@ -140,13 +140,11 @@ impl TheSy {
         case_split_config: Option<CaseSplitConfig>,
     ) -> TheSy {
         debug_assert!(examples.iter().all(|(d, e)| &e.datatype == d));
-        let datatype_to_prover: IndexMap<DataType, Box<dyn Prover>> = datatypes.iter()
+        let datatype_to_prover: IndexMap<DataType, RewriteProver> = datatypes.iter()
             .map(|d| {
-                let prover = prover_config.as_ref().map_or(
-                        RewriteProver::new(d.clone()),
-                        |x| RewriteProver::new_config(d.clone(), x.clone()));
-                let boxed: Box<dyn Prover> = Box::new(prover);
-                (d.clone(), boxed)
+                (d.clone(), prover_config.as_ref().map_or(
+                    RewriteProver::new(d.clone()),
+                    |x| RewriteProver::new_config(d.clone(), x.clone())))
             }).collect();
         let (mut egraph, example_ids) = TheSy::create_graph_example_ids(&datatypes, &examples, &dict, ph_count);
 
@@ -229,7 +227,7 @@ impl TheSy {
         }
     }
 
-    pub fn update_provers(&mut self, mut f: impl FnMut(Box<dyn Prover + 'static>) -> Box<dyn Prover + 'static>) {
+    pub fn update_provers(&mut self, mut f: impl FnMut(RewriteProver) -> RewriteProver) {
         self.datatypes = std::mem::take(&mut self.datatypes)
             .into_iter().map(|(k, v)| (k, f(v))).collect();
     }
@@ -534,7 +532,7 @@ impl TheSy {
         let mut res = None;
         let mut index = 0;
         'outer: for (i, conjs) in lemmas.iter().enumerate() {
-            debug!("Checking goal {}", i);
+            debug!("Checking goal {} - {} conjs", i, conjs.len());
             for (precond, ex1, ex2) in conjs {
                 for p in self.datatypes.values_mut() {
                     let start = if cfg!(feature = "stats") {
@@ -789,6 +787,7 @@ mod test {
     use invariants::AssertLevel;
     use itertools::Itertools;
 
+    use crate::thesy::prover::Prover;
     use crate::{PRETTY_W, tests, TheSyConfig};
     use crate::lang::{DataType, Function, ThEGraph, ThRewrite};
     use crate::tests::{init_logging, ProofMode};
