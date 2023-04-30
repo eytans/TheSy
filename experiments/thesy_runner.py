@@ -64,6 +64,7 @@ def run_thesy(params: RunParams):
 def run_expl(params: RunParams):
     print(f"running {params.fn}")
     cmd = [s for s in CMD_EXPL]
+    assert params.proof_mode is None
     run_cmd(cmd, params)
 
 

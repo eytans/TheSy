@@ -44,7 +44,7 @@ def run(prove_timeout=None, rerun=None, features=None, split_depth=None, process
     print(f"Running with features: {features} on testcases: {tests_subdirs}")
     multi = processnum != 1
     run_all(tests_subdirs,
-            mode=thesy_runner.ThesyMode.CheckEquiv,
+            mode=None,
             timeout=prove_timeout,
             rerun=rerun,
             prover_split_d=str(split_depth),
