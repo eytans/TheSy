@@ -8,7 +8,7 @@ from experiments.stats_processor import create_stats
 from experiments.thesy_runner import run_all
 from experiments import experiments_dir, project_root, copy_tree_th_only, thesy_runner
 
-current_exp = experiments_dir / 'cvc4-newth'
+current_exp = experiments_dir / 'cvc4_newth_alltogether'
 tests_dir = current_exp / 'testcases'
 res_path = current_exp / 'stats.csv'
 
