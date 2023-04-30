@@ -121,3 +121,5 @@ test.dot
 take_succ_i.dot
 black_take_drop.dot
 callgrind_out/*
+tests/*.res
+tests/*.json
