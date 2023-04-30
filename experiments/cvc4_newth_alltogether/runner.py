@@ -6,7 +6,7 @@ from argparse import ArgumentParser
 
 from experiments.stats_processor import create_stats
 from experiments.thesy_runner import run_all
-from experiments import experiments_dir, project_root, copy_tree_th_only, thesy_runner
+from experiments import experiments_dir, project_root, copy_tree_th_and_at_only, thesy_runner
 
 current_exp = experiments_dir / 'cvc4_newth_alltogether'
 tests_dir = current_exp / 'testcases'
@@ -33,7 +33,7 @@ def run(prove_timeout=None, rerun=None, features=None, split_depth=None, process
     if processnum is None:
         processnum = 1
     res_dir = results_dir(features, split_depth)
-    copy_tree_th_only(tests_dir, res_dir)
+    copy_tree_th_and_at_only(tests_dir, res_dir)
 
     # find sub-subfoldrs in res_dir and move them up
     subsubdirs = [sd for d in res_dir.iterdir() if d.is_dir() for sd in d.iterdir() if sd.is_dir()]

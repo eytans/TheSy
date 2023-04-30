@@ -15,3 +15,9 @@ def copy_tree_th_only(src, dest):
         p = pathlib.Path(src_dir)
         return [f for f in files if (p / f).is_file() and ((p / f).suffix != '.th' or '.res' in (p / f).suffixes)]
     shutil.copytree(src, dest, ignore=th_predicate)
+    
+def copy_tree_th_and_at_only(src, dest):
+    def th_predicate(src_dir, files):
+        p = pathlib.Path(src_dir)
+        return [f for f in files if (p / f).is_file() and ((p / f).suffix not in ['.th', '.at'] or '.res' in (p / f).suffixes)]
+    shutil.copytree(src, dest, ignore=th_predicate)
