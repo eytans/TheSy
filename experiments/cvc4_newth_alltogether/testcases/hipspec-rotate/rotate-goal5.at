@@ -1,0 +1,16 @@
+(rotate n (rotate m x4))
+(rotate m (rotate n x4))
+(rotate (succ n) (rotate m x4))
+(rotate (succ m) (rotate n x4))
+(rotate (len x4) (append x4 y))
+(append y x4)
+(append x4 nil)
+x4
+(append (append x4 y) z)
+(append x4 (append y z))
+(rotate (len x4) x4)
+x4
+(len (append x4 y))
+(len (append y x4))
+(len (rotate n x4))
+(len x4)

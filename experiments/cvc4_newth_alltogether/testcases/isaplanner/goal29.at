@@ -1,0 +1,8 @@
+(mem x (insort x l))
+(less x y)
+(mem x (insort y l))
+(mem x l)
+(not (mem x (delete x l)))
+(not (= x y))
+(mem x (insort y l))
+(mem x l)

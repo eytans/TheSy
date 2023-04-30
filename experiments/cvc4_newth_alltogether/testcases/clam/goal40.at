@@ -1,0 +1,2 @@
+(lst-subset x y)
+(lst-eq (lst-intersection x y) x)

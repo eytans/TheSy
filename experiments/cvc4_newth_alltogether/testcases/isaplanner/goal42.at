@@ -1,0 +1,15 @@
+(take n (drop m xs))
+(drop m (take (plus n m) xs))
+(take zero xs)
+nil
+(take n (lmap xs))
+(lmap (take n xs))
+(ztake n (zip xs ys))
+(zip (take n xs) (take n ys))
+(butlast xs)
+(take (minus (len xs) (succ zero)) xs)
+(drop n (take m xs))
+(take (minus m n) (drop n xs))
+(forall ((x Nat)) (P x))
+(takeWhile xs)
+xs

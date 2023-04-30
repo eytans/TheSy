@@ -1,0 +1,1 @@
+(or (= (tsize t) (tsize (tinsert-all t l13))) (less (tsize t) (tsize (tinsert-all t l13))))

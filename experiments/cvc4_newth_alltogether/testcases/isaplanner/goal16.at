@@ -1,0 +1,7 @@
+(len (butlast xs))
+(minus (len xs) (succ zero))
+(butlast xs)
+(take (minus (len xs) (succ zero)) xs)
+(not (= (xs : Lst) nil))
+(last (cons x (xs : Lst)))
+(last (xs : Lst))

@@ -1,0 +1,2 @@
+(tsize (tinsert t n))
+(succ (tsize t))

@@ -1,0 +1,2 @@
+(lst-subset x y)
+(lst-eq (lst-union x y) y)
