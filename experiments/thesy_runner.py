@@ -9,7 +9,7 @@ from collections import namedtuple
 
 from datetime import datetime
 from pathlib import Path
-from experiments import executable_release, project_root, cargo_path
+from experiments import executable_release, expl_executable_release, project_root, cargo_path
 
 RunParams = namedtuple('RunParams', ['fn', 'timeout', 'proof_mode', 'memorylimit', 'prover_split_d', 'prover_split_i',
                                      # 'base_path', 'out_path'
@@ -18,18 +18,16 @@ RunParams = namedtuple('RunParams', ['fn', 'timeout', 'proof_mode', 'memorylimit
 project_dir = project_root
 
 
-def create_build_cmd(additional_features):
-    return [str(cargo_path), "build", "--release", "--no-default-features", "--features", f"stats {' '.join(additional_features)}",
-            "--package", "TheSy", "--bin", "TheSy"]
+def create_build_cmd(additional_features, binary_name="TheSy"):
+    return [str(cargo_path), "build", "--release", "--no-default-features", "--features", f"stats {' '.join(additional_features)}",]
 
 
 CMD = [str(executable_release)]
+CMD_EXPL = [str(expl_executable_release)]
 
 
-def run_thesy(params: RunParams):
-    print(f"running {params.fn}")
+def run_cmd(cmd, params: RunParams):
     try:
-        cmd = [s for s in CMD]
         if params.proof_mode:
             cmd.append(f'--mode={str(params.proof_mode).replace("ThesyMode.", "")}')
         cmd.append(f'--limit={int(params.memorylimit) * 1024}')
@@ -57,6 +55,18 @@ def run_thesy(params: RunParams):
     # with open(fn + ".json", 'w') as f:
 
 
+def run_thesy(params: RunParams):
+    print(f"running {params.fn}")
+    cmd = [s for s in CMD]
+    run_cmd(cmd, params)
+
+
+def run_expl(params: RunParams):
+    print(f"running {params.fn}")
+    cmd = [s for s in CMD_EXPL]
+    run_cmd(cmd, params)
+
+
 class ThesyMode(enum.Enum):
     Run = 1
     Prove = 2
@@ -65,7 +75,7 @@ class ThesyMode(enum.Enum):
 
 
 def run_all(dirs, mode=ThesyMode.Run, features="", skip=None, timeout=60, processnum=15, memorylimit=32,
-            multiprocess=True, rerun=True, prover_split_d="1", prover_split_i="4", out_path=None, base_path=None):
+            multiprocess=True, rerun=True, prover_split_d="1", prover_split_i="4", out_path=None, base_path=None, expl=False):
     assert out_path is None or base_path is not None
     if skip is None:
         skip = []
@@ -93,12 +103,15 @@ def run_all(dirs, mode=ThesyMode.Run, features="", skip=None, timeout=60, proces
         files = [p for p in files if not pathlib.Path(p.fn).with_suffix('.stats.json').exists()]
     # isa_files = ["./temp/" + f for f in isa_files]
     pn = processnum
+    runner = run_thesy
+    if expl:
+        runner = run_expl
     if multiprocess:
         pool = multiprocessing.Pool(pn)
-        pool.map(run_thesy, files)
+        pool.map(runner, files)
     else:
         for f in files:
-            run_thesy(f)
+            runner(f)
 
 
 if __name__ == '__main__':

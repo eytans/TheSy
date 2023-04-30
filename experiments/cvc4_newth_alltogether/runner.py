@@ -51,7 +51,9 @@ def run(prove_timeout=None, rerun=None, features=None, split_depth=None, process
             memorylimit=8,
             multiprocess=multi,
             processnum=processnum,
-            features=" ".join(features))
+            features=" ".join(features),
+            expl=True,
+            )
             # memorylimit=8, multiprocess=False, processnum=1, features=" ".join(features), base_path=tests_dir, out_path=res_dir)
     tests_stats = pandas.concat([create_stats(d) for d in tests_subdirs], keys=[d.name for d in tests_subdirs])
     fixed_res_path = res_dir / res_path.name

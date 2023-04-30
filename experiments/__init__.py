@@ -7,6 +7,7 @@ theories_dir = project_root / "theories"
 cargo_path = pathlib.Path.home() / ".cargo/bin/cargo"
 
 executable_release = project_root / "target/release/TheSy"
+expl_executable_release = project_root / "target/release/expl_experiment"
 
 
 def copy_tree_th_only(src, dest):
