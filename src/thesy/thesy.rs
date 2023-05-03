@@ -385,10 +385,15 @@ impl TheSy {
             SymbolLang::new(edge.op.clone(), new_child)
         }
 
+        // op, parameters, substitutions from searcher
         let op_matches = self.searchers.iter()
             .map(|(op, (searcher, params))| {
-                (op, params, searcher.search(&self.egraph).iter_mut().flat_map(|sm| std::mem::take(&mut sm.substs)).collect_vec())
+                (op, params, searcher.search(&self.egraph).into_iter()
+                    .flat_map(|sm| sm.substs.into_iter()
+                        .filter(|s| s.color().is_none())
+                    ).collect_vec())
             }).collect_vec();
+        // TODO: think about colored exploration
         for (op, params, subs) in op_matches {
             let typ = {
                 let fun = &self.dict.iter().chain(self.datatypes.keys().flat_map(|d| d.constructors.iter()))
@@ -397,8 +402,10 @@ impl TheSy {
                 res
             };
             for sub in subs {
+                trace!("Found match for {} with params {:?} and subst {:?}", op, params, sub);
                 // Foreach match add a term for ind_ph and foreach example and update example_ids map
                 let new_edge = create_edge(op, params, &sub);
+                trace!("New edge: {:?}", &new_edge);
                 let key = self.egraph.add(new_edge.clone());
                 // TODO: do this once per type, not on each sygue application
                 let type_key = self.egraph.add_expr(&typ);

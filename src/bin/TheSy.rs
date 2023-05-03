@@ -64,6 +64,11 @@ struct CliOpt {
     /// Whether to turn off invariants checking
     #[structopt(name = "disable invariants", long = "no_invariants")]
     no_invariants: bool,
+    #[structopt(name = "trace", long = "trace")]
+    trace: bool,
+    #[structopt(name = "traceegg", long = "traceegg")]
+    traceegg: bool,
+
 }
 
 impl From<&CliOpt> for TheSyConfig {
@@ -100,10 +105,12 @@ fn main() {
     let egg_config: simplelog::Config = ConfigBuilder::new()
         .add_filter_allow_str("egg")
         .build();
+    let thesy_level = if args.trace { LevelFilter::Trace } else { LevelFilter::Debug };
+    let egg_level = if args.traceegg { LevelFilter::Trace } else { LevelFilter::Warn };
     CombinedLogger::init(
         vec![
-            TermLogger::new(LevelFilter::Debug, thesy_config, TerminalMode::Mixed, ColorChoice::Auto),
-            TermLogger::new(LevelFilter::Warn, egg_config, TerminalMode::Mixed, ColorChoice::Auto),
+            TermLogger::new(thesy_level, thesy_config, TerminalMode::Mixed, ColorChoice::Auto),
+            TermLogger::new(egg_level, egg_config, TerminalMode::Mixed, ColorChoice::Auto),
             WriteLogger::new(LevelFilter::Info, Config::default(), File::create(log_path).unwrap()),
         ]
     ).unwrap();

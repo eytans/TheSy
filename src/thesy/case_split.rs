@@ -255,14 +255,20 @@ impl CaseSplit {
     }
 
     pub fn find_splitters(&mut self, egraph: &mut ThEGraph) -> Vec<Split> {
-        debug!("Finding splitters");
+        warn!("Finding splitters");
         let mut res = vec![];
-        for (s, c) in &mut self.splitter_rules {
-            res.extend(c(egraph, s.search(egraph)));
+        for (i, (s, c)) in self.splitter_rules.iter_mut().enumerate() {
+            warn!("Searching for splitters with searcher {i}");
+            let searched = s.search(egraph);
+            warn!("Found {} matches", searched.len());
+            let applied = c(egraph, searched);
+            warn!("Applied {} splitters", applied.len());
+            res.extend(applied);
             egraph.rebuild();
+            warn!("Rebuilt egraph")
         }
         res.iter_mut().for_each(|x| x.update(egraph));
-        debug!("Found {} splitters", res.len());
+        warn!("Found {} splitters", res.len());
         res.into_iter().unique().collect()
     }
 
