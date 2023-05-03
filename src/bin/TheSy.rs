@@ -16,7 +16,6 @@ use TheSy::thesy::case_split::CaseSplitStats;
 use TheSy::thesy::semantics::Definitions;
 use TheSy::{CaseSplitConfig, PRETTY_W, SubCmd, thesy, TheSyConfig};
 use cap::Cap;
-use itertools::Itertools;
 use TheSy::thesy::statistics::{sample_graph_stats, StatsReport};
 use TheSy::utils::TheSyRunRes;
 
