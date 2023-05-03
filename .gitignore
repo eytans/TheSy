@@ -123,3 +123,7 @@ black_take_drop.dot
 callgrind_out/*
 tests/*.res
 tests/*.json
+Cargo.toml
+memory_profiles/*
+perf_res/*
+debug.dot
