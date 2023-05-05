@@ -1,23 +1,20 @@
-use std::alloc;
+
 use std::any::Any;
 use std::fs::File;
 use std::path::PathBuf;
 use std::process::exit;
 use std::time::SystemTime;
-use cap::Cap;
 use egg::{RecExpr, SymbolLang};
 use log::{LevelFilter, warn, info};
 use simplelog::{ColorChoice, CombinedLogger, Config, ConfigBuilder, TerminalMode, TermLogger, WriteLogger};
 use structopt::StructOpt;
 use TheSy::thesy::semantics::Definitions;
-use TheSy::{CaseSplitConfig, thesy, TheSyConfig};
+use TheSy::{CaseSplitConfig, thesy, TheSyConfig, ALLOCATOR};
 use TheSy::SubCmd::CheckEquiv;
 use TheSy::thesy::prover;
 use TheSy::thesy::prover::RewriteProver;
 use TheSy::thesy::statistics::{sample_graph_stats, StatsReport};
 
-#[global_allocator]
-pub(crate) static ALLOCATOR: Cap<alloc::System> = Cap::new(alloc::System, usize::MAX);
 
 /// Arguments to use to run thesy
 #[derive(StructOpt, Debug)]
@@ -75,8 +72,10 @@ fn main_with_args(args: CliOpt) {
         warn!("Collecting statistics");
     }
 
-    if let Some(limit) = args.mem_limit {
-        ALLOCATOR.set_limit(limit * 1024 * 1024).expect("Failed to set memory limit");
+    unsafe {
+        if let Some(limit) = args.mem_limit {
+            ALLOCATOR.set_limit(limit * 1024 * 1024).expect("Failed to set memory limit");
+        }
     }
 
     if args.no_invariants {
@@ -96,7 +95,9 @@ fn main_with_args(args: CliOpt) {
     sample_graph_stats(&thesy.egraph, StatsReport::End);
     if cfg!(feature = "stats") {
         thesy.finalize_stats(None);
-        thesy.stats.update_mem(&ALLOCATOR);
+        unsafe {
+            thesy.stats.update_mem(&ALLOCATOR);
+        }
         thesy::statistics::export_json(&mut thesy, &path);
     }
     exit(0);

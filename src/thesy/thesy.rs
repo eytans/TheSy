@@ -795,16 +795,13 @@ mod test {
     use itertools::Itertools;
 
     use crate::thesy::prover::Prover;
-    use crate::{PRETTY_W, tests, TheSyConfig};
+    use crate::{PRETTY_W, tests, TheSyConfig, ALLOCATOR};
     use crate::lang::{DataType, Function, ThEGraph, ThRewrite};
     use crate::tests::{init_logging, ProofMode};
     use crate::thesy::{consts, Examples, thesy};
     use crate::thesy::case_split::CaseSplit;
     use crate::thesy::semantics::Definitions;
     use crate::thesy::thesy::TheSy;
-
-    #[global_allocator]
-    pub(crate) static ALLOCATOR: Cap<alloc::System> = Cap::new(alloc::System, usize::MAX);
 
     fn create_nat_type() -> DataType {
         DataType::new("nat".to_string(), vec![
@@ -1148,10 +1145,14 @@ mod test {
         assert_ne!(thesy.egraph.find(consx), thesy.egraph.find(ex1));
         assert_ne!(thesy.egraph.find(consxy), thesy.egraph.find(ex2));
         assert_eq!(thesy.egraph.find(nil), thesy.egraph.find(ex0));
-        println!("Currently (before) allocated: {}MB", ALLOCATOR.allocated() as f64 / 1e6);
+        unsafe {
+            println!("Currently (before) allocated: {}MB", ALLOCATOR.allocated() as f64 / 1e6);
+        }
         info!("Starting case split");
         case_split.case_split(&mut thesy.egraph, 2, &rules, 6);
-        println!("Currently (after) allocated: {}MB", ALLOCATOR.allocated() as f64 / 1e6);
+        unsafe {
+            println!("Currently (after) allocated: {}MB", ALLOCATOR.allocated() as f64 / 1e6);
+        }
         info!("Done case split");
         thesy.egraph.rebuild();
         println!("drop i [x] is {}", thesy.egraph.find(dropix));

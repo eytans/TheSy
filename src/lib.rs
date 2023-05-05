@@ -25,6 +25,7 @@ use std::fs::File;
 use std::io::Write;
 use std::path::PathBuf;
 
+use cap::Cap;
 use itertools::Itertools;
 use structopt::StructOpt;
 
@@ -39,6 +40,10 @@ use crate::lang::ThRewrite;
 use crate::SubCmd::Prove;
 
 pub const PRETTY_W: usize = 500;
+
+// TODO: Put this under a compiler feature
+#[global_allocator]
+pub static mut ALLOCATOR: Cap<std::alloc::System> = Cap::new(std::alloc::System, usize::MAX);
 
 #[derive(StructOpt, Clone, Copy, strum_macros::EnumString, Debug)]
 pub enum SubCmd {

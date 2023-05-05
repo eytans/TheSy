@@ -1,6 +1,5 @@
 #![allow(non_snake_case)]
 
-use std::alloc;
 use std::fs::File;
 use std::path::PathBuf;
 use std::process::exit;
@@ -14,13 +13,9 @@ use egg::*;
 use TheSy::thesy::prover;
 use TheSy::thesy::case_split::CaseSplitStats;
 use TheSy::thesy::semantics::Definitions;
-use TheSy::{CaseSplitConfig, PRETTY_W, SubCmd, thesy, TheSyConfig};
-use cap::Cap;
+use TheSy::{CaseSplitConfig, PRETTY_W, SubCmd, thesy, TheSyConfig, ALLOCATOR};
 use TheSy::thesy::statistics::{sample_graph_stats, StatsReport};
 use TheSy::utils::TheSyRunRes;
-
-#[global_allocator]
-pub(crate) static ALLOCATOR: Cap<alloc::System> = Cap::new(alloc::System, usize::MAX);
 
 /// Arguments to use to run thesy
 #[derive(StructOpt, Debug)]
@@ -67,7 +62,6 @@ struct CliOpt {
     trace: bool,
     #[structopt(name = "traceegg", long = "traceegg")]
     traceegg: bool,
-
 }
 
 impl From<&CliOpt> for TheSyConfig {
@@ -118,8 +112,10 @@ fn main() {
         warn!("Collecting statistics");
     }
 
-    if let Some(limit) = args.mem_limit {
-        ALLOCATOR.set_limit(limit * 1024 * 1024).expect("Failed to set memory limit");
+    unsafe {
+        if let Some(limit) = args.mem_limit {
+            ALLOCATOR.set_limit(limit * 1024 * 1024).expect("Failed to set memory limit");
+        }
     }
 
     if args.no_invariants {
@@ -168,7 +164,7 @@ fn main() {
     #[cfg(all(feature = "stats"))]
     sample_graph_stats(&res.thesy.egraph, StatsReport::End);
     if cfg!(feature = "stats") {
-        res.thesy.stats.update_mem(&ALLOCATOR);
+        unsafe { res.thesy.stats.update_mem(&ALLOCATOR); }
         res.thesy.finalize_stats(None);
         thesy::statistics::export_json(&mut res.thesy, &args.path);
     }

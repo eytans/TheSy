@@ -1,13 +1,15 @@
+use std::alloc::GlobalAlloc;
 use std::fs::File;
 use std::path::PathBuf;
 use std::time::{Duration, SystemTime};
 
+use cap::Cap;
 #[allow(unused_imports)]
 use egg::{ColorId, Iteration};
 use indexmap::{IndexMap, IndexSet};
 use serde::{Deserialize, Serialize};
 use crate::lang::{Function, ThEGraph, ThExpr};
-use crate::{PRETTY_W, thesy};
+use crate::{PRETTY_W, thesy, ALLOCATOR};
 use crate::thesy::case_split::CaseSplitStats;
 
 global_counter!(MEASURE_COUNTER, usize, usize::default());
@@ -195,6 +197,7 @@ pub struct GraphStats {
     pub vacuos_colors: Vec<ColorId>,
     #[cfg(feature = "keep_splits")]
     pub split_sizes: Vec<usize>,
+    pub graph_memory: usize,
 }
 
 #[cfg(all(feature = "stats", feature = "keep_splits"))]
@@ -209,6 +212,23 @@ fn get_split_sizes(egraph: &ThEGraph) -> Vec<usize> {
 }
 
 impl GraphStats {
+    /**
+     * Returns the memory used by the egraph. Calculate by using Archimedas.
+     * First turn off cap stats, then get the total allocated memory, 
+     * clone graph, get total again, then turn on cap stats again.
+     */
+    #[cfg(feature = "stats")]
+    pub fn memory_used(egraph: &ThEGraph, cap: &mut Cap<impl GlobalAlloc>) -> usize {
+        let mut current = cap.total_allocated();
+        cap.disable_stats();
+        {
+            let g = egraph.clone();
+            current = cap.total_allocated() - current;
+            println!("Prevent drop - egraph size: {}", g.total_size());
+        }
+        cap.enable_stats();
+        current
+    }
     
     pub fn from_egraph(egraph: &ThEGraph) -> Self {
         let mut black_enodes = IndexSet::new();
@@ -229,6 +249,7 @@ impl GraphStats {
                 colored_enodes.get_mut(&c.get_id()).unwrap().retain(|n| fixed_black.contains(n));
             }
         }
+        let memory_used = unsafe { Self::memory_used(egraph, &mut ALLOCATOR) };
         GraphStats {
             #[cfg(any(feature = "split_no_cremove", feature = "split_no_cmemo"))]
             should_delete: colored_enodes.iter().map(|(k, v)| (*k, v.len())).collect(),
@@ -239,6 +260,7 @@ impl GraphStats {
             vacuos_colors: egraph.detect_color_vacuity(),
             #[cfg(feature = "keep_splits")]
             split_sizes: get_split_sizes(egraph),
+            graph_memory: memory_used,
         }
     }
 }
