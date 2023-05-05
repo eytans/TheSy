@@ -43,12 +43,14 @@ def run(prove_timeout=None, rerun=None, features=None, split_depth=None, process
     tests_subdirs = [d for d in res_dir.iterdir() if d.is_dir()]
     print(f"Running with features: {features} on testcases: {tests_subdirs}")
     multi = processnum != 1
+    assert (500.0 / (processnum * 32)) > 1
+    assert processnum < 64
     run_all(tests_subdirs,
             mode=None,
             timeout=prove_timeout,
             rerun=rerun,
             prover_split_d=str(split_depth),
-            memorylimit=8,
+            memorylimit=32,
             multiprocess=multi,
             processnum=processnum,
             features=" ".join(features),
