@@ -127,3 +127,4 @@ Cargo.toml
 memory_profiles/*
 perf_res/*
 debug.dot
+experiments/*/results/

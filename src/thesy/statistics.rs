@@ -217,13 +217,12 @@ impl GraphStats {
      * First turn off cap stats, then get the total allocated memory, 
      * clone graph, get total again, then turn on cap stats again.
      */
-    #[cfg(feature = "stats")]
     pub fn memory_used(egraph: &ThEGraph, cap: &mut Cap<impl GlobalAlloc>) -> usize {
-        let mut current = cap.total_allocated();
+        let mut current = cap.allocated();
         cap.disable_stats();
         {
             let g = egraph.clone();
-            current = cap.total_allocated() - current;
+            current = cap.allocated() - current;
             println!("Prevent drop - egraph size: {}", g.total_size());
         }
         cap.enable_stats();
