@@ -128,3 +128,4 @@ memory_profiles/*
 perf_res/*
 debug.dot
 experiments/*/results/
+experiments/cvc4_newth_alltogether/fmcad_results_2023-05-06_10-28-32/
