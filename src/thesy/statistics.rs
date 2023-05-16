@@ -4,6 +4,7 @@ use std::path::PathBuf;
 use std::time::{Duration, SystemTime};
 
 use cap::Cap;
+use egg::Language;
 #[allow(unused_imports)]
 use egg::{ColorId, Iteration};
 use indexmap::{IndexMap, IndexSet};
@@ -198,6 +199,14 @@ pub struct GraphStats {
     #[cfg(feature = "keep_splits")]
     pub split_sizes: Vec<usize>,
     pub graph_memory: usize,
+    pub eclasses_count: usize,
+    pub id_count: usize,
+    pub by_arity: IndexMap<usize, usize>,
+    pub colored_unions_count: usize,
+    pub deleted_colored_enodes: usize,
+    pub colored_equivalences_size: usize,
+    pub black_colored_classes_size: usize,
+    pub parent_color_tracking_size: usize,
 }
 
 #[cfg(all(feature = "stats", feature = "keep_splits"))]
@@ -249,6 +258,20 @@ impl GraphStats {
             }
         }
         let memory_used = unsafe { Self::memory_used(egraph, &mut ALLOCATOR) };
+        let mut by_arity: IndexMap<usize, usize> = IndexMap::new();
+        for c in egraph.classes() {
+            for n in c.iter() {
+                by_arity.entry(n.children().len()).and_modify(|e| *e += 1).or_insert(1);
+            }
+        }
+
+        let mut colored_unions = 0;
+        for c in egraph.colors() {
+            for id in c.black_reps() {
+                colored_unions += c.black_ids(*id).map_or(0, |x| x.len());
+            }        
+        }
+
         GraphStats {
             #[cfg(any(feature = "split_no_cremove", feature = "split_no_cmemo"))]
             should_delete: colored_enodes.iter().map(|(k, v)| (*k, v.len())).collect(),
@@ -260,6 +283,14 @@ impl GraphStats {
             #[cfg(feature = "keep_splits")]
             split_sizes: get_split_sizes(egraph),
             graph_memory: memory_used,
+            eclasses_count: egraph.number_of_classes(),
+            id_count: egraph.id_len(),
+            by_arity: by_arity,
+            colored_unions_count: colored_unions,
+            deleted_colored_enodes: egraph.deleted_enodes,
+            colored_equivalences_size: egraph.colored_equivalences.iter().map(|x| x.1.len()).sum(),
+            black_colored_classes_size: egraph.colors().map(|c| c.black_colored_classes_size()).sum(), 
+            parent_color_tracking_size: egraph.colors().map(|c| c.parents_classes.iter().map(|m| m.len()).sum::<usize>()).sum(),
         }
     }
 }
