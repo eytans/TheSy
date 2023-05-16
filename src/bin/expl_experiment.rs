@@ -14,6 +14,7 @@ use TheSy::SubCmd::CheckEquiv;
 use TheSy::thesy::prover;
 use TheSy::thesy::prover::RewriteProver;
 use TheSy::thesy::statistics::{sample_graph_stats, StatsReport};
+use thesy_parser::ast::Expression;
 
 
 /// Arguments to use to run thesy
@@ -120,9 +121,10 @@ fn collect_definitions_and_config(args: CliOpt) -> (PathBuf, Vec<RecExpr<SymbolL
     }
     // Load additional terms as a line seperated list (filter empty) of terms in sexp format
     let additional_terms_string = std::fs::read_to_string(additional_terms_path).expect("Failed to load additional terms");
+    let parser = thesy_parser::grammar::ExpParser::new();
     let additional_terms: Vec<RecExpr<SymbolLang>> = additional_terms_string.lines()
         .filter(|s| !s.trim().is_empty())
-        .map(|s| s.parse().unwrap()).collect();
+        .map(|s| parser.parse(s).unwrap().to_sexp_string().parse().unwrap()).collect();
     // Create thesy but use an updated prover
     let config = TheSyConfig::new(
         defs,
