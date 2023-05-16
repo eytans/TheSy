@@ -4,4 +4,4 @@ fun last (x_0 : Lst) -> Nat
 fun leq (__x0 : Nat) (__y1 : Nat) -> Bool => (or (= ?__x0 ?__y1) (less ?__x0 ?__y1))
 rw rule0 (last (cons ?x ?y)) => (ite (= ?y nil) ?x (last ?y))
 rw rule1 (ite (= ?y nil) ?x (last ?y)) => (last (cons ?x ?y))
-prove if (= ((?x : Nat)s : Lst) nil) then (last (cons (?x : Nat) ((?x : Nat)s : Lst)))  = (?x : Nat)
+prove if (= (?xs : Lst) nil) then (last (cons (?x : Nat) (?xs : Lst)))  = (?x : Nat)

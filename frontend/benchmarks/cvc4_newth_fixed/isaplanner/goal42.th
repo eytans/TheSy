@@ -6,4 +6,4 @@ rw rule0 (take ?x nil) => nil
 rw rule1 (take zero ?x2) => nil
 rw rule2 (take (succ ?x) (cons ?y ?z)) => (cons ?y (take ?x ?z))
 rw rule3 (cons ?y (take ?x ?z)) => (take (succ ?x) (cons ?y ?z))
-prove (take (succ (?n : Nat)) (cons (?x : Nat) ((?x : Nat)s : Lst)))  = (cons (?x : Nat) (take (?n : Nat) ((?x : Nat)s : Lst)))
+prove (take (succ (?n : Nat)) (cons (?x : Nat) (?xs : Lst)))  = (cons (?x : Nat) (take (?n : Nat) (?xs : Lst)))

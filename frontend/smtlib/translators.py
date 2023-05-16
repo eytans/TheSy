@@ -1,6 +1,7 @@
 import typing
 import itertools
 import functools
+import re
 
 from pysmt.typing import Type, BOOL
 
@@ -11,6 +12,9 @@ from pysmt.exceptions import PysmtTypeError
 from pysmt.shortcuts import Symbol, FunctionType, ForAll, Equals, \
     Iff, Function, Bool, get_free_variables, TRUE, FALSE, Implies, get_env
 
+def multiple_replace(string, rep_dict):
+    pattern = re.compile("|".join([re.escape(k) for k in sorted(rep_dict,key=len,reverse=True)]), flags=re.DOTALL)
+    return pattern.sub(lambda x: rep_dict[x.group(0)], string)
 
 class ThesyFromSmt(object):
     """
@@ -274,7 +278,9 @@ class FunDef(object):
         if self.body is None:
             fixed_body = ""
         else:
-            with_args = functools.reduce(lambda x, y: str(x).replace(f"{y[0]}", f"?{y[0]}"), self.args, self.body)
+            replace_dict = {f"{a[0]}": f"?{a[0]}" for a in self.args}
+            # with_args = functools.reduce(lambda x, y: str(x).replace(f"{y[0]}", f"?{y[0]}"), self.args, self.body)
+            with_args = multiple_replace(str(self.body), replace_dict)
             fixed_body = f" => {with_args}"
         return f"fun {self.name} {' '.join([f'({a} : {t})' for a, t in self.args])} -> {self.ret_type}{fixed_body}"
 
@@ -318,8 +324,10 @@ class Goal(object):
         if self.rhs:
             fixed_rhs = f" = {self.rhs.to_smtlib(daggify=False)}"
         res = f"prove{fixed_precondition} {self.lhs.to_smtlib(daggify=False)} {fixed_rhs}"
-        for v in self.uvars:
-            res = res.replace(f"?{v.symbol_name()}", f"(?{v.symbol_name()} : {v.symbol_type()})")
+        replace_dict = {f"?{v.symbol_name()}": f"(?{v.symbol_name()} : {v.symbol_type()})" for v in self.uvars}
+        # for v in self.uvars:
+        #     res = res.replace(f"?{v.symbol_name()}", f"(?{v.symbol_name()} : {v.symbol_type()})")
+        res = multiple_replace(res, replace_dict)
         return res
 
 
