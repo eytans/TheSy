@@ -1,0 +1,444 @@
+,test_suite,Unnamed: 1,time,stop_reasons,success,lemma_count,proofs_later_filtered,case_split_root_count,case_split_had_vacuity,total_allocated,max_allocated,file_name,relative_path,total_enodes,error
+0,isaplanner,0.0,13.656905259,[],0.0,0.0,0.0,0.0,0.0,24436165422.0,66055225.0,goal72.stats.json,isaplanner/goal72.th,149601.0,
+1,isaplanner,1.0,0.108584149,[],1.0,0.0,0.0,0.0,0.0,121779443.0,1502725.0,goal77.stats.json,isaplanner/goal77.th,2469.0,
+2,isaplanner,2.0,0.037781195,[],1.0,0.0,0.0,0.0,0.0,45889792.0,1379566.0,goal61.stats.json,isaplanner/goal61.th,2195.0,
+3,isaplanner,3.0,0.012843311,[],1.0,0.0,0.0,0.0,0.0,13693253.0,1003610.0,goal60.stats.json,isaplanner/goal60.th,912.0,
+4,isaplanner,4.0,22.924051327,[],0.0,0.0,0.0,0.0,0.0,38746220929.0,77906888.0,goal53.stats.json,isaplanner/goal53.th,175353.0,
+5,isaplanner,5.0,0.002665703,[],0.0,0.0,0.0,0.0,0.0,5996706.0,434805.0,goal35.stats.json,isaplanner/goal35.th,180.0,
+6,isaplanner,6.0,0.677649736,[],1.0,0.0,0.0,0.0,0.0,815315785.0,2827511.0,goal28.stats.json,isaplanner/goal28.th,4599.0,
+7,isaplanner,7.0,0.032944934,[],0.0,0.0,0.0,0.0,0.0,30411277.0,2152385.0,goal44.stats.json,isaplanner/goal44.th,3107.0,
+8,isaplanner,8.0,0.059892513,[],1.0,0.0,0.0,0.0,0.0,67906303.0,1223172.0,goal38.stats.json,isaplanner/goal38.th,1657.0,
+9,isaplanner,9.0,0.00284659,[],0.0,0.0,0.0,0.0,0.0,6121190.0,436433.0,goal36.stats.json,isaplanner/goal36.th,183.0,
+10,isaplanner,10.0,0.054622812,[],1.0,0.0,0.0,0.0,0.0,64115762.0,1253224.0,goal14.stats.json,isaplanner/goal14.th,1698.0,
+11,isaplanner,11.0,0.015170158,[],1.0,0.0,0.0,0.0,0.0,15284353.0,717221.0,goal4.stats.json,isaplanner/goal4.th,650.0,
+12,isaplanner,12.0,0.581834544,[],1.0,0.0,0.0,0.0,0.0,667372970.0,4106933.0,goal2.stats.json,isaplanner/goal2.th,8069.0,
+13,isaplanner,13.0,0.034664402,[],1.0,0.0,0.0,0.0,0.0,32070249.0,1388876.0,goal45.stats.json,isaplanner/goal45.th,1661.0,
+14,isaplanner,14.0,0.055101783,[],0.0,0.0,0.0,0.0,0.0,63853760.0,1204994.0,goal52.stats.json,isaplanner/goal52.th,1613.0,
+15,isaplanner,15.0,5.404076668,[],0.0,0.0,0.0,0.0,0.0,10312176674.0,22565504.0,goal54.stats.json,isaplanner/goal54.th,48996.0,
+16,isaplanner,16.0,0.006525138,[],0.0,0.0,0.0,0.0,0.0,8495558.0,594919.0,goal26.stats.json,isaplanner/goal26.th,342.0,
+17,isaplanner,17.0,7.83045929,[],1.0,0.0,0.0,0.0,0.0,15088990722.0,45149754.0,goal68.stats.json,isaplanner/goal68.th,96896.0,
+18,isaplanner,18.0,11.874027278,[],0.0,0.0,0.0,0.0,0.0,21252468939.0,56887707.0,goal80.stats.json,isaplanner/goal80.th,132334.0,
+19,isaplanner,19.0,0.002306408,[],0.0,0.0,0.0,0.0,0.0,5941304.0,570952.0,goal75.stats.json,isaplanner/goal75.th,321.0,
+20,isaplanner,20.0,0.011950177,[],1.0,0.0,0.0,0.0,0.0,12890023.0,1073705.0,goal48.stats.json,isaplanner/goal48.th,868.0,
+21,isaplanner,21.0,0.009335079,[],1.0,0.0,0.0,0.0,0.0,10974044.0,859781.0,goal51.stats.json,isaplanner/goal51.th,639.0,
+22,isaplanner,22.0,0.025562395,[],1.0,0.0,0.0,0.0,0.0,22431539.0,926134.0,goal39.stats.json,isaplanner/goal39.th,1024.0,
+23,isaplanner,23.0,21.467386002,[],0.0,0.0,0.0,0.0,0.0,40668130951.0,88031002.0,goal47.stats.json,isaplanner/goal47.th,202759.0,
+24,isaplanner,24.0,54.561968874,[],0.0,0.0,0.0,0.0,0.0,56075385507.0,6570089519.0,goal76.stats.json,isaplanner/goal76.th,11195139.0,
+25,isaplanner,25.0,0.038227834,[],1.0,0.0,0.0,0.0,0.0,36109332.0,1536664.0,goal46.stats.json,isaplanner/goal46.th,1930.0,
+26,isaplanner,26.0,0.015342687,[],1.0,0.0,0.0,0.0,0.0,16232208.0,1178756.0,goal62.stats.json,isaplanner/goal62.th,1242.0,
+27,isaplanner,27.0,19.282221948,[],0.0,0.0,0.0,0.0,0.0,34726738845.0,64067636.0,goal79.stats.json,isaplanner/goal79.th,151194.0,
+28,isaplanner,28.0,18.874584415,[],1.0,0.0,0.0,0.0,0.0,34333892944.0,65482058.0,goal15.stats.json,isaplanner/goal15.th,153101.0,
+29,isaplanner,29.0,0.936550239,[],1.0,0.0,0.0,0.0,0.0,1130743121.0,3377750.0,goal29.stats.json,isaplanner/goal29.th,6396.0,
+30,isaplanner,30.0,0.011101397,[],1.0,0.0,0.0,0.0,0.0,11465772.0,811383.0,goal1.stats.json,isaplanner/goal1.th,642.0,
+31,isaplanner,31.0,0.009417599,[],1.0,0.0,0.0,0.0,0.0,11205376.0,579907.0,goal5.stats.json,isaplanner/goal5.th,404.0,
+32,isaplanner,32.0,12.832305398,[],0.0,0.0,0.0,0.0,0.0,23359105161.0,70230563.0,goal67.stats.json,isaplanner/goal67.th,159953.0,
+33,isaplanner,33.0,30.984811644,[],0.0,0.0,0.0,0.0,0.0,53421439044.0,99791188.0,goal3.stats.json,isaplanner/goal3.th,216890.0,
+34,isaplanner,34.0,1.497689508,[],1.0,0.0,0.0,0.0,0.0,1748682890.0,3970934.0,goal27.stats.json,isaplanner/goal27.th,6694.0,
+35,isaplanner,35.0,18.606189749,[],0.0,0.0,0.0,0.0,0.0,33417974170.0,74821619.0,goal69.stats.json,isaplanner/goal69.th,169779.0,
+36,isaplanner,36.0,0.00836943,[],1.0,0.0,0.0,0.0,0.0,10328729.0,868779.0,goal65.stats.json,isaplanner/goal65.th,677.0,
+37,isaplanner,37.0,11.839335055,[],0.0,0.0,0.0,0.0,0.0,21340253399.0,59283388.0,goal20.stats.json,isaplanner/goal20.th,137246.0,
+38,isaplanner,38.0,0.241850399,[],0.0,0.0,0.0,0.0,0.0,266117664.0,2116771.0,goal78.stats.json,isaplanner/goal78.th,3437.0,
+39,isaplanner,39.0,24.262744091,[],0.0,0.0,0.0,0.0,0.0,41559367298.0,747188846.0,goal74.stats.json,isaplanner/goal74.th,1654566.0,
+40,isaplanner,40.0,0.101316587,[],1.0,0.0,0.0,0.0,0.0,116333446.0,1877688.0,goal49.stats.json,isaplanner/goal49.th,2593.0,
+41,isaplanner,41.0,3.729333324,[],1.0,0.0,0.0,0.0,0.0,6328173508.0,13493392.0,goal73.stats.json,isaplanner/goal73.th,29313.0,
+42,isaplanner,42.0,0.015329197,[],1.0,0.0,0.0,0.0,0.0,21160845.0,519477.0,goal37.stats.json,isaplanner/goal37.th,558.0,
+43,hipspec-nichomachus,0.0,0.001308675,[],0.0,0.0,0.0,0.0,0.0,5170927.0,445178.0,nichomachus-goal4.stats.json,hipspec-nichomachus/nichomachus-goal4.th,42.0,
+44,hipspec-nichomachus,1.0,0.003024678,[],0.0,0.0,0.0,0.0,0.0,6448104.0,444954.0,nichomachus-goal8.stats.json,hipspec-nichomachus/nichomachus-goal8.th,119.0,
+45,hipspec-nichomachus,2.0,0.001905724,[],0.0,0.0,0.0,0.0,0.0,5442066.0,445564.0,nichomachus-goal6.stats.json,hipspec-nichomachus/nichomachus-goal6.th,51.0,
+46,hipspec-nichomachus,3.0,0.001975397,[],0.0,0.0,0.0,0.0,0.0,5552112.0,445178.0,nichomachus-goal2.stats.json,hipspec-nichomachus/nichomachus-goal2.th,59.0,
+47,hipspec-nichomachus,4.0,0.000902891,[],0.0,0.0,0.0,0.0,0.0,5033003.0,445178.0,nichomachus-goal5.stats.json,hipspec-nichomachus/nichomachus-goal5.th,42.0,
+48,hipspec-nichomachus,5.0,0.001115476,[],0.0,0.0,0.0,0.0,0.0,5124698.0,444203.0,nichomachus-goal9.stats.json,hipspec-nichomachus/nichomachus-goal9.th,53.0,
+49,hipspec-nichomachus,6.0,0.001435126,[],0.0,0.0,0.0,0.0,0.0,5269371.0,445430.0,nichomachus-goal7.stats.json,hipspec-nichomachus/nichomachus-goal7.th,49.0,
+50,hipspec-nichomachus,7.0,0.000850191,[],0.0,0.0,0.0,0.0,0.0,5017969.0,444342.0,nichomachus-goal1.stats.json,hipspec-nichomachus/nichomachus-goal1.th,41.0,
+51,hipspec-nichomachus,8.0,0.000860069,[],0.0,0.0,0.0,0.0,0.0,5018097.0,444342.0,nichomachus-goal3.stats.json,hipspec-nichomachus/nichomachus-goal3.th,41.0,
+52,clam,0.0,0.027496714,[],0.0,0.0,0.0,0.0,0.0,35090420.0,754789.0,goal50.stats.json,clam/goal50.th,580.0,
+53,clam,1.0,0.001905694,[],1.0,0.0,0.0,0.0,0.0,5751760.0,472507.0,goal72.stats.json,clam/goal72.th,139.0,
+54,clam,2.0,0.384121502,[],0.0,0.0,0.0,0.0,0.0,467427109.0,3932562.0,goal13.stats.json,clam/goal13.th,1423.0,
+55,clam,3.0,0.001648042,[],0.0,0.0,0.0,0.0,0.0,5541802.0,445795.0,goal77.stats.json,clam/goal77.th,116.0,
+56,clam,4.0,0.002073434,[],1.0,0.0,0.0,0.0,0.0,5869861.0,465539.0,goal61.stats.json,clam/goal61.th,138.0,
+57,clam,5.0,0.002365852,[],1.0,0.0,0.0,0.0,0.0,6107577.0,498506.0,goal60.stats.json,clam/goal60.th,150.0,
+58,clam,6.0,0.001661779,[],0.0,0.0,0.0,0.0,0.0,5607883.0,462223.0,goal81.stats.json,clam/goal81.th,117.0,
+59,clam,7.0,0.002069776,[],1.0,0.0,0.0,0.0,0.0,5880932.0,487931.0,goal53.stats.json,clam/goal53.th,146.0,
+60,clam,8.0,0.003740102,[],0.0,0.0,0.0,0.0,0.0,6659381.0,503024.0,goal64.stats.json,clam/goal64.th,151.0,
+61,clam,9.0,0.001697408,[],0.0,0.0,0.0,0.0,0.0,5627281.0,483780.0,goal23.stats.json,clam/goal23.th,130.0,
+62,clam,10.0,0.001912387,[],0.0,0.0,0.0,0.0,0.0,5744556.0,470219.0,goal30.stats.json,clam/goal30.th,134.0,
+63,clam,11.0,0.001927145,[],0.0,0.0,0.0,0.0,0.0,5727768.0,441871.0,goal35.stats.json,clam/goal35.th,83.0,
+64,clam,12.0,0.00232817,[],0.0,0.0,0.0,0.0,0.0,5829717.0,435002.0,goal85.stats.json,clam/goal85.th,83.0,
+65,clam,13.0,0.001953716,[],0.0,0.0,0.0,0.0,0.0,5860663.0,541182.0,goal28.stats.json,clam/goal28.th,129.0,
+66,clam,14.0,0.015186529,[],0.0,0.0,0.0,0.0,0.0,20728046.0,622971.0,goal44.stats.json,clam/goal44.th,541.0,
+67,clam,15.0,0.001832124,[],0.0,0.0,0.0,0.0,0.0,5745195.0,478675.0,goal31.stats.json,clam/goal31.th,133.0,
+68,clam,16.0,0.020027701,[],0.0,0.0,0.0,0.0,0.0,26537110.0,652122.0,goal43.stats.json,clam/goal43.th,677.0,
+69,clam,17.0,0.00279003,[],0.0,0.0,0.0,0.0,0.0,6326213.0,497038.0,goal12.stats.json,clam/goal12.th,143.0,
+70,clam,18.0,2.291446391,[],1.0,0.0,0.0,0.0,0.0,2721301584.0,5319631.0,goal38.stats.json,clam/goal38.th,10917.0,
+71,clam,19.0,0.002295858,[],0.0,0.0,0.0,0.0,0.0,6012320.0,462311.0,goal36.stats.json,clam/goal36.th,120.0,
+72,clam,20.0,0.002439472,[],0.0,0.0,0.0,0.0,0.0,5914801.0,442228.0,goal86.stats.json,clam/goal86.th,83.0,
+73,clam,21.0,0.001655357,[],0.0,0.0,0.0,0.0,0.0,5558271.0,455495.0,goal19.stats.json,clam/goal19.th,119.0,
+74,clam,22.0,0.001192835,[],0.0,0.0,0.0,0.0,0.0,5305103.0,451414.0,goal14.stats.json,clam/goal14.th,46.0,
+75,clam,23.0,0.001476406,[],0.0,0.0,0.0,0.0,0.0,5534281.0,465986.0,goal42.stats.json,clam/goal42.th,46.0,
+76,clam,24.0,0.001434295,[],0.0,0.0,0.0,0.0,0.0,5421524.0,431012.0,goal16.stats.json,clam/goal16.th,98.0,
+77,clam,25.0,0.001359132,[],0.0,0.0,0.0,0.0,0.0,5300124.0,435021.0,goal66.stats.json,clam/goal66.th,90.0,
+78,clam,26.0,0.001859115,[],0.0,0.0,0.0,0.0,0.0,5619173.0,434474.0,goal34.stats.json,clam/goal34.th,81.0,
+79,clam,27.0,0.002060018,[],0.0,0.0,0.0,0.0,0.0,5936308.0,502882.0,goal4.stats.json,clam/goal4.th,152.0,
+80,clam,28.0,0.001626482,[],0.0,0.0,0.0,0.0,0.0,5546297.0,460095.0,goal2.stats.json,clam/goal2.th,124.0,
+81,clam,29.0,0.002085106,[],1.0,0.0,0.0,0.0,0.0,5896322.0,487076.0,goal52.stats.json,clam/goal52.th,146.0,
+82,clam,30.0,0.264149566,[],0.0,0.0,0.0,0.0,0.0,235712907.0,4627258.0,goal9.stats.json,clam/goal9.th,7266.0,
+83,clam,31.0,0.209034287,[],1.0,0.0,0.0,0.0,0.0,186524376.0,5047142.0,goal54.stats.json,clam/goal54.th,8443.0,
+84,clam,32.0,0.00470923,[],0.0,0.0,0.0,0.0,0.0,7280906.0,430609.0,goal26.stats.json,clam/goal26.th,177.0,
+85,clam,33.0,0.002935447,[],1.0,0.0,0.0,0.0,0.0,6449927.0,595797.0,goal25.stats.json,clam/goal25.th,200.0,
+86,clam,34.0,0.001262298,[],0.0,0.0,0.0,0.0,0.0,5222765.0,430071.0,goal24.stats.json,clam/goal24.th,82.0,
+87,clam,35.0,0.011277105,[],1.0,0.0,0.0,0.0,0.0,14468108.0,659020.0,goal68.stats.json,clam/goal68.th,589.0,
+88,clam,36.0,0.002725928,[],0.0,0.0,0.0,0.0,0.0,6165421.0,491690.0,goal17.stats.json,clam/goal17.th,145.0,
+89,clam,37.0,0.109389234,[],1.0,0.0,0.0,0.0,0.0,103616148.0,3483732.0,goal57.stats.json,clam/goal57.th,5821.0,
+90,clam,38.0,0.001989875,[],0.0,0.0,0.0,0.0,0.0,5808383.0,486412.0,goal21.stats.json,clam/goal21.th,125.0,
+91,clam,39.0,0.001676407,[],0.0,0.0,0.0,0.0,0.0,5566113.0,454124.0,goal80.stats.json,clam/goal80.th,118.0,
+92,clam,40.0,24.660378468,[],0.0,0.0,0.0,0.0,0.0,24873506505.0,1455107205.0,goal8.stats.json,clam/goal8.th,3006446.0,
+93,clam,41.0,0.002790822,[],0.0,0.0,0.0,0.0,0.0,6326046.0,496602.0,goal75.stats.json,clam/goal75.th,143.0,
+94,clam,42.0,0.001954176,[],0.0,0.0,0.0,0.0,0.0,5699351.0,440531.0,goal84.stats.json,clam/goal84.th,83.0,
+95,clam,43.0,0.001658563,[],0.0,0.0,0.0,0.0,0.0,5566425.0,454679.0,goal11.stats.json,clam/goal11.th,118.0,
+96,clam,44.0,0.001770597,[],0.0,0.0,0.0,0.0,0.0,5698506.0,446442.0,goal48.stats.json,clam/goal48.th,101.0,
+97,clam,45.0,0.001570425,[],1.0,0.0,0.0,0.0,0.0,5561039.0,428028.0,goal51.stats.json,clam/goal51.th,93.0,
+98,clam,46.0,75.129224475,[],1.0,0.0,0.0,0.0,0.0,59775624202.0,45928036.0,goal39.stats.json,clam/goal39.th,126239.0,
+99,clam,47.0,0.03378787,[],1.0,0.0,0.0,0.0,0.0,39416369.0,873667.0,goal47.stats.json,clam/goal47.th,1053.0,
+100,clam,48.0,0.002779139,[],0.0,0.0,0.0,0.0,0.0,6301921.0,554419.0,goal76.stats.json,clam/goal76.th,134.0,
+101,clam,49.0,0.024634024,[],0.0,0.0,0.0,0.0,0.0,29850567.0,803777.0,goal62.stats.json,clam/goal62.th,950.0,
+102,clam,50.0,0.001702476,[],0.0,0.0,0.0,0.0,0.0,5575259.0,454937.0,goal18.stats.json,clam/goal18.th,118.0,
+103,clam,51.0,0.001687909,[],0.0,0.0,0.0,0.0,0.0,5574149.0,454382.0,goal79.stats.json,clam/goal79.th,118.0,
+104,clam,52.0,0.022421366,[],0.0,0.0,0.0,0.0,0.0,26768059.0,839959.0,goal70.stats.json,clam/goal70.th,919.0,
+105,clam,53.0,0.001527984,[],0.0,0.0,0.0,0.0,0.0,5572349.0,440238.0,goal33.stats.json,clam/goal33.th,84.0,
+106,clam,54.0,0.001681226,[],0.0,0.0,0.0,0.0,0.0,5650959.0,428028.0,goal15.stats.json,clam/goal15.th,97.0,
+107,clam,55.0,0.001848856,[],0.0,0.0,0.0,0.0,0.0,5741734.0,478318.0,goal29.stats.json,clam/goal29.th,133.0,
+108,clam,56.0,0.001558512,[],0.0,0.0,0.0,0.0,0.0,5602398.0,429769.0,goal1.stats.json,clam/goal1.th,94.0,
+109,clam,57.0,0.001972231,[],0.0,0.0,0.0,0.0,0.0,5906915.0,497468.0,goal5.stats.json,clam/goal5.th,145.0,
+110,clam,58.0,0.002376582,[],0.0,0.0,0.0,0.0,0.0,5883526.0,457768.0,goal59.stats.json,clam/goal59.th,117.0,
+111,clam,59.0,0.002226116,[],0.0,0.0,0.0,0.0,0.0,5917997.0,559092.0,goal6.stats.json,clam/goal6.th,170.0,
+112,clam,60.0,0.001613877,[],1.0,0.0,0.0,0.0,0.0,5579021.0,428042.0,goal67.stats.json,clam/goal67.th,95.0,
+113,clam,61.0,479.549659065,[],1.0,0.0,0.0,0.0,0.0,492700308497.0,179703682.0,goal71.stats.json,clam/goal71.th,413503.0,
+114,clam,62.0,0.002580169,[],1.0,0.0,0.0,0.0,0.0,6213712.0,578801.0,goal3.stats.json,clam/goal3.th,194.0,
+115,clam,63.0,0.001640267,[],0.0,0.0,0.0,0.0,0.0,5599253.0,461914.0,goal82.stats.json,clam/goal82.th,117.0,
+116,clam,64.0,0.001904402,[],0.0,0.0,0.0,0.0,0.0,5876741.0,489285.0,goal27.stats.json,clam/goal27.th,137.0,
+117,clam,65.0,0.002148016,[],1.0,0.0,0.0,0.0,0.0,5965349.0,491844.0,goal58.stats.json,clam/goal58.th,145.0,
+118,clam,66.0,0.002264038,[],1.0,0.0,0.0,0.0,0.0,6025738.0,504318.0,goal65.stats.json,clam/goal65.th,156.0,
+119,clam,67.0,0.001983502,[],0.0,0.0,0.0,0.0,0.0,5807828.0,486412.0,goal83.stats.json,clam/goal83.th,125.0,
+120,clam,68.0,0.002102069,[],0.0,0.0,0.0,0.0,0.0,5964676.0,513502.0,goal20.stats.json,clam/goal20.th,157.0,
+121,clam,69.0,0.001629717,[],0.0,0.0,0.0,0.0,0.0,5597864.0,461805.0,goal78.stats.json,clam/goal78.th,117.0,
+122,clam,70.0,0.001405219,[],1.0,0.0,0.0,0.0,0.0,5350232.0,428050.0,goal74.stats.json,clam/goal74.th,84.0,
+123,clam,71.0,0.116681059,[],1.0,0.0,0.0,0.0,0.0,111371497.0,3866378.0,goal55.stats.json,clam/goal55.th,6488.0,
+124,clam,72.0,0.001888732,[],0.0,0.0,0.0,0.0,0.0,5702821.0,488773.0,goal22.stats.json,clam/goal22.th,138.0,
+125,clam,73.0,0.474401326,[],1.0,0.0,0.0,0.0,0.0,567306161.0,2040932.0,goal49.stats.json,clam/goal49.th,2745.0,
+126,clam,74.0,0.002304844,[],0.0,0.0,0.0,0.0,0.0,5770475.0,432439.0,goal73.stats.json,clam/goal73.th,82.0,
+127,clam,75.0,0.001920232,[],1.0,0.0,0.0,0.0,0.0,5756570.0,472323.0,goal63.stats.json,clam/goal63.th,137.0,
+128,clam,76.0,0.003632948,[],0.0,0.0,0.0,0.0,0.0,6770406.0,607311.0,goal7.stats.json,clam/goal7.th,198.0,
+129,clam,77.0,0.022457134,[],0.0,0.0,0.0,0.0,0.0,29661552.0,613169.0,goal41.stats.json,clam/goal41.th,705.0,
+130,clam,78.0,0.000750481,[],0.0,0.0,0.0,0.0,0.0,5091202.0,473922.0,goal40.stats.json,clam/goal40.th,47.0,
+131,clam,79.0,0.394509099,[],1.0,0.0,0.0,0.0,0.0,351787637.0,5739988.0,goal56.stats.json,clam/goal56.th,9110.0,
+132,clam,80.0,0.001800703,[],0.0,0.0,0.0,0.0,0.0,5723560.0,476050.0,goal10.stats.json,clam/goal10.th,135.0,
+133,clam,81.0,0.002139519,[],0.0,0.0,0.0,0.0,0.0,5981746.0,507322.0,goal32.stats.json,clam/goal32.th,142.0,
+134,clam,82.0,0.829956635,[],1.0,0.0,0.0,0.0,0.0,985744831.0,3035264.0,goal37.stats.json,clam/goal37.th,3922.0,
+135,leon-heap,0.0,5.231961813,[],0.0,0.0,0.0,0.0,0.0,6315353595.0,69964756.0,heap-goal1.stats.json,leon-heap/heap-goal1.th,144950.0,
+136,hipspec-rev-equiv,0.0,0.118967407,[],0.0,0.0,0.0,0.0,0.0,94146248.0,3955805.0,rev-equiv-goal3.stats.json,hipspec-rev-equiv/rev-equiv-goal3.th,6805.0,
+137,hipspec-rev-equiv,1.0,0.212688724,[],1.0,0.0,0.0,0.0,0.0,196414572.0,7235529.0,rev-equiv-goal4.stats.json,hipspec-rev-equiv/rev-equiv-goal4.th,12636.0,
+138,hipspec-rev-equiv,2.0,0.214174306,[],1.0,0.0,0.0,0.0,0.0,193920923.0,8665261.0,rev-equiv-goal5.stats.json,hipspec-rev-equiv/rev-equiv-goal5.th,15371.0,
+139,hipspec-rev-equiv,3.0,0.16001995,[],1.0,0.0,0.0,0.0,0.0,141733721.0,5384278.0,rev-equiv-goal2.stats.json,hipspec-rev-equiv/rev-equiv-goal2.th,9320.0,
+140,hipspec-rev-equiv,4.0,0.181789882,[],0.0,0.0,0.0,0.0,0.0,167938053.0,6165650.0,rev-equiv-goal8.stats.json,hipspec-rev-equiv/rev-equiv-goal8.th,10764.0,
+141,hipspec-rev-equiv,5.0,0.159056833,[],1.0,0.0,0.0,0.0,0.0,140657302.0,5218824.0,rev-equiv-goal1.stats.json,hipspec-rev-equiv/rev-equiv-goal1.th,8848.0,
+142,hipspec-rev-equiv,6.0,0.118219622,[],0.0,0.0,0.0,0.0,0.0,92379068.0,3961616.0,rev-equiv-goal7.stats.json,hipspec-rev-equiv/rev-equiv-goal7.th,6794.0,
+143,hipspec-rev-equiv,7.0,0.200203806,[],1.0,0.0,0.0,0.0,0.0,183669039.0,6783135.0,rev-equiv-goal6.stats.json,hipspec-rev-equiv/rev-equiv-goal6.th,11820.0,
+144,leon-amortize-queue,0.0,4.4301210090000005,[],1.0,0.0,0.0,0.0,0.0,5695339322.0,45431376.0,amortize-queue-goal1.stats.json,leon-amortize-queue/amortize-queue-goal1.th,94279.0,
+145,hipspec-rotate,0.0,0.082139203,[],0.0,0.0,0.0,0.0,0.0,61294009.0,2094600.0,rotate-goal9.stats.json,hipspec-rotate/rotate-goal9.th,3232.0,
+146,hipspec-rotate,1.0,0.080002661,[],1.0,0.0,0.0,0.0,0.0,58604013.0,1984431.0,rotate-goal1.stats.json,hipspec-rotate/rotate-goal1.th,2984.0,
+147,hipspec-rotate,2.0,0.169438834,[],0.0,0.0,0.0,0.0,0.0,143040606.0,2023563.0,rotate-goal4.stats.json,hipspec-rotate/rotate-goal4.th,2740.0,
+148,hipspec-rotate,3.0,0.072235128,[],0.0,0.0,0.0,0.0,0.0,48807936.0,1823732.0,rotate-goal6.stats.json,hipspec-rotate/rotate-goal6.th,2732.0,
+149,hipspec-rotate,4.0,15.559491522,[],1.0,0.0,0.0,0.0,0.0,18118130931.0,46941668.0,rotate-goal5.stats.json,hipspec-rotate/rotate-goal5.th,120536.0,
+150,hipspec-rotate,5.0,200.251516216,[],0.0,0.0,0.0,0.0,0.0,187027699591.0,14249002668.0,rotate-goal3.stats.json,hipspec-rotate/rotate-goal3.th,29388678.0,
+151,hipspec-rotate,6.0,0.085142572,[],1.0,0.0,0.0,0.0,0.0,64169193.0,2099785.0,rotate-goal2.stats.json,hipspec-rotate/rotate-goal2.th,3254.0,
+152,hipspec-rotate,7.0,0.071742435,[],0.0,0.0,0.0,0.0,0.0,48780403.0,1842683.0,rotate-goal8.stats.json,hipspec-rotate/rotate-goal8.th,2767.0,
+153,,,,,,,,,,,,,hipspec-rotate/rotate-goal7.th,,"memory allocation of 160 bytes failed
+"
+154,,,,,,,,,,,,,leon-heap/heap-goal9.th,,"18:05:07 [0m[31m[ERROR] [0mUnrecognized token `(` found at 4357:4358
+Expected one of ""then""
+thread 'main' panicked at 'Please implement error handling', src/thesy/semantics.rs:123:17
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+"
+155,,,,,,,,,,,,,leon-heap/heap-goal12.th,,"18:05:10 [0m[31m[ERROR] [0mUnrecognized token `(` found at 4357:4358
+Expected one of ""then""
+thread 'main' panicked at 'Please implement error handling', src/thesy/semantics.rs:123:17
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+"
+156,,,,,,,,,,,,,leon-heap/heap-goal7.th,,"18:05:07 [0m[31m[ERROR] [0mUnrecognized token `(` found at 4357:4358
+Expected one of ""then""
+thread 'main' panicked at 'Please implement error handling', src/thesy/semantics.rs:123:17
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+"
+157,,,,,,,,,,,,,leon-heap/heap-goal10.th,,"18:05:07 [0m[31m[ERROR] [0mUnrecognized token `(` found at 4357:4358
+Expected one of ""then""
+thread 'main' panicked at 'Please implement error handling', src/thesy/semantics.rs:123:17
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+"
+158,,,,,,,,,,,,,leon-heap/heap-goal11.th,,"18:05:07 [0m[31m[ERROR] [0mUnrecognized token `(` found at 4357:4358
+Expected one of ""then""
+thread 'main' panicked at 'Please implement error handling', src/thesy/semantics.rs:123:17
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+"
+159,,,,,,,,,,,,,leon-heap/heap-goal13.th,,"18:05:07 [0m[31m[ERROR] [0mUnrecognized token `(` found at 4357:4358
+Expected one of ""then""
+thread 'main' panicked at 'Please implement error handling', src/thesy/semantics.rs:123:17
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+"
+160,,,,,,,,,,,,,leon-heap/heap-goal4.th,,"18:05:10 [0m[31m[ERROR] [0mUnrecognized token `(` found at 4357:4358
+Expected one of ""then""
+thread 'main' panicked at 'Please implement error handling', src/thesy/semantics.rs:123:17
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+"
+161,,,,,,,,,,,,,leon-heap/heap-goal3.th,,"18:05:07 [0m[31m[ERROR] [0mUnrecognized token `(` found at 4357:4358
+Expected one of ""then""
+thread 'main' panicked at 'Please implement error handling', src/thesy/semantics.rs:123:17
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+"
+162,,,,,,,,,,,,,leon-heap/heap-goal8.th,,"18:05:07 [0m[31m[ERROR] [0mUnrecognized token `(` found at 4357:4358
+Expected one of ""then""
+thread 'main' panicked at 'Please implement error handling', src/thesy/semantics.rs:123:17
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+"
+163,,,,,,,,,,,,,leon-heap/heap-goal6.th,,"18:05:07 [0m[31m[ERROR] [0mUnrecognized token `(` found at 4357:4358
+Expected one of ""then""
+thread 'main' panicked at 'Please implement error handling', src/thesy/semantics.rs:123:17
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+"
+164,,,,,,,,,,,,,leon-heap/heap-goal5.th,,"18:05:07 [0m[31m[ERROR] [0mUnrecognized token `(` found at 4357:4358
+Expected one of ""then""
+thread 'main' panicked at 'Please implement error handling', src/thesy/semantics.rs:123:17
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+"
+165,,,,,,,,,,,,,leon-heap/heap-goal2.th,,"18:05:07 [0m[31m[ERROR] [0mUnrecognized token `(` found at 4357:4358
+Expected one of ""then""
+thread 'main' panicked at 'Please implement error handling', src/thesy/semantics.rs:123:17
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+"
+166,,,,,,,,,,,,,leon-amortize-queue/amortize-queue-goal12.th,,"18:15:15 [0m[31m[ERROR] [0mInvalid token at 3928
+thread 'main' panicked at 'Please implement error handling', src/thesy/semantics.rs:123:17
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+"
+167,,,,,,,,,,,,,leon-amortize-queue/amortize-queue-goal8.th,,"18:05:50 [0m[31m[ERROR] [0mInvalid token at 3928
+thread 'main' panicked at 'Please implement error handling', src/thesy/semantics.rs:123:17
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+"
+168,,,,,,,,,,,,,leon-amortize-queue/amortize-queue-goal5.th,,"memory allocation of 1203344 bytes failed
+"
+169,,,,,,,,,,,,,leon-amortize-queue/amortize-queue-goal7.th,,"memory allocation of 8 bytes failed
+"
+170,,,,,,,,,,,,,leon-amortize-queue/amortize-queue-goal15.th,,"18:06:14 [0m[31m[ERROR] [0mInvalid token at 3928
+thread 'main' panicked at 'Please implement error handling', src/thesy/semantics.rs:123:17
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+"
+171,,,,,,,,,,,,,leon-amortize-queue/amortize-queue-goal9.th,,"18:15:15 [0m[31m[ERROR] [0mInvalid token at 3928
+thread 'main' panicked at 'Please implement error handling', src/thesy/semantics.rs:123:17
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+"
+172,,,,,,,,,,,,,leon-amortize-queue/amortize-queue-goal14.th,,"18:05:49 [0m[31m[ERROR] [0mInvalid token at 3928
+thread 'main' panicked at 'Please implement error handling', src/thesy/semantics.rs:123:17
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+"
+173,,,,,,,,,,,,,leon-amortize-queue/amortize-queue-goal13.th,,"18:06:54 [0m[31m[ERROR] [0mInvalid token at 3928
+thread 'main' panicked at 'Please implement error handling', src/thesy/semantics.rs:123:17
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+"
+174,,,,,,,,,,,,,leon-amortize-queue/amortize-queue-goal11.th,,"18:06:54 [0m[31m[ERROR] [0mInvalid token at 3928
+thread 'main' panicked at 'Please implement error handling', src/thesy/semantics.rs:123:17
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+"
+175,,,,,,,,,,,,,leon-amortize-queue/amortize-queue-goal2.th,,Timeout Exception
+176,,,,,,,,,,,,,leon-amortize-queue/amortize-queue-goal10.th,,"18:05:09 [0m[31m[ERROR] [0mInvalid token at 3928
+thread 'main' panicked at 'Please implement error handling', src/thesy/semantics.rs:123:17
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+"
+177,,,,,,,,,,,,,leon-amortize-queue/amortize-queue-goal6.th,,"memory allocation of 11001984 bytes failed
+"
+178,,,,,,,,,,,,,leon-amortize-queue/amortize-queue-goal4.th,,"memory allocation of 32 bytes failed
+"
+179,,,,,,,,,,,,,leon-amortize-queue/amortize-queue-goal3.th,,"memory allocation of 60129542144 bytes failed
+"
+180,,,,,,,,,,,,,leon-bsearch-tree/bsearch-tree-goal2.th,,"18:05:07 [0m[31m[ERROR] [0mUnrecognized token `(` found at 2707:2708
+Expected one of ""then""
+thread 'main' panicked at 'Please implement error handling', src/thesy/semantics.rs:123:17
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+"
+181,,,,,,,,,,,,,leon-bsearch-tree/bsearch-tree-goal17.th,,"18:05:07 [0m[31m[ERROR] [0mUnrecognized token `(` found at 2707:2708
+Expected one of ""then""
+thread 'main' panicked at 'Please implement error handling', src/thesy/semantics.rs:123:17
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+"
+182,,,,,,,,,,,,,leon-bsearch-tree/bsearch-tree-goal1.th,,"18:05:07 [0m[31m[ERROR] [0mUnrecognized token `(` found at 2707:2708
+Expected one of ""then""
+thread 'main' panicked at 'Please implement error handling', src/thesy/semantics.rs:123:17
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+"
+183,,,,,,,,,,,,,leon-bsearch-tree/bsearch-tree-goal14.th,,"18:05:07 [0m[31m[ERROR] [0mUnrecognized token `(` found at 2707:2708
+Expected one of ""then""
+thread 'main' panicked at 'Please implement error handling', src/thesy/semantics.rs:123:17
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+"
+184,,,,,,,,,,,,,leon-bsearch-tree/bsearch-tree-goal13.th,,"18:05:07 [0m[31m[ERROR] [0mUnrecognized token `(` found at 2707:2708
+Expected one of ""then""
+thread 'main' panicked at 'Please implement error handling', src/thesy/semantics.rs:123:17
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+"
+185,,,,,,,,,,,,,leon-bsearch-tree/bsearch-tree-goal7.th,,"18:05:07 [0m[31m[ERROR] [0mUnrecognized token `(` found at 2707:2708
+Expected one of ""then""
+thread 'main' panicked at 'Please implement error handling', src/thesy/semantics.rs:123:17
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+"
+186,,,,,,,,,,,,,leon-bsearch-tree/bsearch-tree-goal15.th,,"18:05:07 [0m[31m[ERROR] [0mUnrecognized token `(` found at 2707:2708
+Expected one of ""then""
+thread 'main' panicked at 'Please implement error handling', src/thesy/semantics.rs:123:17
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+"
+187,,,,,,,,,,,,,leon-bsearch-tree/bsearch-tree-goal4.th,,"18:05:07 [0m[31m[ERROR] [0mUnrecognized token `(` found at 2707:2708
+Expected one of ""then""
+thread 'main' panicked at 'Please implement error handling', src/thesy/semantics.rs:123:17
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+"
+188,,,,,,,,,,,,,leon-bsearch-tree/bsearch-tree-goal12.th,,"18:05:07 [0m[31m[ERROR] [0mUnrecognized token `(` found at 2707:2708
+Expected one of ""then""
+thread 'main' panicked at 'Please implement error handling', src/thesy/semantics.rs:123:17
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+"
+189,,,,,,,,,,,,,leon-bsearch-tree/bsearch-tree-goal3.th,,"18:05:07 [0m[31m[ERROR] [0mUnrecognized token `(` found at 2707:2708
+Expected one of ""then""
+thread 'main' panicked at 'Please implement error handling', src/thesy/semantics.rs:123:17
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+"
+190,,,,,,,,,,,,,leon-bsearch-tree/bsearch-tree-goal10.th,,"18:05:07 [0m[31m[ERROR] [0mUnrecognized token `(` found at 2707:2708
+Expected one of ""then""
+thread 'main' panicked at 'Please implement error handling', src/thesy/semantics.rs:123:17
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+"
+191,,,,,,,,,,,,,leon-bsearch-tree/bsearch-tree-goal18.th,,"18:05:07 [0m[31m[ERROR] [0mUnrecognized token `(` found at 2707:2708
+Expected one of ""then""
+thread 'main' panicked at 'Please implement error handling', src/thesy/semantics.rs:123:17
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+"
+192,,,,,,,,,,,,,leon-bsearch-tree/bsearch-tree-goal6.th,,"18:05:07 [0m[31m[ERROR] [0mUnrecognized token `(` found at 2707:2708
+Expected one of ""then""
+thread 'main' panicked at 'Please implement error handling', src/thesy/semantics.rs:123:17
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+"
+193,,,,,,,,,,,,,leon-bsearch-tree/bsearch-tree-goal11.th,,"18:05:07 [0m[31m[ERROR] [0mUnrecognized token `(` found at 2707:2708
+Expected one of ""then""
+thread 'main' panicked at 'Please implement error handling', src/thesy/semantics.rs:123:17
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+"
+194,,,,,,,,,,,,,leon-bsearch-tree/bsearch-tree-goal16.th,,"18:05:07 [0m[31m[ERROR] [0mUnrecognized token `(` found at 2707:2708
+Expected one of ""then""
+thread 'main' panicked at 'Please implement error handling', src/thesy/semantics.rs:123:17
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+"
+195,,,,,,,,,,,,,leon-bsearch-tree/bsearch-tree-goal5.th,,"18:05:07 [0m[31m[ERROR] [0mUnrecognized token `(` found at 2707:2708
+Expected one of ""then""
+thread 'main' panicked at 'Please implement error handling', src/thesy/semantics.rs:123:17
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+"
+196,,,,,,,,,,,,,leon-bsearch-tree/bsearch-tree-goal9.th,,"18:05:07 [0m[31m[ERROR] [0mUnrecognized token `(` found at 2707:2708
+Expected one of ""then""
+thread 'main' panicked at 'Please implement error handling', src/thesy/semantics.rs:123:17
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+"
+197,,,,,,,,,,,,,leon-bsearch-tree/bsearch-tree-goal8.th,,"18:05:07 [0m[31m[ERROR] [0mUnrecognized token `(` found at 2707:2708
+Expected one of ""then""
+thread 'main' panicked at 'Please implement error handling', src/thesy/semantics.rs:123:17
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+"
+198,,,,,,,,,,,,,clam/goal69.th,,"18:04:45 [0m[31m[ERROR] [0mUnrecognized token `=>` found at 1247:1249
+Expected one of ""("", ""="", ""?"", r#""#[^#]+#""# or r#""[a-zA-Z+\\-/_*&$%^@0-9]+""#
+thread 'main' panicked at 'Please implement error handling', src/thesy/semantics.rs:123:17
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+"
+199,,,,,,,,,,,,,clam/goal46.th,,Timeout Exception
+200,,,,,,,,,,,,,clam/goal45.th,,Timeout Exception
+201,,,,,,,,,,,,,isaplanner/goal8.th,,Timeout Exception
+202,,,,,,,,,,,,,isaplanner/goal82.th,,Timeout Exception
+203,,,,,,,,,,,,,isaplanner/goal17.th,,Timeout Exception
+204,,,,,,,,,,,,,isaplanner/goal83.th,,"thread 'main' panicked at 'called `Result::unwrap()` on an `Err` value: ""Found a list in the head position: [String(\""x\""), String(\""Nat\"")]""', src/bin/expl_experiment.rs:125:28
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+"
+205,,,,,,,,,,,,,isaplanner/goal40.th,,"thread 'main' panicked at 'called `Result::unwrap()` on an `Err` value: ""Found a list in the head position: [String(\""x\""), String(\""Nat\"")]""', src/bin/expl_experiment.rs:125:28
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+"
+206,,,,,,,,,,,,,isaplanner/goal9.th,,Timeout Exception
+207,,,,,,,,,,,,,isaplanner/goal13.th,,"18:04:36 [0m[31m[ERROR] [0mUnrecognized token `s` found at 466:467
+Expected one of "")""
+thread 'main' panicked at 'Please implement error handling', src/thesy/semantics.rs:123:17
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+"
+208,,,,,,,,,,,,,isaplanner/goal43.th,,"thread 'main' panicked at 'called `Result::unwrap()` on an `Err` value: ""Found a list in the head position: [String(\""x\""), String(\""Nat\"")]""', src/bin/expl_experiment.rs:125:28
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+"
+209,,,,,,,,,,,,,isaplanner/goal56.th,,Timeout Exception
+210,,,,,,,,,,,,,isaplanner/goal81.th,,Timeout Exception
+211,,,,,,,,,,,,,isaplanner/goal64.th,,"thread 'main' panicked at 'called `Result::unwrap()` on an `Err` value: ""Found a list in the head position: [String(\""x\""), String(\""Nat\"")]""', src/bin/expl_experiment.rs:125:28
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+"
+212,,,,,,,,,,,,,isaplanner/goal71.th,,Timeout Exception
+213,,,,,,,,,,,,,isaplanner/goal87.th,,Timeout Exception
+214,,,,,,,,,,,,,isaplanner/goal12.th,,"thread 'main' panicked at 'called `Result::unwrap()` on an `Err` value: ""Found a list in the head position: [String(\""x\""), String(\""Nat\"")]""', src/bin/expl_experiment.rs:125:28
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+"
+215,,,,,,,,,,,,,isaplanner/goal32.th,,Timeout Exception
+216,,,,,,,,,,,,,isaplanner/goal16.th,,"18:14:36 [0m[31m[ERROR] [0mUnrecognized token `s` found at 426:427
+Expected one of "")""
+thread 'main' panicked at 'Please implement error handling', src/thesy/semantics.rs:123:17
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+"
+217,,,,,,,,,,,,,isaplanner/goal19.th,,"thread 'main' panicked at 'called `Result::unwrap()` on an `Err` value: ""Found a list in the head position: [String(\""x\""), String(\""Nat\"")]""', src/bin/expl_experiment.rs:125:28
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+"
+218,,,,,,,,,,,,,isaplanner/goal18.th,,Timeout Exception
+219,,,,,,,,,,,,,isaplanner/goal41.th,,"thread 'main' panicked at 'called `Result::unwrap()` on an `Err` value: ""Found a list in the head position: [String(\""x\""), String(\""Nat\"")]""', src/bin/expl_experiment.rs:125:28
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+"
+220,,,,,,,,,,,,,isaplanner/goal84.th,,"thread 'main' panicked at 'called `Result::unwrap()` on an `Err` value: ""Found a list in the head position: [String(\""x\""), String(\""Nat\"")]""', src/bin/expl_experiment.rs:125:28
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+"
+221,,,,,,,,,,,,,isaplanner/goal42.th,,"17:54:57 [0m[31m[ERROR] [0mUnrecognized token `s` found at 541:542
+Expected one of "")""
+thread 'main' panicked at 'Please implement error handling', src/thesy/semantics.rs:123:17
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+"
+222,,,,,,,,,,,,,isaplanner/goal25.th,,Timeout Exception
+223,,,,,,,,,,,,,isaplanner/goal30.th,,Timeout Exception
+224,,,,,,,,,,,,,isaplanner/goal70.th,,Timeout Exception
+225,,,,,,,,,,,,,isaplanner/goal34.th,,Timeout Exception
+226,,,,,,,,,,,,,isaplanner/goal57.th,,"thread 'main' panicked at 'called `Result::unwrap()` on an `Err` value: ""Found a list in the head position: [String(\""x\""), String(\""Nat\"")]""', src/bin/expl_experiment.rs:125:28
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+"
+227,,,,,,,,,,,,,isaplanner/goal31.th,,Timeout Exception
+228,,,,,,,,,,,,,isaplanner/goal22.th,,Timeout Exception
+229,,,,,,,,,,,,,isaplanner/goal23.th,,Timeout Exception
+230,,,,,,,,,,,,,isaplanner/goal6.th,,Timeout Exception
+231,,,,,,,,,,,,,isaplanner/goal21.th,,Timeout Exception
+232,,,,,,,,,,,,,isaplanner/goal7.th,,Timeout Exception
+233,,,,,,,,,,,,,isaplanner/goal50.th,,"thread 'main' panicked at 'called `Result::unwrap()` on an `Err` value: ""Found a list in the head position: [String(\""x\""), String(\""Nat\"")]""', src/bin/expl_experiment.rs:125:28
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+"
+234,,,,,,,,,,,,,isaplanner/goal85.th,,"memory allocation of 29884432 bytes failed
+"
+235,,,,,,,,,,,,,isaplanner/goal33.th,,Timeout Exception
+236,,,,,,,,,,,,,isaplanner/goal63.th,,"18:04:36 [0m[31m[ERROR] [0mUnrecognized token `s` found at 431:432
+Expected one of "")""
+thread 'main' panicked at 'Please implement error handling', src/thesy/semantics.rs:123:17
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+"
+237,,,,,,,,,,,,,isaplanner/goal10.th,,Timeout Exception
+238,,,,,,,,,,,,,isaplanner/goal55.th,,Timeout Exception
+239,,,,,,,,,,,,,isaplanner/goal59.th,,"thread 'main' panicked at 'called `Result::unwrap()` on an `Err` value: ""Found a list in the head position: [String(\""x\""), String(\""Nat\"")]""', src/bin/expl_experiment.rs:125:28
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+"
+240,,,,,,,,,,,,,isaplanner/goal58.th,,"thread 'main' panicked at 'called `Result::unwrap()` on an `Err` value: ""Found a list in the head position: [String(\""x\""), String(\""Nat\"")]""', src/bin/expl_experiment.rs:125:28
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+"
+241,,,,,,,,,,,,,isaplanner/goal24.th,,Timeout Exception
+242,,,,,,,,,,,,,isaplanner/goal11.th,,"thread 'main' panicked at 'called `Result::unwrap()` on an `Err` value: ""Found a list in the head position: [String(\""x\""), String(\""Nat\"")]""', src/bin/expl_experiment.rs:125:28
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+"
+243,,,,,,,,,,,,,isaplanner/goal86.th,,"memory allocation of 32 bytes failed
+"
+244,,,,,,,,,,,,,isaplanner/goal66.th,,Timeout Exception
