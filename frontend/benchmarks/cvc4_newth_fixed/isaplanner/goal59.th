@@ -1,0 +1,19 @@
+datatype Nat () := (succ : (x_0 : Nat) -> (res : Nat)) (zero : (res : Nat))
+datatype Lst () := (cons : (x_0 : Nat) -> (x_1 : Lst) -> (res : Lst)) (nil : (res : Lst))
+datatype Pair () := (mkpair : (x_0 : Nat) -> (x_1 : Nat) -> (res : Pair))
+datatype ZLst () := (zcons : (x_0 : Pair) -> (x_1 : ZLst) -> (res : ZLst)) (znil : (res : ZLst))
+fun drop (x_0 : Nat) (x_1 : Lst) -> Lst
+fun zip (x_0 : Lst) (x_1 : Lst) -> ZLst
+fun zdrop (x_0 : Nat) (x_1 : ZLst) -> ZLst
+fun leq (__x0 : Nat) (__y1 : Nat) -> Bool => (or (= ?__x0 ?__y1) (less ?__x0 ?__y1))
+rw rule0 (drop ?x nil) => nil
+rw rule1 (drop zero ?x2) => ?x2
+rw rule2 (drop (succ ?x) (cons ?y ?z)) => (drop ?x ?z)
+rw rule3 (zip nil ?x3) => znil
+rw rule4 (zip ?x4 nil) => znil
+rw rule5 (zip (cons ?x ?y5) (cons ?z6 ?w)) => (zcons (mkpair ?x ?z6) (zip ?y5 ?w))
+rw rule6 (zcons (mkpair ?x ?z6) (zip ?y5 ?w)) => (zip (cons ?x ?y5) (cons ?z6 ?w))
+rw rule7 (zdrop ?x znil) => znil
+rw rule8 (zdrop zero ?x7) => ?x7
+rw rule9 (zdrop (succ ?x) (zcons ?y8 ?z9)) => (zdrop ?x ?z9)
+prove (zdrop (?n : Nat) (zip (?xs : Lst) (?ys : Lst)))  = (zip (drop (?n : Nat) (?xs : Lst)) (drop (?n : Nat) (?ys : Lst)))

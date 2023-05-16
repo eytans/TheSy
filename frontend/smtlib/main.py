@@ -22,11 +22,13 @@ def main():
     files = []
     for inp in args.smtlib_in:
         if Path(inp).is_dir():
+            print(inp, "is dir")
             for f in glob(inp + '**/*.smt2'):
                 files.append((Path(inp), Path(f)))
         else:
             files.append((Path(inp).absolute().parent.relative_to(os.getcwd()), Path(inp)))
 
+    print(files)
     if args.output:
         Path(args.output).mkdir(parents=True, exist_ok=True)
 

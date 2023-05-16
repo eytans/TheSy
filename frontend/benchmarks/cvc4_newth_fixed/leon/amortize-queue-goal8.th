@@ -1,0 +1,69 @@
+datatype Nat () := (succ : (x_0 : Nat) -> (res : Nat)) (zero : (res : Nat))
+datatype Lst () := (cons : (x_0 : Nat) -> (x_1 : Lst) -> (res : Lst)) (nil : (res : Lst))
+datatype Queue () := (queue : (x_0 : Lst) -> (x_1 : Lst) -> (res : Queue))
+fun less (x_0 : Nat) (x_1 : Nat) -> Bool
+fun plus (x_0 : Nat) (x_1 : Nat) -> Nat
+fun append (x_0 : Lst) (x_1 : Lst) -> Lst
+fun len (x_0 : Lst) -> Nat
+fun butlast (x_0 : Lst) -> Lst
+fun qreva (x_0 : Lst) (x_1 : Lst) -> Lst
+fun qrev (x_0 : Lst) -> Lst
+fun queue-to-lst (x_0 : Queue) -> Lst
+fun qlen (x_0 : Queue) -> Nat
+fun isAmortized (x_0 : Queue) -> Bool
+fun isEmpty (x_0 : Queue) -> Bool
+fun amortizeQueue (x_0 : Lst) (x_1 : Lst) -> Queue
+fun enqueue (x_0 : Queue) (x_1 : Nat) -> Queue
+fun qpop (x_0 : Queue) -> Queue
+rw rule0 (less zero zero) <=> false
+rw rule1 (less zero (succ ?x)) => true
+rw rule2 (less (succ ?x) (succ ?y)) => (less ?x ?y)
+rw rule3 (less ?x ?y) => (less (succ ?x) (succ ?y))
+fun leq (__x0 : Nat) (__y1 : Nat) -> Bool => (or (= ?__x0 ?__y1) (less ?__x0 ?__y1))
+rw rule4 (plus zero ?n) => ?n
+rw rule5 (plus (succ ?n) ?m) => (succ (plus ?n ?m))
+rw rule6 (succ (plus ?n ?m)) => (plus (succ ?n) ?m)
+rw rule7 (append nil ?x2) => ?x2
+rw rule8 (append (cons ?x ?y3) ?z) => (cons ?x (append ?y3 ?z))
+rw rule9 (cons ?x (append ?y3 ?z)) => (append (cons ?x ?y3) ?z)
+rw rule10 (len nil) => zero
+rw rule11 zero => (len nil)
+rw rule12 (len (cons ?x ?y4)) => (succ (len ?y4))
+rw rule13 (butlast nil) => nil
+rw rule14 nil => (butlast nil)
+rw rule15 (butlast (cons ?x ?y5)) => (ite (= ?y5 nil) nil (cons ?x (butlast ?y5)))
+rw rule16 (ite (= ?y5 nil) nil (cons ?x (butlast ?y5))) => (butlast (cons ?x ?y5))
+rw rule17 (qreva nil ?x6) => ?x6
+rw rule18 (qreva (cons ?z9 ?x7) ?y8) => (qreva ?x7 (cons ?z9 ?y8))
+rw rule19 (qreva ?x7 (cons ?z9 ?y8)) => (qreva (cons ?z9 ?x7) ?y8)
+rw rule20 (qrev ?x10) => (qreva ?x10 nil)
+rw rule21 (qreva ?x10 nil) => (qrev ?x10)
+rw rule22 (queue-to-lst (queue ?x11 ?y12)) => (append ?x11 (qrev ?y12))
+rw rule23 (append ?x11 (qrev ?y12)) => (queue-to-lst (queue ?x11 ?y12))
+rw rule24 (qlen (queue ?x13 ?y14)) => (plus (len ?x13) (len ?y14))
+rw rule25 (plus (len ?x13) (len ?y14)) => (qlen (queue ?x13 ?y14))
+rw rule26 (isAmortized (queue ?x15 ?y16)) => (or (= (len ?y16) (len ?x15)) (less (len ?y16) (len ?x15)))
+rw rule27 (or (= (len ?y16) (len ?x15)) (less (len ?y16) (len ?x15))) => (isAmortized (queue ?x15 ?y16))
+rw rule28 (isEmpty (queue ?x17 ?y18)) => (and (= ?x17 nil) (= ?y18 nil))
+rw rule29 (and (= ?x17 nil) (= ?y18 nil)) => (isEmpty (queue ?x17 ?y18))
+rw rule30 (amortizeQueue ?x19 ?y20) => (ite (or (= (len ?y20) (len ?x19)) (less (len ?y20) (len ?x19))) (queue ?x19 ?y20) (queue (append ?x19 (qrev ?y20)) nil))
+rw rule31 (ite (or (= (len ?y20) (len ?x19)) (less (len ?y20) (len ?x19))) (queue ?x19 ?y20) (queue (append ?x19 (qrev ?y20)) nil)) => (amortizeQueue ?x19 ?y20)
+rw rule32 (enqueue (queue ?x21 ?y22) ?n) => (amortizeQueue ?x21 (cons ?n ?y22))
+rw rule33 (amortizeQueue ?x21 (cons ?n ?y22)) => (enqueue (queue ?x21 ?y22) ?n)
+rw rule34 (qpop (queue ?x23 (cons ?n ?y24))) => (queue ?x23 ?y24)
+rw rule35 (qpop (queue ?x25 nil)) => (queue (butlast ?x25) nil)
+rw rule36 (queue (butlast ?x25) nil) => (qpop (queue ?x25 nil))
+rw rule37 (len (append ?x26 ?y27)) => (plus (len ?x26) (len ?y27))
+rw rule38 (plus (len ?x26) (len ?y27)) => (len (append ?x26 ?y27))
+rw rule39 (len (qreva ?x28 ?y29)) => (plus (len ?x28) (len ?y29))
+rw rule40 (plus (len ?x28) (len ?y29)) => (len (qreva ?x28 ?y29))
+rw rule41 (len (qrev ?x30)) => (len ?x30)
+rw rule42 (len ?x30) => (len (qrev ?x30))
+rw rule43 (plus (len ?x31) (len ?y32)) => (qlen (queue ?x31 ?y32))
+rw rule44 (qlen (queue ?x31 ?y32)) => (plus (len ?x31) (len ?y32))
+rw rule45 (succ (len (butlast (cons ?y ?x33)))) => (len (cons ?y ?x33))
+rw rule46 (len (cons ?y ?x33)) => (succ (len (butlast (cons ?y ?x33))))
+rw rule47 (qlen (enqueue ?q ?n)) => (succ (qlen ?q))
+rw rule48 if (and (isAmortized ?q) (not (isEmpty ?q))) then (succ (qlen (qpop ?q))) => (qlen ?q)
+rw rule49 if (and (isAmortized ?q) (not (isEmpty ?q))) then (qlen ?q) => (succ (qlen (qpop ?q)))
+prove (append (?x34 : Lst) nil)  = (?x34 : Lst)

@@ -1,0 +1,12 @@
+datatype Nat () := (succ : (x_0 : Nat) -> (res : Nat)) (zero : (res : Nat))
+fun plus (x_0 : Nat) (x_1 : Nat) -> Nat
+fun double (x_0 : Nat) -> Nat
+fun leq (__x0 : Nat) (__y1 : Nat) -> Bool => (or (= ?__x0 ?__y1) (less ?__x0 ?__y1))
+rw rule0 (plus zero ?n) => ?n
+rw rule1 (plus (succ ?n) ?m) => (succ (plus ?n ?m))
+rw rule2 (succ (plus ?n ?m)) => (plus (succ ?n) ?m)
+rw rule3 (double zero) => zero
+rw rule4 zero => (double zero)
+rw rule5 (double (succ ?n)) => (succ (succ (double ?n)))
+rw rule6 (succ (succ (double ?n))) => (double (succ ?n))
+prove (double (?x : Nat))  = (plus (?x : Nat) (?x : Nat))

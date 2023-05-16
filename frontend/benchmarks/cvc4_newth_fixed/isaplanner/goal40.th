@@ -1,0 +1,9 @@
+datatype Nat () := (succ : (x_0 : Nat) -> (res : Nat)) (zero : (res : Nat))
+datatype Lst () := (cons : (x_0 : Nat) -> (x_1 : Lst) -> (res : Lst)) (nil : (res : Lst))
+fun take (x_0 : Nat) (x_1 : Lst) -> Lst
+fun leq (__x0 : Nat) (__y1 : Nat) -> Bool => (or (= ?__x0 ?__y1) (less ?__x0 ?__y1))
+rw rule0 (take ?x nil) => nil
+rw rule1 (take zero ?x2) => nil
+rw rule2 (take (succ ?x) (cons ?y ?z)) => (cons ?y (take ?x ?z))
+rw rule3 (cons ?y (take ?x ?z)) => (take (succ ?x) (cons ?y ?z))
+prove (take zero (?xs : Lst))  = nil

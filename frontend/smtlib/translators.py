@@ -152,6 +152,8 @@ class ThesyFromSmt(object):
             if uvars:
                 re = {v: self._qvar_from_symbol(v) for v in uvars}
                 formula = formula.substitute(re)
+                if precondition is not None:
+                    precondition = precondition.substitute(re)
                 uvars = re.values()
             uvars = set(uvars)
             fv = lambda phi: get_free_variables(phi) & uvars
@@ -161,7 +163,7 @@ class ThesyFromSmt(object):
                 if ((lhs not in uvars) and  # avoid e.g. x => x + 0
                         fv(lhs) >= fv(rhs)):
                     if precondition is not None:
-                        yield precondition, '=>', ex(lhs), ex(rhs)
+                        yield ex(precondition), '=>', ex(lhs), ex(rhs)
                     else:
                         yield None, '=>', ex(lhs), ex(rhs)
         elif not (formula.is_not() and self.extract_universal(formula.args()[0])[0]):
@@ -169,6 +171,8 @@ class ThesyFromSmt(object):
             if uvars:
                 re = {v: self._qvar_from_symbol(v) for v in uvars}
                 formula = formula.substitute(re)
+                if precondition is not None:
+                    precondition = precondition.substitute(re)
                 uvars = re.values()
             uvars = set(uvars)
 
@@ -180,7 +184,7 @@ class ThesyFromSmt(object):
             if uvars:
                 op = '=>'
             if precondition is not None:
-                yield precondition, op, ex(formula), ex(equals_to)
+                yield ex(precondition), op, ex(formula), ex(equals_to)
             else:
                 yield None, op, ex(formula), ex(equals_to)
 

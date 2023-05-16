@@ -1,0 +1,17 @@
+datatype Nat () := (succ : (x_0 : Nat) -> (res : Nat)) (zero : (res : Nat))
+datatype Lst () := (cons : (x_0 : Nat) -> (x_1 : Lst) -> (res : Lst)) (nil : (res : Lst))
+fun P (x_0 : Nat) -> Bool
+fun append (x_0 : Lst) (x_1 : Lst) -> Lst
+fun last (x_0 : Lst) -> Nat
+fun filter (x_0 : Lst) -> Lst
+fun leq (__x0 : Nat) (__y1 : Nat) -> Bool => (or (= ?__x0 ?__y1) (less ?__x0 ?__y1))
+rw rule0 (append nil ?x) => ?x
+rw rule1 (append (cons ?x2 ?y) ?z) => (cons ?x2 (append ?y ?z))
+rw rule2 (cons ?x2 (append ?y ?z)) => (append (cons ?x2 ?y) ?z)
+rw rule3 (last (cons ?x3 ?y)) => (ite (= ?y nil) ?x3 (last ?y))
+rw rule4 (ite (= ?y nil) ?x3 (last ?y)) => (last (cons ?x3 ?y))
+rw rule5 (filter nil) => nil
+rw rule6 nil => (filter nil)
+rw rule7 (filter (cons ?x4 ?y)) => (ite (P ?x4) (cons ?x4 (filter ?y)) (filter ?y))
+rw rule8 (ite (P ?x4) (cons ?x4 (filter ?y)) (filter ?y)) => (filter (cons ?x4 ?y))
+prove (last (append (?xs : Lst) (cons (?x5 : Nat) nil)))  = (?x5 : Nat)

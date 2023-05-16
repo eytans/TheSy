@@ -1,0 +1,12 @@
+datatype Nat () := (succ : (x_0 : Nat) -> (res : Nat)) (zero : (res : Nat))
+datatype Lst () := (cons : (x_0 : Nat) -> (x_1 : Lst) -> (res : Lst)) (nil : (res : Lst))
+fun mem (x_0 : Nat) (x_1 : Lst) -> Bool
+fun delete (x_0 : Nat) (x_1 : Lst) -> Lst
+fun leq (__x0 : Nat) (__y1 : Nat) -> Bool => (or (= ?__x0 ?__y1) (less ?__x0 ?__y1))
+rw rule0 (mem ?x nil) => false
+rw rule1 (mem ?x (cons ?y ?z)) => (or (= ?x ?y) (mem ?x ?z))
+rw rule2 (or (= ?x ?y) (mem ?x ?z)) => (mem ?x (cons ?y ?z))
+rw rule3 (delete ?x nil) => nil
+rw rule4 (delete ?x (cons ?y ?z)) => (ite (= ?x ?y) (delete ?x ?z) (cons ?y (delete ?x ?z)))
+rw rule5 (ite (= ?x ?y) (delete ?x ?z) (cons ?y (delete ?x ?z))) => (delete ?x (cons ?y ?z))
+prove (not (mem (?x : Nat) (delete (?x : Nat) (?l : Lst)))) 

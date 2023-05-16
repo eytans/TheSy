@@ -1,0 +1,82 @@
+datatype Nat () := (succ : (x_0 : Nat) -> (res : Nat)) (zero : (res : Nat))
+datatype Lst () := (cons : (x_0 : Nat) -> (x_1 : Lst) -> (res : Lst)) (nil : (res : Lst))
+datatype Heap () := (hleaf : (res : Heap)) (heap : (x_0 : Nat) -> (x_1 : Nat) -> (x_2 : Heap) -> (x_3 : Heap) -> (res : Heap))
+fun less (x_0 : Nat) (x_1 : Nat) -> Bool
+fun plus (x_0 : Nat) (x_1 : Nat) -> Nat
+fun len (x_0 : Lst) -> Nat
+fun rsorted (x_0 : Lst) -> Bool
+fun sorted (x_0 : Lst) -> Bool
+fun rightHeight (x_0 : Heap) -> Nat
+fun rank (x_0 : Heap) -> Nat
+fun hasLeftistProperty (x_0 : Heap) -> Bool
+fun hsize (x_0 : Heap) -> Nat
+fun mergea (x_0 : Nat) (x_1 : Heap) (x_2 : Heap) -> Heap
+fun merge (x_0 : Heap) (x_1 : Heap) -> Heap
+fun hinsert (x_0 : Heap) (x_1 : Nat) -> Heap
+fun hinsert-all (x_0 : Lst) (x_1 : Heap) -> Heap
+fun qheapsorta (x_0 : Heap) (x_1 : Lst) -> Lst
+fun qheapsort (x_0 : Lst) -> Lst
+fun heapsorta (x_0 : Heap) -> Lst
+fun heapsort (x_0 : Lst) -> Lst
+rw rule0 (less zero zero) <=> false
+rw rule1 (less zero (succ ?x)) => true
+rw rule2 (less (succ ?x) (succ ?y)) => (less ?x ?y)
+rw rule3 (less ?x ?y) => (less (succ ?x) (succ ?y))
+fun leq (__x0 : Nat) (__y1 : Nat) -> Bool => (or (= ?__x0 ?__y1) (less ?__x0 ?__y1))
+rw rule4 (plus zero ?n) => ?n
+rw rule5 (plus (succ ?n) ?m) => (succ (plus ?n ?m))
+rw rule6 (succ (plus ?n ?m)) => (plus (succ ?n) ?m)
+rw rule7 (len nil) => zero
+rw rule8 zero => (len nil)
+rw rule9 (len (cons ?x ?y2)) => (succ (len ?y2))
+rw rule10 (rsorted nil) <=> true
+rw rule11 (rsorted (cons ?x nil)) => true
+rw rule12 (rsorted (cons ?x (cons ?z ?y3))) => (and (rsorted (cons ?z ?y3)) (or (= ?z ?x) (less ?z ?x)))
+rw rule13 (and (rsorted (cons ?z ?y3)) (or (= ?z ?x) (less ?z ?x))) => (rsorted (cons ?x (cons ?z ?y3)))
+rw rule14 (sorted nil) <=> true
+rw rule15 (sorted (cons ?x nil)) => true
+rw rule16 (sorted (cons ?x (cons ?z ?y4))) => (and (rsorted (cons ?z ?y4)) (or (= ?x ?z) (less ?x ?z)))
+rw rule17 (and (rsorted (cons ?z ?y4)) (or (= ?x ?z) (less ?x ?z))) => (sorted (cons ?x (cons ?z ?y4)))
+rw rule18 (rightHeight hleaf) => zero
+rw rule19 zero => (rightHeight hleaf)
+rw rule20 (rightHeight (heap ?k ?v ?l ?r)) => (succ (rightHeight ?r))
+rw rule21 (rank hleaf) => zero
+rw rule22 zero => (rank hleaf)
+rw rule23 (rank (heap ?k ?v ?l ?r)) => ?k
+rw rule24 (hasLeftistProperty hleaf) <=> true
+rw rule25 (hasLeftistProperty (heap ?k ?v ?l ?r)) => (and (hasLeftistProperty ?l) (hasLeftistProperty ?r) (or (= (rightHeight ?r) (rightHeight ?l)) (less (rightHeight ?r) (rightHeight ?l))) (= ?k (succ (rightHeight ?r))))
+rw rule26 (hsize hleaf) => zero
+rw rule27 zero => (hsize hleaf)
+rw rule28 (hsize (heap ?k ?v ?l ?r)) => (succ (plus (hsize ?l) (hsize ?r)))
+rw rule29 (mergea ?v ?l ?r) => (ite (or (= (rank ?r) (rank ?l)) (less (rank ?r) (rank ?l))) (heap (succ (rank ?r)) ?v ?l ?r) (heap (succ (rank ?l)) ?v ?r ?l))
+rw rule30 (ite (or (= (rank ?r) (rank ?l)) (less (rank ?r) (rank ?l))) (heap (succ (rank ?r)) ?v ?l ?r) (heap (succ (rank ?l)) ?v ?r ?l)) => (mergea ?v ?l ?r)
+rw rule31 (merge ?h hleaf) => ?h
+rw rule32 (merge hleaf ?h) => ?h
+rw rule33 (merge (heap ?k1 ?v1 ?l1 ?r1) (heap ?k2 ?v2 ?l2 ?r2)) => (ite (less ?v2 ?v1) (mergea ?v1 ?l1 (merge ?r1 (heap ?k2 ?v2 ?l2 ?r2))) (mergea ?v2 ?l2 (merge (heap ?k1 ?v1 ?l1 ?r1) ?r2)))
+rw rule34 (ite (less ?v2 ?v1) (mergea ?v1 ?l1 (merge ?r1 (heap ?k2 ?v2 ?l2 ?r2))) (mergea ?v2 ?l2 (merge (heap ?k1 ?v1 ?l1 ?r1) ?r2))) => (merge (heap ?k1 ?v1 ?l1 ?r1) (heap ?k2 ?v2 ?l2 ?r2))
+rw rule35 (hinsert ?h ?n) => (merge (heap (succ zero) ?n hleaf hleaf) ?h)
+rw rule36 (merge (heap (succ zero) ?n hleaf hleaf) ?h) => (hinsert ?h ?n)
+rw rule37 (hinsert-all nil ?h) => ?h
+rw rule38 (hinsert-all (cons ?n ?l5) ?h) => (hinsert (hinsert-all ?l5 ?h) ?n)
+rw rule39 (hinsert (hinsert-all ?l5 ?h) ?n) => (hinsert-all (cons ?n ?l5) ?h)
+rw rule40 (qheapsorta hleaf ?l6) => ?l6
+rw rule41 (qheapsorta (heap ?k ?v ?l ?r) ?x7) => (qheapsorta (merge ?l ?r) (cons ?v ?x7))
+rw rule42 (qheapsort ?l8) => (qheapsorta (hinsert-all ?l8 hleaf) nil)
+rw rule43 (qheapsorta (hinsert-all ?l8 hleaf) nil) => (qheapsort ?l8)
+rw rule44 (heapsorta hleaf) => nil
+rw rule45 nil => (heapsorta hleaf)
+rw rule46 (heapsorta (heap ?k ?v ?l ?r)) => (cons ?v (heapsorta (merge ?l ?r)))
+rw rule47 (heapsort ?l9) => (heapsorta (hinsert-all ?l9 hleaf))
+rw rule48 (heapsorta (hinsert-all ?l9 hleaf)) => (heapsort ?l9)
+rw rule49 if (hasLeftistProperty ?x10) then (hasLeftistProperty (hinsert ?x10 ?n)) => true
+rw rule50 if (hasLeftistProperty ?x12) then (hasLeftistProperty (hinsert-all ?n11 ?x12)) => true
+rw rule51 if (and (hasLeftistProperty ?x13) (hasLeftistProperty ?y14)) then (hasLeftistProperty (mergea ?v ?x13 ?y14)) => true
+rw rule52 if (and (hasLeftistProperty ?x15) (hasLeftistProperty ?y16)) then (hasLeftistProperty (merge ?x15 ?y16)) => true
+rw rule53 (hasLeftistProperty (hinsert-all ?l17 hleaf)) => true
+rw rule54 if (and (hasLeftistProperty ?x18) (hasLeftistProperty ?y19)) then (hsize (mergea ?v ?x18 ?y19)) => (succ (plus (hsize ?x18) (hsize ?y19)))
+rw rule55 if (and (hasLeftistProperty ?x20) (hasLeftistProperty ?y21)) then (hsize (merge ?x20 ?y21)) => (plus (hsize ?x20) (hsize ?y21))
+rw rule56 if (and (hasLeftistProperty ?x20) (hasLeftistProperty ?y21)) then (plus (hsize ?x20) (hsize ?y21)) => (hsize (merge ?x20 ?y21))
+rw rule57 if (hasLeftistProperty ?x22) then (hsize (hinsert ?x22 ?n)) => (succ (hsize ?x22))
+rw rule58 if (hasLeftistProperty ?x24) then (hsize (hinsert-all ?l23 ?x24)) => (plus (hsize ?x24) (len ?l23))
+rw rule59 if (hasLeftistProperty ?x24) then (plus (hsize ?x24) (len ?l23)) => (hsize (hinsert-all ?l23 ?x24))
+prove if (hasLeftistProperty (?x25 : Heap)) then (len (heapsorta (?x25 : Heap)))  = (hsize (?x25 : Heap))
