@@ -68,5 +68,5 @@ rw rule45 nil => (heapsorta hleaf)
 rw rule46 (heapsorta (heap ?k ?v ?l ?r)) => (cons ?v (heapsorta (merge ?l ?r)))
 rw rule47 (heapsort ?l9) => (heapsorta (hinsert-all ?l9 hleaf))
 rw rule48 (heapsorta (hinsert-all ?l9 hleaf)) => (heapsort ?l9)
-rw rule49 if hasLeftistProperty(x10) then (hasLeftistProperty (hinsert ?x10 ?n)) => true
+rw rule49 if (hasLeftistProperty ?x10) then (hasLeftistProperty (hinsert ?x10 ?n)) => true
 prove if (hasLeftistProperty (?x12 : Heap)) then (hasLeftistProperty (hinsert-all (?n11 : Lst) (?x12 : Heap))) 

@@ -1,5 +1,5 @@
-(= (xs : Lst) nil)
-(last (cons x (xs : Lst)))
+(= xs nil)
+(last (cons x xs))
 x
 (len (butlast xs))
 (minus (len xs) (succ zero))

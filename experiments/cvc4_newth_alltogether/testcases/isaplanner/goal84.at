@@ -4,8 +4,8 @@
 nil
 (take n (lmap xs))
 (lmap (take n xs))
-(take (succ n) (cons x (xs : Lst)))
-(cons x (take n (xs : Lst)))
+(take (succ n) (cons x xs))
+(cons x (take n xs))
 (butlast xs)
 (take (minus (len xs) (succ zero)) xs)
 (zdrop n (zip xs ys))

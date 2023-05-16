@@ -18,8 +18,8 @@
 (= (len xs) (len ys))
 (zip (rev xs) (rev ys))
 (zrev (zip xs ys))
-(= (xs : Lst) nil)
-(last (cons x (xs : Lst)))
+(= xs nil)
+(last (cons x xs))
 x
 (len (drop n xs))
 (minus (len xs) n)
@@ -43,9 +43,9 @@ xs
 (take (minus (len xs) (succ zero)) xs)
 (zip (append xs ys) zs)
 (zappend (zip xs (take (len xs) zs)) (zip ys (drop (len xs) zs)))
-(not (= (xs : Lst) nil))
-(last (cons x (xs : Lst)))
-(last (xs : Lst))
+(not (= xs nil))
+(last (cons x xs))
+(last xs)
 (minus m m)
 zero
 (minus (minus i j) k)

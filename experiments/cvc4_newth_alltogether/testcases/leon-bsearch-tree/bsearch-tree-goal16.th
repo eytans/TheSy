@@ -50,10 +50,10 @@ rw rule28 (tsize leaf) => zero
 rw rule29 zero => (tsize leaf)
 rw rule30 (tsize (node ?x ?l ?r)) => (succ (plus (tsize ?l) (tsize ?r)))
 rw rule31 (tremove leaf ?i) => leaf
-rw rule32 if less(i, d) then (tremove (node ?d ?l ?r) ?i) => (node ?d (tremove ?l ?i) ?r)
-rw rule33 if less(i, d) then (node ?d (tremove ?l ?i) ?r) => (tremove (node ?d ?l ?r) ?i)
-rw rule34 if less(d, i) then (tremove (node ?d ?l ?r) ?i) => (node ?d ?l (tremove ?r ?i))
-rw rule35 if less(d, i) then (node ?d ?l (tremove ?r ?i)) => (tremove (node ?d ?l ?r) ?i)
+rw rule32 if (less ?i ?d) then (tremove (node ?d ?l ?r) ?i) => (node ?d (tremove ?l ?i) ?r)
+rw rule33 if (less ?i ?d) then (node ?d (tremove ?l ?i) ?r) => (tremove (node ?d ?l ?r) ?i)
+rw rule34 if (less ?d ?i) then (tremove (node ?d ?l ?r) ?i) => (node ?d ?l (tremove ?r ?i))
+rw rule35 if (less ?d ?i) then (node ?d ?l (tremove ?r ?i)) => (tremove (node ?d ?l ?r) ?i)
 rw rule36 (tremove (node ?d leaf ?r) ?d) => ?r
 rw rule37 (tremove (node ?d (node ?ld ?ll ?lr) ?r) ?d) => (node ?ld (tremove (node ?ld ?ll ?lr) ?ld) ?r)
 rw rule38 (tremove-all ?x10 nil) => ?x10
@@ -81,13 +81,13 @@ rw rule59 (or (= (tsize (tremove-all ?t ?l15)) (tsize ?t)) (less (tsize (tremove
 rw rule60 (tcontains (tinsert ?x16 ?i) ?i) => true
 rw rule61 (or (= ?i ?j) (tcontains ?x17 ?j)) => (tcontains (tinsert ?x17 ?i) ?j)
 rw rule62 (tcontains (tinsert ?x17 ?i) ?j) => (or (= ?i ?j) (tcontains ?x17 ?j))
-rw rule63 if tsorted(x18) then (tsorted (tinsert ?x18 ?i)) => true
+rw rule63 if (tsorted ?x18) then (tsorted (tinsert ?x18 ?i)) => true
 rw rule64 (tmember (tinsert ?x19 ?i) ?i) => true
 rw rule65 (or (= ?i ?j) (tmember ?x20 ?j)) => (tmember (tinsert ?x20 ?i) ?j)
 rw rule66 (tmember (tinsert ?x20 ?i) ?j) => (or (= ?i ?j) (tmember ?x20 ?j))
-rw rule67 if tsorted(x21) then (tcontains ?x21 ?i) => (tmember ?x21 ?i)
-rw rule68 if tsorted(x21) then (tmember ?x21 ?i) => (tcontains ?x21 ?i)
-rw rule69 if tmember(x22, i) then (tcontains ?x22 ?i) => true
+rw rule67 if (tsorted ?x21) then (tcontains ?x21 ?i) => (tmember ?x21 ?i)
+rw rule68 if (tsorted ?x21) then (tmember ?x21 ?i) => (tcontains ?x21 ?i)
+rw rule69 if (tmember ?x22 ?i) then (tcontains ?x22 ?i) => true
 rw rule70 (tinsert-all (tinsert ?x24 ?n) ?l23) => (tinsert-all ?x24 (append ?l23 (cons ?n nil)))
 rw rule71 (tinsert-all ?x24 (append ?l23 (cons ?n nil))) => (tinsert-all (tinsert ?x24 ?n) ?l23)
 rw rule72 (tsorted (tinsert-all leaf ?x25)) => true
