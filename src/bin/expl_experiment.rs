@@ -14,7 +14,6 @@ use TheSy::SubCmd::CheckEquiv;
 use TheSy::thesy::prover;
 use TheSy::thesy::prover::RewriteProver;
 use TheSy::thesy::statistics::{sample_graph_stats, StatsReport};
-use thesy_parser::ast::Expression;
 
 
 /// Arguments to use to run thesy

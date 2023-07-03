@@ -226,16 +226,19 @@ impl GraphStats {
      * First turn off cap stats, then get the total allocated memory, 
      * clone graph, get total again, then turn on cap stats again.
      */
-    pub fn memory_used(egraph: &ThEGraph, cap: &mut Cap<impl GlobalAlloc>) -> usize {
-        let mut current = cap.allocated();
-        cap.disable_stats();
-        {
-            let g = egraph.clone();
-            current = cap.allocated() - current;
-            println!("Prevent drop - egraph size: {}", g.total_size());
-        }
-        cap.enable_stats();
-        current
+    pub fn memory_used(_egraph: &ThEGraph, _cap: &mut Cap<impl GlobalAlloc>) -> usize {
+        // let mut current = cap.allocated();
+        // cap.disable_stats();
+        // {
+        //     let g = egraph.clone();
+        //     current = cap.allocated() - current;
+        //     println!("Prevent drop - egraph size: {}", g.total_size());
+        // }
+        // cap.enable_stats();
+        // current
+
+        // This mechanism is definitly broken
+        0
     }
     
     pub fn from_egraph(egraph: &ThEGraph) -> Self {
@@ -268,7 +271,7 @@ impl GraphStats {
         let mut colored_unions = 0;
         for c in egraph.colors() {
             for id in c.black_reps() {
-                colored_unions += c.black_ids(*id).map_or(0, |x| x.len());
+                colored_unions += c.black_ids(egraph, *id).map_or(0, |x| x.len());
             }        
         }
 

@@ -780,12 +780,11 @@ impl TheSy {
 
 #[cfg(test)]
 mod test {
-    use std::{alloc, iter};
+    use std::iter;
     use std::iter::FromIterator;
     use std::str::FromStr;
     use std::time::SystemTime;
 
-    use cap::Cap;
     use egg::{EGraph, Pattern, RecExpr, Searcher, Symbol, SymbolLang};
     use egg::reconstruct::reconstruct;
     use egg::tools::tools::Grouped;
