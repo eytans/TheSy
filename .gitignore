@@ -130,3 +130,7 @@ debug.dot
 experiments/*/results/
 experiments/cvc4_newth_alltogether/fmcad_results_2023-05-06_10-28-32/
 experiments/cvc4_newth_alltogether/fmcad_results_2023-05-16_23-03-02/
+experiments/cvc4_newth_alltogether/fmcad_res_5_16.zip
+experiments/cvc4_newth_alltogether/fmcad_res.zip
+experiments/cvc4_newth_alltogether/temp.csv
+memory-profiling*.dat
