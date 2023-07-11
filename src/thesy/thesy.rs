@@ -1039,6 +1039,7 @@ mod test {
 
     #[test]
     fn prove_pl_zero() {
+        init_logging();
         let mut syg = create_nat_sygue();
         let nat = create_nat_type();
         let rewrites = create_pl_rewrites();

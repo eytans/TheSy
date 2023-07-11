@@ -2,7 +2,7 @@ use std::any::Any;
 use std::cmp::max;
 use std::str::FromStr;
 
-use egg::{ENodeOrVar, Id, Iteration, Language, Pattern, RecExpr, Rewrite, Runner, Symbol, SymbolLang, Var};
+use egg::{ENodeOrVar, Id, Iteration, Language, MultiPattern, Pattern, RecExpr, Rewrite, Runner, Symbol, SymbolLang, Var};
 use egg::appliers::DiffApplier;
 use egg::expression_ops::{IntoTree, RecExpSlice, Tree};
 use egg::pretty_string::PrettyString;
@@ -73,10 +73,8 @@ impl RewriteProver {
     fn wfo_op() -> &'static str { "ltwf" }
 
     fn wfo_trans() -> ThRewrite {
-        let searcher = MultiDiffSearcher::new(vec![
-            Pattern::from_str(&*format!("({} ?z ?x)", Self::wfo_op())).unwrap(),
-            Pattern::from_str(&*format!("({} ?x ?y)", Self::wfo_op())).unwrap()]);
-        let applier = Pattern::from_str(&*format!("({} ?z ?y)", Self::wfo_op())).unwrap();
+        let searcher: MultiPattern<SymbolLang> = MultiPattern::from_str(&*format!("?a = ({} ?z ?x), ?b = ({} ?x ?y)", Self::wfo_op(), Self::wfo_op())).unwrap();
+        let applier: MultiPattern<SymbolLang> = MultiPattern::from_str(&*format!("?a = ({} ?z ?y)", Self::wfo_op())).unwrap();
         Rewrite::new("wfo transitivity", searcher, applier).unwrap()
     }
 
@@ -93,7 +91,7 @@ impl RewriteProver {
                     params.iter().map(|s| s.0.clone()),
                     " ".to_string(),
                 ).collect::<String>();
-                let contr_pattern = Pattern::from_str(&*format!("(|@|?root|@|{} {})", c.name, interspersed)).unwrap();
+                let contr_pattern: MultiPattern<SymbolLang> = MultiPattern::from_str(&*format!("?root = ({} {})", c.name, interspersed)).unwrap();
 
                 let appliers = params.iter()
                     .filter(|x| x.1)

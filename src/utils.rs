@@ -202,13 +202,12 @@ impl<L: Language, N: Analysis<L>> ImmutableCondition<L, N> for SubPattern<L> {
                     egraph
                         .get_colored_equalities(*s.get(v).unwrap())
                         .map(|x| {
-                            x.iter()
+                            x.into_iter()
                                 .filter(|(c_id, id)| {
                                     *id == egraph
                                         .opt_colored_find(Some(*c_id), *subst.get(v).unwrap())
                                 })
                                 .map(|(c_id, _)| c_id)
-                                .copied()
                                 .collect_vec()
                         })
                         .unwrap_or_default()

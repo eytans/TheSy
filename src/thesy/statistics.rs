@@ -291,7 +291,7 @@ impl GraphStats {
             by_arity: by_arity,
             colored_unions_count: colored_unions,
             deleted_colored_enodes: egraph.deleted_enodes,
-            colored_equivalences_size: egraph.colored_equivalences.iter().map(|x| x.1.len()).sum(),
+            colored_equivalences_size: egraph.colored_equivalences_size(),
             black_colored_classes_size: egraph.colors().map(|c| c.black_colored_classes_size()).sum(), 
             parent_color_tracking_size: egraph.colors().map(|c| c.parents_classes.iter().map(|m| m.len()).sum::<usize>()).sum(),
         }
