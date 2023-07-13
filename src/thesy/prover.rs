@@ -6,7 +6,6 @@ use egg::{ENodeOrVar, Id, Iteration, Language, MultiPattern, Pattern, PatternAst
 use egg::appliers::DiffApplier;
 use egg::expression_ops::{IntoTree, RecExpSlice, Tree};
 use egg::pretty_string::PrettyString;
-use egg::searchers::MultiDiffSearcher;
 use itertools::Itertools;
 use log::{debug, info};
 use permutohedron::control::Control;
@@ -17,6 +16,7 @@ use crate::lang::{DataType, Function, ThEGraph, ThExpr, ThRewrite};
 use crate::thesy::case_split::CaseSplit;
 use crate::thesy::statistics::{sample_graph_stats, StatsReport};
 use crate::thesy::TheSy;
+use crate::utils::fresh_multipattern_var;
 
 #[derive(Clone, Debug, Default)]
 pub struct ProverStats {
@@ -285,7 +285,8 @@ impl RewriteProver {
     fn push_rw(precond: Option<Pattern<SymbolLang>>, fixed_ex1: &Pattern<SymbolLang>, fixed_ex2: &Pattern<SymbolLang>, text1: String, new_rules: &mut Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, ThRewrite)>) {
         if !fixed_ex1.ast.as_ref().last().unwrap().is_leaf() {
             let rw = if precond.is_some() {
-                Rewrite::new(text1.clone(), MultiDiffSearcher::new(vec![precond.clone().unwrap(), fixed_ex1.clone()]), fixed_ex2.clone())
+                let var = fresh_multipattern_var();
+                Rewrite::new(text1.clone(), MultiPattern::new(vec![(fresh_multipattern_var(), precond.clone().unwrap().ast), (var, fixed_ex1.clone().ast)]), MultiPattern::new(vec![(var, fixed_ex2.clone().ast)]))
             } else {
                 Rewrite::new(text1.clone(), fixed_ex1.clone(), fixed_ex2.clone())
             };

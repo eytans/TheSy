@@ -9,7 +9,6 @@ use egg::*;
 use egg::costs::{MinRep, RepOrder};
 use egg::expression_ops::{IntoTree, Tree};
 use egg::pretty_string::PrettyString;
-use egg::searchers::MultiDiffSearcher;
 use egg::tools::tools::choose;
 use indexmap::{IndexMap, IndexSet};
 use itertools::Itertools;
@@ -22,6 +21,7 @@ use crate::thesy::case_split::CaseSplit;
 use crate::thesy::example_creator::Examples;
 use crate::thesy::prover::{Prover, RewriteProver};
 use crate::thesy::statistics::{sample_graph_stats, Stats, StatsReport};
+use crate::utils::fresh_multipattern_var;
 
 pub const ITERN: usize = 12;
 pub const EXP_SPLIT_D: usize = 2;
@@ -36,7 +36,7 @@ pub struct TheSy {
     /// egraph which is expanded as part of the exploration
     pub egraph: ThEGraph,
     /// searchers used to create the next depth of terms
-    searchers: IndexMap<String, (MultiDiffSearcher<Pattern<SymbolLang>>, Vec<(Var, ThExpr)>)>,
+    searchers: IndexMap<String, (MultiPattern<SymbolLang>, Vec<(Var, ThExpr)>)>,
     /// map maintaining the connection between eclasses created by sygue
     /// and their associated eclasses with `ind_ph` replaced by symbolic examples.
     example_ids: IndexMap<DataType, IndexMap<Id, Vec<Id>>>,
@@ -95,7 +95,7 @@ impl TheSy {
         Self::replace_ops(exp, &IndexMap::from_iter(iter::once((orig, replacment))))
     }
 
-    fn create_sygue_serchers<'a>(dict: &[Function], datatypes: impl Iterator<Item=&'a DataType>) -> IndexMap<String, (MultiDiffSearcher<Pattern<SymbolLang>>, Vec<(Var, ThExpr)>)> {
+    fn create_sygue_serchers<'a>(dict: &[Function], datatypes: impl Iterator<Item=&'a DataType>) -> IndexMap<String, (MultiPattern<SymbolLang>, Vec<(Var, ThExpr)>)> {
         let mut res = IndexMap::new();
         let datas = datatypes.cloned().collect_vec();
         TheSy::known_functions(&datas, dict).for_each(|fun| {
@@ -110,7 +110,7 @@ impl TheSy {
                                                         typ.pretty(PRETTY_W))).unwrap(),
                         ]
                     }).collect::<Vec<Pattern<SymbolLang>>>();
-                res.insert(fun.name.clone(), (MultiDiffSearcher::new(patterns), params));
+                res.insert(fun.name.clone(), (MultiPattern::new(patterns.into_iter().map(|p| (fresh_multipattern_var(), p.ast)).collect_vec()), params));
             }
         });
         res
