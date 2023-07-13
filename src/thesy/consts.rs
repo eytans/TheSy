@@ -1,24 +1,14 @@
 use egg::{SymbolLang, Pattern, Var, ToCondRc};
 use egg::searchers::{FilteringSearcher, ToDyn};
-use egg::appliers::{DiffApplier, UnionApplier};
 use std::str::FromStr;
 use crate::thesy::case_split::{CaseSplit, Split, SplitApplier};
 use itertools::Itertools;
 use egg::conditions::AndCondition;
 use egg::searchers::{PatternMatcher, ToRc, VarMatcher};
-use crate::lang::ThRewrite;
+use crate::lang::{ThMultiPattern, ThRewrite};
+use egg::multi_rewrite;
 
 pub(crate) fn bool_rws() -> Vec<ThRewrite> {
-    let and_multi_searcher = {
-        let p: Pattern<SymbolLang> = "(and ?x ?y)".parse().unwrap();
-        FilteringSearcher::searcher_is_true(p)
-    };
-
-    #[allow(unused_variables)]
-    let and_implies = rewrite!("and_implies"; {and_multi_searcher.clone()} => "(= ?x true)");
-    #[allow(unused_variables)]
-    let and_implies2 = rewrite!("and_implies2"; {and_multi_searcher} => "(= ?y true)");
-
     vec![
         rewrite!("or-true"; "(or true ?x)" => "true"),
         rewrite!("or-true2"; "(or ?x true)" => "true"),
@@ -30,13 +20,14 @@ pub(crate) fn bool_rws() -> Vec<ThRewrite> {
         rewrite!("and-true2"; "(and ?x true)" => "?x"),
         rewrite!("and-false"; "(and false ?x)" => "false"),
         rewrite!("and-false2"; "(and ?x false)" => "false"),
-        // and_implies,
+        multi_rewrite!("and_implies"; "?m1 = (and ?x ?y), ?m1 = true" => "?x = true, ?y = true"),
         // and_implies2,
 
         rewrite!("not-true"; "(not true)" => "false"),
         rewrite!("not-false"; "(not false)" => "true"),
-        rewrite!("not-x-false"; { FilteringSearcher::searcher_is_false("(not ?x)".parse::<Pattern<SymbolLang>>().unwrap()) } => "true"),
-        rewrite!("not-x-true"; { FilteringSearcher::searcher_is_true("(not ?x)".parse::<Pattern<SymbolLang>>().unwrap()) } => "false"),
+
+        multi_rewrite!("not-x-false"; "?m1 = (not ?x), ?m1 = false" => "?x = true"),
+        multi_rewrite!("not-x-true"; "?m1 = (not ?x), ?m1 = true" => "?x = false"),
     ]
 }
 
@@ -49,35 +40,24 @@ pub(crate) fn less_rws() -> Vec<ThRewrite> {
     ]
 }
 
-fn cons_conc_searcher() -> FilteringSearcher<SymbolLang, ()> {
-    FilteringSearcher::searcher_is_true("(is-cons ?x)".parse::<Pattern<SymbolLang>>().unwrap())
-}
-
-fn cons_conclusion() -> DiffApplier<Pattern<SymbolLang>> {
-    DiffApplier::new("(cons (isconsex ?x))".parse().unwrap())
-}
-
 pub(crate) fn is_rws() -> Vec<ThRewrite> {
     vec![
-        rewrite!("is_cons_true"; {FilteringSearcher::from(Pattern::from_str("(is-cons ?x)").unwrap(), FilteringSearcher::create_exists_pattern_filterer("(cons ?y)".parse::<Pattern<SymbolLang>>().unwrap()))} => "true"),
-        rewrite!("is_cons_false"; {FilteringSearcher::from(Pattern::from_str("(is-cons ?x)").unwrap(), FilteringSearcher::create_exists_pattern_filterer("nil".parse::<Pattern<SymbolLang>>().unwrap()))} => "false"),
-        rewrite!("is_cons_conclusion"; {cons_conc_searcher()} => {cons_conclusion()}),
-        rewrite!("is_succ_true"; {FilteringSearcher::from(Pattern::from_str("(is-succ ?x)").unwrap(), FilteringSearcher::create_exists_pattern_filterer("(succ ?y)".parse::<Pattern<SymbolLang>>().unwrap()))} => "true"),
-        rewrite!("is_succ_false"; {FilteringSearcher::from(Pattern::from_str("(is-succ ?x)").unwrap(), FilteringSearcher::create_exists_pattern_filterer("zero".parse::<Pattern<SymbolLang>>().unwrap()))} => "false"),
-        rewrite!("is_ESC_true"; {FilteringSearcher::from(Pattern::from_str("(is-ESC ?x)").unwrap(), FilteringSearcher::create_exists_pattern_filterer("ESC".parse::<Pattern<SymbolLang>>().unwrap()))} => "true"),
+        multi_rewrite!("is_cons_true"; "?m1 = (is-cons ?x), ?x = (cons ?y)" => "?m1 = true"),
+        multi_rewrite!("is_cons_false"; "?m1 = (is-cons ?x), ?x = nil" => "?m1 = false"),
+        multi_rewrite!("is_cons_conclusion"; "?m1 = (is-cons ?x), ?m1 = true" => "?m2 = (cons (isconsex ?x))"),
+        multi_rewrite!("is_nil_conclusion"; "?m1 = (is-cons ?x), ?m1 = false" => "?x = nil"),
+        multi_rewrite!("is_succ_true"; "?m1 = (is-succ ?x), ?x = (succ ?y)" => "?m1 = true"),
+        rewrite!("is_succ_false"; "?m1 = (is-succ ?x), ?x = zero" => "?m1 = false"),
+        rewrite!("is_ESC_true"; "?m1 = (is-ESC ?x), ?x = ESC" => "?m1 = true"),
     ]
 }
 
 pub(crate) fn equality_rws() -> Vec<ThRewrite> {
-    let eq_searcher = FilteringSearcher::searcher_is_true(Pattern::from_str("(= ?x ?y)").unwrap());
-    let union_applier = UnionApplier::new(vec![Var::from_str("?x").unwrap(), Var::from_str("?y").unwrap()]);
-    let false_eq = FilteringSearcher::searcher_is_false(Pattern::from_str("(= ?x true)").unwrap());
-    let false_eq2 = FilteringSearcher::searcher_is_false(Pattern::from_str("(= ?x false)").unwrap());
     vec![
-        rewrite!("equality"; "(= ?x ?x)" => "true"),
-        rewrite!("equality-true"; eq_searcher => union_applier),
-        rewrite!("equality-false-is-false"; false_eq => "?x"),
-        rewrite!("equality-true-is-false"; false_eq2 => "(not ?x)"),
+        rewrite!("equality"; "(Eq ?x ?x)" => "true"),
+        multi_rewrite!("equality-true"; "?m1 = (Eq ?x ?y), ?m1 = true" => "?x = ?y"),
+        multi_rewrite!("equality-false-is-false"; "?m1 = (Eq ?x true), ?m1 = false" => "?x = false"),
+        multi_rewrite!("equality-true-is-false"; "?m1 = (Eq ?x false), ?m1 = false" => "?x = true"),
         // TODO: I would like to split by equality but not a possibility with current conditions.
         // rewrite!("equality-split"; "(= ?x ?y)" => "(potential_split (= ?x ?y) true false)" if {NonPatternCondition::new(Pattern::from_str("").unwrap(), Var::from_str("?"))})
     ]
@@ -104,14 +84,14 @@ pub fn system_case_splits() -> CaseSplit {
     };
     let mut res = CaseSplit::from_applier_patterns(vec![(ite_searcher.into_rc_dyn(), Pattern::from_str("?z").unwrap(), vec!["true".parse().unwrap(), "false".parse().unwrap()])]);
 
-    let or_multi_searcher = FilteringSearcher::searcher_is_true(Pattern::from_str("(or ?x ?y)").unwrap());
+    let or_multi_searcher: ThMultiPattern = "?m1 = true, ?m1 = (or ?x ?y)".parse().unwrap();
 
     let x_var = Var::from_str("?x").unwrap();
     let y_var = Var::from_str("?y").unwrap();
-    let or_implies_applier: SplitApplier = Box::new(move |graph, sms| {
-        let true_root = graph.add_expr(&"true".parse().unwrap());
+    let m1_var = Var::from_str("?m1").unwrap();
+    let or_implies_applier: SplitApplier = Box::new(move |_graph, sms| {
         sms.iter().flat_map(|sm| sm.substs.iter().filter_map(|subs|
-            Some(Split::new(true_root, vec![*subs.get(x_var).unwrap(), *subs.get(y_var).unwrap()], subs.color()))
+            Some(Split::new(*subs.get(m1_var).unwrap(), vec![*subs.get(x_var).unwrap(), *subs.get(y_var).unwrap()], subs.color()))
         )).collect_vec()
     });
 

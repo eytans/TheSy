@@ -162,7 +162,7 @@ pub fn test_prover(definitions: &Definitions) -> (TheSy, Vec<ProofMode>) {
 
             // Attempt proof
             let prover = &mut thesy.datatypes[d];
-            warn!("Proving goal with {}", d);
+            warn!("Proving goal {:?} -> {} = {} with {}", &precond, ast_exp1, ast_exp2, d);
             let temp = prover.prove_all(
                 &mut Some(&mut case_splitter),
                 &rws,

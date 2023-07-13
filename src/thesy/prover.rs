@@ -2,12 +2,11 @@ use std::any::Any;
 use std::cmp::max;
 use std::str::FromStr;
 
-use egg::{ENodeOrVar, Id, Iteration, Language, MultiPattern, Pattern, RecExpr, Rewrite, Runner, Symbol, SymbolLang, Var};
+use egg::{ENodeOrVar, Id, Iteration, Language, MultiPattern, Pattern, PatternAst, RecExpr, Rewrite, Runner, Symbol, SymbolLang, Var};
 use egg::appliers::DiffApplier;
 use egg::expression_ops::{IntoTree, RecExpSlice, Tree};
 use egg::pretty_string::PrettyString;
-use egg::searchers::{EitherSearcher, MultiDiffSearcher};
-use egg::searchers::FilteringSearcher;
+use egg::searchers::MultiDiffSearcher;
 use itertools::Itertools;
 use log::{debug, info};
 use permutohedron::control::Control;
@@ -307,17 +306,28 @@ impl RewriteProver {
         let clean_term2 = Self::pattern_from_exp(ex2, induction_ph, &ind_replacer);
         let pret = clean_term1.pretty(PRETTY_W);
         let pret2 = clean_term2.pretty(PRETTY_W);
-        let mut searchers = vec![EitherSearcher::left(Pattern::from_str(&*format!("({} {} {})", Self::wfo_op(), ind_replacer, induction_ph.name)).unwrap())];
-        precond.map(|p| searchers.push(EitherSearcher::right(
-            FilteringSearcher::searcher_is_true(Pattern::from(p.as_ref())))));
-        let precondition = MultiDiffSearcher::new(searchers);
-        let precond_pret = precondition.pretty_string();
+        // TODO: assert multimergers are unique
+        let mut precond_searchers: Vec<(Var, PatternAst<SymbolLang>)> = vec![
+            ("?multimerger1".parse().unwrap(), Pattern::from_str(&*format!("({} {} {})", Self::wfo_op(), ind_replacer, induction_ph.name)).unwrap().ast)
+        ];
+        precond.map(|p| precond_searchers.extend(
+            vec![
+                ("?multimerger2".parse().unwrap(), Pattern::from(p.as_ref()).ast),
+                ("?multimerger2".parse().unwrap(), Pattern::from_str("true").unwrap().ast),
+            ]));
+
+        let precond_pret = precond_searchers.iter().map(|(v, ast)| format!("{} = {}", v, ast)).join(", ");
         let mut res = vec![];
+        let main_var: Var = "?multimerge3".parse().unwrap();
+
         // Precondition on each direction of the hypothesis
         if pret.starts_with("(") {
-            let searcher = MultiDiffSearcher::new(vec![EitherSearcher::left(clean_term1.clone()), EitherSearcher::right(precondition.clone())]);
+            let mut searchers = precond_searchers.clone();
+            searchers.push((main_var, clean_term1.ast.clone()));
+            let searcher = MultiPattern::new(searchers);
+            let applier = MultiPattern::new(vec![(main_var, clean_term2.ast.clone())]);
             info!("Creating IH1 with {} => {}", searcher.pretty_string(), clean_term2.pretty(PRETTY_W));
-            let rw = Rewrite::new("IH1", searcher, clean_term2.clone());
+            let rw = Rewrite::new("IH1", searcher, applier);
             if rw.is_ok() {
                 res.push(rw.unwrap())
             } else {
@@ -326,9 +336,12 @@ impl RewriteProver {
             }
         }
         if pret2.starts_with("(") {
-            let searcher = MultiDiffSearcher::new(vec![EitherSearcher::left(clean_term2.clone()), EitherSearcher::right(precondition.clone())]);
+            let mut searchers = precond_searchers.clone();
+            searchers.push((main_var, clean_term2.ast.clone()));
+            let searcher = MultiPattern::new(searchers);
+            let applier = MultiPattern::new(vec![(main_var, clean_term1.ast.clone())]);
             info!("Creating IH2 with {} => {}", searcher.pretty_string(), clean_term1.pretty(PRETTY_W));
-            let rw = Rewrite::new("IH2", searcher, clean_term1.clone());
+            let rw = Rewrite::new("IH2", searcher, applier);
             if rw.is_ok() {
                 res.push(rw.unwrap())
             } else {

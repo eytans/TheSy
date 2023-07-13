@@ -1,7 +1,7 @@
 use std::fmt::{Debug, Formatter};
 use std::rc::Rc;
 
-use egg::{Pattern, RecExpr, Rewrite, Searcher, SymbolLang, Var, ENodeOrVar, ImmutableCondition, Language, RcImmutableCondition, ToCondRc};
+use egg::{Pattern, RecExpr, Rewrite, Searcher, SymbolLang, Var, ENodeOrVar, ImmutableCondition, Language, RcImmutableCondition, ToCondRc, MultiPattern};
 use itertools::Itertools;
 use thesy_parser::{grammar, ast};
 
@@ -10,7 +10,7 @@ use std::path::PathBuf;
 use thesy_parser::ast::{Expression, Statement, Annotation, Terminal};
 use thesy_parser::ast::Definitions::Defs;
 use std::str::FromStr;
-use egg::searchers::{MultiDiffSearcher, EitherSearcher, FilteringSearcher, ToDyn, PointerSearcher};
+use egg::searchers::{FilteringSearcher, ToDyn, PointerSearcher};
 use egg::appliers::DiffApplier;
 use thesy_parser::ast::Terminal::{Id, Hole};
 use thesy_parser::ast::Expression::{Op, Leaf};
@@ -20,7 +20,7 @@ use egg::conditions::{AndCondition, OrCondition};
 use std::sync::atomic::{AtomicUsize, Ordering};
 use indexmap::{IndexMap, IndexSet};
 use egg::searchers::{PatternMatcher, ToRc, VarMatcher};
-use crate::utils::SubPattern;
+use crate::utils::{fresh_multipattern_var, pattern_ast_is_true, SubPattern};
 
 lazy_static!(
     static ref SPLIT_HOLE: Terminal = Hole(String::from("splithole"), None);
@@ -144,28 +144,24 @@ impl Definitions {
     fn create_searcher_applier(precond: Option<Expression>,
                                source: Expression,
                                target: Expression,
-                               conds: Vec<thesy_parser::ast::Condition>)
-                               -> (Rc<dyn Searcher<SymbolLang, ()>>, Pattern<SymbolLang>) {
-        let precond_searcher = precond.as_ref().map(|e| {
-            FilteringSearcher::searcher_is_true(Self::exp_to_pattern(e))
+                               conds: Vec<ast::Condition>)
+                               -> (Rc<dyn Searcher<SymbolLang, ()>>, MultiPattern<SymbolLang>) {
+        let mut patterns = vec![];
+        precond.as_ref().iter().for_each(|e| {
+            patterns.extend(pattern_ast_is_true(Self::exp_to_pattern(e)))
         });
-        let searcher = {
-            let s = Self::exp_to_pattern(&source);
-            if precond.is_some() {
-                MultiDiffSearcher::new(vec![
-                    EitherSearcher::left(s),
-                    EitherSearcher::right(precond_searcher.unwrap()),
-                ]).into_rc_dyn()
-            } else {
-                s.into_rc_dyn()
-            }
-        };
-        let applier = Self::exp_to_pattern(&target);
+        let searcher_var = fresh_multipattern_var();
+        patterns.push((searcher_var, Self::exp_to_pattern(&source).ast));
+        let searcher = MultiPattern::new(patterns).into_rc_dyn();
+        let applier = MultiPattern::new(vec![(searcher_var, Self::exp_to_pattern(&target).ast)]);
         let conditions = Self::collect_non_pattern_conds(conds);
         debug_assert!(conditions.iter().all(|c| c.vars().iter().all(|v| searcher.vars().contains(v))));
         let cond_searcher =
-            if conditions.is_empty() { searcher }
-            else { FilteringSearcher::new(searcher,
+            if conditions.is_empty() {
+                searcher
+            }
+            else {
+                FilteringSearcher::new(searcher,
                        AndCondition::new(conditions).into_rc()).into_rc_dyn()
             };
         (cond_searcher, applier)

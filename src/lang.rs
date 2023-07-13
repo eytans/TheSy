@@ -1,4 +1,4 @@
-use egg::{EGraph, Id, Language, RecExpr, Rewrite, Symbol, SymbolLang};
+use egg::{EGraph, Id, Language, MultiPattern, Pattern, RecExpr, Rewrite, Symbol, SymbolLang};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
@@ -9,8 +9,11 @@ use crate::PRETTY_W;
 pub type ThNode = SymbolLang;
 pub type ThAnl = ();
 pub type ThExpr = RecExpr<ThNode>;
+#[allow(dead_code)]
+pub type ThPattern = Pattern<ThNode>;
 pub type ThEGraph = EGraph<ThNode, ThAnl>;
 pub type ThRewrite = Rewrite<ThNode, ThAnl>;
+pub type ThMultiPattern = MultiPattern<ThNode>;
 
 #[derive(Clone, Hash, PartialEq, Eq, Debug)]
 pub struct DataType {

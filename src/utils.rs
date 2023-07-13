@@ -1,12 +1,13 @@
 use crate::lang::{ThEGraph, ThExpr};
 use egg::expression_ops::{IntoTree, RecExpSlice, Tree};
-use egg::{Analysis, ColorId, EGraph, ENodeOrVar, Id, ImmutableCondition, Language, Pattern, RecExpr, Rewrite, Searcher, Subst, SymbolLang, ToCondRc, Var};
+use egg::{Analysis, ColorId, EGraph, ENodeOrVar, Id, ImmutableCondition, Language, MultiPattern, Pattern, PatternAst, RecExpr, Rewrite, Searcher, Subst, SymbolLang, ToCondRc, Var};
 use indexmap::IndexSet;
 use itertools::Itertools;
 use std::collections::HashSet;
 use std::iter::FromIterator;
 use std::ops::Deref;
 use std::str::FromStr;
+use std::sync::atomic::{AtomicUsize, Ordering};
 use thesy_parser::ast::Expression;
 use crate::thesy::case_split::CaseSplitStats;
 use crate::thesy::TheSy;
@@ -279,6 +280,33 @@ impl<L: Language, N: Analysis<L>> ImmutableCondition<L, N> for SubPattern<L> {
     }
 }
 
+lazy_static! {
+    static ref TRUE_AST: PatternAst<SymbolLang> = Pattern::from_str("true").unwrap().ast;
+    static ref FALSE_AST: PatternAst<SymbolLang> = Pattern::from_str("false").unwrap().ast;
+    static ref MULTIPATTERN_VAR_COUNTER: AtomicUsize = AtomicUsize::default();
+}
+
+pub fn fresh_multipattern_var() -> Var {
+    let i = MULTIPATTERN_VAR_COUNTER.fetch_add(1, Ordering::SeqCst);
+    format!("?__multipattern_var_{}", i).parse().unwrap()
+}
+
+pub fn pattern_ast_is_true(p: Pattern<SymbolLang>) -> Vec<(Var, PatternAst<SymbolLang>)> {
+    let var = fresh_multipattern_var();
+    vec![(var, TRUE_AST.clone()), (var, p.ast)]
+}
+
+pub fn pattern_is_true(p: Pattern<SymbolLang>) -> (Var, MultiPattern<SymbolLang>) {
+    let vec = pattern_ast_is_true(p);
+    let var = vec[0].0;
+    (var, MultiPattern::new(vec))
+}
+
+pub fn pattern_is_false(p: Pattern<SymbolLang>) -> (Var, MultiPattern<SymbolLang>) {
+    let var = fresh_multipattern_var();
+    (var, MultiPattern::new(vec![(var, p.ast), (var, FALSE_AST.clone())]))
+}
+
 #[allow(dead_code)]
 pub fn filterTypings(egraph: &ThEGraph, id: Id) -> bool {
     // Return true if eclass has typed node, or is the in index 1 of a typed node.
@@ -336,6 +364,7 @@ mod test {
     use egg::RecExpr;
 
     use crate::{lang::{ThEGraph, ThNode}, utils::filterTypings, TheSyConfig, thesy::TheSy};
+    use crate::utils::fresh_multipattern_var;
 
     #[test]
     fn test_filter_typings() {
@@ -363,5 +392,12 @@ mod test {
         let filtered_dot_str = thesy.egraph.filtered_dot(filterTypings).to_string();
         assert!(dot_str.contains("\"Lst\""));
         assert!(!filtered_dot_str.contains("\"Lst\""));
+    }
+
+    #[test]
+    fn fresh_var_is_fresh() {
+        let x1 = fresh_multipattern_var();
+        let x2 = fresh_multipattern_var();
+        assert_ne!(x1, x2);
     }
 }
