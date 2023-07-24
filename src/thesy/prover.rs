@@ -3,7 +3,6 @@ use std::cmp::max;
 use std::str::FromStr;
 
 use egg::{ENodeOrVar, Id, Iteration, Language, MultiPattern, Pattern, PatternAst, RecExpr, Rewrite, Runner, Symbol, SymbolLang, Var};
-use egg::appliers::DiffApplier;
 use egg::expression_ops::{IntoTree, RecExpSlice, Tree};
 use egg::pretty_string::PrettyString;
 use itertools::Itertools;
@@ -94,9 +93,10 @@ impl RewriteProver {
 
                 let appliers = params.iter()
                     .filter(|x| x.1)
-                    .map(|x| (x.0.clone(), DiffApplier::new(
-                        Pattern::from_str(&*format!("({} {} ?root)", Self::wfo_op(), x.0)).unwrap()
-                    )));
+                    .map(|x| (x.0.clone(), MultiPattern::new(vec![(
+                        fresh_multipattern_var(),
+                        Pattern::from_str(&*format!("({} {} ?root)", Self::wfo_op(), x.0)).unwrap().ast
+                    )])));
 
                 // rules
                 appliers.map(|a| {

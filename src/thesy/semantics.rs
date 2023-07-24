@@ -1,17 +1,16 @@
 use std::fmt::{Debug, Formatter};
 use std::rc::Rc;
 
-use egg::{Pattern, RecExpr, Rewrite, Searcher, SymbolLang, Var, ENodeOrVar, ImmutableCondition, Language, RcImmutableCondition, ToCondRc, MultiPattern};
+use egg::{Pattern, RecExpr, Rewrite, Searcher, SymbolLang, Var, ENodeOrVar, ImmutableCondition, Language, ToCondRc, MultiPattern, PatternAst};
 use itertools::Itertools;
 use thesy_parser::{grammar, ast};
 
 use crate::lang::{DataType, Function, ThExpr, ThRewrite};
 use std::path::PathBuf;
-use thesy_parser::ast::{Expression, Statement, Annotation, Terminal};
+use thesy_parser::ast::{Expression, Statement, Annotation, Terminal, Condition};
 use thesy_parser::ast::Definitions::Defs;
 use std::str::FromStr;
 use egg::searchers::{FilteringSearcher, ToDyn, PointerSearcher};
-use egg::appliers::DiffApplier;
 use thesy_parser::ast::Terminal::{Id, Hole};
 use thesy_parser::ast::Expression::{Op, Leaf};
 use multimap::MultiMap;
@@ -130,41 +129,41 @@ impl Definitions {
         Pattern::from_str(&*exp_s).unwrap()
     }
 
-    fn collect_non_pattern_conds(conds: Vec<ast::Condition>) -> Vec<RcImmutableCondition<SymbolLang, ()>> {
-        conds.into_iter().map(|(matcher, negation)| {
-            let p1= Self::exp_to_pattern(&matcher);
-            let p2 = Self::exp_to_pattern(&negation);
-            FilteringSearcher::create_non_pattern_filterer(
-                PatternMatcher::new(p1).into_rc(),
-                PatternMatcher::new(p2).into_rc(),
-            )
-        }).collect_vec()
-    }
-
-    fn create_searcher_applier(precond: Option<Expression>,
-                               source: Expression,
-                               target: Expression,
-                               conds: Vec<ast::Condition>)
-                               -> (Rc<dyn Searcher<SymbolLang, ()>>, MultiPattern<SymbolLang>) {
+    fn create_searcher_applier(
+        precond: Option<Expression>,
+        source: Expression,
+        target: Expression,
+        conds: Vec<ast::Condition>,
+        is_diff: bool,
+    ) -> (Rc<dyn Searcher<SymbolLang, ()>>, MultiPattern<SymbolLang>) {
         let mut patterns = vec![];
+        let mut neg_patterns = vec![];
         precond.as_ref().iter().for_each(|e| {
             patterns.extend(pattern_ast_is_true(Self::exp_to_pattern(e)))
         });
         let searcher_var = fresh_multipattern_var();
         patterns.push((searcher_var, Self::exp_to_pattern(&source).ast));
-        let searcher = MultiPattern::new(patterns).into_rc_dyn();
-        let applier = MultiPattern::new(vec![(searcher_var, Self::exp_to_pattern(&target).ast)]);
-        let conditions = Self::collect_non_pattern_conds(conds);
-        debug_assert!(conditions.iter().all(|c| c.vars().iter().all(|v| searcher.vars().contains(v))));
-        let cond_searcher =
-            if conditions.is_empty() {
-                searcher
+        Self::collect_conditions(conds, &mut patterns, &mut neg_patterns);
+        let searcher = MultiPattern::new_with_specials(patterns, vec![], neg_patterns).into_rc_dyn();
+        let applier_var = if is_diff {
+            fresh_multipattern_var()
+        } else {
+            searcher_var
+        };
+        let applier = MultiPattern::new(vec![(applier_var, Self::exp_to_pattern(&target).ast)]);
+        (searcher, applier)
+    }
+
+    fn collect_conditions(conds: Vec<Condition>, patterns: &mut Vec<(Var, PatternAst<SymbolLang>)>, neg_patterns: &mut Vec<(Var, PatternAst<SymbolLang>)>) {
+        for (source, negation) in conds {
+            if source.children().is_empty() && source.root().is_hole() {
+                neg_patterns.push((source.root().to_string().parse().unwrap(), Self::exp_to_pattern(&negation).ast));
+            } else {
+                let neg_var = fresh_multipattern_var();
+                patterns.push((neg_var, Self::exp_to_pattern(&source).ast));
+                neg_patterns.push((neg_var, Self::exp_to_pattern(&negation).ast));
             }
-            else {
-                FilteringSearcher::new(searcher,
-                       AndCondition::new(conditions).into_rc()).into_rc_dyn()
-            };
-        (cond_searcher, applier)
+        }
     }
 
     fn collect_splittable_params<'a>(&self, f: &Function, opt_pats: &'a Vec<Expression>)
@@ -274,16 +273,11 @@ impl From<Vec<Statement>> for Definitions {
                     res.goals.push((precond, exp1, exp2));
                 }
                 Statement::CaseSplit(searcher, expr, pats, conditions) => {
-                    let searcher = Pattern::from_str(&*searcher.to_sexp_string()).unwrap().into_rc_dyn();
-                    let conditions = conditions.into_iter().map(|(m, n)| {
-                        let mp = Definitions::exp_to_pattern(&m);
-                        let np = Definitions::exp_to_pattern(&n);
-                        FilteringSearcher::create_non_pattern_filterer(
-                            PatternMatcher::new(mp).into_rc(),
-                            PatternMatcher::new(np).into_rc())
-                    }).collect_vec();
-                    let cond_searcher = FilteringSearcher::new(searcher,
-                                                               AndCondition::new(conditions).into_rc());
+                    let searcher_var = fresh_multipattern_var();
+                    let mut patterns = vec![(searcher_var, Pattern::from_str(&*searcher.to_sexp_string()).unwrap().ast)];
+                    let mut neg_pats = vec![];
+                    Self::collect_conditions(conditions, &mut patterns, &mut neg_pats);
+                    let cond_searcher = MultiPattern::new_with_specials(patterns, vec![], neg_pats);
                     res.case_splitters.push((
                         cond_searcher.into_rc_dyn(),
                         Self::exp_to_pattern(&expr),
@@ -439,9 +433,8 @@ impl Definitions {
                 precond, source, target, conds
             ) => {
                 let (cond_searcher, applier) =
-                    Self::create_searcher_applier(precond, source, target, conds);
-                let diff_applier = DiffApplier::new(applier);
-                self.rws.push(Rewrite::new(name, PointerSearcher::new(cond_searcher), diff_applier).unwrap());
+                    Self::create_searcher_applier(precond, source, target, conds, true);
+                self.rws.push(Rewrite::new(name, PointerSearcher::new(cond_searcher), applier).unwrap());
             }
         }
     }
@@ -539,7 +532,7 @@ impl Definitions {
                target: Expression,
                conds: Vec<thesy_parser::ast::Condition>) -> ThRewrite {
         let (cond_searcher, applier) =
-            Self::create_searcher_applier(precond, source.clone(), target, conds);
+            Self::create_searcher_applier(precond, source.clone(), target, conds, false);
         if let Op(op, _params) = &source {
             if op.is_id() {
                 self.name_pats.push((op.ident().clone(), source));

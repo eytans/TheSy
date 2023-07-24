@@ -1,10 +1,8 @@
-use egg::{SymbolLang, Pattern, Var, ToCondRc};
-use egg::searchers::{FilteringSearcher, ToDyn};
+use egg::{SymbolLang, Pattern, Var, MultiPattern};
+use egg::searchers::ToDyn;
 use std::str::FromStr;
 use crate::thesy::case_split::{CaseSplit, Split, SplitApplier};
 use itertools::Itertools;
-use egg::conditions::AndCondition;
-use egg::searchers::{PatternMatcher, ToRc, VarMatcher};
 use crate::lang::{ThMultiPattern, ThRewrite};
 use egg::multi_rewrite;
 
@@ -71,19 +69,8 @@ pub(crate) fn ite_rws() -> Vec<ThRewrite> {
 }
 
 pub fn system_case_splits() -> CaseSplit {
-    let ite_searcher = {
-        let searcher: Pattern<SymbolLang> = Pattern::from_str("(ite ?z ?x ?y)").unwrap();
-        let true_cond = FilteringSearcher::<SymbolLang, ()>::create_non_pattern_filterer(
-            VarMatcher::new(Var::from_str("?z").unwrap()).into_rc(),
-            PatternMatcher::new("true".parse().unwrap()).into_rc());
-        let false_cond = FilteringSearcher::<SymbolLang, ()>::create_non_pattern_filterer(
-            VarMatcher::new(Var::from_str("?z").unwrap()).into_rc(),
-            PatternMatcher::new("false".parse().unwrap()).into_rc());
-        FilteringSearcher::new(searcher.into_rc_dyn(),
-            AndCondition::<SymbolLang, ()>::new(vec![true_cond, false_cond]).into_rc())
-    };
+    let ite_searcher: MultiPattern<SymbolLang> = "?root = (ite ?z ?x ?y), ?z != true, ?z != false".parse().unwrap();
     let mut res = CaseSplit::from_applier_patterns(vec![(ite_searcher.into_rc_dyn(), Pattern::from_str("?z").unwrap(), vec!["true".parse().unwrap(), "false".parse().unwrap()])]);
-
     let or_multi_searcher: ThMultiPattern = "?m1 = true, ?m1 = (or ?x ?y)".parse().unwrap();
 
     let x_var = Var::from_str("?x").unwrap();
