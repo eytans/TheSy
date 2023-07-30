@@ -29,7 +29,7 @@ CMD_EXPL = [str(expl_executable_release)]
 def run_cmd(cmd, params: RunParams):
     try:
         if params.proof_mode:
-            cmd.append(f'--mode={str(params.proof_mode).replace("ThesyMode.", "")}')
+            cmd.append(str(params.proof_mode.name))
         cmd.append(f'--limit={int(params.memorylimit) * 1024}')
         cmd.append('--no_invariants')
         cmd.append(f"--prover_split_d={params.prover_split_d}")
@@ -139,7 +139,7 @@ if __name__ == '__main__':
     # Copy all input dirs to outputdir and collect to inputdirs
     inputdirs = []
     for inputdir in args.inputdir:
-        new_inputdir = Path(outputdir / inputdir.name)
+        new_inputdir = Path(outputdir / Path(inputdir).name)
         assert inputdir.is_dir()
         shutil.copytree(inputdir, new_inputdir)
         inputdirs.append(new_inputdir)
