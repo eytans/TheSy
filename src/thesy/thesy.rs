@@ -388,10 +388,10 @@ impl TheSy {
         // op, parameters, substitutions from searcher
         let op_matches = self.searchers.iter()
             .map(|(op, (searcher, params))| {
-                (op, params, searcher.search(&self.egraph).into_iter()
-                    .flat_map(|sm| sm.substs.into_iter()
-                        .filter(|s| s.color().is_none())
-                    ).collect_vec())
+                (op, params, searcher.search(&self.egraph).map(|sm|
+                    sm.matches.into_iter().flat_map(|(_c, m)| m.into_iter())
+                    .filter(|s| s.color().is_none())
+                .collect_vec()).unwrap_or_default())
             }).collect_vec();
         // TODO: think about colored exploration
         for (op, params, subs) in op_matches {
@@ -659,8 +659,7 @@ impl TheSy {
     fn prove_case_split_rules(&mut self, case_splitter: &mut CaseSplit, rules: &mut Vec<ThRewrite>, found_rules: &mut Vec<(Option<Pattern<SymbolLang>>, Pattern<SymbolLang>, Pattern<SymbolLang>, ThRewrite)>) -> bool {
         let measure_splits = if cfg!(feature = "stats") {
             let n = case_split::SPLIT_PATTERNS.iter().map(|p|
-                p.search(&self.egraph)
-                    .iter().map(|m| m.substs.len()).sum::<usize>()
+                p.search(&self.egraph).map_or(0, |m| m.total_substs())
             ).sum();
             self.stats.init_measure(|| n)
         } else {
@@ -684,6 +683,7 @@ impl TheSy {
 
         let mut splitter_to_use = Some(case_splitter);
 
+        warn!("Collecting conjectures after case split");
         let conjectures = self.get_conjectures();
         let mut changed = false;
         for (_o, mut ex1, mut ex2, d) in conjs_before_cases.into_iter().rev() {
@@ -952,12 +952,12 @@ mod test {
         let anchor_patt: Pattern<SymbolLang> = Pattern::from_str("(typed ?x ?y)").unwrap();
         let results0 = anchor_patt.search(&syg.egraph);
         // Zero, S (functions are also in graph), ph1, ph0, (true false)
-        assert_eq!(6usize, results0.iter().map(|x| x.substs.len()).sum::<usize>());
+        assert_eq!(6usize, results0.map_or(0, |x| x.total_substs()));
         syg.increase_depth();
         // Zero, S, S Zero, ph1, S ph1, ph0, S ph0, (true false)
-        assert_eq!(9usize, anchor_patt.search(&syg.egraph).iter().map(|x| x.substs.len()).sum::<usize>());
+        assert_eq!(9usize, anchor_patt.search(&syg.egraph).map_or(0, |x| x.total_substs()));
         syg.increase_depth();
-        assert_eq!(12usize, anchor_patt.search(&syg.egraph).iter().map(|x| x.substs.len()).sum::<usize>());
+        assert_eq!(12usize, anchor_patt.search(&syg.egraph).map_or(0, |x| x.total_substs()));
 
         let new_nat = DataType::new("nat".to_string(), vec![
             Function::new("Z".to_string(), vec![], "nat".parse().unwrap()),
@@ -977,15 +977,15 @@ mod test {
 
         let results0 = anchor_patt.search(&syg.egraph);
         // Zero, x, ph1, ph0, ph2, (true false)
-        assert_eq!(7usize, results0.iter().map(|x| x.substs.len()).sum::<usize>());
+        assert_eq!(7usize, results0.map_or(0, |x| x.total_substs()));
         syg.increase_depth();
         let results1 = anchor_patt.search(&syg.egraph);
         // 7 + 16
-        assert_eq!(23usize, results1.iter().map(|x| x.substs.len()).sum::<usize>());
+        assert_eq!(23usize, results1.map_or(0, |x| x.total_substs()));
         syg.increase_depth();
         // 7 + 16 + 20*20 - 16
         let results2 = anchor_patt.search(&syg.egraph);
-        assert_eq!(407usize, results2.iter().map(|x| x.substs.len()).sum::<usize>());
+        assert_eq!(407usize, results2.map_or(0, |x| x.total_substs()));
     }
 
     #[test]
@@ -1062,8 +1062,8 @@ mod test {
         let phs = TheSy::collect_phs(dict.iter().chain(list_type.constructors.iter()), 3).into_iter().filter(|x| !x.params.is_empty()).collect_vec();
         let pat1 = Pattern::from_str(&*format!("(filter {} (filter {} {}))", phs[0].name, phs[1].name, TheSy::get_ind_var(&list_type).name)).unwrap();
         let pat2 = Pattern::from_str(&*format!("(filter {} (filter {} {}))", phs[1].name, phs[0].name, TheSy::get_ind_var(&list_type).name)).unwrap();
-        assert!(!pat1.search(&thesy.egraph).is_empty());
-        assert!(!pat2.search(&thesy.egraph).is_empty());
+        assert!(pat1.search(&thesy.egraph).is_some());
+        assert!(pat2.search(&thesy.egraph).is_some());
     }
 
     fn create_filter_thesy() -> (DataType, Vec<Function>, TheSy) {

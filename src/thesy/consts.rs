@@ -77,7 +77,7 @@ pub fn system_case_splits() -> CaseSplit {
     let y_var = Var::from_str("?y").unwrap();
     let m1_var = Var::from_str("?m1").unwrap();
     let or_implies_applier: SplitApplier = Box::new(move |_graph, sms| {
-        sms.iter().flat_map(|sm| sm.substs.iter().filter_map(|subs|
+        sms.iter().flat_map(|sm| sm.substs().filter_map(|subs|
             Some(Split::new(*subs.get(m1_var).unwrap(), vec![*subs.get(x_var).unwrap(), *subs.get(y_var).unwrap()], subs.color()))
         )).collect_vec()
     });

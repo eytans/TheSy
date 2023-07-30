@@ -482,8 +482,8 @@ mod tests {
         egraph.add_expr("(ltwf y z)".parse().as_ref().unwrap());
         egraph = Runner::default().with_egraph(egraph).run(&vec![RewriteProver::wfo_trans()][..]).egraph;
         let pat: Pattern<SymbolLang> = "(ltwf x z)".parse().unwrap();
-        assert!(pat.search(&egraph).iter().all(|s| !s.substs.is_empty()));
-        assert!(!pat.search(&egraph).is_empty());
+        assert!(pat.search(&egraph).iter().all(|s| s.iter().all(|m| !m.substs.is_empty())));
+        assert!(pat.search(&egraph).is_some());
     }
 
     #[test]
@@ -492,8 +492,8 @@ mod tests {
         egraph.add_expr("(S y)".parse().as_ref().unwrap());
         egraph = Runner::default().with_egraph(egraph).run(&RewriteProver::wfo_datatype(&create_nat_type())[..]).egraph;
         let pat: Pattern<SymbolLang> = "(ltwf y (S y))".parse().unwrap();
-        assert!(pat.search(&egraph).iter().all(|s| !s.substs.is_empty()));
-        assert!(!pat.search(&egraph).is_empty());
+        assert!(pat.search(&egraph).iter().all(|s| s.iter().all(|m| !m.substs.is_empty())));
+        assert!(pat.search(&egraph).is_some());
     }
 
     #[test]

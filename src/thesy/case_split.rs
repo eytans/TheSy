@@ -116,7 +116,7 @@ impl fmt::Display for Split {
     }
 }
 
-pub type SplitApplier = Box<dyn FnMut(&mut ThEGraph, Vec<SearchMatches>) -> Vec<Split>>;
+pub type SplitApplier = Box<dyn FnMut(&mut ThEGraph, Option<SearchMatches>) -> Vec<Split>>;
 
 /// A struct to collect statistics to
 #[cfg(feature = "stats")]
@@ -179,21 +179,23 @@ impl CaseSplit {
                 .map(|(searcher, pattern, split_evaluators)| {
                     let diff_pattern = DiffApplier::new(pattern);
                     let applier: SplitApplier =
-                        Box::new(move |graph: &mut ThEGraph, sms: Vec<SearchMatches>| {
+                        Box::new(move |graph: &mut ThEGraph, sms: Option<SearchMatches>| {
                             let mut res = vec![];
-                            for sm in sms {
-                                for subst in &sm.substs {
-                                    // ECLass is irrelevant
-                                    let id = diff_pattern.apply_one(graph, sm.eclass, subst);
-                                    assert_eq!(id.len(), 1);
-                                    res.push(Split::new(
-                                        id[0],
-                                        split_evaluators
-                                            .iter()
-                                            .map(|ev| ev.apply_one(graph, sm.eclass, &subst)[0])
-                                            .collect_vec(),
-                                        subst.color(),
-                                    ));
+                            if let Some(sms) = sms {
+                                for sm in sms.iter() {
+                                    for subst in sm.substs {
+                                        // ECLass is irrelevant
+                                        let id = diff_pattern.apply_one(graph, sm.eclass, subst);
+                                        assert_eq!(id.len(), 1);
+                                        res.push(Split::new(
+                                            id[0],
+                                            split_evaluators
+                                                .iter()
+                                                .map(|ev| ev.apply_one(graph, sm.eclass, &subst)[0])
+                                                .collect_vec(),
+                                            subst.color(),
+                                        ));
+                                    }
                                 }
                             }
                             res
@@ -257,19 +259,34 @@ impl CaseSplit {
     pub fn find_splitters(&mut self, egraph: &mut ThEGraph) -> Vec<Split> {
         warn!("Finding splitters");
         let mut res = vec![];
-        for (i, (s, c)) in self.splitter_rules.iter_mut().enumerate() {
-            warn!("Searching for splitters with searcher {i}");
+        let matches = self.splitter_rules.iter().enumerate().map(|(i, (s, _))| {
+            warn!("Searching for splitters with searcher {i}: {}", s.to_string());
             let searched = s.search(egraph);
-            warn!("Found {} matches", searched.len());
-            let applied = c(egraph, searched);
+            warn!("Found {} matches", searched.as_ref().map_or(0, |s| s.len()));
+            searched
+        }).collect_vec();
+        for ((_s, c), matched) in self.splitter_rules.iter_mut().zip(matches) {
+            let applied = c(egraph, matched);
             warn!("Applied {} splitters", applied.len());
             res.extend(applied);
-            egraph.rebuild();
-            warn!("Rebuilt egraph")
         }
+        egraph.rebuild();
+        warn!("Rebuilt egraph");
         res.iter_mut().for_each(|x| x.update(egraph));
         warn!("Found {} splitters", res.len());
-        res.into_iter().unique().collect()
+
+        // TODO: Support hierarchy
+        let mut by_color = res.into_iter().map(|s| (s.color(), s)).into_group_map();
+        let blacks = by_color.remove(&None).unwrap_or_default();
+        let others = by_color.into_iter().flat_map(|(color, splits)| {
+            let fixed: IndexSet<Split> = blacks.iter().cloned().map(|mut s| {
+                s.color = color;
+                s.update(egraph);
+                s
+            }).collect();
+            splits.into_iter().filter(move |s| !fixed.contains(s))
+        }).collect_vec();
+        blacks.into_iter().chain(others).unique().collect()
     }
 
     fn merge_conclusions(
@@ -400,18 +417,6 @@ impl CaseSplit {
             return;
         }
         debug!("Colored Case splitting with depth {}", split_depth);
-        let color_keys = known_splits_by_color.keys().cloned().collect_vec();
-        for color in color_keys {
-            let mut splits = known_splits_by_color.remove(&color).unwrap();
-            splits = splits
-                .into_iter()
-                .map(|mut split| {
-                    split.update(egraph);
-                    split
-                })
-                .collect();
-            known_splits_by_color.insert(color, splits);
-        }
 
         let temp = self.find_splitters(egraph);
         if cfg!(feature = "print_splits") {
@@ -433,6 +438,18 @@ impl CaseSplit {
                     .collect::<String>()
                 );
             }
+        }
+        let color_keys = known_splits_by_color.keys().cloned().collect_vec();
+        for color in color_keys {
+            let mut splits = known_splits_by_color.remove(&color).unwrap();
+            splits = splits
+                .into_iter()
+                .map(|mut split| {
+                    split.update(egraph);
+                    split
+                })
+                .collect();
+            known_splits_by_color.insert(color, splits);
         }
         let temp_len = temp.len();
         let mut splitters: Vec<Split> = temp
@@ -506,6 +523,7 @@ impl CaseSplit {
             }
         }
         warn!("Created colors: {:?}", colors);
+        warn!("Running Equivalence reduction");
         // When the API is limited the code is mentally inhibited
         *egraph = self.equiv_reduction(rules, std::mem::take(egraph), run_depth);
         #[cfg(feature = "stats")]
@@ -526,6 +544,7 @@ impl CaseSplit {
             rules,
             run_depth,
         );
+        warn!("Doing final conclusions for depth {split_depth} ----------------");
         for (base, cs) in colors {
             let split_conclusions = cs
                 .iter()
@@ -533,6 +552,7 @@ impl CaseSplit {
                 .collect_vec();
             Self::merge_conclusions(egraph, base, &classes, &split_conclusions);
         }
+        warn!("Done final conclusions for depth {split_depth} -------------------");
     }
 
     fn keep_splits_case_split(
