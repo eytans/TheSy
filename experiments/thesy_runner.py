@@ -140,7 +140,7 @@ if __name__ == '__main__':
     inputdirs = []
     for inputdir in args.inputdir:
         new_inputdir = Path(outputdir / Path(inputdir).name)
-        assert inputdir.is_dir()
+        assert Path(inputdir).is_dir(), "Inputdir must be a directory got " + inputdir
         shutil.copytree(inputdir, new_inputdir)
         inputdirs.append(new_inputdir)
 
