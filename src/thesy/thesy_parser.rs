@@ -88,7 +88,6 @@ mod parser {
         // Creating case split rewrites is done per function.
         // Either the body of the function contains ite or the different rewrites
         // span a match expression on a second variable.
-        // TODO: Ite variant might not be able to use the conditional apply optimization. Fix.
 
         // 'Heuristicly' Patterns used for function definitions. Will be used for auto case split.
         let mut function_patterns: MultiMap<Function, PatternAst<SymbolLang>> = MultiMap::new();
@@ -189,7 +188,6 @@ mod parser {
                     let searcher1 = searcher.clone();
                     let applier1 = applier.clone();
                     let rw1 = collected_precon_conds_to_rw(name.clone(), precondition.clone(), searcher, applier, false, conditions);
-                    // TODO: Shouldnt need to create empty filter
                     let rw2 = collected_precon_conds_to_rw(name + "-rev", precondition, applier1, searcher1, false, vec![]);
                     let rws = vec![rw1, rw2].into_iter().flatten().collect_vec();
                     defs.rws.extend(rws);
@@ -272,8 +270,6 @@ mod parser {
                     let param_datatype = res.datatypes.iter().find(|d|
                         d.name == t.into_tree().root().op.to_string());
                     let res = param_datatype.map(|d| (i, t, d));
-                    // TODO: also filter by whether the other params are always the same or var and one pattern.
-                    // TODO: if there is a pattern use it for screening
                     res.filter(|(i, t, d)|
                         d.constructors.iter().all(|c|
                             pats.iter().any(|p|

@@ -1,4 +1,5 @@
 use std::alloc::GlobalAlloc;
+use std::collections::BTreeSet;
 use std::fs::File;
 use std::path::PathBuf;
 use std::time::{Duration, SystemTime};
@@ -195,7 +196,7 @@ pub struct GraphStats {
     pub colors_sizes: IndexMap<ColorId, usize>,
     pub black_size: usize,
     #[cfg(feature = "split_colored")]
-    pub vacuos_colors: Vec<ColorId>,
+    pub vacuos_colors: BTreeSet<ColorId>,
     #[cfg(feature = "keep_splits")]
     pub split_sizes: Vec<usize>,
     pub graph_memory: usize,
@@ -206,7 +207,6 @@ pub struct GraphStats {
     pub deleted_colored_enodes: usize,
     pub colored_equivalences_size: usize,
     pub black_colored_classes_size: usize,
-    pub parent_color_tracking_size: usize,
 }
 
 #[cfg(all(feature = "stats", feature = "keep_splits"))]
@@ -270,9 +270,9 @@ impl GraphStats {
 
         let mut colored_unions = 0;
         for c in egraph.colors() {
-            for id in c.black_reps() {
-                colored_unions += c.black_ids(egraph, *id).map_or(0, |x| x.len());
-            }        
+            for id in c.current_black_reps() {
+                colored_unions += c.base_equality_class(egraph, *id).map_or(0, |x| x.len());
+            }
         }
 
         GraphStats {
@@ -292,8 +292,7 @@ impl GraphStats {
             colored_unions_count: colored_unions,
             deleted_colored_enodes: egraph.deleted_enodes,
             colored_equivalences_size: egraph.colored_equivalences_size(),
-            black_colored_classes_size: egraph.colors().map(|c| c.black_colored_classes_size()).sum(), 
-            parent_color_tracking_size: egraph.colors().map(|c| c.parents_classes.iter().map(|m| m.len()).sum::<usize>()).sum(),
+            black_colored_classes_size: egraph.colors().map(|c| c.black_colored_classes_size()).sum(),
         }
     }
 }

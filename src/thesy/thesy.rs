@@ -9,7 +9,7 @@ use egg::*;
 use egg::costs::{MinRep, RepOrder};
 use egg::expression_ops::{IntoTree, Tree};
 use egg::pretty_string::PrettyString;
-use egg::tools::tools::choose;
+use egg::tools::tools::{choose, vacuity_detector_from_ops};
 use indexmap::{IndexMap, IndexSet};
 use itertools::Itertools;
 use log::{info, warn};
@@ -201,10 +201,10 @@ impl TheSy {
 
         let op_ids = datatypes.iter().map(|d| {
             d.constructors.iter().map(|c| {
-                SymbolLang::leaf(c.name.clone()).op_id()
+                c.as_exp().as_ref().last().unwrap().clone()
             }).collect_vec()
         }).collect_vec();
-        egraph.vacuity_ops = op_ids;
+        egraph.vacuity_ops = op_ids.into_iter().flat_map(|ops| vacuity_detector_from_ops(ops)).collect_vec();
 
         TheSy {
             datatypes: datatype_to_prover,

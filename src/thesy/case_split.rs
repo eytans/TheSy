@@ -66,13 +66,8 @@ impl Split {
         self.splits
             .iter()
             .map(|id| {
-                let c = if let Some(base_color) = self.color {
-                    egraph.create_sub_color(base_color)
-                } else {
-                    egraph.create_color()
-                };
-                let fixer = |id: Id| egraph.get_color(c).unwrap().translate_from_base(id);
-                egraph.colored_union(c, fixer(self.root), fixer(*id));
+                let c = egraph.create_color(self.color);
+                egraph.colored_union(c, self.root, *id);
                 egraph.rebuild();
                 c
             })
@@ -333,18 +328,10 @@ impl CaseSplit {
 
     fn collect_colored_merged(
         egraph: &ThEGraph,
-        classes: &Vec<Id>,
         color: ColorId,
     ) -> IndexMap<Id, Id> {
-        classes
-            .iter()
-            .map(|eclass| {
-                let fixed = egraph
-                    .get_color(color)
-                    .unwrap()
-                    .translate_to_base(egraph.colored_find(color, *eclass));
-                (*eclass, fixed)
-            })
+        egraph.classes().map(|c| c.id)
+            .map(|eclass| (eclass, egraph.colored_find(color, eclass)))
             .collect::<IndexMap<Id, Id>>()
     }
 
@@ -480,7 +467,6 @@ impl CaseSplit {
         }
 
         egraph.rebuild();
-        let classes = egraph.classes().map(|c| c.id).collect_vec();
         let colors = splitters
             .iter()
             .map(|s| (s.color.clone(), s.create_colors(egraph)))
@@ -530,9 +516,10 @@ impl CaseSplit {
         sample_graph_stats(egraph, StatsReport::CaseSplitDepth(split_depth));
         warn!("Doing Conclusions for depth {split_depth} ----------------");
         for (base, cs) in colors.iter() {
+            let classes = egraph.classes().map(|c| c.id).collect_vec();
             let split_conclusions = cs
                 .iter()
-                .map(|c| Self::collect_colored_merged(egraph, &classes, *c))
+                .map(|c| Self::collect_colored_merged(egraph, *c))
                 .collect_vec();
             Self::merge_conclusions(egraph, base.clone(), &classes, &split_conclusions);
         }
@@ -545,12 +532,13 @@ impl CaseSplit {
             run_depth,
         );
         warn!("Doing final conclusions for depth {split_depth} ----------------");
-        for (base, cs) in colors {
+        for (base, cs) in &colors {
+            let classes = egraph.classes().map(|c| c.id).collect_vec();
             let split_conclusions = cs
                 .iter()
-                .map(|c| Self::collect_colored_merged(egraph, &classes, *c))
+                .map(|c| Self::collect_colored_merged(egraph, *c))
                 .collect_vec();
-            Self::merge_conclusions(egraph, base, &classes, &split_conclusions);
+            Self::merge_conclusions(egraph, *base, &classes, &split_conclusions);
         }
         warn!("Done final conclusions for depth {split_depth} -------------------");
     }
@@ -747,6 +735,7 @@ mod tests {
     use itertools::Itertools;
     use std::path::PathBuf;
     use std::rc::Rc;
+    use egg::tools::tools::vacuity_detector_from_ops;
 
     #[test]
     #[cfg(feature = "split_colored")]
@@ -761,8 +750,7 @@ mod tests {
         thesy.equiv_reduc(&mut config.definitions.rws);
         let mut egraph = thesy.egraph;
         let ops = vec![SymbolLang::leaf("true"), SymbolLang::leaf("false")];
-        let op_ids = ops.iter().map(|op| op.op_id()).collect_vec();
-        egraph.vacuity_ops = vec![op_ids];
+        egraph.vacuity_ops = vacuity_detector_from_ops(ops);
         assert!(egraph.detect_color_vacuity().len() == 0);
         case_splitter.case_split(&mut egraph, 1, &config.definitions.rws, 4);
         assert!(egraph.detect_color_vacuity().len() == 0);
@@ -778,8 +766,7 @@ mod tests {
         let (mut thesy, _rewrites) =
             TheSyConfig::from_path("tests/booleans.th".to_string()).run(Some(1));
         let ops = vec![SymbolLang::leaf("true"), SymbolLang::leaf("false")];
-        let op_ids = ops.iter().map(|op| op.op_id()).collect_vec();
-        thesy.egraph.vacuity_ops = vec![op_ids];
+        thesy.egraph.vacuity_ops = vacuity_detector_from_ops(ops);
         assert_eq!(thesy.egraph.detect_color_vacuity().len(), 0);
     }
 
@@ -837,7 +824,7 @@ mod tests {
         let mut egraph: EGraph<SymbolLang, ()> = EGraph::new(());
         let take_succ_i_exp = "(take i (cons x (cons y nil)))".parse().unwrap();
         let take_succ_i = egraph.add_expr(&take_succ_i_exp);
-        let c_base = egraph.create_color();
+        let c_base = egraph.create_color(None);
         // Colored add expression (succ (param_Nat_0 i))
         let i_exp = egraph.add_expr(&"i".parse().unwrap());
         let _nil_exp = egraph.add_expr(&"nil".parse().unwrap());

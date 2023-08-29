@@ -19,7 +19,6 @@ pub type ThMultiPattern = MultiPattern<ThNode>;
 pub struct DataType {
     pub name: String,
     pub type_params: Vec<ThExpr>,
-    // TODO: change to Function instead of rec expr
     /// Constructor name applied on types
     pub constructors: Vec<Function>,
 }
