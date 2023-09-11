@@ -662,14 +662,6 @@ impl CaseSplit {
                     );
                     i += 1;
                     let res = Self::collect_merged(&g, &classes);
-                    warn!(
-                        "Collected merged {i}: {:?}",
-                        res.iter()
-                            .grouped(|x| x.1)
-                            .iter()
-                            .filter(|x| x.1.len() > 1)
-                            .collect_vec()
-                    );
                     if g.detect_graph_vacuity() {
                         *vacuity_cases += 1;
                     }
@@ -678,7 +670,6 @@ impl CaseSplit {
                     res
                 })
                 .collect_vec();
-            warn!("Split conclusions: {:?}", split_conclusions);
             Self::merge_conclusions(egraph, None, &classes, &split_conclusions);
         }
     }
