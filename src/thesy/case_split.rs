@@ -738,7 +738,6 @@ mod tests {
     use egg::tools::tools::vacuity_detector_from_ops;
 
     #[test]
-    #[cfg(feature = "split_colored")]
     fn splits_on_ite() {
         let mut config = TheSyConfig::from_path("tests/booleans.th".parse().unwrap());
         let mut case_splitter =
