@@ -509,7 +509,7 @@ impl CaseSplit {
             }
         }
         warn!("Created colors: {:?}", colors);
-        warn!("Running Equivalence reduction");
+        warn!("Case-Split: Running equivalence reduction after adding colors");
         // When the API is limited the code is mentally inhibited
         *egraph = self.equiv_reduction(rules, std::mem::take(egraph), run_depth);
         #[cfg(feature = "stats")]

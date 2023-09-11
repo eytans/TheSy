@@ -585,9 +585,10 @@ impl TheSy {
             self.finalize_stats(case_spliter.as_ref());
             return found_rules;
         }
+        warn!("Finished prove goals");
 
         for depth in 0..max_depth {
-            info!("Starting depth {}", depth + 1);
+            warn!("Running main equivalence reduction depth {}", depth + 1);
             self.increase_depth();
             let _stop_reason = self.equiv_reduc(rules);
 
@@ -607,6 +608,7 @@ impl TheSy {
             'outer: while !conjectures.is_empty() {
                 let (_, mut ex1, mut ex2, d) = conjectures.pop().unwrap();
                 let measure_key = self.stats.init_measure(|| 0);
+                warn!("Trying to prove the conjecture {} = {}", ex1.pretty(PRETTY_W), ex2.pretty(PRETTY_W));
                 let mut new_rules = self.datatypes[&d].prove_ind(&mut splitter_to_use, &rules, &ex1, &ex2);
                 if new_rules.is_some() {
                     let temp = new_rules;
@@ -637,9 +639,11 @@ impl TheSy {
                         self.finalize_stats(case_spliter.as_ref());
                         return found_rules;
                     }
+                    warn!("Running additional equivalence reduction after changes");
 
                     let reduc_depth = 3;
                     let _stop_reason = self.equiv_reduc_depth(rules, reduc_depth);
+                    warn!("Getting new conjectures");
                     conjectures = self.get_conjectures();
                 } else {
                     self.stats.update_failed_proof(ex1, ex2, measure_key);
@@ -725,6 +729,7 @@ impl TheSy {
         }
 
         if changed {
+            warn!("Had changes due to case splits. running equivalence reduction");
             let reduc_depth = 3;
             let _stop_reason = self.equiv_reduc_depth(rules, reduc_depth);
         }
