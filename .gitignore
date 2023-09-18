@@ -135,3 +135,4 @@ experiments/cvc4_newth_alltogether/fmcad_res.zip
 experiments/cvc4_newth_alltogether/temp.csv
 memory-profiling*.dat
 results_*
+experiments/cvc4_newth_alltogether/results_oopsla_11_9_23/

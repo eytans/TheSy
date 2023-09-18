@@ -222,7 +222,7 @@ impl CaseSplit {
     fn equiv_reduction(&mut self, rules: &[ThRewrite], egraph: ThEGraph, run_depth: usize) -> ThEGraph {
         let mut runner = Runner::default()
             .with_time_limit(Duration::from_secs(60 * 10))
-            .with_node_limit(egraph.total_number_of_nodes() + 200000)
+            // .with_node_limit(egraph.total_number_of_nodes() + 200000)
             .with_egraph(egraph)
             .with_iter_limit(run_depth);
         runner = runner.run(rules);
@@ -563,6 +563,9 @@ impl CaseSplit {
             .iter()
             .map(|s| Self::split_graph(egraph, s))
             .collect_vec();
+        if !cfg!(feature = "print_splits") {
+            debug!("No split text (see feature = print_splits).")
+        }
         debug!(
             "Working on following splits in depth {split_depth}:\n{splits}",
             splits=splitters.iter().map(|s| rected
@@ -639,6 +642,9 @@ impl CaseSplit {
             let split_conclusions = Self::split_graph(&*egraph, &s)
                 .into_iter()
                 .map(|g| {
+                    if !cfg!(feature="print_splits") {
+                        debug!("No split text (see feature = print_splits).")
+                    }
                     debug!(
                         "Working on split {i} of {} -> {:?} in depth {split_depth}",
                         rected
@@ -702,13 +708,18 @@ impl CaseSplit {
             "Splitters len (temp len: {temp_len}): {} in depth {split_depth}",
             splitters.len()
         );
-        let rected = reconstruct_all(egraph, None, 4);
-        for s in &splitters {
-            let split_text = s.by_translation(&rected);
-            warn!("  {} - {}", s, split_text);
-            #[cfg(feature = "stats")]
-            self.stats.known_splits_text.insert(split_text);
-        }
+        let rected = if cfg!(feature = "print_splits") {
+            let rected = reconstruct_all(egraph, None, 4);
+            for s in &splitters {
+                let split_text = s.by_translation(&rected);
+                warn!("  {} - {}", s, split_text);
+                #[cfg(feature = "stats")]
+                self.stats.known_splits_text.insert(split_text);
+            }
+            rected
+        } else {
+            Default::default()
+        };
         (splitters, new_known, rected)
     }
 }
