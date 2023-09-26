@@ -1,4 +1,3 @@
-use crate::egg::tools::tools::Grouped;
 use egg::appliers::DiffApplier;
 use egg::reconstruct::reconstruct_all;
 use egg::{Analysis, Applier, ColorId, EGraph, Id, Language, Pattern, Runner, SearchMatches, Searcher, StopReason, SymbolLang, Iteration};
@@ -16,6 +15,8 @@ use crate::thesy::statistics::{sample_graph_stats, StatsReport};
 use egg::tree::Tree;
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
+use crate::utils::Progress::CaseSplitEquivReduc;
+use crate::utils::{Progress, report_progress};
 
 /// To be used as the op of edges representing potential split
 pub const SPLITTER: &'static str = "potential_split";
@@ -120,6 +121,7 @@ pub struct CaseSplitStats {
     pub(crate) vacuous_cases: Vec<usize>,
     pub(crate) known_splits_text: IndexSet<String>,
     pub iterations: Vec<Vec<Iteration<()>>>,
+    pub splits_done: usize,
 }
 
 #[cfg(feature = "stats")]
@@ -129,6 +131,7 @@ impl CaseSplitStats {
             vacuous_cases: vec![],
             known_splits_text: Default::default(),
             iterations: vec![],
+            splits_done: 0
         }
     }
 }
@@ -225,6 +228,11 @@ impl CaseSplit {
             // .with_node_limit(egraph.total_number_of_nodes() + 200000)
             .with_egraph(egraph)
             .with_iter_limit(run_depth);
+        let split_count = self.stats.splits_done;
+        #[cfg(feature = "progress_report")]
+        {
+            runner = runner.with_hook(move |r| Ok(report_progress(CaseSplitEquivReduc(r.iterations.len()), &r.egraph, &vec![], split_count)));
+        }
         runner = runner.run(rules);
         match runner.stop_reason.as_ref().unwrap() {
             StopReason::Saturated => {}
@@ -271,6 +279,7 @@ impl CaseSplit {
         warn!("Found {} splitters", res.len());
 
         // TODO: Support hierarchy
+        // TODO: Check with Shachar but I think this is wrong for deeper splits
         let mut by_color = res.into_iter().map(|s| (s.color(), s)).into_group_map();
         let blacks = by_color.remove(&None).unwrap_or_default();
         let others = by_color.into_iter().flat_map(|(color, splits)| {
@@ -305,8 +314,6 @@ impl CaseSplit {
                     .count()
                     <= 1
             );
-            // TODO: might need to look into hierarchical colors conclusions.
-            // TODO: What about split conclusion from only colored matches?
             if group.len() > 1 {
                 debug!("\tMerging group: {:?} for color {:?}", group, color.clone());
             }
@@ -404,8 +411,15 @@ impl CaseSplit {
             return;
         }
         debug!("Colored Case splitting with depth {}", split_depth);
-
+        #[cfg(feature = "progress_report")]
+        {
+            report_progress(Progress::CaseSplitStart(split_depth), egraph, &vec![], self.stats.splits_done);
+        }
         let temp = self.find_splitters(egraph);
+        #[cfg(feature = "progress_report")]
+        {
+            report_progress(Progress::CaseSplitFindSplitters(split_depth), egraph, &vec![], self.stats.splits_done);
+        }
         if cfg!(feature = "print_splits") {
             for s in &temp {
                 let trns = reconstruct_all(egraph, s.color, 4);
@@ -428,6 +442,7 @@ impl CaseSplit {
         }
         let color_keys = known_splits_by_color.keys().cloned().collect_vec();
         for color in color_keys {
+            // TODO: It could be that two colors should merge!!! Maybe deal with it
             let mut splits = known_splits_by_color.remove(&color).unwrap();
             splits = splits
                 .into_iter()
@@ -471,6 +486,11 @@ impl CaseSplit {
             .iter()
             .map(|s| (s.color.clone(), s.create_colors(egraph)))
             .collect_vec();
+        #[cfg(feature = "stats")]
+        {
+            self.stats.splits_done += colors.iter()
+                .map(|(b, cs)| cs.len()).sum::<usize>();
+        }
         for (_, cs) in &colors {
             for c in cs {
                 let color = egraph.get_color(*c).unwrap();
@@ -540,6 +560,10 @@ impl CaseSplit {
                 .collect_vec();
             Self::merge_conclusions(egraph, *base, &classes, &split_conclusions);
         }
+        #[cfg(feature = "progress_report")]
+        {
+            report_progress(Progress::CaseSplitMergeConclusions(split_depth), egraph, &vec![], self.stats.splits_done);
+        }
         warn!("Done final conclusions for depth {split_depth} -------------------");
     }
 
@@ -555,6 +579,10 @@ impl CaseSplit {
         if split_depth == 0 {
             return;
         }
+        #[cfg(feature = "progress_report")]
+        {
+            report_progress(Progress::CaseSplitStart(split_depth), egraph, &vec![], self.stats.splits_done);
+        }
         let (splitters, new_known, rected) =
             self.initialize_case_split(known_splits, egraph, split_depth);
         let classes = egraph.classes().map(|c| c.id).collect_vec();
@@ -563,6 +591,10 @@ impl CaseSplit {
             .iter()
             .map(|s| Self::split_graph(egraph, s))
             .collect_vec();
+        #[cfg(feature = "stats")]
+        {
+            self.stats.splits_done += split_graphs.iter().flatten().count();
+        }
         if !cfg!(feature = "print_splits") {
             debug!("No split text (see feature = print_splits).")
         }
@@ -616,6 +648,10 @@ impl CaseSplit {
             // Merge all conclusions into the original graph
             Self::merge_conclusions(egraph, None, &classes, &curr_conc);
         }
+        #[cfg(feature = "progress_report")]
+        {
+            report_progress(Progress::CaseSplitMergeConclusions(split_depth), egraph, &split_graphs, self.stats.splits_done);
+        }
         // Add splits to all_splits - This is only used for keep_splits anyway
         #[cfg(feature = "keep_splits")]
         egraph.all_splits.extend(split_graphs.into_iter().flatten());
@@ -633,6 +669,10 @@ impl CaseSplit {
         if split_depth == 0 {
             return;
         }
+        #[cfg(feature = "progress_report")]
+        {
+            report_progress(Progress::CaseSplitStart(split_depth), egraph, &vec![], self.stats.splits_done);
+        }
         let (splitters, new_known, rected) =
             self.initialize_case_split(known_splits, egraph, split_depth);
         let classes = egraph.classes().map(|c| c.id).collect_vec();
@@ -642,6 +682,10 @@ impl CaseSplit {
             let split_conclusions = Self::split_graph(&*egraph, &s)
                 .into_iter()
                 .map(|g| {
+                    #[cfg(feature = "stats")]
+                    {
+                        self.stats.splits_done += 1;
+                    }
                     if !cfg!(feature="print_splits") {
                         debug!("No split text (see feature = print_splits).")
                     }
@@ -677,6 +721,10 @@ impl CaseSplit {
                 })
                 .collect_vec();
             Self::merge_conclusions(egraph, None, &classes, &split_conclusions);
+            #[cfg(feature = "progress_report")]
+            {
+                report_progress(Progress::CaseSplitMergeConclusions(split_depth), egraph, &vec![], self.stats.splits_done);
+            }
         }
     }
 
@@ -696,6 +744,10 @@ impl CaseSplit {
             .collect();
 
         let temp = self.find_splitters(egraph);
+        #[cfg(feature = "progress_report")]
+        {
+            report_progress(Progress::CaseSplitFindSplitters(split_depth), egraph, &vec![], self.stats.splits_done);
+        }
         let temp_len = temp.len();
         let splitters: Vec<Split> = temp
             .into_iter()

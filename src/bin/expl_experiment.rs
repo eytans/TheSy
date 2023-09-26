@@ -14,6 +14,8 @@ use TheSy::SubCmd::CheckEquiv;
 use TheSy::thesy::prover;
 use TheSy::thesy::prover::RewriteProver;
 use TheSy::thesy::statistics::{sample_graph_stats, StatsReport};
+use TheSy::utils::Progress::{Finished, Preprocessing};
+use TheSy::utils::{report_progress, set_progress_report_file};
 
 
 /// Arguments to use to run thesy
@@ -54,6 +56,8 @@ fn main() {
 
 fn main_with_args(args: CliOpt) {
     let log_path = args.path.with_extension("log");
+    let report_path = args.path.with_extension("report.txt");
+    set_progress_report_file(report_path);
     let thesy_config: simplelog::Config = ConfigBuilder::new()
         .add_filter_ignore_str("egg")
         .build();
@@ -152,6 +156,7 @@ fn update_provers_and_run(mut config: TheSyConfig, additional_terms: Vec<RecExpr
         let casted: &RewriteProver = unsafe { &*(&p as *const dyn Any as *const RewriteProver) };
         casted.with_terms_to_push(additional_terms.clone())
     });
+    report_progress(Preprocessing, &thesy.egraph, &vec![], 0);
     // run case split mode only
     let _res = thesy.check_goals(&mut Some(&mut case_split), &mut rules);
     let _success = if !thesy.remaining_goals().unwrap().is_empty() {
@@ -160,6 +165,7 @@ fn update_provers_and_run(mut config: TheSyConfig, additional_terms: Vec<RecExpr
     } else {
         true
     };
+    report_progress(Finished, &thesy.egraph, &vec![], case_split.stats.splits_done);
     thesy
 }
 

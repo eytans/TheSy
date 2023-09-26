@@ -1,7 +1,10 @@
-use crate::lang::{ThEGraph, ThExpr};
-use egg::{EGraph, Id, Language, MultiPattern, Pattern, PatternAst, RecExpr, Rewrite, Searcher, SymbolLang, Var};
+use crate::lang::{Function, ThEGraph, ThExpr};
+use egg::{Analysis, EGraph, Id, Language, MultiPattern, Pattern, PatternAst, RecExpr, Rewrite, Searcher, SymbolLang, Var};
 use std::collections::HashSet;
+use std::fs::File;
+use std::io::Write;
 use std::ops::Deref;
+use std::path::PathBuf;
 use std::str::FromStr;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use crate::thesy::case_split::CaseSplitStats;
@@ -82,6 +85,76 @@ impl TheSyRunRes {
     }
 }
 
+#[derive(Clone, Debug, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+pub enum Progress {
+    Preprocessing,
+    // By constructor
+    ProveBase(Function),
+    ProverConstructor(Function),
+    // By rewrite rule
+    EquivReduc(usize),
+    // By depth and rewrite rule
+    CaseSplitEquivReduc(usize),
+    // By rewrite rule
+    CaseSplitStart(usize),
+    CaseSplitFindSplitters(usize),
+    CaseSplitMergeConclusions(usize),
+    Finished
+}
+
+static mut PROGRESS_REPORT_FILE: Option<File> = None;
+pub fn set_progress_report_file(path: PathBuf) {
+    unsafe {
+        let file = std::fs::OpenOptions::new()
+            .create(true)
+            .truncate(true)
+            .write(true)
+            .open(path)
+            .unwrap();
+        PROGRESS_REPORT_FILE = Some(file);
+    }
+}
+
+pub fn report_progress<L: Language, N: Analysis<L>>(progress: Progress, main: &EGraph<L, N>, additionals: &Vec<Vec<ThEGraph>>, split_count: usize) {
+    if !cfg!(feature = "progress_report") {
+        return;
+    }
+    assert!(unsafe { PROGRESS_REPORT_FILE.is_some() });
+    // Collect report info:
+    let run_time = cpu_time::ProcessTime::now().as_duration().as_millis();
+    let graph_size = main.total_number_of_nodes();
+    let total_graph_size = graph_size +
+        additionals.iter().flat_map(|egraphs| egraphs.iter().map(|x| x.total_number_of_nodes())).sum::<usize>();
+    // Get all static run statistics from egg
+    let data = unsafe {
+        let total_matches = egg::SEARCH_MATCHES;
+        let search_time = egg::SEARCH_TIME;
+        let total_applied = egg::APPLICATIONS;
+        let apply_time = egg::APPLY_TIME;
+        let rebuild_time = egg::REBUILD_TIME;
+
+    serde_json::json!({
+        "progress": progress,
+        "run_time": run_time,
+        "split_count": split_count,
+        "graph_size": graph_size,
+        "total_graph_size": total_graph_size,
+        "total_matches": total_matches,
+        "search_time": search_time,
+        "total_applied": total_applied,
+        "apply_time": apply_time,
+        "rebuild_time": rebuild_time,
+        })
+    };
+    unsafe {
+        let file = PROGRESS_REPORT_FILE.as_mut().unwrap();
+        file.write("--------------------------------\n".as_bytes()).unwrap();
+        let s = serde_json::to_string(&data).unwrap();
+        file.write(s.as_bytes()).unwrap();
+        file.write("--------------------------------\n".as_bytes()).unwrap();
+        file.flush().unwrap();
+    }
+}
 
 #[cfg(test)]
 mod test {

@@ -15,7 +15,7 @@ use TheSy::thesy::case_split::CaseSplitStats;
 use TheSy::thesy::semantics::Definitions;
 use TheSy::{CaseSplitConfig, PRETTY_W, SubCmd, thesy, TheSyConfig, ALLOCATOR};
 use TheSy::thesy::statistics::{sample_graph_stats, StatsReport};
-use TheSy::utils::TheSyRunRes;
+use TheSy::utils::{set_progress_report_file, TheSyRunRes};
 
 /// Arguments to use to run thesy
 #[derive(StructOpt, Debug)]
@@ -92,6 +92,8 @@ fn main() {
     let args: CliOpt = CliOpt::from_args();
 
     let log_path = args.path.with_extension("log");
+    let report_path = args.path.with_extension("report.txt");
+    set_progress_report_file(report_path);
     let thesy_config: simplelog::Config = ConfigBuilder::new()
         .add_filter_ignore_str("egg")
         .build();

@@ -430,20 +430,6 @@ impl TheSy {
 
     fn equiv_reduc_depth(&mut self, rules: &mut Vec<ThRewrite>, depth: usize) -> StopReason {
         let mut runner = Runner::default().with_time_limit(Duration::from_secs(60 * 10)).with_node_limit(self.node_limit).with_egraph(std::mem::take(&mut self.egraph)).with_iter_limit(depth);
-        // TODO: Support colors
-        // if !cfg!(feature = "split_clone") {
-        //     runner = runner.with_hook(|runner| {
-        //         for pat in case_split::split_patterns.iter() {
-        //             for m in pat.search(&runner.egraph) {
-        //                 for s in m.substs {
-        //                     let colors = s.colors();
-        //
-        //                 }
-        //             }
-        //         }
-        //         Ok(())
-        //     })
-        // }
         runner = runner.run(&*rules);
         self.stats.update_rewrite_iters(std::mem::take(&mut runner.iterations));
         self.egraph = runner.egraph;
