@@ -73,7 +73,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     todo_features = [["split_colored"], ["split_no_cremove"], ["split_no_cmemo"], ["split_clone"], ["split_clone", "keep_splits"]]
-    todo_features = [fs + ["stats", , "progress_report"] for fs in todo_features]
+    todo_features = [fs + ["stats", "progress_report"] for fs in todo_features]
 
     split_depths = [1, 2, 3, 4]
 
