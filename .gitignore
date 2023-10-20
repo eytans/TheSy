@@ -136,3 +136,5 @@ experiments/cvc4_newth_alltogether/temp.csv
 memory-profiling*.dat
 results_*
 experiments/cvc4_newth_alltogether/results_oopsla_11_9_23/
+experiments/cvc4_newth_alltogether/2023-10-*/*
+experiments/cvc4_newth_alltogether/oopsla_hierarchy_results_4_10_23/*
